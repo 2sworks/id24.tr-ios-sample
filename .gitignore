@@ -17,3 +17,5 @@ NewTest/AppDelegate.swift
 NewTest/Env.xcdatamodeld/Env.xcdatamodel/contents
 NewTest/Views/Login/SDKLoginViewController.swift
 NewTest/Views/Login/SDKLoginViewController.xib
+
+xcuserdata/
