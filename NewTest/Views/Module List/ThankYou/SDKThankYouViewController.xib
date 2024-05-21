@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="22155" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_0" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22131"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="SDKThankYouViewController" customModule="NewTest" customModuleProvider="target">
+            <connections>
+                <outlet property="closeBtn" destination="E4i-cx-Mv7" id="jLV-jz-AWE"/>
+                <outlet property="desc1Lbl" destination="Usv-5M-EU9" id="sRt-h0-tSK"/>
+                <outlet property="desc2Lbl" destination="nMe-ub-OfS" id="bZd-HA-cNy"/>
+                <outlet property="statusImg" destination="YNk-pz-R1u" id="6l2-eI-LvR"/>
+                <outlet property="successLbl" destination="sVs-4h-xAL" id="Rj2-jp-yY6"/>
+                <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
+            <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="center" spacing="25" translatesAutoresizingMaskIntoConstraints="NO" id="UVu-tS-A42">
+                    <rect key="frame" x="12" y="250.66666666666663" width="366" height="303"/>
+                    <subviews>
+                        <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="successTick" translatesAutoresizingMaskIntoConstraints="NO" id="YNk-pz-R1u">
+                            <rect key="frame" x="128" y="0.0" width="110" height="110"/>
+                            <color key="tintColor" systemColor="systemGreenColor"/>
+                            <constraints>
+                                <constraint firstAttribute="width" constant="110" id="Qtx-T7-UmP"/>
+                                <constraint firstAttribute="height" constant="110" id="zTb-a2-Ifo"/>
+                            </constraints>
+                        </imageView>
+                        <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="25" translatesAutoresizingMaskIntoConstraints="NO" id="TUY-bA-W6Z">
+                            <rect key="frame" x="15.333333333333343" y="135.00000000000003" width="335.66666666666663" height="167.99999999999997"/>
+                            <subviews>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Teşekkürler" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sVs-4h-xAL">
+                                    <rect key="frame" x="0.0" y="0.0" width="335.66666666666669" height="38.333333333333336"/>
+                                    <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="32"/>
+                                    <color key="textColor" name="ID Light White"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                                <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="Wza-pa-20N">
+                                    <rect key="frame" x="0.0" y="63.333333333333321" width="335.66666666666669" height="104.66666666666669"/>
+                                    <subviews>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Tüm kimlik doğrulama süreçlerini başarılı bir şekilde tamamladınız." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Usv-5M-EU9">
+                                            <rect key="frame" x="0.0" y="0.0" width="335.66666666666669" height="42.333333333333336"/>
+                                            <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
+                                            <color key="textColor" name="ID Light White"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Başvurunuz en kısa süre içerisinde değerlendirilip geri dönüş sağlanacaktır." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="nMe-ub-OfS">
+                                            <rect key="frame" x="0.0" y="62.333333333333314" width="335.66666666666669" height="42.333333333333343"/>
+                                            <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
+                                            <color key="textColor" name="ID Light White"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                    </subviews>
+                                </stackView>
+                            </subviews>
+                        </stackView>
+                    </subviews>
+                </stackView>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="E4i-cx-Mv7" customClass="IdentifyButton" customModule="NewTest" customModuleProvider="target">
+                    <rect key="frame" x="32" y="732" width="326" height="48"/>
+                    <color key="backgroundColor" name="ID White"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="48" id="AyI-aZ-OQ5"/>
+                    </constraints>
+                    <state key="normal" title="Button"/>
+                    <buttonConfiguration key="configuration" style="plain" title="Tamam"/>
+                </button>
+            </subviews>
+            <viewLayoutGuide key="safeArea" id="fnl-2z-Ty3"/>
+            <color key="backgroundColor" systemColor="systemBlueColor"/>
+            <constraints>
+                <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="E4i-cx-Mv7" secondAttribute="trailing" constant="32" id="8ge-85-yLo"/>
+                <constraint firstItem="UVu-tS-A42" firstAttribute="centerX" secondItem="i5M-Pr-FkT" secondAttribute="centerX" id="Hvr-CK-0NK"/>
+                <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="UVu-tS-A42" secondAttribute="trailing" constant="12" id="Nhj-yd-EYd"/>
+                <constraint firstItem="UVu-tS-A42" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" constant="12" id="SGm-gG-5QE"/>
+                <constraint firstAttribute="bottom" secondItem="E4i-cx-Mv7" secondAttribute="bottom" constant="64" id="Wp6-9Z-H9w"/>
+                <constraint firstItem="E4i-cx-Mv7" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" constant="32" id="aa6-ZH-iTJ"/>
+                <constraint firstItem="UVu-tS-A42" firstAttribute="centerY" secondItem="i5M-Pr-FkT" secondAttribute="centerY" constant="-20" id="fgf-EM-QOP"/>
+            </constraints>
+            <point key="canvasLocation" x="-26.153846153846153" y="20.616113744075829"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="successTick" width="129" height="129"/>
+        <namedColor name="ID Light White">
+            <color red="0.99599999189376831" green="0.99599999189376831" blue="0.99599999189376831" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="ID White">
+            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <systemColor name="systemBlueColor">
+            <color red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+        <systemColor name="systemGreenColor">
+            <color red="0.20392156859999999" green="0.78039215689999997" blue="0.34901960780000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+    </resources>
+</document>

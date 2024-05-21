@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21225" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_0" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21207"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="SDKAddressConfirmViewController" customModule="NewTest" customModuleProvider="target">
+            <connections>
+                <outlet property="addressTxt" destination="tyH-ak-E8D" id="oZF-Ld-EkE"/>
+                <outlet property="desc1Lbl" destination="qoS-VX-Mb0" id="tjK-qp-NnI"/>
+                <outlet property="desc2Lbl" destination="2OF-uR-yOr" id="K5B-dx-GdD"/>
+                <outlet property="docPhoto" destination="zjE-fW-4Ob" id="acG-Cn-Aqv"/>
+                <outlet property="photoBtn" destination="EGO-or-eZq" id="Qos-aQ-n7K"/>
+                <outlet property="submitBtn" destination="VoT-Sh-dLW" id="f94-v0-p0B"/>
+                <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
+            <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="8gL-cl-M6C">
+                    <rect key="frame" x="12" y="209" width="366" height="126"/>
+                    <subviews>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Lütfen ikamet adresinizi girin" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="qoS-VX-Mb0">
+                            <rect key="frame" x="0.0" y="0.0" width="366" height="18"/>
+                            <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                            <nil key="textColor"/>
+                            <nil key="highlightedColor"/>
+                        </label>
+                        <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="2" translatesAutoresizingMaskIntoConstraints="NO" id="UbP-kA-P2T">
+                            <rect key="frame" x="0.0" y="23" width="366" height="103"/>
+                            <subviews>
+                                <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="tyH-ak-E8D">
+                                    <rect key="frame" x="0.0" y="0.0" width="366" height="100"/>
+                                    <color key="backgroundColor" name="ID White"/>
+                                    <constraints>
+                                        <constraint firstAttribute="height" constant="100" id="0dR-sN-cnC"/>
+                                    </constraints>
+                                    <color key="textColor" name="ID Black"/>
+                                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                    <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                </textView>
+                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="7x3-fg-zVX">
+                                    <rect key="frame" x="0.0" y="102" width="366" height="1"/>
+                                    <color key="backgroundColor" red="0.13016048059999999" green="0.77686184410000003" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                                    <constraints>
+                                        <constraint firstAttribute="height" constant="1" id="rgW-Be-uFZ"/>
+                                    </constraints>
+                                </view>
+                            </subviews>
+                        </stackView>
+                    </subviews>
+                </stackView>
+                <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="YsW-je-Tes">
+                    <rect key="frame" x="12" y="347" width="366" height="260.33333333333326"/>
+                    <subviews>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Adresinizi doğrulayabilmemiz için lütfen herhangi bir faturanızın fotoğrafını çekin veya seçin" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2OF-uR-yOr">
+                            <rect key="frame" x="0.0" y="0.0" width="366" height="36"/>
+                            <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                            <nil key="textColor"/>
+                            <nil key="highlightedColor"/>
+                        </label>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="EGO-or-eZq" customClass="IdentifyButton" customModule="NewTest" customModuleProvider="target">
+                            <rect key="frame" x="0.0" y="41" width="366" height="34.333333333333343"/>
+                            <state key="normal" title="Button"/>
+                            <buttonConfiguration key="configuration" style="plain" title="Fotoğraf Seç &amp; Çek"/>
+                        </button>
+                        <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="zjE-fW-4Ob">
+                            <rect key="frame" x="0.0" y="80.333333333333314" width="366" height="180"/>
+                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="180" id="bv6-mv-m1n"/>
+                            </constraints>
+                        </imageView>
+                    </subviews>
+                </stackView>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="VoT-Sh-dLW" customClass="IdentifyButton" customModule="NewTest" customModuleProvider="target">
+                    <rect key="frame" x="0.0" y="765" width="390" height="45"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="45" id="60l-wM-yBg"/>
+                    </constraints>
+                    <state key="normal" title="Button"/>
+                    <buttonConfiguration key="configuration" style="plain" title="Doğrula"/>
+                </button>
+            </subviews>
+            <viewLayoutGuide key="safeArea" id="fnl-2z-Ty3"/>
+            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+            <constraints>
+                <constraint firstItem="VoT-Sh-dLW" firstAttribute="trailing" secondItem="fnl-2z-Ty3" secondAttribute="trailing" id="17T-uT-VmM"/>
+                <constraint firstItem="YsW-je-Tes" firstAttribute="leading" secondItem="8gL-cl-M6C" secondAttribute="leading" id="613-Zc-6FS"/>
+                <constraint firstItem="fnl-2z-Ty3" firstAttribute="bottom" secondItem="VoT-Sh-dLW" secondAttribute="bottom" id="Lgt-bM-6F5"/>
+                <constraint firstItem="VoT-Sh-dLW" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" id="LzB-hN-UFs"/>
+                <constraint firstItem="8gL-cl-M6C" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" constant="12" id="Pcc-md-8uj"/>
+                <constraint firstItem="8gL-cl-M6C" firstAttribute="centerX" secondItem="i5M-Pr-FkT" secondAttribute="centerX" id="TN4-Ie-fkI"/>
+                <constraint firstItem="YsW-je-Tes" firstAttribute="top" secondItem="8gL-cl-M6C" secondAttribute="bottom" constant="12" id="YS6-dg-wl7"/>
+                <constraint firstItem="YsW-je-Tes" firstAttribute="trailing" secondItem="8gL-cl-M6C" secondAttribute="trailing" id="kE9-7l-h3m"/>
+                <constraint firstItem="8gL-cl-M6C" firstAttribute="centerY" secondItem="i5M-Pr-FkT" secondAttribute="centerY" constant="-150" id="qe9-Iz-HKL"/>
+                <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="8gL-cl-M6C" secondAttribute="trailing" constant="12" id="tAf-x5-5W1"/>
+            </constraints>
+            <point key="canvasLocation" x="139" y="21"/>
+        </view>
+    </objects>
+    <resources>
+        <namedColor name="ID Black">
+            <color red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="ID White">
+            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>

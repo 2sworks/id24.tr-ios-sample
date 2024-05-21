@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="22505" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_0" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22504"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <customFonts key="customFonts">
+        <array key="NunitoSans-Bold.ttf">
+            <string>NunitoSans-Bold</string>
+        </array>
+        <array key="NunitoSans-Regular.ttf">
+            <string>NunitoSans-Regular</string>
+        </array>
+    </customFonts>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="SDKCallScreenViewController" customModule="NewTest" customModuleProvider="target">
+            <connections>
+                <outlet property="callScreen" destination="1Ge-oL-6lD" id="1Vg-hx-sv8"/>
+                <outlet property="codeTxt" destination="584-GN-Fbj" id="acc-ly-6mj"/>
+                <outlet property="customerCam" destination="H13-C5-KUq" id="6Ur-EL-Dp7"/>
+                <outlet property="myCam" destination="JWh-MT-aW9" id="F3S-S5-gLt"/>
+                <outlet property="plsWaitLbl" destination="NNT-O3-uf5" id="dNo-bQ-1cg"/>
+                <outlet property="qualityImg" destination="xrv-lg-chm" id="sLV-FN-8Q7"/>
+                <outlet property="smsLblDesc" destination="rSA-LB-VMV" id="4eH-I6-yOh"/>
+                <outlet property="smsStackView" destination="Fjd-2H-ODQ" id="naH-rD-jKW"/>
+                <outlet property="timeInfoLbl" destination="5jn-bx-s1e" id="fWS-Vj-lIB"/>
+                <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+                <outlet property="waitDesc1" destination="fRf-jN-woD" id="xLG-QN-8as"/>
+                <outlet property="waitDesc2" destination="103-Ru-5dP" id="Kbh-cG-ZKo"/>
+                <outlet property="waitScreen" destination="Y6H-03-vdl" id="nxD-Oo-Lzj"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
+            <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <view contentMode="scaleToFill" id="Y6H-03-vdl" userLabel="wait">
+                    <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    <subviews>
+                        <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Lütfen bekleyin" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="NNT-O3-uf5">
+                            <rect key="frame" x="12" y="407" width="366" height="30.333333333333314"/>
+                            <fontDescription key="fontDescription" name="NunitoSans-Bold" family="Nunito Sans" pointSize="26"/>
+                            <color key="textColor" name="KB White"/>
+                            <nil key="highlightedColor"/>
+                        </label>
+                        <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="USf-qd-FSC">
+                            <rect key="frame" x="12" y="471.33333333333331" width="366" height="49.999999999999943"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="50" id="RMQ-Wr-Szn"/>
+                            </constraints>
+                            <state key="normal" title="Kapat">
+                                <color key="titleColor" name="KB White"/>
+                            </state>
+                        </button>
+                        <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" image="waitingBack" translatesAutoresizingMaskIntoConstraints="NO" id="t23-Lu-f99">
+                            <rect key="frame" x="0.0" y="92" width="390" height="560"/>
+                        </imageView>
+                        <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="AVl-ZZ-Fj9">
+                            <rect key="frame" x="32" y="679" width="326" height="116"/>
+                            <subviews>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Müşteri temsilcimiz sizi aramak üzere lütfen bu ekranda bekleyiniz." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fRf-jN-woD">
+                                    <rect key="frame" x="0.0" y="0.0" width="326" height="42"/>
+                                    <fontDescription key="fontDescription" name="NunitoSans-Regular" family="Nunito Sans" pointSize="18"/>
+                                    <color key="textColor" name="80 White"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Kimliğinizin yanınızda ve hazır olduğundan emin olunuz." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="103-Ru-5dP">
+                                    <rect key="frame" x="0.0" y="58" width="326" height="42"/>
+                                    <fontDescription key="fontDescription" name="NunitoSans-Regular" family="Nunito Sans" pointSize="18"/>
+                                    <color key="textColor" name="80 White"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5jn-bx-s1e">
+                                    <rect key="frame" x="0.0" y="116" width="326" height="0.0"/>
+                                    <fontDescription key="fontDescription" name="NunitoSans-Regular" family="Nunito Sans" pointSize="18"/>
+                                    <color key="textColor" name="80 White"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                            </subviews>
+                        </stackView>
+                    </subviews>
+                    <color key="backgroundColor" systemColor="tintColor"/>
+                    <constraints>
+                        <constraint firstAttribute="trailing" secondItem="AVl-ZZ-Fj9" secondAttribute="trailing" constant="32" id="9Hc-jt-h6J"/>
+                        <constraint firstAttribute="trailing" secondItem="NNT-O3-uf5" secondAttribute="trailing" constant="12" id="IFh-gS-njc"/>
+                        <constraint firstItem="NNT-O3-uf5" firstAttribute="centerX" secondItem="Y6H-03-vdl" secondAttribute="centerX" id="O88-n0-6Pd"/>
+                        <constraint firstItem="USf-qd-FSC" firstAttribute="leading" secondItem="Y6H-03-vdl" secondAttribute="leading" constant="12" id="Zk4-W4-3zd"/>
+                        <constraint firstItem="NNT-O3-uf5" firstAttribute="centerY" secondItem="Y6H-03-vdl" secondAttribute="centerY" id="b6m-7c-qPH"/>
+                        <constraint firstAttribute="trailing" secondItem="t23-Lu-f99" secondAttribute="trailing" id="bbb-kO-3JF"/>
+                        <constraint firstItem="NNT-O3-uf5" firstAttribute="leading" secondItem="Y6H-03-vdl" secondAttribute="leading" constant="12" id="dm1-Gj-95n"/>
+                        <constraint firstItem="t23-Lu-f99" firstAttribute="leading" secondItem="Y6H-03-vdl" secondAttribute="leading" id="jkp-n9-Frj"/>
+                        <constraint firstAttribute="trailing" secondItem="USf-qd-FSC" secondAttribute="trailing" constant="12" id="lih-ky-Att"/>
+                        <constraint firstItem="AVl-ZZ-Fj9" firstAttribute="leading" secondItem="Y6H-03-vdl" secondAttribute="leading" constant="32" id="vgI-ao-EKi"/>
+                        <constraint firstItem="USf-qd-FSC" firstAttribute="top" secondItem="NNT-O3-uf5" secondAttribute="bottom" constant="34" id="wFA-fb-NMM"/>
+                        <constraint firstItem="t23-Lu-f99" firstAttribute="centerY" secondItem="Y6H-03-vdl" secondAttribute="centerY" constant="-50" id="wd0-vO-JWh"/>
+                    </constraints>
+                </view>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="1Ge-oL-6lD" userLabel="callView">
+                    <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
+                    <subviews>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="JWh-MT-aW9" userLabel="myCam">
+                            <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
+                            <color key="backgroundColor" systemColor="labelColor"/>
+                        </view>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="H13-C5-KUq" userLabel="customerCam">
+                            <rect key="frame" x="268" y="59" width="110" height="139"/>
+                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="139" id="7G5-zg-aiT"/>
+                                <constraint firstAttribute="width" constant="110" id="OK1-mZ-KS2"/>
+                            </constraints>
+                        </view>
+                        <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="xrv-lg-chm">
+                            <rect key="frame" x="12" y="61" width="48" height="48"/>
+                            <constraints>
+                                <constraint firstAttribute="width" constant="48" id="8jl-Ik-KKH"/>
+                                <constraint firstAttribute="height" constant="48" id="Mg0-ji-wOg"/>
+                            </constraints>
+                        </imageView>
+                    </subviews>
+                    <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <constraints>
+                        <constraint firstItem="JWh-MT-aW9" firstAttribute="leading" secondItem="1Ge-oL-6lD" secondAttribute="leading" id="1p5-nv-zSp"/>
+                        <constraint firstAttribute="trailing" secondItem="JWh-MT-aW9" secondAttribute="trailing" id="3Zk-Xj-SGZ"/>
+                        <constraint firstAttribute="bottom" secondItem="JWh-MT-aW9" secondAttribute="bottom" id="IFr-WG-UAo"/>
+                        <constraint firstItem="JWh-MT-aW9" firstAttribute="top" secondItem="1Ge-oL-6lD" secondAttribute="top" id="Ynp-sW-hT4"/>
+                        <constraint firstItem="xrv-lg-chm" firstAttribute="leading" secondItem="1Ge-oL-6lD" secondAttribute="leading" constant="12" id="bKX-EG-3Kb"/>
+                        <constraint firstAttribute="trailing" secondItem="H13-C5-KUq" secondAttribute="trailing" constant="12" id="ty9-cc-52V"/>
+                    </constraints>
+                </view>
+                <view hidden="YES" contentMode="scaleToFill" id="Fjd-2H-ODQ" userLabel="sms">
+                    <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    <subviews>
+                        <stackView opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" axis="vertical" spacing="23" translatesAutoresizingMaskIntoConstraints="NO" id="nZN-RZ-hTh">
+                            <rect key="frame" x="0.0" y="370" width="390" height="104"/>
+                            <subviews>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Lütfen sms kodunu girin" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rSA-LB-VMV">
+                                    <rect key="frame" x="0.0" y="0.0" width="390" height="21"/>
+                                    <fontDescription key="fontDescription" name="NunitoSans-Regular" family="Nunito Sans" pointSize="18"/>
+                                    <color key="textColor" name="ID White"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                                <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="584-GN-Fbj" customClass="CHIOTPFieldTwo" customModule="CHIOTPField">
+                                    <rect key="frame" x="0.0" y="44" width="390" height="60"/>
+                                    <constraints>
+                                        <constraint firstAttribute="height" constant="60" id="6hk-Q5-wGP"/>
+                                    </constraints>
+                                    <color key="textColor" name="ID Black"/>
+                                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                    <textInputTraits key="textInputTraits" textContentType="one-time-code"/>
+                                    <userDefinedRuntimeAttributes>
+                                        <userDefinedRuntimeAttribute type="number" keyPath="numberOfDigits">
+                                            <integer key="value" value="6"/>
+                                        </userDefinedRuntimeAttribute>
+                                        <userDefinedRuntimeAttribute type="number" keyPath="spacing">
+                                            <integer key="value" value="6"/>
+                                        </userDefinedRuntimeAttribute>
+                                        <userDefinedRuntimeAttribute type="color" keyPath="boxBackgroundColor">
+                                            <color key="value" name="50 White"/>
+                                        </userDefinedRuntimeAttribute>
+                                        <userDefinedRuntimeAttribute type="color" keyPath="activeBoxBackgroundColor">
+                                            <color key="value" name="ID White"/>
+                                        </userDefinedRuntimeAttribute>
+                                        <userDefinedRuntimeAttribute type="color" keyPath="filledBoxBackgroundColor">
+                                            <color key="value" name="ID White"/>
+                                        </userDefinedRuntimeAttribute>
+                                        <userDefinedRuntimeAttribute type="color" keyPath="borderColor">
+                                            <color key="value" name="ID White"/>
+                                        </userDefinedRuntimeAttribute>
+                                        <userDefinedRuntimeAttribute type="color" keyPath="activeBorderColor">
+                                            <color key="value" name="Yellow"/>
+                                        </userDefinedRuntimeAttribute>
+                                        <userDefinedRuntimeAttribute type="color" keyPath="filledBorderColor">
+                                            <color key="value" name="ID White"/>
+                                        </userDefinedRuntimeAttribute>
+                                        <userDefinedRuntimeAttribute type="number" keyPath="cornerRadius">
+                                            <real key="value" value="8"/>
+                                        </userDefinedRuntimeAttribute>
+                                    </userDefinedRuntimeAttributes>
+                                </textField>
+                            </subviews>
+                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        </stackView>
+                    </subviews>
+                    <viewLayoutGuide key="safeArea" id="neG-Al-mdz"/>
+                    <color key="backgroundColor" white="0.0" alpha="0.80266794220000004" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <constraints>
+                        <constraint firstItem="nZN-RZ-hTh" firstAttribute="centerX" secondItem="Fjd-2H-ODQ" secondAttribute="centerX" id="Gm3-gW-wgZ"/>
+                        <constraint firstAttribute="trailing" secondItem="nZN-RZ-hTh" secondAttribute="trailing" id="HP1-FH-8wJ"/>
+                        <constraint firstItem="nZN-RZ-hTh" firstAttribute="leading" secondItem="Fjd-2H-ODQ" secondAttribute="leading" id="hvD-fG-5u2"/>
+                        <constraint firstItem="nZN-RZ-hTh" firstAttribute="centerY" secondItem="Fjd-2H-ODQ" secondAttribute="centerY" id="pmB-S4-aRj"/>
+                    </constraints>
+                </view>
+            </subviews>
+            <viewLayoutGuide key="safeArea" id="fnl-2z-Ty3"/>
+            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+            <constraints>
+                <constraint firstItem="fnl-2z-Ty3" firstAttribute="top" secondItem="H13-C5-KUq" secondAttribute="top" constant="-12" id="MVH-SE-NxE"/>
+                <constraint firstItem="xrv-lg-chm" firstAttribute="top" secondItem="fnl-2z-Ty3" secondAttribute="top" constant="14" id="W1I-jG-cw4"/>
+                <constraint firstItem="fnl-2z-Ty3" firstAttribute="bottom" secondItem="AVl-ZZ-Fj9" secondAttribute="bottom" constant="15" id="YI6-jT-bJ1"/>
+                <constraint firstItem="1Ge-oL-6lD" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" id="hfk-Je-Fec"/>
+                <constraint firstAttribute="bottom" secondItem="1Ge-oL-6lD" secondAttribute="bottom" id="n2X-7F-eck"/>
+                <constraint firstItem="1Ge-oL-6lD" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" id="wl1-P1-uAd"/>
+                <constraint firstItem="1Ge-oL-6lD" firstAttribute="trailing" secondItem="fnl-2z-Ty3" secondAttribute="trailing" id="zOf-yB-3zE"/>
+            </constraints>
+            <point key="canvasLocation" x="-925" y="-19"/>
+        </view>
+    </objects>
+    <designables>
+        <designable name="584-GN-Fbj">
+            <size key="intrinsicContentSize" width="32" height="34"/>
+        </designable>
+    </designables>
+    <resources>
+        <image name="waitingBack" width="375" height="560"/>
+        <namedColor name="50 White">
+            <color red="1" green="1" blue="1" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="80 White">
+            <color red="1" green="1" blue="1" alpha="0.80000001192092896" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="ID Black">
+            <color red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="ID White">
+            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="KB White">
+            <color red="0.32899999618530273" green="0.32400000095367432" blue="0.4779999852180481" alpha="0.33000001311302185" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="Yellow">
+            <color red="0.93999999761581421" green="0.80000001192092896" blue="0.090000003576278687" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <systemColor name="labelColor">
+            <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="tintColor">
+            <color red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+    </resources>
+</document>

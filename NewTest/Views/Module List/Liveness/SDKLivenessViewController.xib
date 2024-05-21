@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="22505" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_0" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22504"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="SDKLivenessViewController" customModule="NewTest" customModuleProvider="target">
+            <connections>
+                <outlet property="myCam" destination="PlH-mW-2Vk" id="2ro-uR-7UI"/>
+                <outlet property="pauseView" destination="hLH-VX-ylF" id="UmY-Ma-j6m"/>
+                <outlet property="resetCamBtn" destination="DD5-kz-2K6" id="QBg-fA-5Gt"/>
+                <outlet property="stepInfoLbl" destination="tqF-2l-VQZ" id="c5O-eE-YHX"/>
+                <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
+            <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <arscnView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="PlH-mW-2Vk">
+                    <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
+                </arscnView>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ACd-Et-EyL">
+                    <rect key="frame" x="0.0" y="775" width="390" height="35"/>
+                    <subviews>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Lütfen yüzünüzü kameraya gösterin" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tqF-2l-VQZ">
+                            <rect key="frame" x="7" y="7" width="376" height="21"/>
+                            <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                            <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <nil key="highlightedColor"/>
+                        </label>
+                    </subviews>
+                    <color key="backgroundColor" red="0.13016048059999999" green="0.77686184410000003" blue="1" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                    <constraints>
+                        <constraint firstItem="tqF-2l-VQZ" firstAttribute="leading" secondItem="ACd-Et-EyL" secondAttribute="leading" constant="7" id="Ofd-O9-AlJ"/>
+                        <constraint firstItem="tqF-2l-VQZ" firstAttribute="top" secondItem="ACd-Et-EyL" secondAttribute="top" constant="7" id="Tyn-M9-oCP"/>
+                        <constraint firstAttribute="trailing" secondItem="tqF-2l-VQZ" secondAttribute="trailing" constant="7" id="Z31-tY-Qcb"/>
+                        <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="35" id="aQr-3n-khv"/>
+                        <constraint firstAttribute="bottom" secondItem="tqF-2l-VQZ" secondAttribute="bottom" constant="7" id="teL-Fa-Fpq"/>
+                    </constraints>
+                </view>
+                <view hidden="YES" alpha="0.90000000000000002" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="hLH-VX-ylF">
+                    <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
+                    <subviews>
+                        <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="25" translatesAutoresizingMaskIntoConstraints="NO" id="qkb-zd-BUm">
+                            <rect key="frame" x="12" y="372" width="366" height="100"/>
+                            <subviews>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Uygulamayı arkaplana attığınız için kameranız durduruldu" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sWA-1L-SNg">
+                                    <rect key="frame" x="0.0" y="0.0" width="366" height="40.666666666666664"/>
+                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                    <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="DD5-kz-2K6" customClass="IdentifyButton" customModule="NewTest" customModuleProvider="target">
+                                    <rect key="frame" x="0.0" y="65.666666666666686" width="366" height="34.333333333333343"/>
+                                    <state key="normal" title="Button"/>
+                                    <buttonConfiguration key="configuration" style="plain" title="Kamerayı Başlat"/>
+                                </button>
+                            </subviews>
+                        </stackView>
+                    </subviews>
+                    <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <constraints>
+                        <constraint firstItem="qkb-zd-BUm" firstAttribute="leading" secondItem="hLH-VX-ylF" secondAttribute="leading" constant="12" id="8nM-UQ-dDN"/>
+                        <constraint firstItem="qkb-zd-BUm" firstAttribute="centerX" secondItem="hLH-VX-ylF" secondAttribute="centerX" id="AQd-iK-x31"/>
+                        <constraint firstItem="qkb-zd-BUm" firstAttribute="centerY" secondItem="hLH-VX-ylF" secondAttribute="centerY" id="HmR-DZ-AAV"/>
+                        <constraint firstAttribute="trailing" secondItem="qkb-zd-BUm" secondAttribute="trailing" constant="12" id="SW5-1o-cyC"/>
+                    </constraints>
+                </view>
+            </subviews>
+            <viewLayoutGuide key="safeArea" id="fnl-2z-Ty3"/>
+            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+            <constraints>
+                <constraint firstItem="ACd-Et-EyL" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" id="40s-b3-lcw"/>
+                <constraint firstItem="hLH-VX-ylF" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" id="A5e-DB-07W"/>
+                <constraint firstItem="ACd-Et-EyL" firstAttribute="trailing" secondItem="fnl-2z-Ty3" secondAttribute="trailing" id="IP4-2E-e7e"/>
+                <constraint firstItem="PlH-mW-2Vk" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" id="S7M-LQ-R2e"/>
+                <constraint firstAttribute="bottom" secondItem="hLH-VX-ylF" secondAttribute="bottom" id="UfH-Zm-4ud"/>
+                <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="PlH-mW-2Vk" secondAttribute="trailing" id="Wz7-xO-qPe"/>
+                <constraint firstAttribute="bottom" secondItem="PlH-mW-2Vk" secondAttribute="bottom" id="aWU-yB-k1H"/>
+                <constraint firstItem="PlH-mW-2Vk" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" id="drG-65-EWi"/>
+                <constraint firstItem="fnl-2z-Ty3" firstAttribute="bottom" secondItem="ACd-Et-EyL" secondAttribute="bottom" id="fN1-7M-soe"/>
+                <constraint firstItem="hLH-VX-ylF" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" id="fl0-BS-Gd9"/>
+                <constraint firstItem="hLH-VX-ylF" firstAttribute="trailing" secondItem="fnl-2z-Ty3" secondAttribute="trailing" id="mqk-Iy-ILz"/>
+            </constraints>
+            <point key="canvasLocation" x="-26.153846153846153" y="20.616113744075829"/>
+        </view>
+    </objects>
+    <resources>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>

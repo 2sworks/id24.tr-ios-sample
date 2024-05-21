@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21225" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_0" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21207"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="SDKCardReaderViewController" customModule="NewTest" customModuleProvider="target">
+            <connections>
+                <outlet property="backIdPhoto" destination="VIX-Xf-a9E" id="ppa-ya-3Er"/>
+                <outlet property="backIdStack" destination="HDx-1C-FiW" id="Avq-pF-CpS"/>
+                <outlet property="backSideBtn" destination="4pW-8E-aha" id="5GN-bQ-oNX"/>
+                <outlet property="continueBtn" destination="0hn-QR-H5C" id="k0s-b2-cSx"/>
+                <outlet property="frontIdPhoto" destination="tS8-ZX-hrN" id="w9T-Jf-bPH"/>
+                <outlet property="frontIdStack" destination="SlA-OU-l5t" id="sMw-gI-83h"/>
+                <outlet property="frontSideBtn" destination="cEf-qe-cjN" id="CMq-t2-cd2"/>
+                <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
+            <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="nTI-XU-rMX">
+                    <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
+                    <subviews>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="TbL-5f-4cK" userLabel="root">
+                            <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
+                            <subviews>
+                                <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="center" spacing="19" translatesAutoresizingMaskIntoConstraints="NO" id="mW8-Ft-rdV">
+                                    <rect key="frame" x="12" y="138.33333333333334" width="366" height="467.66666666666663"/>
+                                    <subviews>
+                                        <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="center" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="SlA-OU-l5t">
+                                            <rect key="frame" x="12.666666666666657" y="0.0" width="341" height="224.33333333333334"/>
+                                            <subviews>
+                                                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="idFront" translatesAutoresizingMaskIntoConstraints="NO" id="tS8-ZX-hrN">
+                                                    <rect key="frame" x="0.0" y="0.0" width="341" height="182"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="width" secondItem="tS8-ZX-hrN" secondAttribute="height" multiplier="341:182" id="E6V-hh-5t0"/>
+                                                        <constraint firstAttribute="height" constant="182" id="zLK-vt-vQ0"/>
+                                                    </constraints>
+                                                </imageView>
+                                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cEf-qe-cjN" customClass="IdentifyButton" customModule="NewTest" customModuleProvider="target">
+                                                    <rect key="frame" x="63.999999999999986" y="189.99999999999997" width="212.66666666666663" height="34.333333333333343"/>
+                                                    <state key="normal" title="Button"/>
+                                                    <buttonConfiguration key="configuration" style="plain" title="Kimlik Önü Fotoğrafı Çek"/>
+                                                </button>
+                                            </subviews>
+                                        </stackView>
+                                        <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="center" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="HDx-1C-FiW">
+                                            <rect key="frame" x="12.666666666666657" y="243.33333333333331" width="341" height="224.33333333333331"/>
+                                            <subviews>
+                                                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="idBack" translatesAutoresizingMaskIntoConstraints="NO" id="VIX-Xf-a9E">
+                                                    <rect key="frame" x="0.0" y="0.0" width="341" height="182"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="width" secondItem="VIX-Xf-a9E" secondAttribute="height" multiplier="341:182" id="Nm6-T4-IdK"/>
+                                                        <constraint firstAttribute="height" constant="182" id="whN-ZT-Qau"/>
+                                                    </constraints>
+                                                </imageView>
+                                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4pW-8E-aha" customClass="IdentifyButton" customModule="NewTest" customModuleProvider="target">
+                                                    <rect key="frame" x="56.666666666666671" y="189.99999999999994" width="227.66666666666663" height="34.333333333333343"/>
+                                                    <state key="normal" title="Button"/>
+                                                    <buttonConfiguration key="configuration" style="plain" title="Kimlik Arkası Fotoğrafı Çek"/>
+                                                </button>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstItem="VIX-Xf-a9E" firstAttribute="width" secondItem="VIX-Xf-a9E" secondAttribute="height" multiplier="341:182" id="c2J-L8-Hi9"/>
+                                            </constraints>
+                                        </stackView>
+                                    </subviews>
+                                </stackView>
+                            </subviews>
+                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <constraints>
+                                <constraint firstItem="mW8-Ft-rdV" firstAttribute="leading" secondItem="TbL-5f-4cK" secondAttribute="leading" constant="12" id="Fdq-ja-yJa"/>
+                                <constraint firstItem="mW8-Ft-rdV" firstAttribute="centerY" secondItem="TbL-5f-4cK" secondAttribute="centerY" constant="-50" id="OAb-HS-JZa"/>
+                                <constraint firstAttribute="trailing" secondItem="mW8-Ft-rdV" secondAttribute="trailing" constant="12" id="Vxn-B8-BVE"/>
+                            </constraints>
+                        </view>
+                    </subviews>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <constraints>
+                        <constraint firstItem="TbL-5f-4cK" firstAttribute="height" secondItem="nTI-XU-rMX" secondAttribute="height" priority="250" id="2kw-hL-VNg"/>
+                        <constraint firstAttribute="bottom" secondItem="TbL-5f-4cK" secondAttribute="bottom" id="AQL-KV-Zte"/>
+                        <constraint firstItem="TbL-5f-4cK" firstAttribute="leading" secondItem="nTI-XU-rMX" secondAttribute="leading" id="Elj-sZ-vQg"/>
+                        <constraint firstAttribute="trailing" secondItem="TbL-5f-4cK" secondAttribute="trailing" id="SpU-oJ-kR8"/>
+                        <constraint firstItem="TbL-5f-4cK" firstAttribute="width" secondItem="nTI-XU-rMX" secondAttribute="width" id="m31-V0-qFU"/>
+                        <constraint firstItem="TbL-5f-4cK" firstAttribute="top" secondItem="nTI-XU-rMX" secondAttribute="top" id="zSl-ld-sEI"/>
+                    </constraints>
+                </scrollView>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0hn-QR-H5C" customClass="IdentifyButton" customModule="NewTest" customModuleProvider="target">
+                    <rect key="frame" x="0.0" y="765" width="390" height="45"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="45" id="hbk-fF-mJm"/>
+                    </constraints>
+                    <state key="normal" title="Button"/>
+                    <buttonConfiguration key="configuration" style="plain" title="Sorgula"/>
+                </button>
+            </subviews>
+            <viewLayoutGuide key="safeArea" id="fnl-2z-Ty3"/>
+            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+            <constraints>
+                <constraint firstItem="0hn-QR-H5C" firstAttribute="trailing" secondItem="fnl-2z-Ty3" secondAttribute="trailing" id="4Eu-wA-UM8"/>
+                <constraint firstItem="nTI-XU-rMX" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" id="Myh-9p-CrR"/>
+                <constraint firstItem="nTI-XU-rMX" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" id="aLV-eN-TJ7"/>
+                <constraint firstAttribute="bottom" secondItem="nTI-XU-rMX" secondAttribute="bottom" id="abv-GS-GIg"/>
+                <constraint firstItem="fnl-2z-Ty3" firstAttribute="bottom" secondItem="0hn-QR-H5C" secondAttribute="bottom" id="cpn-eo-Bgy"/>
+                <constraint firstItem="0hn-QR-H5C" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" id="i8o-vb-E7j"/>
+                <constraint firstItem="nTI-XU-rMX" firstAttribute="trailing" secondItem="fnl-2z-Ty3" secondAttribute="trailing" id="qbV-kh-stv"/>
+            </constraints>
+            <point key="canvasLocation" x="-26.153846153846153" y="20.616113744075829"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="idBack" width="466" height="271"/>
+        <image name="idFront" width="466" height="271"/>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>

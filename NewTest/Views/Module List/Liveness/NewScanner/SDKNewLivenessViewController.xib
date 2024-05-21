@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="22505" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22504"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="SDKNewLivenessViewController" customModule="NewTest" customModuleProvider="target">
+            <connections>
+                <outlet property="myCam" destination="B2n-00-IUR" id="lh4-EY-bM0"/>
+                <outlet property="pauseView" destination="KyD-UN-i8O" id="PPv-0a-A2o"/>
+                <outlet property="resetCamBtn" destination="wEc-cr-xxN" id="lrw-nb-JEK"/>
+                <outlet property="stepInfoLbl" destination="PPA-kX-CbP" id="xsN-tT-4JE"/>
+                <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
+            <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxX="YES" heightSizable="YES" flexibleMaxY="YES"/>
+            <subviews>
+                <arscnView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="B2n-00-IUR">
+                    <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                </arscnView>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="PPA-kX-CbP">
+                    <rect key="frame" x="12" y="797.66666666666663" width="369" height="20.333333333333371"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                    <color key="textColor" red="0.85098040100000005" green="0.55686277149999996" blue="0.19607841970000001" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                    <nil key="highlightedColor"/>
+                </label>
+                <view hidden="YES" alpha="0.80000000000000004" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="KyD-UN-i8O" userLabel="continueCam">
+                    <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                    <subviews>
+                        <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="25" translatesAutoresizingMaskIntoConstraints="NO" id="9lj-5M-pC6">
+                            <rect key="frame" x="12" y="376" width="369" height="100"/>
+                            <subviews>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="749" text="Uygulamayı arkaplana attığınız için kameranız durduruldu" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="8O4-YH-dQ3">
+                                    <rect key="frame" x="0.0" y="0.0" width="369" height="40.666666666666664"/>
+                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                    <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="wEc-cr-xxN" customClass="IdentifyButton" customModule="NewTest" customModuleProvider="target">
+                                    <rect key="frame" x="0.0" y="65.666666666666686" width="369" height="34.333333333333343"/>
+                                    <state key="normal" title="Button"/>
+                                    <buttonConfiguration key="configuration" style="plain" title="Kamerayı Başlat"/>
+                                </button>
+                            </subviews>
+                            <constraints>
+                                <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="80" id="mO2-of-jJe"/>
+                            </constraints>
+                        </stackView>
+                    </subviews>
+                    <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <constraints>
+                        <constraint firstAttribute="trailing" secondItem="9lj-5M-pC6" secondAttribute="trailing" constant="12" id="Lm4-Ji-Ity"/>
+                        <constraint firstItem="9lj-5M-pC6" firstAttribute="centerY" secondItem="KyD-UN-i8O" secondAttribute="centerY" id="Pcx-pm-AW4"/>
+                        <constraint firstItem="9lj-5M-pC6" firstAttribute="centerX" secondItem="KyD-UN-i8O" secondAttribute="centerX" id="Pt4-2K-Xcq"/>
+                        <constraint firstItem="9lj-5M-pC6" firstAttribute="leading" secondItem="KyD-UN-i8O" secondAttribute="leading" constant="12" id="oV4-9t-cxH"/>
+                    </constraints>
+                </view>
+            </subviews>
+            <viewLayoutGuide key="safeArea" id="WGx-Xy-whT"/>
+            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+            <constraints>
+                <constraint firstItem="B2n-00-IUR" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" id="7nX-I3-jBr"/>
+                <constraint firstAttribute="bottom" secondItem="B2n-00-IUR" secondAttribute="bottom" id="Idc-U6-wpM"/>
+                <constraint firstItem="PPA-kX-CbP" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" constant="12" id="Mct-1Y-cwO"/>
+                <constraint firstItem="B2n-00-IUR" firstAttribute="trailing" secondItem="WGx-Xy-whT" secondAttribute="trailing" id="OhI-e4-zvA"/>
+                <constraint firstAttribute="trailing" secondItem="PPA-kX-CbP" secondAttribute="trailing" constant="12" id="TsJ-DB-LAX"/>
+                <constraint firstItem="KyD-UN-i8O" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" id="Utu-Fe-XUx"/>
+                <constraint firstItem="KyD-UN-i8O" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" id="eaL-K6-ZaS"/>
+                <constraint firstAttribute="trailing" secondItem="KyD-UN-i8O" secondAttribute="trailing" id="hbU-sr-Is2"/>
+                <constraint firstItem="B2n-00-IUR" firstAttribute="leading" secondItem="WGx-Xy-whT" secondAttribute="leading" id="laY-WH-rzc"/>
+                <constraint firstAttribute="bottom" secondItem="PPA-kX-CbP" secondAttribute="bottom" constant="34" id="msX-EX-zVX"/>
+                <constraint firstAttribute="bottom" secondItem="KyD-UN-i8O" secondAttribute="bottom" id="ysP-uB-LQ4"/>
+            </constraints>
+            <point key="canvasLocation" x="138.1679389312977" y="20.422535211267608"/>
+        </view>
+    </objects>
+    <resources>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_0" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <customFonts key="customFonts">
+        <array key="NunitoSans-ExtraBold.ttf">
+            <string>NunitoSans-ExtraBold</string>
+        </array>
+        <array key="NunitoSans-Regular.ttf">
+            <string>NunitoSans-Regular</string>
+        </array>
+    </customFonts>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="SDKRingViewController" customModule="NewTest" customModuleProvider="target">
+            <connections>
+                <outlet property="desc1Lbl" destination="Yd2-re-aA2" id="KmX-wU-qGc"/>
+                <outlet property="desc2Lbl" destination="DwE-6x-TMv" id="WU3-rk-lra"/>
+                <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
+            <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" image="SDKCallingBack" translatesAutoresizingMaskIntoConstraints="NO" id="hap-7L-yCk">
+                    <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
+                </imageView>
+                <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="g18-52-glv">
+                    <rect key="frame" x="12" y="578" width="366" height="88.333333333333371"/>
+                    <subviews>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Müşteri temsilcimiz arıyor" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Yd2-re-aA2">
+                            <rect key="frame" x="0.0" y="0.0" width="366" height="30.333333333333332"/>
+                            <fontDescription key="fontDescription" name="NunitoSans-ExtraBold" family="Nunito Sans" pointSize="26"/>
+                            <color key="textColor" name="80 White"/>
+                            <nil key="highlightedColor"/>
+                        </label>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Video görüşmeyi başlatmak için lütfen cevaplayınız." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DwE-6x-TMv">
+                            <rect key="frame" x="0.0" y="46.333333333333371" width="366" height="42"/>
+                            <fontDescription key="fontDescription" name="NunitoSans-Regular" family="Nunito Sans" pointSize="18"/>
+                            <color key="textColor" name="80 White"/>
+                            <nil key="highlightedColor"/>
+                        </label>
+                    </subviews>
+                </stackView>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="J5a-AS-DnH">
+                    <rect key="frame" x="12" y="726" width="366" height="72"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="72" id="6VP-SW-odE"/>
+                    </constraints>
+                    <state key="normal" image="greenCall"/>
+                    <connections>
+                        <action selector="acceptAct:" destination="-1" eventType="touchUpInside" id="6n7-Nc-cVF"/>
+                    </connections>
+                </button>
+            </subviews>
+            <viewLayoutGuide key="safeArea" id="fnl-2z-Ty3"/>
+            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+            <constraints>
+                <constraint firstItem="g18-52-glv" firstAttribute="centerX" secondItem="i5M-Pr-FkT" secondAttribute="centerX" id="0d6-OA-qau"/>
+                <constraint firstItem="fnl-2z-Ty3" firstAttribute="bottom" secondItem="J5a-AS-DnH" secondAttribute="bottom" constant="12" id="6Fo-TZ-P7d"/>
+                <constraint firstItem="hap-7L-yCk" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" id="O4v-vh-Dfo"/>
+                <constraint firstItem="J5a-AS-DnH" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" constant="12" id="Obs-ql-IYM"/>
+                <constraint firstItem="g18-52-glv" firstAttribute="centerY" secondItem="i5M-Pr-FkT" secondAttribute="centerY" constant="200" id="Ry4-uv-Mou"/>
+                <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="J5a-AS-DnH" secondAttribute="trailing" constant="12" id="aZO-OR-10r"/>
+                <constraint firstItem="hap-7L-yCk" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" id="cSN-Cb-KPe"/>
+                <constraint firstItem="hap-7L-yCk" firstAttribute="trailing" secondItem="fnl-2z-Ty3" secondAttribute="trailing" id="oM5-hJ-7s2"/>
+                <constraint firstItem="g18-52-glv" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" constant="12" id="scd-AS-SQo"/>
+                <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="g18-52-glv" secondAttribute="trailing" constant="12" id="vPk-DR-rw8"/>
+                <constraint firstAttribute="bottom" secondItem="hap-7L-yCk" secondAttribute="bottom" id="vzk-GX-m45"/>
+            </constraints>
+            <point key="canvasLocation" x="4.615384615384615" y="20.616113744075829"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="SDKCallingBack" width="375" height="812"/>
+        <image name="greenCall" width="72" height="72"/>
+        <namedColor name="80 White">
+            <color red="1" green="1" blue="1" alpha="0.80000001192092896" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>

@@ -1,0 +1,131 @@
+{
+  "pins" : [
+    {
+      "identity" : "chiotpfield",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ChiliLabs/CHIOTPField.git",
+      "state" : {
+        "revision" : "a18c00e08af660338832c60e6a3789c9c2f4e11b",
+        "version" : "0.1.0"
+      }
+    },
+    {
+      "identity" : "iqkeyboardmanager",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/hackiftekhar/IQKeyboardManager.git",
+      "state" : {
+        "revision" : "aa656e1f0d95f0154622f453599318602848be3b",
+        "version" : "7.0.1"
+      }
+    },
+    {
+      "identity" : "libtesseract",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SwiftyTesseract/libtesseract.git",
+      "state" : {
+        "revision" : "214a36e04d740795d7ba2f07c6108944d0136f8a",
+        "version" : "0.2.0"
+      }
+    },
+    {
+      "identity" : "netfox",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/kasketis/netfox",
+      "state" : {
+        "revision" : "557576032736fd3140422baefb68b8f76c55088f",
+        "version" : "1.21.0"
+      }
+    },
+    {
+      "identity" : "openssl",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/krzyzanowskim/OpenSSL.git",
+      "state" : {
+        "revision" : "9429bf89fe0df2d2f25f3a9a51cbf7092e69640f",
+        "version" : "1.1.1700"
+      }
+    },
+    {
+      "identity" : "permissionskit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/sparrowcode/PermissionsKit",
+      "state" : {
+        "revision" : "8d6b3d6db7d0654a4e4fe31bbf6556dec6fc3d13",
+        "version" : "10.0.1"
+      }
+    },
+    {
+      "identity" : "qkmrzparser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Mattijah/QKMRZParser.git",
+      "state" : {
+        "revision" : "ef79fdfa691e6323e729e33c2f79bace10286f49",
+        "version" : "2.0.0"
+      }
+    },
+    {
+      "identity" : "qkmrzscanner",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Mattijah/QKMRZScanner.git",
+      "state" : {
+        "branch" : "master-spm",
+        "revision" : "2600de3c3317ca8d96e81a4bbcf26547f3c92d1c"
+      }
+    },
+    {
+      "identity" : "starscream",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/daltoniam/Starscream.git",
+      "state" : {
+        "revision" : "e6b65c6d9077ea48b4a7bdda8994a1d3c6969c8d",
+        "version" : "3.1.1"
+      }
+    },
+    {
+      "identity" : "swift-nio-zlib-support",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-nio-zlib-support.git",
+      "state" : {
+        "revision" : "37760e9a52030bb9011972c5213c3350fa9d41fd",
+        "version" : "1.0.0"
+      }
+    },
+    {
+      "identity" : "swiftsignatureview",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/alankarmisra/SwiftSignatureView.git",
+      "state" : {
+        "revision" : "6912d301de5088aa16d61566b62596069342a096",
+        "version" : "3.2.0"
+      }
+    },
+    {
+      "identity" : "swiftytesseract",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SwiftyTesseract/SwiftyTesseract",
+      "state" : {
+        "revision" : "1393d15d0278673dd89f2ba21d3fb748f99e02ce",
+        "version" : "4.0.1"
+      }
+    },
+    {
+      "identity" : "toast",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/hengyu/Toast.git",
+      "state" : {
+        "revision" : "962ea1063c564012655fb86be91221e93f2d862d",
+        "version" : "1.0.0"
+      }
+    },
+    {
+      "identity" : "webrtc",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/stasel/WebRTC.git",
+      "state" : {
+        "revision" : "8ce70d799bc637be04489376ebae7334061a1db0",
+        "version" : "94.0.0"
+      }
+    }
+  ],
+  "version" : 2
+}

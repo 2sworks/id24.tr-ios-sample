@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21225" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_0" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21207"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="SDKSignLangViewController" customModule="NewTest" customModuleProvider="target">
+            <connections>
+                <outlet property="acceptBtn" destination="zR1-NX-9da" id="7pW-uQ-Fij"/>
+                <outlet property="descLbl" destination="Gvn-4Y-6Bv" id="eeL-qp-hDE"/>
+                <outlet property="signSwitch" destination="Lcq-Bb-sWH" id="FaW-t5-x7V"/>
+                <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
+            <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillProportionally" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="d6g-pk-yJw">
+                    <rect key="frame" x="12" y="335" width="366" height="174"/>
+                    <subviews>
+                        <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="woman" translatesAutoresizingMaskIntoConstraints="NO" id="LcC-BH-TxY">
+                            <rect key="frame" x="0.0" y="0.0" width="366" height="128"/>
+                        </imageView>
+                        <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="iNu-DH-wWx">
+                            <rect key="frame" x="0.0" y="138" width="366" height="36"/>
+                            <subviews>
+                                <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Lcq-Bb-sWH">
+                                    <rect key="frame" x="0.0" y="2.6666666666666856" width="57" height="31"/>
+                                    <constraints>
+                                        <constraint firstAttribute="width" constant="55" id="eTh-2z-6oa"/>
+                                    </constraints>
+                                </switch>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="İşaret dili bilen bir temsilci ile görüşmek istiyorum" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Gvn-4Y-6Bv">
+                                    <rect key="frame" x="60" y="0.0" width="306" height="36"/>
+                                    <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                                    <color key="textColor" name="ID Light White"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                            </subviews>
+                        </stackView>
+                    </subviews>
+                    <constraints>
+                        <constraint firstItem="iNu-DH-wWx" firstAttribute="top" secondItem="LcC-BH-TxY" secondAttribute="bottom" constant="10" id="Kcw-Km-ya4"/>
+                        <constraint firstItem="LcC-BH-TxY" firstAttribute="top" secondItem="d6g-pk-yJw" secondAttribute="top" id="hSv-WD-IbT"/>
+                        <constraint firstAttribute="trailing" secondItem="LcC-BH-TxY" secondAttribute="trailing" id="jwc-5K-SBR"/>
+                        <constraint firstItem="LcC-BH-TxY" firstAttribute="leading" secondItem="d6g-pk-yJw" secondAttribute="leading" id="mJh-A3-vSd"/>
+                    </constraints>
+                </stackView>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zR1-NX-9da" customClass="IdentifyButton" customModule="NewTest" customModuleProvider="target">
+                    <rect key="frame" x="0.0" y="765" width="390" height="45"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="45" id="X21-in-Xkf"/>
+                    </constraints>
+                    <state key="normal" title="Button"/>
+                    <buttonConfiguration key="configuration" style="plain" title="Onayla"/>
+                </button>
+            </subviews>
+            <viewLayoutGuide key="safeArea" id="fnl-2z-Ty3"/>
+            <color key="backgroundColor" name="AccentColor"/>
+            <constraints>
+                <constraint firstItem="d6g-pk-yJw" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" constant="12" id="0is-sg-7gZ"/>
+                <constraint firstItem="d6g-pk-yJw" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" constant="12" id="5NB-5D-K2L"/>
+                <constraint firstItem="fnl-2z-Ty3" firstAttribute="bottom" secondItem="zR1-NX-9da" secondAttribute="bottom" id="9xd-de-0eQ"/>
+                <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="d6g-pk-yJw" secondAttribute="trailing" constant="12" id="DAc-j6-agg"/>
+                <constraint firstItem="d6g-pk-yJw" firstAttribute="centerY" secondItem="i5M-Pr-FkT" secondAttribute="centerY" id="DrL-Tm-sqW"/>
+                <constraint firstItem="zR1-NX-9da" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" id="MWb-QI-1Xl"/>
+                <constraint firstItem="d6g-pk-yJw" firstAttribute="centerX" secondItem="i5M-Pr-FkT" secondAttribute="centerX" id="kiO-ok-ihn"/>
+                <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="d6g-pk-yJw" secondAttribute="trailing" constant="12" id="kze-1D-OXn"/>
+                <constraint firstAttribute="trailing" secondItem="zR1-NX-9da" secondAttribute="trailing" id="suj-PQ-IzX"/>
+            </constraints>
+            <point key="canvasLocation" x="139" y="21"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="woman" width="128" height="128"/>
+        <namedColor name="AccentColor">
+            <color red="0.0" green="0.46000000000000002" blue="0.89000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="ID Light White">
+            <color red="0.99599999189376831" green="0.99599999189376831" blue="0.99599999189376831" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+    </resources>
+</document>
