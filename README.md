@@ -41,6 +41,9 @@ Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.
 
 ### SDK Son Güncelleme:
 
+## 2.0.6
+- Network sınıfında ssl pinning için ekstra log eklendi
+
 ## 2.0.5
 - yeni dil desteği eklendi
 
