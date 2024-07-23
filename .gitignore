@@ -1,18 +1,15 @@
 NewTest/SDK/*
 NewTest/.DS_Store
-NewTest/Views/Login/*
+NewTest/Views/Login/IdentifyApp/*
 .DS_Store
 NewTest/.DS_Store
 .DS_Store
-NewTest.xcodeproj/xcuserdata/emirbeytekin.xcuserdatad/xcdebugger/Breakpoints_v2.xcbkptlist
-NewTest/Views/Login/SDKLoginViewController.swift
 NewTest.xcodeproj/xcuserdata/emirbeytekin.xcuserdatad/xcdebugger/Breakpoints_v2.xcbkptlist
 .DS_Store
 NewTest.xcodeproj/project.xcworkspace/xcuserdata/emirbeytekin.xcuserdatad/UserInterfaceState.xcuserstate
 NewTest.xcodeproj/xcuserdata/emirbeytekin.xcuserdatad/xcdebugger/Breakpoints_v2.xcbkptlist
 NewTest/.DS_Store
 NewTest/Env.xcdatamodeld/Env.xcdatamodel/contents
-NewTest/Views/Login/SDKLoginViewController.swift
-NewTest/Views/Login/SDKLoginViewController.xib
+
 
 xcuserdata/

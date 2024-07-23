@@ -28,7 +28,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func startFirstScreen() {
         self.window = UIWindow(frame: UIScreen.main.bounds)
-        let firstVC = SDKIdentifyLoginViewController()
+        let firstVC = SDKLoginViewController()
         let firstNC = UINavigationController(rootViewController: firstVC)
         UINavigationBar.appearance().tintColor = .white
 //        UINavigationBar.appearance().prefersLargeTitles = false
