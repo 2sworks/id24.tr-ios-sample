@@ -92,7 +92,23 @@ class SDKViewOptionsController: UIViewController {
         imageView.contentMode = .scaleAspectFit
         let image = UIImage(named: "idCard")
         imageView.image = image
+        
+        imageView.isUserInteractionEnabled = true // Kullanıcının dokunmayı algılaması için gerekli
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(openSocketLogs))
+        tapGesture.numberOfTapsRequired = 2 // İki kez dokunmayı belirliyoruz
+        imageView.addGestureRecognizer(tapGesture)
+        
         navigationItem.titleView = imageView
+    }
+    
+    @objc  func openSocketLogs() {
+//        self.closeSDK()
+        self.dismiss(animated: true) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: {
+                let socketLogVC = SDKSocketLogsViewController()
+                self.present(socketLogVC, animated: true)
+            })
+        }
     }
     
     func addGradientBackground(view: UIView) {
@@ -221,8 +237,10 @@ class SDKBaseViewController: SDKViewOptionsController {
             guard let self = self else { return }
             act1()
         }))
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: {
+            self.topMostController().present(alert, animated: true, completion: nil)
+        })
         
-        topMostController().present(alert, animated: true, completion: nil)
     }
     
     func topMostController() -> UIViewController {
@@ -240,12 +258,22 @@ var vSpinner : UIView?
 
 extension UIViewController {
     
-    func showLoader() {
+    func showLoader(with msg: String? = "") {
         let spinnerView = UIView.init(frame: self.view.frame)
         spinnerView.backgroundColor = UIColor.init(red: 0.5, green: 0.5, blue: 0.5, alpha: 0.5)
         let ai = UIActivityIndicatorView.init(style: .large)
         ai.startAnimating()
         ai.center = spinnerView.center
+        
+        if let loadMsg = msg {
+            let label = UILabel(frame: CGRect(x: 0, y: ai.frame.maxY + 10, width: spinnerView.frame.width, height: 30))
+            label.text = msg
+            label.textAlignment = .center
+            label.textColor = .white
+            DispatchQueue.main.async {
+                spinnerView.addSubview(label)
+            }
+        }
         
         DispatchQueue.main.async {
             spinnerView.addSubview(ai)
