@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		480961172C64E70B00B9E6D5 /* kimlikbasit.cer in Resources */ = {isa = PBXBuildFile; fileRef = 480961162C64E70B00B9E6D5 /* kimlikbasit.cer */; };
+		480961182C64E70C00B9E6D5 /* v2api.identify.com.tr.cer in Resources */ = {isa = PBXBuildFile; fileRef = 48BFF0D02BBAF3940088D67E /* v2api.identify.com.tr.cer */; };
 		480C1E4F2BDB8B8D0076D28B /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 480C1E4E2BDB8B8D0076D28B /* PrivacyInfo.xcprivacy */; };
 		480E76A9297A868E0071B049 /* GERMAN.json in Resources */ = {isa = PBXBuildFile; fileRef = 48CD8D0429792E26008573F8 /* GERMAN.json */; };
 		480E76AA297A868E0071B049 /* ENGLISH.json in Resources */ = {isa = PBXBuildFile; fileRef = 48CD8D0229792E25008573F8 /* ENGLISH.json */; };
@@ -18,8 +20,6 @@
 		48171405294716830095A64F /* netfox in Frameworks */ = {isa = PBXBuildFile; productRef = 48171404294716830095A64F /* netfox */; settings = {ATTRIBUTES = (Required, ); }; };
 		48171422294734FA0095A64F /* SDKPassportReaderViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48171420294734FA0095A64F /* SDKPassportReaderViewController.swift */; };
 		48171423294734FA0095A64F /* SDKPassportReaderViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 48171421294734FA0095A64F /* SDKPassportReaderViewController.xib */; };
-		481C65322C10969000D0DF51 /* IdentifySDK.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 481C65302C10968B00D0DF51 /* IdentifySDK.xcframework */; };
-		481C65332C10969000D0DF51 /* IdentifySDK.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 481C65302C10968B00D0DF51 /* IdentifySDK.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4820A4A22924CDAD004DB388 /* sample.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 4820A4A12924CDAC004DB388 /* sample.mp4 */; };
 		4825316C2B02632900B0472C /* SDKPrepareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4825316A2B02632900B0472C /* SDKPrepareViewController.swift */; };
 		4825316D2B02632900B0472C /* SDKPrepareViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4825316B2B02632900B0472C /* SDKPrepareViewController.xib */; };
@@ -139,7 +139,6 @@
 		48CD8CFF29792C8F008573F8 /* SDKIdentifyColorTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48CD8CFE29792C8F008573F8 /* SDKIdentifyColorTheme.swift */; };
 		48CD8D0129792D5A008573F8 /* SDKLangManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48CD8D0029792D5A008573F8 /* SDKLangManager.swift */; };
 		48D802292924F6B000B9BB83 /* CHIOTPField in Frameworks */ = {isa = PBXBuildFile; productRef = 48D802282924F6B000B9BB83 /* CHIOTPField */; settings = {ATTRIBUTES = (Required, ); }; };
-		48DCAA0B2C13028D007A5488 /* admin.kimlikbasit.com.cer in Resources */ = {isa = PBXBuildFile; fileRef = 48DCAA0A2C13028D007A5488 /* admin.kimlikbasit.com.cer */; };
 		48DD2F292B8DD4DE0091FCCE /* IdentifyProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DD2F282B8DD4DE0091FCCE /* IdentifyProgressBar.swift */; };
 		48DD2F2D2B8DD57D0091FCCE /* SDKNewLivenessViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DD2F2B2B8DD57D0091FCCE /* SDKNewLivenessViewController.swift */; };
 		48DD2F2E2B8DD57D0091FCCE /* SDKNewLivenessViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 48DD2F2C2B8DD57D0091FCCE /* SDKNewLivenessViewController.xib */; };
@@ -148,6 +147,8 @@
 		48DE1485290A7D3A00057EAD /* UIViewController+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DE1484290A7D3A00057EAD /* UIViewController+.swift */; };
 		48E8E43129266B8A0045C3F8 /* SDKSpeechRecViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E8E42F29266B8A0045C3F8 /* SDKSpeechRecViewController.swift */; };
 		48E8E43229266B8A0045C3F8 /* SDKSpeechRecViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 48E8E43029266B8A0045C3F8 /* SDKSpeechRecViewController.xib */; };
+		48EFE53A2C58D6EF003E92A4 /* IdentifySDK.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48EFE5382C58D6E6003E92A4 /* IdentifySDK.xcframework */; };
+		48EFE53B2C58D6EF003E92A4 /* IdentifySDK.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 48EFE5382C58D6E6003E92A4 /* IdentifySDK.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		48F0867829F7CA4E00FCA4BF /* QKMRZScanner in Frameworks */ = {isa = PBXBuildFile; productRef = 48F0867729F7CA4E00FCA4BF /* QKMRZScanner */; };
 /* End PBXBuildFile section */
 
@@ -158,7 +159,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				481C65332C10969000D0DF51 /* IdentifySDK.xcframework in Embed Frameworks */,
+				48EFE53B2C58D6EF003E92A4 /* IdentifySDK.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -167,6 +168,7 @@
 
 /* Begin PBXFileReference section */
 		480099BA2B175C5C00325ED0 /* SDKIdentifyLoginViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SDKIdentifyLoginViewController.swift; sourceTree = "<group>"; };
+		480961162C64E70B00B9E6D5 /* kimlikbasit.cer */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = kimlikbasit.cer; sourceTree = "<group>"; };
 		480C1E4E2BDB8B8D0076D28B /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		481065972922646600053004 /* SDKLivenessViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKLivenessViewController.swift; sourceTree = "<group>"; };
 		481065982922646600053004 /* SDKLivenessViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SDKLivenessViewController.xib; sourceTree = "<group>"; };
@@ -174,7 +176,6 @@
 		4813037D29221E1300E66D73 /* SDKVideoRecorderViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SDKVideoRecorderViewController.xib; sourceTree = "<group>"; };
 		48171420294734FA0095A64F /* SDKPassportReaderViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKPassportReaderViewController.swift; sourceTree = "<group>"; };
 		48171421294734FA0095A64F /* SDKPassportReaderViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SDKPassportReaderViewController.xib; sourceTree = "<group>"; };
-		481C65302C10968B00D0DF51 /* IdentifySDK.xcframework */ = {isa = PBXFileReference; expectedSignature = "AppleDeveloperProgram:KUE93LBN2W:Emir Beytekin"; lastKnownFileType = wrapper.xcframework; path = IdentifySDK.xcframework; sourceTree = "<group>"; };
 		4820A4A12924CDAC004DB388 /* sample.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = sample.mp4; sourceTree = "<group>"; };
 		4825316A2B02632900B0472C /* SDKPrepareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKPrepareViewController.swift; sourceTree = "<group>"; };
 		4825316B2B02632900B0472C /* SDKPrepareViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SDKPrepareViewController.xib; sourceTree = "<group>"; };
@@ -308,7 +309,6 @@
 		48CD8D0229792E25008573F8 /* ENGLISH.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ENGLISH.json; sourceTree = "<group>"; };
 		48CD8D0329792E26008573F8 /* TURKISH.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = TURKISH.json; sourceTree = "<group>"; };
 		48CD8D0429792E26008573F8 /* GERMAN.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = GERMAN.json; sourceTree = "<group>"; };
-		48DCAA0A2C13028D007A5488 /* admin.kimlikbasit.com.cer */ = {isa = PBXFileReference; lastKnownFileType = file; path = admin.kimlikbasit.com.cer; sourceTree = "<group>"; };
 		48DD2F282B8DD4DE0091FCCE /* IdentifyProgressBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifyProgressBar.swift; sourceTree = "<group>"; };
 		48DD2F2B2B8DD57D0091FCCE /* SDKNewLivenessViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKNewLivenessViewController.swift; sourceTree = "<group>"; };
 		48DD2F2C2B8DD57D0091FCCE /* SDKNewLivenessViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SDKNewLivenessViewController.xib; sourceTree = "<group>"; };
@@ -317,6 +317,7 @@
 		48DE1484290A7D3A00057EAD /* UIViewController+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+.swift"; sourceTree = "<group>"; };
 		48E8E42F29266B8A0045C3F8 /* SDKSpeechRecViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKSpeechRecViewController.swift; sourceTree = "<group>"; };
 		48E8E43029266B8A0045C3F8 /* SDKSpeechRecViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SDKSpeechRecViewController.xib; sourceTree = "<group>"; };
+		48EFE5382C58D6E6003E92A4 /* IdentifySDK.xcframework */ = {isa = PBXFileReference; expectedSignature = "AppleDeveloperProgram:KUE93LBN2W:Emir Beytekin"; lastKnownFileType = wrapper.xcframework; path = IdentifySDK.xcframework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -334,7 +335,7 @@
 				4831E1F32B69284400B67891 /* IQKeyboardManagerSwift in Frameworks */,
 				48171405294716830095A64F /* netfox in Frameworks */,
 				48F0867829F7CA4E00FCA4BF /* QKMRZScanner in Frameworks */,
-				481C65322C10969000D0DF51 /* IdentifySDK.xcframework in Frameworks */,
+				48EFE53A2C58D6EF003E92A4 /* IdentifySDK.xcframework in Frameworks */,
 				4857BFFB2902D636001FE850 /* Starscream in Frameworks */,
 				48D802292924F6B000B9BB83 /* CHIOTPField in Frameworks */,
 			);
@@ -565,8 +566,8 @@
 			isa = PBXGroup;
 			children = (
 				480C1E4E2BDB8B8D0076D28B /* PrivacyInfo.xcprivacy */,
+				480961162C64E70B00B9E6D5 /* kimlikbasit.cer */,
 				48BFF0D02BBAF3940088D67E /* v2api.identify.com.tr.cer */,
-				48DCAA0A2C13028D007A5488 /* admin.kimlikbasit.com.cer */,
 				482D2B612A547A8600F1344F /* WeScan-Edited */,
 				48ED5F0E2A0D2A8B0000C279 /* SDK */,
 				4820A4A12924CDAC004DB388 /* sample.mp4 */,
@@ -845,7 +846,7 @@
 		48ED5F0E2A0D2A8B0000C279 /* SDK */ = {
 			isa = PBXGroup;
 			children = (
-				481C65302C10968B00D0DF51 /* IdentifySDK.xcframework */,
+				48EFE5382C58D6E6003E92A4 /* IdentifySDK.xcframework */,
 			);
 			path = SDK;
 			sourceTree = "<group>";
@@ -975,6 +976,7 @@
 				485C154F2907DC19007B9ED0 /* SDKSelfieViewController.xib in Resources */,
 				4881A80029238CB400EB4072 /* SDKAddressConfirmViewController.xib in Resources */,
 				48E8E43229266B8A0045C3F8 /* SDKSpeechRecViewController.xib in Resources */,
+				480961172C64E70B00B9E6D5 /* kimlikbasit.cer in Resources */,
 				482D2BB52A547AC000F1344F /* rotate@3x.png in Resources */,
 				4881A80C2923BEF400EB4072 /* SDKCallScreenViewController.xib in Resources */,
 				482D2BBF2A547AC000F1344F /* enhance.png in Resources */,
@@ -983,12 +985,12 @@
 				482D2BB32A547AC000F1344F /* Localizable.strings in Resources */,
 				480E76AB297A868E0071B049 /* TURKISH.json in Resources */,
 				485C15332907D2E8007B9ED0 /* SDKLoginViewController.xib in Resources */,
-				48DCAA0B2C13028D007A5488 /* admin.kimlikbasit.com.cer in Resources */,
 				480E76AA297A868E0071B049 /* ENGLISH.json in Resources */,
 				487D31AB2BEB913400305684 /* AZERI.json in Resources */,
 				482D2BB12A547AC000F1344F /* Localizable.strings in Resources */,
 				4887009B292CDA3500961218 /* SDKListenSocketViewController.xib in Resources */,
 				4825316D2B02632900B0472C /* SDKPrepareViewController.xib in Resources */,
+				480961182C64E70C00B9E6D5 /* v2api.identify.com.tr.cer in Resources */,
 				4881A8112923BF0000EB4072 /* SDKRingViewController.xib in Resources */,
 				485C15642907F3FA007B9ED0 /* Colors.xcassets in Resources */,
 				482D2BBE2A547AC000F1344F /* enhance@2x.png in Resources */,
@@ -1265,7 +1267,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = NewTest/NewTest.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 99;
+				CURRENT_PROJECT_VERSION = 100;
 				DEVELOPMENT_TEAM = TQUQ2HQ482;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1307,7 +1309,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = NewTest/NewTest.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 99;
+				CURRENT_PROJECT_VERSION = 100;
 				DEVELOPMENT_TEAM = TQUQ2HQ482;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",

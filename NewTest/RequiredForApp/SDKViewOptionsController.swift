@@ -39,6 +39,7 @@ class SDKViewOptionsController: UIViewController {
     }
     
     @objc func skipModuleAct() {
+        self.manager.skipModule()
         self.manager.getNextModule { nextMod in
             self.navigationController?.pushViewController(nextMod, animated: true)
         }
@@ -192,6 +193,7 @@ class SDKBaseViewController: SDKViewOptionsController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.manager.trackingDelegate = self
         nc.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
         nc.addObserver(self, selector: #selector(appMovedToForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
         nc.addObserver(self, selector: #selector(reActiveScreen), name: UIApplication.didBecomeActiveNotification, object: nil)
@@ -253,8 +255,15 @@ class SDKBaseViewController: SDKViewOptionsController {
    
     
 }
+extension SDKBaseViewController: IdentifyTrackingListener {
+    func eventReceived(event: TrackingEvent) {
+        print("\(event.eventType) - \(event.time)")
+    }
+    
+}
 
 var vSpinner : UIView?
+
 
 extension UIViewController {
     

@@ -22,13 +22,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         IQKeyboardManager.shared.enable = true
         NFX.sharedInstance().start()
         startFirstScreen()
-        
         return true
     }
     
     func startFirstScreen() {
         self.window = UIWindow(frame: UIScreen.main.bounds)
-        let firstVC = SDKLoginViewController()
+        let firstVC = SDKIdentifyLoginViewController()
         let firstNC = UINavigationController(rootViewController: firstVC)
         UINavigationBar.appearance().tintColor = .white
 //        UINavigationBar.appearance().prefersLargeTitles = false
