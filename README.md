@@ -4,7 +4,7 @@ Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.
 ### Sample App 
 
 ## Build 100:
-- IdentifyTrackingListener kullanımı eklendi (Yalnızca 2.0.7 ve üstü sürümler için geçerli)
+- IdentifyTrackingListener kullanımı eklendi (Yalnızca 2.1.0 ve üstü sürümler için geçerli)
 
 ## Build 97:
 - yeni dil desteği eklendi
@@ -44,7 +44,7 @@ Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.
 
 ### SDK Son Güncelleme:
 
-## 2.0.7
+## 2.1.0
 - SDK tarafında yeni bir IdentifyTrackingListener eklendi, örnek kullanım için SDKBaseViewController dosyasını inceleyebilirsiniz.
 
 ## 2.0.6
