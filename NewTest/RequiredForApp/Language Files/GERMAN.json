@@ -149,6 +149,8 @@
   "ActiveSelfieWarn" : "Ihr Ausweisfoto stimmt nicht mit Ihrem Selfie überein. Bitte machen Sie ein neues.",
   "ActiveSelfieExit" : "Sie haben ausreichend Versuche unternommen, Vielen Dank.",
   "ActiveNfcWarn" : "Ihre Formular und NFC Daten stimmen nicht überein. Bitte nehmen Sie das korrekte Ausweisfoto erneut auf.",
-  "ActiveNfcExit" : "Ihre Identifikationsdaten stimmen nicht mit den Angaben im Formular überein. Sie haben ausreichend Versuche unternommen, Vielen Dank."
+  "ActiveNfcExit" : "Ihre Identifikationsdaten stimmen nicht mit den Angaben im Formular überein. Sie haben ausreichend Versuche unternommen, Vielen Dank.",
+  "AddressPdfErrorTitle" : "Ungültige Dateigröße",
+  "AddressPdfErrorMessage" : "Die Datei, die Sie hochladen möchten, darf nicht größer als 5 MB sein. Bitte wählen Sie eine kleinere Datei aus."
 }
 

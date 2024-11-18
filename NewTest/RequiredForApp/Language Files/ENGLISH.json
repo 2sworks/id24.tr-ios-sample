@@ -149,5 +149,7 @@
   "ActiveSelfieWarn" : "Your identification photo does not match your selfie. Please take it again.",
   "ActiveSelfieExit" : "You have made enough attempts, thank you.",
   "ActiveNfcWarn" : "Your form and NFC data do not match. Please retake the correct identification photo.",
-  "ActiveNfcExit" : "The identity information does not match the data in the form. You have made enough attempts, thank you."
+  "ActiveNfcExit" : "The identity information does not match the data in the form. You have made enough attempts, thank you.",
+  "AddressPdfErrorTitle" : "Invalid File Size",
+  "AddressPdfErrorMessage" : "The file you want to upload cannot be larger than 5 MB. Please select a smaller file."
 }

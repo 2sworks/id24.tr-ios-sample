@@ -353,6 +353,10 @@ extension SDKLangManager {
                 return self.readKey(key: "ActiveSelfieExit")
             case .scanErrDegree:
                 return self.readKey(key: "ScanErrDegree")
+            case .addressPdfErrorTitle:
+                return self.readKey(key: "AddressPdfErrorTitle")
+            case .addressPdfErrorMessage:
+                return self.readKey(key: "AddressPdfErrorMessage")
         }
     }
 }
@@ -508,4 +512,6 @@ public enum SDKKeywords {
     case activeNfcWarn
     case activeNfcExit
     case scanErrDegree
+    case addressPdfErrorTitle
+    case addressPdfErrorMessage
 }

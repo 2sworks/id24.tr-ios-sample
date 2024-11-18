@@ -149,5 +149,7 @@
   "ActiveSelfieWarn" : "Şəxsiyyət şəklinizlə selfie şəkliniz uyğun gəlmir. Lütfən yenidən çəkin.",
   "ActiveSelfieExit" : "Kifayət qədər cəhd etdiniz, təşəkkürlər.",
   "ActiveNfcWarn" : "Form və NFC məlumatlarınız uyğun deyil. Lütfən düzgün şəxsiyyət şəklini yenidən çəkin.",
-  "ActiveNfcExit" : "Şəxsiyyət məlumatları ilə formdakı məlumatlar uyğun deyil. Kifayət qədər cəhd etdiniz, təşəkkürlər."
+  "ActiveNfcExit" : "Şəxsiyyət məlumatları ilə formdakı məlumatlar uyğun deyil. Kifayət qədər cəhd etdiniz, təşəkkürlər.",
+  "AddressPdfErrorTitle" : "Yanlış Fayl Ölçüsü",
+  "AddressPdfErrorMessage" : "Yükləmək istədiyiniz faylın ölçüsü 5 MB-dan böyük ola bilməz. Zəhmət olmasa, daha kiçik bir fayl seçin."
 }
