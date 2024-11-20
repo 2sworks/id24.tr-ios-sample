@@ -28,6 +28,7 @@ class SDKIdentifyLoginViewController: SDKBaseViewController {
     @IBOutlet weak var signLangBtn: IdentifyButton!
     var editedShowBigCustomer = false
     var editedSignLang = false
+    var addressPdfOption =  false
     @IBOutlet weak var newLivenessBtn: IdentifyButton!
     @IBOutlet weak var sslPinningBtn: IdentifyButton!
     
@@ -185,6 +186,8 @@ class SDKIdentifyLoginViewController: SDKBaseViewController {
             self.identIdArea.text = "600d7388a82294f712147672ef56965c77d92f41"
         } else if identIdArea.text == "qa" {
             self.identIdArea.text = "1404df9c1cbd6c66bbb3c9217ea4bbfc1157fd33"
+        } else if identIdArea.text == "busra" {
+            self.identIdArea.text = "14412dd4616298aabbd80c9628860ed8d214c288"
         }
         
         self.showLoader()
@@ -198,6 +201,8 @@ class SDKIdentifyLoginViewController: SDKBaseViewController {
             identCardType: [.idCard, .passport, .oldSchool], // destekleyeceğiniz kart tipleri
             signLangSupport: editedSignLang, // işitme engelliler için müşteri temsilcisi desteği
             nfcMaxErrorCount: 3,
+            addressPdfOption: addressPdfOption,
+            pdfMaxFileSize: 5,
             logLevel: .all,
             bigCustomerCam: editedShowBigCustomer,
             selectedModules: self.selectedModuleList,

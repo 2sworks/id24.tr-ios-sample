@@ -18,7 +18,9 @@ class SDKAddressConfirmViewController: SDKBaseViewController {
     var idPhoto = ""
     var addressPdf : Data? = nil
     var docImg = UIImage()
-    let maxFileSizeInBytes = 5 * 1024 * 1024
+    var maxFileSizeInBytes: Int {
+        return Int(self.manager.pdfMaxFileSize * 1024 * 1024)
+    }
     @IBOutlet weak var addressTxt: UITextView!
     var addressOk = false
     @IBOutlet weak var desc1Lbl: UILabel!
@@ -65,6 +67,7 @@ class SDKAddressConfirmViewController: SDKBaseViewController {
     }
     
     private func showOptions() {
+        
         // create an actionSheet
         let actionSheetController: UIAlertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
 
@@ -77,15 +80,17 @@ class SDKAddressConfirmViewController: SDKBaseViewController {
             self.openGallery()
         }
         
-        let thirdAction: UIAlertAction = UIAlertAction(title: "Dosya Seç", style: .default) { action -> Void in
-            self.attachDocument()
-        }
 
         let cancelAction: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in }
         
         actionSheetController.addAction(firstAction)
         actionSheetController.addAction(secondAction)
-        actionSheetController.addAction(thirdAction)
+        if self.manager.addressPdfOption == true {
+            let thirdAction: UIAlertAction = UIAlertAction(title: "Dosya Seç", style: .default) { action -> Void in
+                self.attachDocument()
+            }
+            actionSheetController.addAction(thirdAction)
+        }
         actionSheetController.addAction(cancelAction)
 
         actionSheetController.popoverPresentationController?.sourceView = self.view
