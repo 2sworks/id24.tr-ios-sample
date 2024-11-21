@@ -253,6 +253,8 @@ extension SDKLangManager {
                 return self.readKey(key: "CoreInvoicePhoto")
             case .corePhotoBtn:
                 return self.readKey(key: "CorePhotoBtn")
+            case .corePhotoBtnPDF:
+                return self.readKey(key: "CorePhotoBtnPDF")
             case .coreSignLang:
                 return self.readKey(key: "CoreSignLang")
             case .coreDelSig:
@@ -462,6 +464,7 @@ public enum SDKKeywords {
     case coreAddrDesc
     case coreInvoicePhoto
     case corePhotoBtn
+    case corePhotoBtnPDF
     case coreSignLang
     case coreDelSig
     case selfieIdentInfo1

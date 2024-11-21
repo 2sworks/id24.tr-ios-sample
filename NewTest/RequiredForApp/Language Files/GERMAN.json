@@ -100,6 +100,7 @@
   "CoreAddrDesc":"Geben Sie Adresse ein",
   "CoreInvoicePhoto":"Um Ihre Adresse zu bestätigen laden Sie bitte ein Foto einer aktuellen Rechnung hoch",
   "CorePhotoBtn":"Foto auswählen oder aufnehmen",
+  "CorePhotoBtnPDF":"Foto oder PDF auswählen",
   "CoreSignLang":"Mit Gebärdensprachendolmetscher verbinden",
   "CoreDelSig":"Signatur löschen",
   "SelfieIdentInfoText":"Sie haben alle Authentifizierungsschritte erfolgreich abgeschlossen.",

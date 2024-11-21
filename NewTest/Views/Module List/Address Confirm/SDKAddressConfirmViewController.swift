@@ -42,7 +42,7 @@ class SDKAddressConfirmViewController: SDKBaseViewController {
         self.addressTxt.text = ""
         self.addressOk = false
         self.docImg = UIImage()
-        self.addressPdf = Data()
+        self.addressPdf = nil
         self.docPhoto.image = UIImage()
         self.idPhoto = ""
         self.checkSubmitAvailablity()
@@ -51,7 +51,11 @@ class SDKAddressConfirmViewController: SDKBaseViewController {
     private func setupUI() {
         addressTxt.delegate = self
         photoBtn.type = .cancel
-        photoBtn.setTitle(self.translate(text: .corePhotoBtn), for: .normal)
+        if self.showPDFOption {
+            photoBtn.setTitle(self.translate(text: .corePhotoBtnPDF), for: .normal)
+        } else {
+            photoBtn.setTitle(self.translate(text: .corePhotoBtn), for: .normal)
+        }
         photoBtn.onTap = {
             self.showOptions()
         }
@@ -106,7 +110,7 @@ class SDKAddressConfirmViewController: SDKBaseViewController {
         let importMenu = UIDocumentPickerViewController(documentTypes: types as [String], in: .import)
 
         if #available(iOS 11.0, *) {
-            importMenu.allowsMultipleSelection = true
+            importMenu.allowsMultipleSelection = false
         }
 
         importMenu.delegate = self
@@ -139,7 +143,7 @@ class SDKAddressConfirmViewController: SDKBaseViewController {
     }
     
     @discardableResult func checkSubmitAvailablity() -> Bool {
-        if (idPhoto != "" || !(addressPdf?.isEmpty ?? true)) && addressOk == true {
+        if (idPhoto != "" || addressPdf?.isEmpty == false) && addressOk == true {
             submitBtn.isUserInteractionEnabled = true
             UIView.animate(withDuration: 0.3) {
                 self.submitBtn.alpha = 1
@@ -171,8 +175,8 @@ class SDKAddressConfirmViewController: SDKBaseViewController {
                     }
                 }
             }
-        } else if !(addressPdf?.isEmpty ?? true) {
-            self.manager.uploadAddressInfoWithPdf(pdfData: addressPdf ?? Data(), addressText: self.addressTxt.text) { webResp, sdkError in
+        } else if addressPdf?.isEmpty == false {
+            self.manager.uploadAddressInfoWithPdf(pdfData: addressPdf!, addressText: self.addressTxt.text) { webResp, sdkError in
                 self.hideLoader()
                 if webResp {
                     self.manager.getNextModule { nextVC in
@@ -205,33 +209,33 @@ extension SDKAddressConfirmViewController: UIDocumentPickerDelegate, UINavigatio
                 self.idPhoto = ""
                 docImg = UIImage()
                 if let pdfDocument = PDFDocument(url: pdfURL) {
-                            // İlk sayfayı al
-                if let firstPage = pdfDocument.page(at: 0) {
-                    // İlk sayfanın boyutuna göre bir UIImage oluştur
-                    let pdfPageBounds = firstPage.bounds(for: .mediaBox)
-                    let renderer = UIGraphicsImageRenderer(size: pdfPageBounds.size)
-                    let image = renderer.image { ctx in
-                        UIColor.white.set()
-                        ctx.fill(CGRect(origin: .zero, size: pdfPageBounds.size))
-                        ctx.cgContext.translateBy(x: 0, y: pdfPageBounds.size.height)
-                        ctx.cgContext.scaleBy(x: 1.0, y: -1.0)
-                        firstPage.draw(with: .mediaBox, to: ctx.cgContext)
+                    // İlk sayfayı al
+                    if let firstPage = pdfDocument.page(at: 0) {
+                        // İlk sayfanın boyutuna göre bir UIImage oluştur
+                        let pdfPageBounds = firstPage.bounds(for: .mediaBox)
+                        let renderer = UIGraphicsImageRenderer(size: pdfPageBounds.size)
+                        let image = renderer.image { ctx in
+                            UIColor.white.set()
+                            ctx.fill(CGRect(origin: .zero, size: pdfPageBounds.size))
+                            ctx.cgContext.translateBy(x: 0, y: pdfPageBounds.size.height)
+                            ctx.cgContext.scaleBy(x: 1.0, y: -1.0)
+                            firstPage.draw(with: .mediaBox, to: ctx.cgContext)
+                        }
+                        
+                        // Oluşturulan görüntüyü docPhoto'ya ata
+                        docPhoto.image = image
+                    } else {
+                        print("PDF'in ilk sayfası alınamadı.")
                     }
-                    
-                    // Oluşturulan görüntüyü docPhoto'ya ata
-                    docPhoto.image = image
                 } else {
-                    print("PDF'in ilk sayfası alınamadı.")
+                    print("PDF dökümanı oluşturulamadı.")
                 }
-            } else {
-                print("PDF dökümanı oluşturulamadı.")
-            }
             
                 let fileSizeInBytes = pdfData.count // Dosya boyutu bayt olarak
 
                 if fileSizeInBytes > maxFileSizeInBytes {
-                    print("Dosya boyutu 5 MB'den büyük!")
-                    self.addressPdf = Data()
+                    print("Dosya boyutu \(maxFileSizeInBytes) MB'den büyük!")
+                    self.addressPdf = nil
                     docPhoto.image = UIImage()
                     
                     self.oneButtonAlertShow(message: self.translate(text: .addressPdfErrorMessage), title1: self.translate(text: .coreOk)) {
@@ -259,7 +263,7 @@ extension SDKAddressConfirmViewController: UIDocumentPickerDelegate, UINavigatio
             docPhoto.image = image
             docImg = image!
             
-            self.addressPdf = Data()
+            self.addressPdf = nil
             
             self.idPhoto = image?.jpegData(compressionQuality: 0.5)?.base64EncodedString() ?? ""
             checkSubmitAvailablity()
