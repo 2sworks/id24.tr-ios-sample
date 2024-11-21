@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 60;
+	objectVersion = 56;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -18,26 +18,11 @@
 		48171405294716830095A64F /* netfox in Frameworks */ = {isa = PBXBuildFile; productRef = 48171404294716830095A64F /* netfox */; settings = {ATTRIBUTES = (Required, ); }; };
 		48171422294734FA0095A64F /* SDKPassportReaderViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48171420294734FA0095A64F /* SDKPassportReaderViewController.swift */; };
 		48171423294734FA0095A64F /* SDKPassportReaderViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 48171421294734FA0095A64F /* SDKPassportReaderViewController.xib */; };
-		481C65322C10969000D0DF51 /* IdentifySDK.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 481C65302C10968B00D0DF51 /* IdentifySDK.xcframework */; };
-		481C65332C10969000D0DF51 /* IdentifySDK.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 481C65302C10968B00D0DF51 /* IdentifySDK.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4820A4A22924CDAD004DB388 /* sample.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 4820A4A12924CDAC004DB388 /* sample.mp4 */; };
 		4825316C2B02632900B0472C /* SDKPrepareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4825316A2B02632900B0472C /* SDKPrepareViewController.swift */; };
 		4825316D2B02632900B0472C /* SDKPrepareViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4825316B2B02632900B0472C /* SDKPrepareViewController.xib */; };
 		48263C10292789C7005200A1 /* SDKThankYouViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48263C0E292789C7005200A1 /* SDKThankYouViewController.swift */; };
 		48263C11292789C7005200A1 /* SDKThankYouViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 48263C0F292789C7005200A1 /* SDKThankYouViewController.xib */; };
-		482769402BDFB4C600D5675D /* Env.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 48622A042AA9BE7D00B5CFC2 /* Env.xcdatamodeld */; };
-		482769412BDFB4D000D5675D /* SDKModuleListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 486A110F2B07BAA200A34623 /* SDKModuleListViewController.swift */; };
-		482769422BDFB4D000D5675D /* SDKIdentifyLoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480099BA2B175C5C00325ED0 /* SDKIdentifyLoginViewController.swift */; };
-		482769432BDFB4D000D5675D /* ServerSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 486A110B2B07BA9800A34623 /* ServerSettingsViewController.swift */; };
-		482769442BDFB4D000D5675D /* EnvListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 486A11082B07BA9200A34623 /* EnvListViewController.swift */; };
-		482769452BDFB4D000D5675D /* SDKSocketLogsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48BC60A82B2217F400B03684 /* SDKSocketLogsViewController.swift */; };
-		482769462BDFB4D000D5675D /* SocketLogTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48BC60AD2B22184500B03684 /* SocketLogTableViewCell.swift */; };
-		482769472BDFB4D000D5675D /* SDKModuleListViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 486A11102B07BAA200A34623 /* SDKModuleListViewController.xib */; };
-		482769482BDFB4D000D5675D /* SocketLogTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 48BC60AE2B22184500B03684 /* SocketLogTableViewCell.xib */; };
-		482769492BDFB4D000D5675D /* SDKSocketLogsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 48BC60A92B2217F400B03684 /* SDKSocketLogsViewController.xib */; };
-		4827694A2BDFB4D000D5675D /* ServerSettingsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 486A110C2B07BA9800A34623 /* ServerSettingsViewController.xib */; };
-		4827694B2BDFB4D000D5675D /* SDKIdentifyLoginViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 486A11142B07BAAA00A34623 /* SDKIdentifyLoginViewController.xib */; };
-		4827694C2BDFB4D000D5675D /* EnvListViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 486A11072B07BA9200A34623 /* EnvListViewController.xib */; };
 		482D2BB12A547AC000F1344F /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 482D2B632A547AC000F1344F /* Localizable.strings */; };
 		482D2BB22A547AC000F1344F /* ImageScannerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 482D2B652A547AC000F1344F /* ImageScannerController.swift */; };
 		482D2BB32A547AC000F1344F /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 482D2B682A547AC000F1344F /* Localizable.strings */; };
@@ -149,6 +134,8 @@
 		48E8E43129266B8A0045C3F8 /* SDKSpeechRecViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E8E42F29266B8A0045C3F8 /* SDKSpeechRecViewController.swift */; };
 		48E8E43229266B8A0045C3F8 /* SDKSpeechRecViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 48E8E43029266B8A0045C3F8 /* SDKSpeechRecViewController.xib */; };
 		48F0867829F7CA4E00FCA4BF /* QKMRZScanner in Frameworks */ = {isa = PBXBuildFile; productRef = 48F0867729F7CA4E00FCA4BF /* QKMRZScanner */; };
+		DFD0C5282CEF2DB7004D5075 /* IdentifySDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFD0C5262CEF2DB1004D5075 /* IdentifySDK.framework */; };
+		DFD0C5292CEF2DB7004D5075 /* IdentifySDK.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DFD0C5262CEF2DB1004D5075 /* IdentifySDK.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -158,7 +145,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				481C65332C10969000D0DF51 /* IdentifySDK.xcframework in Embed Frameworks */,
+				DFD0C5292CEF2DB7004D5075 /* IdentifySDK.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -166,7 +153,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		480099BA2B175C5C00325ED0 /* SDKIdentifyLoginViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SDKIdentifyLoginViewController.swift; sourceTree = "<group>"; };
 		480C1E4E2BDB8B8D0076D28B /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		481065972922646600053004 /* SDKLivenessViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKLivenessViewController.swift; sourceTree = "<group>"; };
 		481065982922646600053004 /* SDKLivenessViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SDKLivenessViewController.xib; sourceTree = "<group>"; };
@@ -174,7 +160,6 @@
 		4813037D29221E1300E66D73 /* SDKVideoRecorderViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SDKVideoRecorderViewController.xib; sourceTree = "<group>"; };
 		48171420294734FA0095A64F /* SDKPassportReaderViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKPassportReaderViewController.swift; sourceTree = "<group>"; };
 		48171421294734FA0095A64F /* SDKPassportReaderViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SDKPassportReaderViewController.xib; sourceTree = "<group>"; };
-		481C65302C10968B00D0DF51 /* IdentifySDK.xcframework */ = {isa = PBXFileReference; expectedSignature = "AppleDeveloperProgram:KUE93LBN2W:Emir Beytekin"; lastKnownFileType = wrapper.xcframework; path = IdentifySDK.xcframework; sourceTree = "<group>"; };
 		4820A4A12924CDAC004DB388 /* sample.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = sample.mp4; sourceTree = "<group>"; };
 		4825316A2B02632900B0472C /* SDKPrepareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKPrepareViewController.swift; sourceTree = "<group>"; };
 		4825316B2B02632900B0472C /* SDKPrepareViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SDKPrepareViewController.xib; sourceTree = "<group>"; };
@@ -272,14 +257,6 @@
 		485C15672907FC69007B9ED0 /* SDKCardReaderViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SDKCardReaderViewController.xib; sourceTree = "<group>"; };
 		485C157A2908190D007B9ED0 /* SDKNfcViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKNfcViewController.swift; sourceTree = "<group>"; };
 		485C157B2908190D007B9ED0 /* SDKNfcViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SDKNfcViewController.xib; sourceTree = "<group>"; };
-		48622A052AA9BE7D00B5CFC2 /* Env.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Env.xcdatamodel; sourceTree = "<group>"; };
-		486A11072B07BA9200A34623 /* EnvListViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = EnvListViewController.xib; sourceTree = "<group>"; };
-		486A11082B07BA9200A34623 /* EnvListViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EnvListViewController.swift; sourceTree = "<group>"; };
-		486A110B2B07BA9800A34623 /* ServerSettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServerSettingsViewController.swift; sourceTree = "<group>"; };
-		486A110C2B07BA9800A34623 /* ServerSettingsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ServerSettingsViewController.xib; sourceTree = "<group>"; };
-		486A110F2B07BAA200A34623 /* SDKModuleListViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SDKModuleListViewController.swift; sourceTree = "<group>"; };
-		486A11102B07BAA200A34623 /* SDKModuleListViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SDKModuleListViewController.xib; sourceTree = "<group>"; };
-		486A11142B07BAAA00A34623 /* SDKIdentifyLoginViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SDKIdentifyLoginViewController.xib; sourceTree = "<group>"; };
 		487D31A92BEB913400305684 /* AZERI.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = AZERI.json; sourceTree = "<group>"; };
 		487D31AA2BEB913400305684 /* RUSSIAN.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = RUSSIAN.json; sourceTree = "<group>"; };
 		4881A7FD29238CB400EB4072 /* SDKAddressConfirmViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKAddressConfirmViewController.swift; sourceTree = "<group>"; };
@@ -297,10 +274,6 @@
 		48A151EA292B73BA005B376B /* SDKSignLangViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SDKSignLangViewController.xib; sourceTree = "<group>"; };
 		48AB73F9291A75E200F591A4 /* SDKSignatureViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKSignatureViewController.swift; sourceTree = "<group>"; };
 		48AB73FA291A75E200F591A4 /* SDKSignatureViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SDKSignatureViewController.xib; sourceTree = "<group>"; };
-		48BC60A82B2217F400B03684 /* SDKSocketLogsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKSocketLogsViewController.swift; sourceTree = "<group>"; };
-		48BC60A92B2217F400B03684 /* SDKSocketLogsViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SDKSocketLogsViewController.xib; sourceTree = "<group>"; };
-		48BC60AD2B22184500B03684 /* SocketLogTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketLogTableViewCell.swift; sourceTree = "<group>"; };
-		48BC60AE2B22184500B03684 /* SocketLogTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SocketLogTableViewCell.xib; sourceTree = "<group>"; };
 		48BFF0D02BBAF3940088D67E /* v2api.identify.com.tr.cer */ = {isa = PBXFileReference; lastKnownFileType = file; path = v2api.identify.com.tr.cer; sourceTree = "<group>"; };
 		48C038192B5542F500AF690B /* CallStatusEnum.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallStatusEnum.swift; sourceTree = "<group>"; };
 		48CD8CFE29792C8F008573F8 /* SDKIdentifyColorTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKIdentifyColorTheme.swift; sourceTree = "<group>"; };
@@ -317,6 +290,7 @@
 		48DE1484290A7D3A00057EAD /* UIViewController+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+.swift"; sourceTree = "<group>"; };
 		48E8E42F29266B8A0045C3F8 /* SDKSpeechRecViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKSpeechRecViewController.swift; sourceTree = "<group>"; };
 		48E8E43029266B8A0045C3F8 /* SDKSpeechRecViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SDKSpeechRecViewController.xib; sourceTree = "<group>"; };
+		DFD0C5262CEF2DB1004D5075 /* IdentifySDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = IdentifySDK.framework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -334,9 +308,9 @@
 				4831E1F32B69284400B67891 /* IQKeyboardManagerSwift in Frameworks */,
 				48171405294716830095A64F /* netfox in Frameworks */,
 				48F0867829F7CA4E00FCA4BF /* QKMRZScanner in Frameworks */,
-				481C65322C10969000D0DF51 /* IdentifySDK.xcframework in Frameworks */,
 				4857BFFB2902D636001FE850 /* Starscream in Frameworks */,
 				48D802292924F6B000B9BB83 /* CHIOTPField in Frameworks */,
+				DFD0C5282CEF2DB7004D5075 /* IdentifySDK.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -578,7 +552,6 @@
 				485C15632907F3FA007B9ED0 /* Colors.xcassets */,
 				483BDB1928F459CC00635BCC /* LaunchScreen.storyboard */,
 				483BDB1C28F459CC00635BCC /* Info.plist */,
-				48622A042AA9BE7D00B5CFC2 /* Env.xcdatamodeld */,
 			);
 			path = NewTest;
 			sourceTree = "<group>";
@@ -606,7 +579,6 @@
 		485C154B2907DC0E007B9ED0 /* Login */ = {
 			isa = PBXGroup;
 			children = (
-				48C87B262B075D300062E936 /* IdentifyApp */,
 				485C15302907D2E8007B9ED0 /* SDKLoginViewController.swift */,
 				485C15312907D2E8007B9ED0 /* SDKLoginViewController.xib */,
 			);
@@ -652,33 +624,6 @@
 				485C157B2908190D007B9ED0 /* SDKNfcViewController.xib */,
 			);
 			path = NFC;
-			sourceTree = "<group>";
-		};
-		486229FF2AA9A8AF00B5CFC2 /* Servers */ = {
-			isa = PBXGroup;
-			children = (
-				48622A082AA9C8DC00B5CFC2 /* List */,
-				48622A072AA9C8C000B5CFC2 /* Add New */,
-			);
-			path = Servers;
-			sourceTree = "<group>";
-		};
-		48622A072AA9C8C000B5CFC2 /* Add New */ = {
-			isa = PBXGroup;
-			children = (
-				486A110B2B07BA9800A34623 /* ServerSettingsViewController.swift */,
-				486A110C2B07BA9800A34623 /* ServerSettingsViewController.xib */,
-			);
-			path = "Add New";
-			sourceTree = "<group>";
-		};
-		48622A082AA9C8DC00B5CFC2 /* List */ = {
-			isa = PBXGroup;
-			children = (
-				486A11082B07BA9200A34623 /* EnvListViewController.swift */,
-				486A11072B07BA9200A34623 /* EnvListViewController.xib */,
-			);
-			path = List;
 			sourceTree = "<group>";
 		};
 		4881A8082923BEDD00EB4072 /* Call Screen */ = {
@@ -755,54 +700,6 @@
 			path = "Module List";
 			sourceTree = "<group>";
 		};
-		48BC60A72B2217E300B03684 /* SocketLogs */ = {
-			isa = PBXGroup;
-			children = (
-				48BC60AC2B22183100B03684 /* logsCell */,
-				48BC60A82B2217F400B03684 /* SDKSocketLogsViewController.swift */,
-				48BC60A92B2217F400B03684 /* SDKSocketLogsViewController.xib */,
-			);
-			path = SocketLogs;
-			sourceTree = "<group>";
-		};
-		48BC60AC2B22183100B03684 /* logsCell */ = {
-			isa = PBXGroup;
-			children = (
-				48BC60AD2B22184500B03684 /* SocketLogTableViewCell.swift */,
-				48BC60AE2B22184500B03684 /* SocketLogTableViewCell.xib */,
-			);
-			path = logsCell;
-			sourceTree = "<group>";
-		};
-		48C87B262B075D300062E936 /* IdentifyApp */ = {
-			isa = PBXGroup;
-			children = (
-				48BC60A72B2217E300B03684 /* SocketLogs */,
-				486229FF2AA9A8AF00B5CFC2 /* Servers */,
-				48C87B2C2B075E520062E936 /* Module List */,
-				48C87B2B2B075E4E0062E936 /* Login */,
-			);
-			path = IdentifyApp;
-			sourceTree = "<group>";
-		};
-		48C87B2B2B075E4E0062E936 /* Login */ = {
-			isa = PBXGroup;
-			children = (
-				480099BA2B175C5C00325ED0 /* SDKIdentifyLoginViewController.swift */,
-				486A11142B07BAAA00A34623 /* SDKIdentifyLoginViewController.xib */,
-			);
-			path = Login;
-			sourceTree = "<group>";
-		};
-		48C87B2C2B075E520062E936 /* Module List */ = {
-			isa = PBXGroup;
-			children = (
-				486A110F2B07BAA200A34623 /* SDKModuleListViewController.swift */,
-				486A11102B07BAA200A34623 /* SDKModuleListViewController.xib */,
-			);
-			path = "Module List";
-			sourceTree = "<group>";
-		};
 		48CD8CFD29792C31008573F8 /* Language Files */ = {
 			isa = PBXGroup;
 			children = (
@@ -845,7 +742,7 @@
 		48ED5F0E2A0D2A8B0000C279 /* SDK */ = {
 			isa = PBXGroup;
 			children = (
-				481C65302C10968B00D0DF51 /* IdentifySDK.xcframework */,
+				DFD0C5262CEF2DB1004D5075 /* IdentifySDK.framework */,
 			);
 			path = SDK;
 			sourceTree = "<group>";
@@ -958,12 +855,6 @@
 				487D31AC2BEB913400305684 /* RUSSIAN.json in Resources */,
 				48263C11292789C7005200A1 /* SDKThankYouViewController.xib in Resources */,
 				483BDB1B28F459CC00635BCC /* LaunchScreen.storyboard in Resources */,
-				482769472BDFB4D000D5675D /* SDKModuleListViewController.xib in Resources */,
-				482769482BDFB4D000D5675D /* SocketLogTableViewCell.xib in Resources */,
-				482769492BDFB4D000D5675D /* SDKSocketLogsViewController.xib in Resources */,
-				4827694A2BDFB4D000D5675D /* ServerSettingsViewController.xib in Resources */,
-				4827694B2BDFB4D000D5675D /* SDKIdentifyLoginViewController.xib in Resources */,
-				4827694C2BDFB4D000D5675D /* EnvListViewController.xib in Resources */,
 				482D2BB42A547AC000F1344F /* flash.png in Resources */,
 				482D2BBC2A547AC000F1344F /* flash@3x.png in Resources */,
 				485C157D2908190D007B9ED0 /* SDKNfcViewController.xib in Resources */,
@@ -1015,19 +906,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				48DE147D290A6C3E00057EAD /* SDKButtonExtension.swift in Sources */,
-				482769402BDFB4C600D5675D /* Env.xcdatamodeld in Sources */,
 				4881A7FF29238CB400EB4072 /* SDKAddressConfirmViewController.swift in Sources */,
 				482D2BDA2A547AC000F1344F /* ReviewViewController.swift in Sources */,
 				482D2BDF2A547AC000F1344F /* CaptureSession.swift in Sources */,
 				485C155C2907F3A7007B9ED0 /* SDKBundle+.swift in Sources */,
 				482D2BD52A547AC000F1344F /* Error.swift in Sources */,
 				4825316C2B02632900B0472C /* SDKPrepareViewController.swift in Sources */,
-				482769412BDFB4D000D5675D /* SDKModuleListViewController.swift in Sources */,
-				482769422BDFB4D000D5675D /* SDKIdentifyLoginViewController.swift in Sources */,
-				482769432BDFB4D000D5675D /* ServerSettingsViewController.swift in Sources */,
-				482769442BDFB4D000D5675D /* EnvListViewController.swift in Sources */,
-				482769452BDFB4D000D5675D /* SDKSocketLogsViewController.swift in Sources */,
-				482769462BDFB4D000D5675D /* SocketLogTableViewCell.swift in Sources */,
 				481065992922646600053004 /* SDKLivenessViewController.swift in Sources */,
 				482D2BD02A547AC000F1344F /* UIImage+SFSymbol.swift in Sources */,
 				48549ADA2A41800E00F6838B /* SDKLivenessViewController.swift in Sources */,
@@ -1270,6 +1154,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/NewTest",
+					"$(PROJECT_DIR)/NewTest/SDK",
 				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = NewTest/Info.plist;
@@ -1312,6 +1197,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/NewTest",
+					"$(PROJECT_DIR)/NewTest/SDK",
 				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = NewTest/Info.plist;
@@ -1509,19 +1395,6 @@
 			productName = QKMRZScanner;
 		};
 /* End XCSwiftPackageProductDependency section */
-
-/* Begin XCVersionGroup section */
-		48622A042AA9BE7D00B5CFC2 /* Env.xcdatamodeld */ = {
-			isa = XCVersionGroup;
-			children = (
-				48622A052AA9BE7D00B5CFC2 /* Env.xcdatamodel */,
-			);
-			currentVersion = 48622A052AA9BE7D00B5CFC2 /* Env.xcdatamodel */;
-			path = Env.xcdatamodeld;
-			sourceTree = "<group>";
-			versionGroupType = wrapper.xcdatamodel;
-		};
-/* End XCVersionGroup section */
 	};
 	rootObject = 483BDB0328F459CC00635BCC /* Project object */;
 }

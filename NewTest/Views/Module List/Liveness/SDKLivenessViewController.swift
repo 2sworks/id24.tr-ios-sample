@@ -7,9 +7,10 @@
 
 import UIKit
 import ARKit
+import ReplayKit
 import IdentifySDK
 
-class SDKLivenessViewController: SDKBaseViewController {
+class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerDelegate {
     
     var timer: Timer?
     let waitSecs: TimeInterval = 2.0
@@ -24,7 +25,11 @@ class SDKLivenessViewController: SDKBaseViewController {
     var allowLeft = true
     var allowRight = true
     
+    let screenRecorder = RPScreenRecorder.shared()
+    var stopRecordingCount = 0
+    
     private var lookCamTxt: String {
+        screenRecorder.
         return languageManager.translate(key: .livenessLookCam)
     }
     
@@ -70,6 +75,70 @@ class SDKLivenessViewController: SDKBaseViewController {
         self.resumeSession()
     }
     
+    func startRecording() {
+        if screenRecorder.isRecording {return}
+//        screenRecorder.startRecording { error in
+//            if let error = error {
+//                print("Failed to start recording: \(error.localizedDescription)")
+//            } else {
+//                print("Recording started successfully!")
+//            }
+//        }
+
+        screenRecorder.startRecording() { error in
+                if let error = error {
+                    print("Failed to start recording: \(error.localizedDescription)")
+                } else {
+                    print("Recording started successfully")
+                }
+            }
+    }
+
+    func stopRecording() {
+        if !screenRecorder.isRecording {return}
+        
+        let fileManager = FileManager.default
+        let tempDir = fileManager.temporaryDirectory
+        let videoURL = tempDir.appendingPathComponent("screenRecording.mp4")
+
+        
+        if #available(iOS 14.0, *) {
+            screenRecorder.stopRecording(withOutput: videoURL) { error in
+                if let error = error {
+                    print("Failed to stop recording: \(error.localizedDescription)")
+                } else {
+                    print("Recording stopped successfully!")
+                    
+                    
+                   
+                                
+                    if fileManager.fileExists(atPath: videoURL.path) {
+                        // Present share sheet
+                        self.shareVideo(videoURL)
+                    } else {
+                        print("Video file not found at \(videoURL)")
+                    }
+                    
+                }
+            }
+        } else {
+            // Fallback on earlier versions
+        }
+    }
+    
+    func shareVideo(_ videoURL: URL) {
+        let activityViewController = UIActivityViewController(activityItems: [videoURL], applicationActivities: nil)
+        
+        activityViewController.excludedActivityTypes = [
+            .assignToContact,
+            .print
+        ]
+
+        DispatchQueue.main.async {
+            self.present(activityViewController, animated: true, completion: nil)
+        }
+    }
+    
     override func appMovedToBackground() {
         self.pauseSession()
     }
@@ -93,6 +162,8 @@ class SDKLivenessViewController: SDKBaseViewController {
     }
     
     private func resumeSession() {
+        startRecording()
+        
         if self.nextStep != .completed {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
                 self.myCam.session.run(self.configuration)
@@ -136,7 +207,11 @@ class SDKLivenessViewController: SDKBaseViewController {
             if completed ?? false {
                 self.nextStep = .completed
                 self.pauseSession()
-                self.getNextModule() 
+                
+                self.stopRecording()
+
+                
+//                self.getNextModule()
             } else {
                 self.nextStep = nextStep
             }
@@ -151,6 +226,8 @@ class SDKLivenessViewController: SDKBaseViewController {
             }
         })
     }
+    
+    
     
     private func sendScreenShot(uploaded: @escaping(Bool) -> ()) {
         let image = myCam.snapshot()

@@ -48,7 +48,9 @@ class SDKLoginViewController: SDKViewOptionsController {
             print("cihazda jb tespit edildi, bu durumu yönetebilirsiniz.")
         }
         
-        self.selectedServer.apiUrl = "https://v2api.identify.com.tr/"
+        self.selectedServer.apiUrl = "https://api.id24tr-qa.bssgmbh.works/"
+        
+        self.identIdArea.text = "2fbd8096824f907812e6f9203151a817cf830337"
     }
     
     private func setupUI() {
@@ -99,7 +101,7 @@ class SDKLoginViewController: SDKViewOptionsController {
         self.manager.setupSDK(
             identId: identIdArea.text!,
             baseApiUrl: self.selectedServer.apiUrl,
-            networkOptions: SDKNetworkOptions(timeoutIntervalForRequest: 30, timeoutIntervalForResource: 30, useSslPinning: true), // DOCS' U MUTLAKA OKUYUN!!
+            networkOptions: SDKNetworkOptions(timeoutIntervalForRequest: 30, timeoutIntervalForResource: 30, useSslPinning: false), // DOCS' U MUTLAKA OKUYUN!!
             kpsData: nil, // EĞER ELİNİZDE KPS DEN GELEN KİMLİK DATALARI VARSA ALTTAKİ KODU AKTİF EDİP BU SATIRI SİLEBİLİRSİNİZ.
 //                kpsData: SDKKpsData(birthDate: "890103", validDate: "300303", serialNo: "B25F24190"),
             identCardType: [.idCard, .passport, .oldSchool], // destekleyeceğiniz kart tipleri

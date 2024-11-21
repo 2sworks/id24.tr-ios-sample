@@ -105,8 +105,8 @@ class SDKViewOptionsController: UIViewController {
 //        self.closeSDK()
         self.dismiss(animated: true) {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: {
-                let socketLogVC = SDKSocketLogsViewController()
-                self.present(socketLogVC, animated: true)
+//                let socketLogVC = SDKSocketLogsViewController()
+//                self.present(socketLogVC, animated: true)
             })
         }
     }
@@ -192,6 +192,7 @@ class SDKBaseViewController: SDKViewOptionsController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.manager.trackingDelegate = self
         nc.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
         nc.addObserver(self, selector: #selector(appMovedToForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
         nc.addObserver(self, selector: #selector(reActiveScreen), name: UIApplication.didBecomeActiveNotification, object: nil)
@@ -303,4 +304,13 @@ extension SDKViewOptionsController: SDKNoConnectionDelegate {
     }
     
     
+}
+
+extension SDKBaseViewController: IdentifyTrackingListener {
+    func eventReceived(event: TrackingEvent) {
+        print("FILIP")
+        print(event.time)
+        print(event.eventType)
+        print(event.context)
+    }
 }
