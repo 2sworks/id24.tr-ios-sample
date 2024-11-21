@@ -28,7 +28,6 @@ class SDKIdentifyLoginViewController: SDKBaseViewController {
     @IBOutlet weak var signLangBtn: IdentifyButton!
     var editedShowBigCustomer = false
     var editedSignLang = false
-    var addressPdfOption =  false
     @IBOutlet weak var newLivenessBtn: IdentifyButton!
     @IBOutlet weak var sslPinningBtn: IdentifyButton!
     
@@ -201,8 +200,6 @@ class SDKIdentifyLoginViewController: SDKBaseViewController {
             identCardType: [.idCard, .passport, .oldSchool], // destekleyeceğiniz kart tipleri
             signLangSupport: editedSignLang, // işitme engelliler için müşteri temsilcisi desteği
             nfcMaxErrorCount: 3,
-            addressPdfOption: addressPdfOption,
-            pdfMaxFileSize: 5,
             logLevel: .all,
             bigCustomerCam: editedShowBigCustomer,
             selectedModules: self.selectedModuleList,

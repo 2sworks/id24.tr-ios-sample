@@ -18,8 +18,10 @@ class SDKAddressConfirmViewController: SDKBaseViewController {
     var idPhoto = ""
     var addressPdf : Data? = nil
     var docImg = UIImage()
+    
+    let showPDFOption = true
     var maxFileSizeInBytes: Int {
-        return Int(self.manager.pdfMaxFileSize * 1024 * 1024)
+        return Int(self.manager.maxAddressPDFFileSize * 1024 * 1024)
     }
     @IBOutlet weak var addressTxt: UITextView!
     var addressOk = false
@@ -85,7 +87,8 @@ class SDKAddressConfirmViewController: SDKBaseViewController {
         
         actionSheetController.addAction(firstAction)
         actionSheetController.addAction(secondAction)
-        if self.manager.addressPdfOption == true {
+        
+        if showPDFOption {
             let thirdAction: UIAlertAction = UIAlertAction(title: "Dosya Seç", style: .default) { action -> Void in
                 self.attachDocument()
             }

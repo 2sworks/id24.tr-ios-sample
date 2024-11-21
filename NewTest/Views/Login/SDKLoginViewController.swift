@@ -105,8 +105,6 @@ class SDKLoginViewController: SDKViewOptionsController {
             identCardType: [.idCard, .passport, .oldSchool], // destekleyeceğiniz kart tipleri
             signLangSupport: false, // işitme engelliler için müşteri temsilcisi desteği
             nfcMaxErrorCount: 3,
-            addressPdfOption: false,
-            pdfMaxFileSize: 5,
             logLevel: .all,
             bigCustomerCam: true,
             selectedModules: []
