@@ -20,7 +20,8 @@ class SDKAddressConfirmViewController: SDKBaseViewController {
     var docImg = UIImage()
     
     let showPDFOption = false
-    var maxFileSizeInBytes: Int {
+    var maxPDFFileSizeInBytes: Int {
+        // this is maximum value, but can be set to be lower
         return Int(self.manager.maxAddressPDFFileSize * 1024 * 1024)
     }
     @IBOutlet weak var addressTxt: UITextView!
@@ -233,8 +234,8 @@ extension SDKAddressConfirmViewController: UIDocumentPickerDelegate, UINavigatio
             
                 let fileSizeInBytes = pdfData.count // Dosya boyutu bayt olarak
 
-                if fileSizeInBytes > maxFileSizeInBytes {
-                    print("Dosya boyutu \(maxFileSizeInBytes) MB'den büyük!")
+                if fileSizeInBytes > maxPDFFileSizeInBytes {
+                    print("Dosya boyutu \(maxPDFFileSizeInBytes) B'den büyük!")
                     self.addressPdf = nil
                     docPhoto.image = UIImage()
                     
