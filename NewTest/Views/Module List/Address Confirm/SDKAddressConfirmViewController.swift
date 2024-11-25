@@ -19,7 +19,7 @@ class SDKAddressConfirmViewController: SDKBaseViewController {
     var addressPdf : Data? = nil
     var docImg = UIImage()
     
-    let showPDFOption = true
+    let showPDFOption = false
     var maxFileSizeInBytes: Int {
         return Int(self.manager.maxAddressPDFFileSize * 1024 * 1024)
     }
