@@ -3,6 +3,9 @@ Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.
 
 ### Sample App 
 
+## Build 101:
+- Adres modülüne PDF yükleme seçeneği eklendi
+
 ## Build 100:
 - IdentifyTrackingListener kullanımı eklendi (Yalnızca 2.1.0 ve üstü sürümler için geçerli)
 

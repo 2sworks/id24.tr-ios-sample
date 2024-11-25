@@ -253,6 +253,8 @@ extension SDKLangManager {
                 return self.readKey(key: "CoreInvoicePhoto")
             case .corePhotoBtn:
                 return self.readKey(key: "CorePhotoBtn")
+            case .corePhotoBtnPDF:
+                return self.readKey(key: "CorePhotoBtnPDF")
             case .coreSignLang:
                 return self.readKey(key: "CoreSignLang")
             case .coreDelSig:
@@ -353,6 +355,10 @@ extension SDKLangManager {
                 return self.readKey(key: "ActiveSelfieExit")
             case .scanErrDegree:
                 return self.readKey(key: "ScanErrDegree")
+            case .addressPdfErrorTitle:
+                return self.readKey(key: "AddressPdfErrorTitle")
+            case .addressPdfErrorMessage:
+                return self.readKey(key: "AddressPdfErrorMessage")
         }
     }
 }
@@ -458,6 +464,7 @@ public enum SDKKeywords {
     case coreAddrDesc
     case coreInvoicePhoto
     case corePhotoBtn
+    case corePhotoBtnPDF
     case coreSignLang
     case coreDelSig
     case selfieIdentInfo1
@@ -508,4 +515,6 @@ public enum SDKKeywords {
     case activeNfcWarn
     case activeNfcExit
     case scanErrDegree
+    case addressPdfErrorTitle
+    case addressPdfErrorMessage
 }

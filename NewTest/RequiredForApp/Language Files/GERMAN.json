@@ -100,6 +100,7 @@
   "CoreAddrDesc":"Geben Sie Adresse ein",
   "CoreInvoicePhoto":"Um Ihre Adresse zu bestätigen laden Sie bitte ein Foto einer aktuellen Rechnung hoch",
   "CorePhotoBtn":"Foto auswählen oder aufnehmen",
+  "CorePhotoBtnPDF":"Foto oder PDF auswählen",
   "CoreSignLang":"Mit Gebärdensprachendolmetscher verbinden",
   "CoreDelSig":"Signatur löschen",
   "SelfieIdentInfoText":"Sie haben alle Authentifizierungsschritte erfolgreich abgeschlossen.",
@@ -149,6 +150,8 @@
   "ActiveSelfieWarn" : "Ihr Ausweisfoto stimmt nicht mit Ihrem Selfie überein. Bitte machen Sie ein neues.",
   "ActiveSelfieExit" : "Sie haben ausreichend Versuche unternommen, Vielen Dank.",
   "ActiveNfcWarn" : "Ihre Formular und NFC Daten stimmen nicht überein. Bitte nehmen Sie das korrekte Ausweisfoto erneut auf.",
-  "ActiveNfcExit" : "Ihre Identifikationsdaten stimmen nicht mit den Angaben im Formular überein. Sie haben ausreichend Versuche unternommen, Vielen Dank."
+  "ActiveNfcExit" : "Ihre Identifikationsdaten stimmen nicht mit den Angaben im Formular überein. Sie haben ausreichend Versuche unternommen, Vielen Dank.",
+  "AddressPdfErrorTitle" : "Ungültige Dateigröße",
+  "AddressPdfErrorMessage" : "Die Datei, die Sie hochladen möchten, darf nicht größer als 5 MB sein. Bitte wählen Sie eine kleinere Datei aus."
 }
 

@@ -100,6 +100,7 @@
   "CoreAddrDesc":"İkametgah adresinizi yazın",
   "CoreInvoicePhoto":"Adresinizi doğrulayabilmemiz için lütfen herhangi bir faturanızın fotoğrafını çekin veya seçin",
   "CorePhotoBtn":"Fotoğraf Seç & Çek",
+  "CorePhotoBtnPDF":"Fotoğraf veya PDF Seç",
   "CoreSignLang":"İşaret dili bilen bir müşteri temsilcisi ile görüşmek istiyorum",
   "CoreDelSig":"İmzayı Sil",
   "SelfieIdentInfoText":"Tüm kimlik doğrulama süreçlerini başarılı bir şekilde tamamladınız.",
@@ -149,7 +150,9 @@
   "ActiveSelfieWarn" : "Kimlik fotoğrafınız ile selfie fotoğrafınız uyuşmamaktadır. Lütfen tekrar çekiniz.",
   "ActiveSelfieExit" : "Yeterli sayıda deneme yaptınız, teşekkürler.",
   "ActiveNfcWarn" : "Form ve NFC verileriniz uyuşmamaktadır. Lütfen doğru kimlik fotoğrafını tekrar çekiniz.",
-  "ActiveNfcExit" : "Kimlik bilgileri ile formdaki veriler uyuşmamaktadır. Yeterli sayıda deneme yaptınız, teşekkürler."
+  "ActiveNfcExit" : "Kimlik bilgileri ile formdaki veriler uyuşmamaktadır. Yeterli sayıda deneme yaptınız, teşekkürler.",
+  "AddressPdfErrorTitle" : "Geçersiz Dosya Boyutu",
+  "AddressPdfErrorMessage" : "Yüklemek istediğiniz dosya 5 MB'dan büyük olamaz. Lütfen daha küçük bir dosya seçin.",
   
   
 }
