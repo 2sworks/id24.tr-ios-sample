@@ -3,6 +3,12 @@ Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.
 
 ### Sample App 
 
+## Build 101:
+- Adres modülüne PDF yükleme seçeneği eklendi
+
+## Build 100:
+- IdentifyTrackingListener kullanımı eklendi (Yalnızca 2.1.0 ve üstü sürümler için geçerli)
+
 ## Build 97:
 - yeni dil desteği eklendi
 
@@ -40,6 +46,13 @@ Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.
 
 
 ### SDK Son Güncelleme:
+
+## 2.2.0
+- IdentifyTrackingListener tarafına HTTP_RESPONSE_TRACKING_EVENT ve HTTP_REQUEST_TRACKING_EVENT eklendi
+- Turn sunucu için Short term auth servisi eklendi
+
+## 2.1.0
+- SDK tarafında yeni bir IdentifyTrackingListener eklendi, örnek kullanım için SDKBaseViewController dosyasını inceleyebilirsiniz.
 
 ## 2.0.6
 - Network sınıfında ssl pinning için ekstra log eklendi

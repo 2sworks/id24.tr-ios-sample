@@ -39,6 +39,7 @@ class SDKViewOptionsController: UIViewController {
     }
     
     @objc func skipModuleAct() {
+        self.manager.skipModule()
         self.manager.getNextModule { nextMod in
             self.navigationController?.pushViewController(nextMod, animated: true)
         }
@@ -254,8 +255,15 @@ class SDKBaseViewController: SDKViewOptionsController {
    
     
 }
+extension SDKBaseViewController: IdentifyTrackingListener {
+    func eventReceived(event: TrackingEvent) {
+        print("\(event.eventType) - \(event.time)")
+    }
+    
+}
 
 var vSpinner : UIView?
+
 
 extension UIViewController {
     

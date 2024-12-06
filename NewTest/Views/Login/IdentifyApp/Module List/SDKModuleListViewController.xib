@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="22155" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22131"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="SDKModuleListViewController" customModule="NewTest" customModuleProvider="target">
+            <connections>
+                <outlet property="saveBtn" destination="yuK-tG-G5t" id="RHM-Py-aqK"/>
+                <outlet property="tableView" destination="com-rd-3KK" id="s3H-AW-ySr"/>
+                <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
+            <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" style="insetGrouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" estimatedSectionHeaderHeight="-1" sectionFooterHeight="18" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="com-rd-3KK">
+                    <rect key="frame" x="0.0" y="59" width="393" height="793"/>
+                </tableView>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="yuK-tG-G5t" customClass="IdentifyButton" customModule="NewTest" customModuleProvider="target">
+                    <rect key="frame" x="0.0" y="773" width="393" height="45"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="45" id="KmQ-xZ-zmw"/>
+                    </constraints>
+                    <state key="normal" title="Button"/>
+                    <buttonConfiguration key="configuration" style="plain" title="Button"/>
+                </button>
+            </subviews>
+            <viewLayoutGuide key="safeArea" id="fnl-2z-Ty3"/>
+            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+            <constraints>
+                <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="yuK-tG-G5t" secondAttribute="trailing" id="DEQ-cz-4kU"/>
+                <constraint firstItem="com-rd-3KK" firstAttribute="trailing" secondItem="fnl-2z-Ty3" secondAttribute="trailing" id="L2v-Et-KGy"/>
+                <constraint firstItem="yuK-tG-G5t" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" id="Lkv-Xn-Kdg"/>
+                <constraint firstItem="yuK-tG-G5t" firstAttribute="bottom" secondItem="fnl-2z-Ty3" secondAttribute="bottom" id="bm2-3y-Fjz"/>
+                <constraint firstAttribute="bottom" secondItem="com-rd-3KK" secondAttribute="bottom" id="iFV-hP-oPR"/>
+                <constraint firstItem="com-rd-3KK" firstAttribute="top" secondItem="fnl-2z-Ty3" secondAttribute="top" id="kRt-yk-8wi"/>
+                <constraint firstItem="com-rd-3KK" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" id="z0c-je-EYo"/>
+            </constraints>
+            <point key="canvasLocation" x="139.69465648854961" y="19.718309859154932"/>
+        </view>
+    </objects>
+    <resources>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>
