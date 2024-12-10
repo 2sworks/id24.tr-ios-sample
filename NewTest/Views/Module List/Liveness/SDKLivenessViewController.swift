@@ -60,6 +60,7 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        configureScreenRecorder()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -78,12 +79,18 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
         self.resumeSession()
     }
     
+    func configureScreenRecorder() {
+        screenRecorder.isMicrophoneEnabled = false
+    }
+    
     func startRecording(handler: ((Bool, (any Error)?) -> Void)? = nil) {
         guard !recordingInProgress && !screenRecorder.isRecording else {
             handler?(false, nil)
             return
         }
         recordingInProgress = true
+        
+        print("START NOW!!!")
         
         screenRecorder.startRecording() { error in
             if error != nil {
@@ -133,7 +140,7 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
             self.handleRecordindUploadError()
             return
         }
-        self.manager.upload5SecVideo(videoData: data) { response, error in
+        self.manager.uploadLivenessVideo(videoData: data) { response, error in
             guard error == nil else {
                 // TODO: add delay
                 self.uploadRecordingVideo(data: data, attempt: attempt + 1)
@@ -157,7 +164,7 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
         return false
     }
     
-    func showRecordingStartError(_ error: Error) {
+    func handleRecordingStartError(_ error: Error) {
         let nsError = error as NSError
         let errorText: String
         let toastText: String
@@ -170,7 +177,7 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
         }
         DispatchQueue.main.async {
             self.showToast(type:.fail, title: self.translate(text: .coreError), subTitle: toastText, attachTo: self.view) {
-                self.oneButtonAlertShow(message: errorText, title1: self.translate(text: .livenessRecordingRetryTitle)) {
+                self.oneButtonAlertShow(message: errorText, title1: self.translate(text: .livenessRecordingRetryAction)) {
                     self.resumeSession()
                 }
             }
@@ -179,6 +186,14 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
     
     func handleRecordingStopError(_ error: Error) {
         print("ERROR WHEN STOPPING: \(error)")
+        DispatchQueue.main.async {
+            self.showToast(type:.fail, title: self.translate(text: .coreError), subTitle: self.translate(text: .livenessRecordingFailedToast), attachTo: self.view) {
+                self.oneButtonAlertShow(message: self.translate(text: .livenessRecordingFailedToStop), title1: self.translate(text: .coreOk)) {
+                    self.manager.resetLivenessTest()
+                    self.resumeSession()
+                }
+            }
+        }
     }
     
     func handleRecordingFileError() {
@@ -232,16 +247,14 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
     private func resumeSession() {
         startRecording() { started, error in
             guard error == nil else {
-                self.showRecordingStartError(error!)
+                self.handleRecordingStartError(error!)
                 return
             }
-            if started {
-                if self.nextStep != .completed {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
-                        self.myCam.session.run(self.configuration)
-                        self.hideLoader()
-                    })
-                }
+            if self.nextStep != .completed {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
+                    self.myCam.session.run(self.configuration)
+                    self.hideLoader()
+                })
             }
         }
     }
