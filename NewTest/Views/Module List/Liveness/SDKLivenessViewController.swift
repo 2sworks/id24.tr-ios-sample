@@ -17,19 +17,22 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
 
     @IBOutlet weak var resetCamBtn: IdentifyButton!
     @IBOutlet weak var myCam: ARSCNView!
-    let configuration = ARFaceTrackingConfiguration()
     @IBOutlet weak var pauseView: UIView!
+
+    let configuration = ARFaceTrackingConfiguration()
+    let recordingFileName = "liveness_recording.mp4"
+    // this is configured on the server
+    let recordingMaxFileSize = 25 // in MB
     
+    var recordingInProgress = false
     var allowBlink = true
     var allowSmile = true
     var allowLeft = true
     var allowRight = true
     
     let screenRecorder = RPScreenRecorder.shared()
-    var stopRecordingCount = 0
     
     private var lookCamTxt: String {
-        screenRecorder.
         return languageManager.translate(key: .livenessLookCam)
     }
     
@@ -75,69 +78,134 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
         self.resumeSession()
     }
     
-    func startRecording() {
-        if screenRecorder.isRecording {return}
-//        screenRecorder.startRecording { error in
-//            if let error = error {
-//                print("Failed to start recording: \(error.localizedDescription)")
-//            } else {
-//                print("Recording started successfully!")
-//            }
-//        }
-
+    func startRecording(handler: ((Bool, (any Error)?) -> Void)? = nil) {
+        guard !recordingInProgress && !screenRecorder.isRecording else {
+            handler?(false, nil)
+            return
+        }
+        recordingInProgress = true
+        
         screenRecorder.startRecording() { error in
-                if let error = error {
-                    print("Failed to start recording: \(error.localizedDescription)")
-                } else {
-                    print("Recording started successfully")
-                }
+            if error != nil {
+                self.recordingInProgress = false
+                handler?(false, error)
+            } else {
+                handler?(true, nil)
             }
+        }
     }
 
     func stopRecording() {
-        if !screenRecorder.isRecording {return}
+        recordingInProgress = false
+        guard screenRecorder.isRecording else { return }
         
         let fileManager = FileManager.default
         let tempDir = fileManager.temporaryDirectory
-        let videoURL = tempDir.appendingPathComponent("screenRecording.mp4")
-
+        let videoURL = tempDir.appendingPathComponent(recordingFileName)
         
-        if #available(iOS 14.0, *) {
-            screenRecorder.stopRecording(withOutput: videoURL) { error in
-                if let error = error {
-                    print("Failed to stop recording: \(error.localizedDescription)")
-                } else {
-                    print("Recording stopped successfully!")
-                    
-                    
-                   
-                                
-                    if fileManager.fileExists(atPath: videoURL.path) {
-                        // Present share sheet
-                        self.shareVideo(videoURL)
-                    } else {
-                        print("Video file not found at \(videoURL)")
-                    }
-                    
-                }
+        screenRecorder.stopRecording(withOutput: videoURL) { error in
+            guard error == nil else {
+                self.handleRecordingStopError(error!)
+                return
             }
-        } else {
-            // Fallback on earlier versions
+            
+            guard fileManager.fileExists(atPath: videoURL.path) else {
+                self.handleRecordingFileError()
+                return
+            }
+            
+            guard !self.isFileLargerThanMaxSize(fileURL: videoURL) else {
+                self.handleRecordingFileTooLarge()
+                return
+            }
+            
+            do {
+                let data = try Data(contentsOf: videoURL, options: .mappedIfSafe)
+                self.uploadRecordingVideo(data: data)
+            } catch {
+                self.handleRecordingFileError()
+            }
         }
     }
     
-    func shareVideo(_ videoURL: URL) {
-        let activityViewController = UIActivityViewController(activityItems: [videoURL], applicationActivities: nil)
-        
-        activityViewController.excludedActivityTypes = [
-            .assignToContact,
-            .print
-        ]
-
-        DispatchQueue.main.async {
-            self.present(activityViewController, animated: true, completion: nil)
+    func uploadRecordingVideo(data: Data, attempt: Int = 0) {
+        if attempt == 3 {
+            self.handleRecordindUploadError()
+            return
+        }
+        self.manager.upload5SecVideo(videoData: data) { response, error in
+            guard error == nil else {
+                // TODO: add delay
+                self.uploadRecordingVideo(data: data, attempt: attempt + 1)
+                print("error upload: \(error!)")
+                return
+            }
         }
     }
+    
+    func isFileLargerThanMaxSize(fileURL: URL) -> Bool {
+        let fileManager = FileManager.default
+        do {
+            let attributes = try fileManager.attributesOfItem(atPath: fileURL.path)
+            if let fileSize = attributes[.size] as? Int64 {
+                // File size is in bytes
+                return fileSize > recordingMaxFileSize * 1024 * 1024
+            }
+        } catch {
+            print("Error getting file attributes: \(error.localizedDescription)")
+        }
+        return false
+    }
+    
+    func showRecordingStartError(_ error: Error) {
+        let nsError = error as NSError
+        let errorText: String
+        let toastText: String
+        if nsError.domain == RPRecordingErrorDomain && nsError.code == RPRecordingErrorCode.userDeclined.rawValue {
+            errorText = self.translate(text: .livenessRecordingPermissionsMissing)
+            toastText = self.translate(text: .livenessRecordingPermissionsMissingToast)
+        } else {
+            errorText = self.translate(text: .livenessRecordingFailedToStart)
+            toastText = self.translate(text: .livenessRecordingFailedToStartToast)
+        }
+        DispatchQueue.main.async {
+            self.showToast(type:.fail, title: self.translate(text: .coreError), subTitle: toastText, attachTo: self.view) {
+                self.oneButtonAlertShow(message: errorText, title1: self.translate(text: .livenessRecordingRetryTitle)) {
+                    self.resumeSession()
+                }
+            }
+        }
+    }
+    
+    func handleRecordingStopError(_ error: Error) {
+        print("ERROR WHEN STOPPING: \(error)")
+    }
+    
+    func handleRecordingFileError() {
+        print("Recording file error")
+    }
+    
+    func handleRecordingFileTooLarge() {
+        print("Recording file too large")
+    }
+    
+    func handleRecordindUploadError() {
+        print("Recording file upload error")
+    }
+    
+    
+//    func shareVideo(_ videoURL: URL) {
+//        let activityViewController = UIActivityViewController(activityItems: [videoURL], applicationActivities: nil)
+//        
+//        activityViewController.excludedActivityTypes = [
+//            .assignToContact,
+//            .print
+//        ]
+//
+//        DispatchQueue.main.async {
+//            self.present(activityViewController, animated: true, completion: nil)
+//        }
+//    }
     
     override func appMovedToBackground() {
         self.pauseSession()
@@ -162,13 +230,19 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
     }
     
     private func resumeSession() {
-        startRecording()
-        
-        if self.nextStep != .completed {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
-                self.myCam.session.run(self.configuration)
-                self.hideLoader()
-            })
+        startRecording() { started, error in
+            guard error == nil else {
+                self.showRecordingStartError(error!)
+                return
+            }
+            if started {
+                if self.nextStep != .completed {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
+                        self.myCam.session.run(self.configuration)
+                        self.hideLoader()
+                    })
+                }
+            }
         }
     }
     

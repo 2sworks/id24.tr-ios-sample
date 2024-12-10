@@ -313,12 +313,3 @@ extension SDKViewOptionsController: SDKNoConnectionDelegate {
     
     
 }
-
-extension SDKBaseViewController: IdentifyTrackingListener {
-    func eventReceived(event: TrackingEvent) {
-        print("FILIP")
-        print(event.time)
-        print(event.eventType)
-        print(event.context)
-    }
-}
