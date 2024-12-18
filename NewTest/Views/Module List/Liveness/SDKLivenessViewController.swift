@@ -103,31 +103,40 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
     }
 
     func stopRecording() {
+        print("STOP CALLED!")
         recordingInProgress = false
         guard screenRecorder.isRecording else { return }
         
         let fileManager = FileManager.default
-        let tempDir = fileManager.temporaryDirectory
-        let videoURL = tempDir.appendingPathComponent(recordingFileName)
+        let fileURL: URL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(recordingFileName)
         
-        screenRecorder.stopRecording(withOutput: videoURL) { error in
+        if fileManager.fileExists(atPath: fileURL.path) {
+            do {
+                try fileManager.removeItem(at: fileURL)
+                print("Existing file deleted at \(fileURL)")
+            } catch {
+                print("Error deleting existing file: \(error)")
+            }
+        }
+        
+        screenRecorder.stopRecording(withOutput: fileURL) { error in
             guard error == nil else {
                 self.handleRecordingStopError(error!)
                 return
             }
             
-            guard fileManager.fileExists(atPath: videoURL.path) else {
+            guard fileManager.fileExists(atPath: fileURL.path) else {
                 self.handleRecordingFileError()
                 return
             }
             
-            guard !self.isFileLargerThanMaxSize(fileURL: videoURL) else {
+            guard !self.isFileLargerThanMaxSize(fileURL: fileURL) else {
                 self.handleRecordingFileTooLarge()
                 return
             }
             
             do {
-                let data = try Data(contentsOf: videoURL, options: .mappedIfSafe)
+                let data = try Data(contentsOf: fileURL, options: .mappedIfSafe)
                 self.uploadRecordingVideo(data: data)
             } catch {
                 self.handleRecordingFileError()
