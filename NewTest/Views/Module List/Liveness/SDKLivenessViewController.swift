@@ -20,9 +20,13 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
     @IBOutlet weak var pauseView: UIView!
 
     let configuration = ARFaceTrackingConfiguration()
+    
     let recordingFileName = "liveness_recording.mp4"
-    // this is configured on the server
+    // following property is hardcoded on the server. increasing it here will not increase max size on the server.
     let recordingMaxFileSize = 25 // in MB
+    var videoWriter: AVAssetWriter?
+    var videoInput: AVAssetWriterInput?
+    var fileOutputURL: URL?
     
     var recordingInProgress = false
     var allowBlink = true
@@ -101,45 +105,128 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
             }
         }
     }
-
-    func stopRecording() {
-        print("recording stopped")
-        recordingInProgress = false
-        guard screenRecorder.isRecording else { return }
+    
+    func startCapture(handler: ((Bool, (any Error)?) -> Void)? = nil) {
+        guard !recordingInProgress && !screenRecorder.isRecording else {
+            handler?(false, nil)
+            return
+        }
+        
+        print("start capture called")
+        
+        recordingInProgress = true
+        
+        let tempDir = FileManager.default.temporaryDirectory
+        fileOutputURL = tempDir.appendingPathComponent(recordingFileName)
         
         let fileManager = FileManager.default
-        let fileURL: URL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(recordingFileName)
-        
-        if fileManager.fileExists(atPath: fileURL.path) {
+        if fileManager.fileExists(atPath: fileOutputURL!.path) {
             do {
-                try fileManager.removeItem(at: fileURL)
-                print("Existing file deleted at \(fileURL)")
+                try fileManager.removeItem(at: fileOutputURL!)
+                print("Existing file deleted at \(fileOutputURL!)")
             } catch {
                 print("Error deleting existing file: \(error)")
+                self.recordingInProgress = false
+                handler?(false, error)
+                return
             }
         }
         
-        screenRecorder.stopRecording(withOutput: fileURL) { error in
+        do {
+            videoWriter = try AVAssetWriter(outputURL: fileOutputURL!, fileType: .mp4)
+            
+            let videoSettings: [String: Any] = [
+                AVVideoCodecKey: AVVideoCodecType.h264,
+                AVVideoWidthKey: UIScreen.main.bounds.width,
+                AVVideoHeightKey: UIScreen.main.bounds.height,
+                AVVideoCompressionPropertiesKey: [
+                    AVVideoAverageBitRateKey: 1_000_000
+                ]
+            ]
+            
+            videoInput = AVAssetWriterInput(mediaType: .video, outputSettings: videoSettings)
+            videoInput!.expectsMediaDataInRealTime = true
+            videoWriter!.add(videoInput!)
+        } catch {
+            self.recordingInProgress = false
+            print("Error setting up video writer: \(error.localizedDescription)")
+            handler?(false, error)
+            return
+        }
+                
+        screenRecorder.startCapture(handler: { (sampleBuffer, sampleType, error) in
+            guard error == nil else {
+                print("error during capture: \(error!)")
+                // most likely we can ignore this
+                return
+            }
+            
+            switch sampleType {
+            case .video:
+                guard CMSampleBufferDataIsReady(sampleBuffer) else {
+                    return
+                }
+
+                if self.videoWriter!.status == .unknown {
+                    let startTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+                    self.videoWriter!.startWriting()
+                    self.videoWriter!.startSession(atSourceTime: startTime)
+                }
+
+                if let input = self.videoInput, input.isReadyForMoreMediaData {
+                    input.append(sampleBuffer)
+                } else {
+                    // ignore, too many frames
+                }
+
+            default:
+                // ignore
+                break
+            }
+        }, completionHandler: { error in
+            if let error = error {
+                print("Error starting capture: \(error.localizedDescription)")
+                self.recordingInProgress = false
+                handler?(false, error)
+            } else {
+                print("Capture started successfully.")
+                handler?(true, nil)
+            }
+        })
+    }
+    
+    func stopCapture() {
+        print("capture stopped")
+        
+        recordingInProgress = false
+
+        screenRecorder.stopCapture { error in
             guard error == nil else {
                 self.handleRecordingStopError(error!)
                 return
             }
             
-            guard fileManager.fileExists(atPath: fileURL.path) else {
-                self.handleRecordingFileError()
-                return
-            }
-            
-            guard !self.isFileLargerThanMaxSize(fileURL: fileURL) else {
-                self.handleRecordingFileTooLarge()
-                return
-            }
-            
-            do {
-                let data = try Data(contentsOf: fileURL, options: .mappedIfSafe)
-                self.uploadRecordingVideo(data: data)
-            } catch {
-                self.handleRecordingFileError()
+            self.videoInput?.markAsFinished()
+            self.videoWriter?.finishWriting {
+                let fileManager = FileManager.default
+                guard fileManager.fileExists(atPath: self.fileOutputURL!.path) else {
+                    self.handleRecordingFileError()
+                    return
+                }
+                
+                // do additional video compressing here if needed
+                
+                guard !self.isFileLargerThanMaxSize(fileURL: self.fileOutputURL!) else {
+                    self.handleRecordingFileTooLarge()
+                    return
+                }
+                
+                do {
+                    let data = try Data(contentsOf: self.fileOutputURL!, options: .mappedIfSafe)
+                    self.uploadRecordingVideo(data: data)
+                } catch {
+                    self.handleRecordingFileError()
+                }
             }
         }
     }
@@ -151,11 +238,14 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
         }
         self.manager.uploadLivenessVideo(videoData: data) { response, error in
             guard error == nil else {
-                // TODO: add delay
-                self.uploadRecordingVideo(data: data, attempt: attempt + 1)
-                print("error upload: \(error!)")
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
+                    self.uploadRecordingVideo(data: data, attempt: attempt + 1)
+                    print("error upload: \(error!)")
+                    return
+                })
                 return
             }
+            self.getNextModule()
         }
     }
     
@@ -165,6 +255,7 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
             let attributes = try fileManager.attributesOfItem(atPath: fileURL.path)
             if let fileSize = attributes[.size] as? Int64 {
                 // File size is in bytes
+                print("FILE SIZE IS: \(Double(fileSize) / 1048576.0)")
                 return fileSize > recordingMaxFileSize * 1024 * 1024
             }
         } catch {
@@ -272,7 +363,7 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
     }
     
     private func resumeSession() {
-        startRecording() { started, error in
+        startCapture() { started, error in
             guard error == nil else {
                 self.handleRecordingStartError(error!)
                 return
@@ -284,6 +375,18 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
                 })
             }
         }
+//        startRecording() { started, error in
+//            guard error == nil else {
+//                self.handleRecordingStartError(error!)
+//                return
+//            }
+//            if self.nextStep != .completed {
+//                DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
+//                    self.myCam.session.run(self.configuration)
+//                    self.hideLoader()
+//                })
+//            }
+//        }
     }
     
     private func killArSession() {
@@ -322,8 +425,8 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
                 self.nextStep = .completed
                 self.pauseSession()
                 
-                self.stopRecording()
-
+//                self.stopRecording()
+                self.stopCapture()
                 
 //                self.getNextModule()
             } else {
