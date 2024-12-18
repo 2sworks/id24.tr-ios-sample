@@ -375,12 +375,10 @@ extension SDKLangManager {
                 return self.readKey(key: "LivenessRecordingFailedToStart")
             case .livenessRecordingFailedToStop:
                 return self.readKey(key: "LivenessRecordingFailedToStop")
-            case .livenessRecordingFailedToStartToast:
-                return self.readKey(key: "LivenessRecordingFailedToStartToast")
-            case .livenessRecordingRetryAction:
-                return self.readKey(key: "LivenessRecordingRetryAction")
             case .livenessRecordingFailedToast:
                 return self.readKey(key: "LivenessRecordingFailedToast")
+            case .livenessRecordingRetryAction:
+                return self.readKey(key: "LivenessRecordingRetryAction")
         }
     }
 }
@@ -477,11 +475,10 @@ public enum SDKKeywords {
     case livenessRecordingPermissionsMissingToast
     case livenessRecordingFailedToStart
     case livenessRecordingFailedToStop
-    case livenessRecordingFailedToStartToast
+    case livenessRecordingFailedToast
     case livenessRecordingFailedToUpload
     case livenessRecordingSizeTooLarge
     case livenessRecordingInterrupted
-    case livenessRecordingFailedToast
     case livenessStep1
     case livenessStep1Desc
     case livenessStep2

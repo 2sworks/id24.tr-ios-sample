@@ -90,7 +90,7 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
         }
         recordingInProgress = true
         
-        print("START NOW!!!")
+        print("recording started")
         
         screenRecorder.startRecording() { error in
             if error != nil {
@@ -103,7 +103,7 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
     }
 
     func stopRecording() {
-        print("STOP CALLED!")
+        print("recording stopped")
         recordingInProgress = false
         guard screenRecorder.isRecording else { return }
         
@@ -173,6 +173,18 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
         return false
     }
     
+    func resetLiveness() {
+        self.manager.resetLivenessTest()
+        nextStep = nil
+        self.pauseView.isHidden = true
+        resumeSession()
+        allowLeft = true
+        allowRight = true
+        allowBlink = true
+        allowSmile = true
+        getNextTest()
+    }
+    
     func handleRecordingStartError(_ error: Error) {
         let nsError = error as NSError
         let errorText: String
@@ -182,7 +194,7 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
             toastText = self.translate(text: .livenessRecordingPermissionsMissingToast)
         } else {
             errorText = self.translate(text: .livenessRecordingFailedToStart)
-            toastText = self.translate(text: .livenessRecordingFailedToStartToast)
+            toastText = self.translate(text: .livenessRecordingFailedToast)
         }
         DispatchQueue.main.async {
             self.showToast(type:.fail, title: self.translate(text: .coreError), subTitle: toastText, attachTo: self.view) {
@@ -194,12 +206,11 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
     }
     
     func handleRecordingStopError(_ error: Error) {
-        print("ERROR WHEN STOPPING: \(error)")
+        print("error when stopping: \(error)")
         DispatchQueue.main.async {
             self.showToast(type:.fail, title: self.translate(text: .coreError), subTitle: self.translate(text: .livenessRecordingFailedToast), attachTo: self.view) {
                 self.oneButtonAlertShow(message: self.translate(text: .livenessRecordingFailedToStop), title1: self.translate(text: .coreOk)) {
-                    self.manager.resetLivenessTest()
-                    self.resumeSession()
+                    self.resetLiveness()
                 }
             }
         }
@@ -211,6 +222,13 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
     
     func handleRecordingFileTooLarge() {
         print("Recording file too large")
+        DispatchQueue.main.async {
+            self.showToast(type:.fail, title: self.translate(text: .coreError), subTitle: self.translate(text: .livenessRecordingFailedToast), attachTo: self.view) {
+                self.oneButtonAlertShow(message: self.translate(text: .livenessRecordingSizeTooLarge), title1: self.translate(text: .coreOk)) {
+                    self.resetLiveness()
+                }
+            }
+        }
     }
     
     func handleRecordindUploadError() {

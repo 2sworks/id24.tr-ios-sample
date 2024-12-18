@@ -89,11 +89,10 @@
   "LivenessRecordingPermissionsMissing": "Bildschirmaufnahme ist für den Liveness-Schritt erforderlich, um den neuesten Vorschriften zu entsprechen. Bitte erlauben Sie die Bildschirmaufnahme.",
   "LivenessRecordingFailedToStart": "Ein Fehler ist beim Starten der Liveness-Aufnahme aufgetreten. Bitte versuchen Sie es erneut.",
   "LivenessRecordingFailedToStop": "Ein Fehler ist beim Beenden der Liveness-Aufnahme aufgetreten. Der Vorgang muss von Anfang an wiederholt werden.",
-  "LivenessRecordingFailedToStartToast": "Ein Fehler ist aufgetreten."
-  "LivenessRecordingFileTooLarge": "Die Liveness-Aufnahmedatei ist zu groß. Der Vorgang muss von Anfang an wiederholt werden.",
+  "LivenessRecordingFailedToast": "Ein Fehler ist aufgetreten."
+  "LivenessRecordingSizeTooLarge": "Die Liveness-Aufnahmedatei ist zu groß. Der Vorgang muss von Anfang an wiederholt werden.",
   "LivenessRecordingInterrupted": "Die Liveness-Aufnahme wurde unterbrochen. Der Vorgang muss von Anfang an wiederholt werden.",
   "LivenessRecordingFailedToUpload": "Beim Hochladen der Liveness-Aufnahme ist ein Fehler aufgetreten. Bitte überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.",
-  "LivenessRecordingFailedToast": "Ein Fehler ist bei der Bildschirmaufnahme aufgetreten.",
   "LivenessRecordingUploading": "Die Liveness-Aufnahme wird hochgeladen, bitte warten Sie.",
   "LivenessRecordingRetryAction": "Erneut versuchen",
   "LivenessStep1":"Drücken Sie weiter und lächeln Sie in die Kamera",
