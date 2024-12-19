@@ -68,6 +68,8 @@ class SDKLivenessViewController: SDKBaseViewController {
         setupUI()
         configureScreenRecorder()
         
+        recordingIsEnabled = self.manager.livenessRecordingEnabled
+                
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(handleAppInterruption),
                                                name: UIApplication.willResignActiveNotification,
