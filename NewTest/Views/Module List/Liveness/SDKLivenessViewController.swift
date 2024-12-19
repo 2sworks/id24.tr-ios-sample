@@ -29,7 +29,7 @@ class SDKLivenessViewController: SDKBaseViewController {
     var fileOutputURL: URL?
     var recordingInProgress = false
     var recordingIsInterrupted = false
-    var recordingIsEnabled = true
+    var recordingIsEnabled = false
     
     var allowBlink = true
     var allowSmile = true
@@ -420,11 +420,20 @@ class SDKLivenessViewController: SDKBaseViewController {
     }
     
     private func resumeSession() {
-        startCapture() { started, error in
-            guard error == nil else {
-                self.handleRecordingStartError(error!)
-                return
+        if recordingIsEnabled {
+            startCapture() { started, error in
+                guard error == nil else {
+                    self.handleRecordingStartError(error!)
+                    return
+                }
+                if self.nextStep != .completed {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
+                        self.myCam.session.run(self.configuration)
+                        self.hideLoader()
+                    })
+                }
             }
+        } else {
             if self.nextStep != .completed {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
                     self.myCam.session.run(self.configuration)
@@ -470,9 +479,11 @@ class SDKLivenessViewController: SDKBaseViewController {
                 self.nextStep = .completed
                 self.pauseSession()
                 
-                self.stopAndUploadCapture()
-                
-//                self.getNextModule()
+                if self.recordingIsEnabled {
+                    self.stopAndUploadCapture()
+                } else {
+                    self.getNextModule()
+                }
             } else {
                 self.nextStep = nextStep
             }
