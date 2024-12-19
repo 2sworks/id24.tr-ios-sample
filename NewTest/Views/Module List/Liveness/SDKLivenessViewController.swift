@@ -10,7 +10,7 @@ import ARKit
 import ReplayKit
 import IdentifySDK
 
-class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerDelegate {
+class SDKLivenessViewController: SDKBaseViewController {
     
     var timer: Timer?
     let waitSecs: TimeInterval = 2.0
@@ -29,6 +29,7 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
     var fileOutputURL: URL?
     var recordingInProgress = false
     var recordingIsInterrupted = false
+    var recordingIsEnabled = true
     
     var allowBlink = true
     var allowSmile = true
@@ -66,6 +67,20 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
         super.viewDidLoad()
         setupUI()
         configureScreenRecorder()
+        
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(handleAppInterruption),
+                                               name: UIApplication.willResignActiveNotification,
+                                               object: nil)
+        
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(handleAppBecomeActive),
+                                               name: UIApplication.didBecomeActiveNotification,
+                                               object: nil)
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -86,25 +101,6 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
     
     func configureScreenRecorder() {
         screenRecorder.isMicrophoneEnabled = false
-    }
-    
-    func startRecording(handler: ((Bool, (any Error)?) -> Void)? = nil) {
-        guard !recordingInProgress && !screenRecorder.isRecording else {
-            handler?(false, nil)
-            return
-        }
-        recordingInProgress = true
-        
-        print("recording started")
-        
-        screenRecorder.startRecording() { error in
-            if error != nil {
-                self.recordingInProgress = false
-                handler?(false, error)
-            } else {
-                handler?(true, nil)
-            }
-        }
     }
     
     func startCapture(handler: ((Bool, (any Error)?) -> Void)? = nil) {
@@ -196,8 +192,27 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
         })
     }
     
-    func stopCapture() {
+    func stopCapture(handler: (() -> Void)? = nil) {
         print("capture stopped")
+        
+        recordingInProgress = false
+        if screenRecorder.isRecording {
+            screenRecorder.stopCapture { error in
+                self.videoInput?.markAsFinished()
+                self.videoWriter?.finishWriting {
+                    self.videoWriter = nil
+                    self.videoInput = nil
+                    handler?()
+                }
+            }
+        } else {
+            handler?()
+        }
+    }
+    
+    
+    func stopAndUploadCapture() {
+        print("capture stopped and uploading")
         
         recordingInProgress = false
 
@@ -269,12 +284,14 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
         self.manager.resetLivenessTest()
         nextStep = nil
         self.pauseView.isHidden = true
-        resumeSession()
         allowLeft = true
         allowRight = true
         allowBlink = true
         allowSmile = true
-        getNextTest()
+        stopCapture() {
+            self.getNextTest()
+            self.resumeSession()
+        }
     }
     
     func handleRecordingStartError(_ error: Error) {
@@ -361,13 +378,29 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
     
     override func appMovedToBackground() {
         self.pauseSession()
-        self.recordingIsInterrupted = true
+    }
+    
+    @objc func handleAppInterruption() {
+        print("App will resign active (e.g., phone call or multitasking)")
+        if recordingIsEnabled && recordingInProgress && screenRecorder.isRecording {
+            print("PAUSE!")
+            recordingIsInterrupted = true
+        }
+    }
+    
+    @objc func handleAppBecomeActive() {
+        print("app is active again")
+        if recordingIsEnabled && recordingIsInterrupted {
+            recordingIsInterrupted = false
+            pauseSession()
+            stopCapture() {
+                self.handleRecordingInterruptedError()
+            }
+        }
     }
     
     override func appMovedToForeground() {
-        if recordingIsInterrupted {
-            self.handleRecordingInterruptedError()
-        } else {
+        if !recordingIsEnabled {
             self.pauseView.isHidden = false
         }
     }
@@ -399,18 +432,6 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
                 })
             }
         }
-//        startRecording() { started, error in
-//            guard error == nil else {
-//                self.handleRecordingStartError(error!)
-//                return
-//            }
-//            if self.nextStep != .completed {
-//                DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
-//                    self.myCam.session.run(self.configuration)
-//                    self.hideLoader()
-//                })
-//            }
-//        }
     }
     
     private func killArSession() {
@@ -449,8 +470,7 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
                 self.nextStep = .completed
                 self.pauseSession()
                 
-//                self.stopRecording()
-                self.stopCapture()
+                self.stopAndUploadCapture()
                 
 //                self.getNextModule()
             } else {
@@ -609,5 +629,4 @@ extension SDKLivenessViewController: ARSCNViewDelegate {
                 return
         }
     }
-    
 }
