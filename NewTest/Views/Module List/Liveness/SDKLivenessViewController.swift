@@ -122,9 +122,8 @@ class SDKLivenessViewController: SDKBaseViewController {
         if fileManager.fileExists(atPath: fileOutputURL!.path) {
             do {
                 try fileManager.removeItem(at: fileOutputURL!)
-                print("Existing file deleted at \(fileOutputURL!)")
             } catch {
-                print("Error deleting existing file: \(error)")
+                print("error deleting existing file: \(error)")
                 self.recordingInProgress = false
                 handler?(false, error)
                 return
@@ -148,7 +147,7 @@ class SDKLivenessViewController: SDKBaseViewController {
             videoWriter!.add(videoInput!)
         } catch {
             self.recordingInProgress = false
-            print("Error setting up video writer: \(error.localizedDescription)")
+            print("error setting up video writer: \(error.localizedDescription)")
             handler?(false, error)
             return
         }
@@ -156,7 +155,7 @@ class SDKLivenessViewController: SDKBaseViewController {
         screenRecorder.startCapture(handler: { (sampleBuffer, sampleType, error) in
             guard error == nil else {
                 print("error during capture: \(error!)")
-                // most likely we can ignore this
+                // unclear when this happens. for the moment we will ignore it
                 return
             }
             
@@ -184,11 +183,11 @@ class SDKLivenessViewController: SDKBaseViewController {
             }
         }, completionHandler: { error in
             if let error = error {
-                print("Error starting capture: \(error.localizedDescription)")
+                print("error starting capture: \(error.localizedDescription)")
                 self.recordingInProgress = false
                 handler?(false, error)
             } else {
-                print("Capture started successfully.")
+                print("capture started successfully.")
                 handler?(true, nil)
             }
         })
@@ -273,11 +272,10 @@ class SDKLivenessViewController: SDKBaseViewController {
             let attributes = try fileManager.attributesOfItem(atPath: fileURL.path)
             if let fileSize = attributes[.size] as? Int64 {
                 // File size is in bytes
-                print("FILE SIZE IS: \(Double(fileSize) / 1048576.0)")
                 return fileSize > recordingMaxFileSize * 1024 * 1024
             }
         } catch {
-            print("Error getting file attributes: \(error.localizedDescription)")
+            print("error getting file attributes: \(error.localizedDescription)")
         }
         return false
     }
@@ -332,7 +330,7 @@ class SDKLivenessViewController: SDKBaseViewController {
     }
     
     func handleRecordingInterruptedError() {
-        print("Recording interrupted error")
+        print("recording interrupted error")
         DispatchQueue.main.async {
             self.showToast(type:.fail, title: self.translate(text: .coreError), subTitle: self.translate(text: .livenessRecordingFailedToast), attachTo: self.view) {
                 self.oneButtonAlertShow(message: self.translate(text: .livenessRecordingInterrupted), title1: self.translate(text: .coreOk)) {
@@ -343,7 +341,7 @@ class SDKLivenessViewController: SDKBaseViewController {
     }
     
     func handleRecordingFileTooLarge() {
-        print("Recording file too large")
+        print("recording file too large")
         DispatchQueue.main.async {
             self.showToast(type:.fail, title: self.translate(text: .coreError), subTitle: self.translate(text: .livenessRecordingFailedToast), attachTo: self.view) {
                 self.oneButtonAlertShow(message: self.translate(text: .livenessRecordingSizeTooLarge), title1: self.translate(text: .coreOk)) {
@@ -354,7 +352,7 @@ class SDKLivenessViewController: SDKBaseViewController {
     }
     
     func handleRecordindUploadError() {
-        print("Recording upload error")
+        print("recording upload error")
         DispatchQueue.main.async {
             self.showToast(type:.fail, title: self.translate(text: .coreError), subTitle: self.translate(text: .livenessRecordingFailedToast), attachTo: self.view) {
                 self.oneButtonAlertShow(message: self.translate(text: .livenessRecordingFailedToUpload), title1: self.translate(text: .coreOk)) {
@@ -383,15 +381,12 @@ class SDKLivenessViewController: SDKBaseViewController {
     }
     
     @objc func handleAppInterruption() {
-        print("App will resign active (e.g., phone call or multitasking)")
         if recordingIsEnabled && recordingInProgress && screenRecorder.isRecording {
-            print("PAUSE!")
             recordingIsInterrupted = true
         }
     }
     
     @objc func handleAppBecomeActive() {
-        print("app is active again")
         if recordingIsEnabled && recordingIsInterrupted {
             recordingIsInterrupted = false
             pauseSession()
