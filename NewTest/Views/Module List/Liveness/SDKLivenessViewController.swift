@@ -27,8 +27,9 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
     var videoWriter: AVAssetWriter?
     var videoInput: AVAssetWriterInput?
     var fileOutputURL: URL?
-    
     var recordingInProgress = false
+    var recordingIsInterrupted = false
+    
     var allowBlink = true
     var allowSmile = true
     var allowLeft = true
@@ -202,7 +203,7 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
 
         screenRecorder.stopCapture { error in
             guard error == nil else {
-                self.handleRecordingStopError(error!)
+                self.handleRecordingStopError(error)
                 return
             }
             
@@ -210,7 +211,7 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
             self.videoWriter?.finishWriting {
                 let fileManager = FileManager.default
                 guard fileManager.fileExists(atPath: self.fileOutputURL!.path) else {
-                    self.handleRecordingFileError()
+                    self.handleRecordingStopError(nil)
                     return
                 }
                 
@@ -225,7 +226,7 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
                     let data = try Data(contentsOf: self.fileOutputURL!, options: .mappedIfSafe)
                     self.uploadRecordingVideo(data: data)
                 } catch {
-                    self.handleRecordingFileError()
+                    self.handleRecordingStopError(error)
                 }
             }
         }
@@ -296,8 +297,12 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
         }
     }
     
-    func handleRecordingStopError(_ error: Error) {
-        print("error when stopping: \(error)")
+    func handleRecordingStopError(_ error: Error?) {
+        if let error = error {
+            print("error when stopping: \(error)")
+        } else {
+            print("error when stopping")
+        }
         DispatchQueue.main.async {
             self.showToast(type:.fail, title: self.translate(text: .coreError), subTitle: self.translate(text: .livenessRecordingFailedToast), attachTo: self.view) {
                 self.oneButtonAlertShow(message: self.translate(text: .livenessRecordingFailedToStop), title1: self.translate(text: .coreOk)) {
@@ -307,8 +312,15 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
         }
     }
     
-    func handleRecordingFileError() {
-        print("Recording file error")
+    func handleRecordingInterruptedError() {
+        print("Recording interrupted error")
+        DispatchQueue.main.async {
+            self.showToast(type:.fail, title: self.translate(text: .coreError), subTitle: self.translate(text: .livenessRecordingFailedToast), attachTo: self.view) {
+                self.oneButtonAlertShow(message: self.translate(text: .livenessRecordingInterrupted), title1: self.translate(text: .coreOk)) {
+                    self.resetLiveness()
+                }
+            }
+        }
     }
     
     func handleRecordingFileTooLarge() {
@@ -323,7 +335,14 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
     }
     
     func handleRecordindUploadError() {
-        print("Recording file upload error")
+        print("Recording upload error")
+        DispatchQueue.main.async {
+            self.showToast(type:.fail, title: self.translate(text: .coreError), subTitle: self.translate(text: .livenessRecordingFailedToast), attachTo: self.view) {
+                self.oneButtonAlertShow(message: self.translate(text: .livenessRecordingFailedToUpload), title1: self.translate(text: .coreOk)) {
+                    self.resetLiveness()
+                }
+            }
+        }
     }
     
     
@@ -342,10 +361,15 @@ class SDKLivenessViewController: SDKBaseViewController, RPPreviewViewControllerD
     
     override func appMovedToBackground() {
         self.pauseSession()
+        self.recordingIsInterrupted = true
     }
     
     override func appMovedToForeground() {
-        self.pauseView.isHidden = false
+        if recordingIsInterrupted {
+            self.handleRecordingInterruptedError()
+        } else {
+            self.pauseView.isHidden = false
+        }
     }
     
     private func appendInfoText(_ text: String?) {
