@@ -359,6 +359,26 @@ extension SDKLangManager {
                 return self.readKey(key: "AddressPdfErrorTitle")
             case .addressPdfErrorMessage:
                 return self.readKey(key: "AddressPdfErrorMessage")
+            case .livenessRecordingUploading:
+                return self.readKey(key: "LivenessRecordingUploading")
+            case .livenessRecordingInterrupted:
+                return self.readKey(key: "LivenessRecordingInterrupted")
+            case .livenessRecordingFailedToUpload:
+                return self.readKey(key: "LivenessRecordingFailedToUpload")
+            case .livenessRecordingSizeTooLarge:
+                return self.readKey(key: "LivenessRecordingSizeTooLarge")
+            case .livenessRecordingPermissionsMissing:
+                return self.readKey(key: "LivenessRecordingPermissionsMissing")
+            case .livenessRecordingPermissionsMissingToast:
+                return self.readKey(key: "LivenessRecordingPermissionsMissingToast")
+            case .livenessRecordingFailedToStart:
+                return self.readKey(key: "LivenessRecordingFailedToStart")
+            case .livenessRecordingFailedToStop:
+                return self.readKey(key: "LivenessRecordingFailedToStop")
+            case .livenessRecordingFailedToast:
+                return self.readKey(key: "LivenessRecordingFailedToast")
+            case .livenessRecordingRetryAction:
+                return self.readKey(key: "LivenessRecordingRetryAction")
         }
     }
 }
@@ -449,6 +469,16 @@ public enum SDKKeywords {
     case coreBirthday
     case coreValidDay
     case coreSerialNumber
+    case livenessRecordingUploading
+    case livenessRecordingRetryAction
+    case livenessRecordingPermissionsMissing
+    case livenessRecordingPermissionsMissingToast
+    case livenessRecordingFailedToStart
+    case livenessRecordingFailedToStop
+    case livenessRecordingFailedToast
+    case livenessRecordingFailedToUpload
+    case livenessRecordingSizeTooLarge
+    case livenessRecordingInterrupted
     case livenessStep1
     case livenessStep1Desc
     case livenessStep2
