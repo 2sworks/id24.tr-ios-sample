@@ -139,9 +139,6 @@ class SDKIdentifyLoginViewController: SDKBaseViewController {
         sslPinningBtn.setImage(UIImage(named: "checkTick"), for: .selected)
         sslPinningBtn.tag = 4
         sslPinningBtn.addTarget(self, action: #selector(checkBoxTapped(_ :)), for: .touchUpInside)
-        
-        self.identIdArea.text = "370c3f7c553a2d59445b32905d27be18e223ad8a"
-
     }
     
     
