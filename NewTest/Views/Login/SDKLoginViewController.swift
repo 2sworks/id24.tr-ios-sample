@@ -48,9 +48,7 @@ class SDKLoginViewController: SDKViewOptionsController {
             print("cihazda jb tespit edildi, bu durumu yönetebilirsiniz.")
         }
         
-        self.selectedServer.apiUrl = "https://api.id24tr-qa.bssgmbh.works/"
-        
-        self.identIdArea.text = "2fbd8096824f907812e6f9203151a817cf830337"
+        self.selectedServer.apiUrl = "https://v2api.identify.com.tr/"
     }
     
     private func setupUI() {
