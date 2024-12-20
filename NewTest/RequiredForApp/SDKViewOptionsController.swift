@@ -106,8 +106,8 @@ class SDKViewOptionsController: UIViewController {
 //        self.closeSDK()
         self.dismiss(animated: true) {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: {
-//                let socketLogVC = SDKSocketLogsViewController()
-//                self.present(socketLogVC, animated: true)
+                let socketLogVC = SDKSocketLogsViewController()
+                self.present(socketLogVC, animated: true)
             })
         }
     }
