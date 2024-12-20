@@ -88,6 +88,9 @@ class SDKLivenessViewController: SDKBaseViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         self.pauseSession()
+        if self.recordingIsEnabled {
+            self.stopCapture()
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
