@@ -50,6 +50,10 @@ Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.
 
 ### SDK Son Güncelleme:
 
+## 2.3.0
+- Adres modülüne PDF yükleme seçeneği eklendi
+- Canlılık modülüne ekran kaydı desteği eklendiw
+
 ## 2.2.0
 - IdentifyTrackingListener tarafına HTTP_RESPONSE_TRACKING_EVENT ve HTTP_REQUEST_TRACKING_EVENT eklendi
 - Turn sunucu için Short term auth servisi eklendi
