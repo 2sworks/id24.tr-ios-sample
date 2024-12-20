@@ -188,7 +188,7 @@ class SDKIdentifyLoginViewController: SDKBaseViewController {
         } else if identIdArea.text == "busra" {
             self.identIdArea.text = "14412dd4616298aabbd80c9628860ed8d214c288"
         }
-                
+        
         self.showLoader()
         
         self.manager.setupSDK(
