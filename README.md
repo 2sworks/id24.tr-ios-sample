@@ -3,6 +3,9 @@ Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.
 
 ### Sample App 
 
+## Build 103:
+- Canlılık modülünü kaydetme seçeneği eklendi
+
 ## Build 101:
 - Adres modülüne PDF yükleme seçeneği eklendi
 
