@@ -89,7 +89,7 @@
   "LivenessRecordingPermissionsMissing": "Son qaydalara uyğun olaraq Liveness addımı üçün ekran qeydiyyatı tələb olunur. Zəhmət olmasa ekran qeydiyyatına icazə verin.",
   "LivenessRecordingFailedToStart": "Liveness qeydiyyatını başlatarkən bir xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.",
   "LivenessRecordingFailedToStop": "Liveness qeydiyyatını dayandırarkən bir xəta baş verdi. Proses yenidən başlanmalıdır.",
-  "LivenessRecordingFailedToast": "Bir xəta baş verdi."
+  "LivenessRecordingFailedToast": "Bir xəta baş verdi.",
   "LivenessRecordingSizeTooLarge": "Liveness qeydiyyat faylı çox böyükdür. Proses yenidən başlanmalıdır.",
   "LivenessRecordingInterrupted": "Liveness qeydiyyatı kəsildi. Proses yenidən başlanmalıdır.",
   "LivenessRecordingFailedToUpload": "Liveness qeydiyyatını yükləyərkən bir xəta baş verdi. Zəhmət olmasa internet bağlantınızı yoxlayın və yenidən cəhd edin.",

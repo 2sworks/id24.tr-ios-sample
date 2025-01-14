@@ -89,7 +89,7 @@
   "LivenessRecordingPermissionsMissing": "Son düzenlemelere uyum sağlamak için Liveness adımı için ekran kaydı gereklidir. Lütfen ekran kaydına izin verin.",
   "LivenessRecordingFailedToStart": "Liveness kaydı başlatılırken bir hata oluştu. Lütfen tekrar deneyin.",
   "LivenessRecordingFailedToStop": "Liveness kaydı durdurulurken bir hata oluştu. İşlem en baştan tekrar yapılmalıdır.",
-  "LivenessRecordingFailedToast": "Bir hata oluştu."
+  "LivenessRecordingFailedToast": "Bir hata oluştu.",
   "LivenessRecordingSizeTooLarge": "Liveness kayıt dosyası çok büyük. İşlem en baştan tekrar yapılmalıdır.",
   "LivenessRecordingInterrupted": "Liveness kaydı kesintiye uğradı. İşlem en baştan tekrar yapılmalıdır.",
   "LivenessRecordingFailedToUpload": "Liveness kaydı yüklenirken bir hata oluştu. Lütfen internet bağlantınızı kontrol edin ve tekrar deneyin.",
@@ -162,7 +162,5 @@
   "ActiveNfcWarn" : "Form ve NFC verileriniz uyuşmamaktadır. Lütfen doğru kimlik fotoğrafını tekrar çekiniz.",
   "ActiveNfcExit" : "Kimlik bilgileri ile formdaki veriler uyuşmamaktadır. Yeterli sayıda deneme yaptınız, teşekkürler.",
   "AddressPdfErrorTitle" : "Geçersiz Dosya Boyutu",
-  "AddressPdfErrorMessage" : "Yüklemek istediğiniz dosya 5 MB'dan büyük olamaz. Lütfen daha küçük bir dosya seçin.",
-  
-  
+  "AddressPdfErrorMessage" : "Yüklemek istediğiniz dosya 5 MB'dan büyük olamaz. Lütfen daha küçük bir dosya seçin."
 }
