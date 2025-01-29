@@ -148,6 +148,7 @@
 		48F0867829F7CA4E00FCA4BF /* QKMRZScanner in Frameworks */ = {isa = PBXBuildFile; productRef = 48F0867729F7CA4E00FCA4BF /* QKMRZScanner */; };
 		DF6842532D0866110015E477 /* IdentifySDK.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = DF6842512D08660A0015E477 /* IdentifySDK.xcframework */; };
 		DF6842542D0866110015E477 /* IdentifySDK.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DF6842512D08660A0015E477 /* IdentifySDK.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		DF7BC16A2D4A279600372CAB /* Env.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = DF7BC1682D4A279600372CAB /* Env.xcdatamodeld */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -314,6 +315,7 @@
 		48E8E42F29266B8A0045C3F8 /* SDKSpeechRecViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKSpeechRecViewController.swift; sourceTree = "<group>"; };
 		48E8E43029266B8A0045C3F8 /* SDKSpeechRecViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SDKSpeechRecViewController.xib; sourceTree = "<group>"; };
 		DF6842512D08660A0015E477 /* IdentifySDK.xcframework */ = {isa = PBXFileReference; expectedSignature = "AppleDeveloperProgram:TQUQ2HQ482:Business Service Solution GMBH"; lastKnownFileType = wrapper.xcframework; path = IdentifySDK.xcframework; sourceTree = "<group>"; };
+		DF7BC1692D4A279600372CAB /* Env.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Env.xcdatamodel; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -570,6 +572,7 @@
 				485C152F2907D2D7007B9ED0 /* Views */,
 				489CBB1A28F586D500D22CC1 /* NewTest.entitlements */,
 				483BDB0E28F459CC00635BCC /* AppDelegate.swift */,
+				DF7BC1682D4A279600372CAB /* Env.xcdatamodeld */,
 				483BDB1728F459CC00635BCC /* Assets.xcassets */,
 				485C15632907F3FA007B9ED0 /* Colors.xcassets */,
 				483BDB1928F459CC00635BCC /* LaunchScreen.storyboard */,
@@ -1028,6 +1031,7 @@
 				485C15392907D3CF007B9ED0 /* SDKViewOptionsController.swift in Sources */,
 				485C155B2907F3A7007B9ED0 /* SDKUIApplication+.swift in Sources */,
 				485C155F2907F3A7007B9ED0 /* SDKString+.swift in Sources */,
+				DF7BC16A2D4A279600372CAB /* Env.xcdatamodeld in Sources */,
 				4881A8102923BF0000EB4072 /* SDKRingViewController.swift in Sources */,
 				482D2BC22A547AC000F1344F /* ShutterButton.swift in Sources */,
 				482D2BC72A547AC000F1344F /* CGPoint+Utils.swift in Sources */,
@@ -1503,6 +1507,19 @@
 			productName = QKMRZScanner;
 		};
 /* End XCSwiftPackageProductDependency section */
+
+/* Begin XCVersionGroup section */
+		DF7BC1682D4A279600372CAB /* Env.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				DF7BC1692D4A279600372CAB /* Env.xcdatamodel */,
+			);
+			currentVersion = DF7BC1692D4A279600372CAB /* Env.xcdatamodel */;
+			path = Env.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 483BDB0328F459CC00635BCC /* Project object */;
 }

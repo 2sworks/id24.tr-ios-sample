@@ -66,6 +66,7 @@ class ServerSettingsViewController: SDKBaseViewController {
         let alert = UIAlertController(title: "Başarılı", message: "Kaydetme işlemi başarılı", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "Tamam", style: .default, handler: {_ in
             self.getItems()
+            self.navigationController?.popViewController(animated: true)
         }))
         self.present(alert, animated: true, completion: nil)
     }
