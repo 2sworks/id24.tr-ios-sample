@@ -3,6 +3,9 @@ Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.
 
 ### Sample App 
 
+## Build 106:
+- Sunucudan maksimum dosya yükleme boyutunu al
+
 ## Build 103:
 - Canlılık modülünü kaydetme seçeneği eklendi
 
@@ -49,6 +52,9 @@ Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.
 
 
 ### SDK Son Güncelleme:
+
+## 2.3.1
+- Sunucudan maksimum dosya yükleme boyutunu al
 
 ## 2.3.0
 - Adres modülüne PDF yükleme seçeneği eklendi
