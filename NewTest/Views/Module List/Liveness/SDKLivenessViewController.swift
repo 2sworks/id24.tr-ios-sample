@@ -22,8 +22,8 @@ class SDKLivenessViewController: SDKBaseViewController {
     let configuration = ARFaceTrackingConfiguration()
     
     let recordingFileName = "liveness_recording.mp4"
-    // following property is hardcoded on the server. increasing it here will not increase max size on the server.
-    let recordingMaxFileSize = 25 // in MB
+    // following property is set on the server. increasing it here will not increase max size on the server.
+    var recordingMaxFileSize = 50
     var videoWriter: AVAssetWriter?
     var videoInput: AVAssetWriterInput?
     var fileOutputURL: URL?
@@ -69,6 +69,7 @@ class SDKLivenessViewController: SDKBaseViewController {
         configureScreenRecorder()
         
         recordingIsEnabled = self.manager.livenessRecordingEnabled
+        recordingMaxFileSize = self.manager.requestMaxBodySize
                 
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(handleAppInterruption),
