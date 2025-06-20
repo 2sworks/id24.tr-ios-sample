@@ -90,6 +90,8 @@ class SDKNfcViewController: SDKBaseViewController {
             data.idValidDateMRZ = self.errValidDate.text?.toMrzDate() ?? ""
             data.idDocumentNumberMRZ = self.errSerialNo.text ?? ""
             self.manager.sdkBackInfo = data
+          // self.manager.useKpsData = false 
+
             self.startNFC()
         }
         errSaveBtn.populate()
