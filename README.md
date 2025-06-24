@@ -5,6 +5,7 @@ Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.
 
 ## Build 107:
 - SDK'i işlemler tamamlanmadan kapatabilme özelliği eklendi
+- Müşterinin çağrıyı sonlandırabilmesi eklendi
 
 
 ## Build 106:
