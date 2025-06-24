@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="22505" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23727" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_0" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22504"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23721"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -63,7 +63,7 @@
                             <rect key="frame" x="0.0" y="92" width="390" height="560"/>
                         </imageView>
                         <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="AVl-ZZ-Fj9">
-                            <rect key="frame" x="32" y="679" width="326" height="116"/>
+                            <rect key="frame" x="32" y="645" width="326" height="116"/>
                             <subviews>
                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Müşteri temsilcimiz sizi aramak üzere lütfen bu ekranda bekleyiniz." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fRf-jN-woD">
                                     <rect key="frame" x="0.0" y="0.0" width="326" height="42"/>
@@ -110,7 +110,7 @@
                             <color key="backgroundColor" systemColor="labelColor"/>
                         </view>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="H13-C5-KUq" userLabel="customerCam">
-                            <rect key="frame" x="268" y="59" width="110" height="139"/>
+                            <rect key="frame" x="268" y="106" width="110" height="139"/>
                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <constraints>
                                 <constraint firstAttribute="height" constant="139" id="7G5-zg-aiT"/>
@@ -118,20 +118,35 @@
                             </constraints>
                         </view>
                         <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="xrv-lg-chm">
-                            <rect key="frame" x="12" y="61" width="48" height="48"/>
+                            <rect key="frame" x="12" y="108" width="48" height="48"/>
                             <constraints>
                                 <constraint firstAttribute="width" constant="48" id="8jl-Ik-KKH"/>
                                 <constraint firstAttribute="height" constant="48" id="Mg0-ji-wOg"/>
                             </constraints>
                         </imageView>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="XNu-pi-4vV">
+                            <rect key="frame" x="0.0" y="784" width="390" height="60"/>
+                            <color key="backgroundColor" systemColor="systemRedColor"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="60" id="RLB-DP-bMS"/>
+                            </constraints>
+                            <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                            <state key="normal" title="End Call"/>
+                            <connections>
+                                <action selector="endCallAct:" destination="-1" eventType="touchUpInside" id="XRF-Q0-a9b"/>
+                            </connections>
+                        </button>
                     </subviews>
                     <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     <constraints>
                         <constraint firstItem="JWh-MT-aW9" firstAttribute="leading" secondItem="1Ge-oL-6lD" secondAttribute="leading" id="1p5-nv-zSp"/>
                         <constraint firstAttribute="trailing" secondItem="JWh-MT-aW9" secondAttribute="trailing" id="3Zk-Xj-SGZ"/>
                         <constraint firstAttribute="bottom" secondItem="JWh-MT-aW9" secondAttribute="bottom" id="IFr-WG-UAo"/>
+                        <constraint firstAttribute="bottom" secondItem="XNu-pi-4vV" secondAttribute="bottom" id="YUa-aC-Pvm"/>
                         <constraint firstItem="JWh-MT-aW9" firstAttribute="top" secondItem="1Ge-oL-6lD" secondAttribute="top" id="Ynp-sW-hT4"/>
                         <constraint firstItem="xrv-lg-chm" firstAttribute="leading" secondItem="1Ge-oL-6lD" secondAttribute="leading" constant="12" id="bKX-EG-3Kb"/>
+                        <constraint firstAttribute="trailing" secondItem="XNu-pi-4vV" secondAttribute="trailing" id="c4m-dp-Te2"/>
+                        <constraint firstItem="XNu-pi-4vV" firstAttribute="leading" secondItem="1Ge-oL-6lD" secondAttribute="leading" id="hz9-LI-hCg"/>
                         <constraint firstAttribute="trailing" secondItem="H13-C5-KUq" secondAttribute="trailing" constant="12" id="ty9-cc-52V"/>
                     </constraints>
                 </view>
@@ -211,14 +226,9 @@
                 <constraint firstItem="1Ge-oL-6lD" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" id="wl1-P1-uAd"/>
                 <constraint firstItem="1Ge-oL-6lD" firstAttribute="trailing" secondItem="fnl-2z-Ty3" secondAttribute="trailing" id="zOf-yB-3zE"/>
             </constraints>
-            <point key="canvasLocation" x="-925" y="-19"/>
+            <point key="canvasLocation" x="-926.15384615384608" y="-19.194312796208528"/>
         </view>
     </objects>
-    <designables>
-        <designable name="584-GN-Fbj">
-            <size key="intrinsicContentSize" width="32" height="34"/>
-        </designable>
-    </designables>
     <resources>
         <image name="waitingBack" width="375" height="560"/>
         <namedColor name="50 White">
@@ -244,6 +254,9 @@
         </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemRedColor">
+            <color red="1" green="0.23137254900000001" blue="0.18823529410000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="tintColor">
             <color red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

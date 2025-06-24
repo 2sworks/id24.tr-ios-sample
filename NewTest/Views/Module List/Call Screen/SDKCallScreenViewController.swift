@@ -122,6 +122,15 @@ class SDKCallScreenViewController: SDKBaseViewController {
         }
     }
     
+    @IBAction func endCallAct(_ sender: UIButton) {
+        let alert = UIAlertController(title: "Uyarı", message: "Görüşmeyi kapatırsanız tüm işlemler iptal edilecektir, onaylıyor musunuz?", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Hayır", style: .cancel, handler: nil))
+        alert.addAction(UIAlertAction(title: "Evet", style: .destructive, handler: { [weak self] _ in
+            self?.closeSDK()
+        }))
+        self.present(alert, animated: true, completion: nil)
+    }
+    
 }
 
 extension SDKCallScreenViewController: CallScreenDelegate {
