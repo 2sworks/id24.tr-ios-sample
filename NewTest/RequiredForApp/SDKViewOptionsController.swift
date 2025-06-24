@@ -22,6 +22,9 @@ class SDKViewOptionsController: UIViewController {
         super.viewDidLoad()
         print("viewDidLoad: \(self)")
         self.addSkipModuleButton()
+        if !(self is SDKIdentifyLoginViewController) && !(self is SDKCallScreenViewController) {
+            self.addQuitButton()
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -35,7 +38,17 @@ class SDKViewOptionsController: UIViewController {
     }
     
     func addSkipModuleButton() {
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Skip Module", style: .plain, target: self, action: #selector(skipModuleAct))
+        var buttons = navigationItem.rightBarButtonItems ?? []
+        let skipButton = UIBarButtonItem(title: "Skip Module", style: .plain, target: self, action: #selector(skipModuleAct))
+        buttons.append(skipButton)
+        navigationItem.rightBarButtonItems = buttons
+    }
+
+    func addQuitButton() {
+        var buttons = navigationItem.rightBarButtonItems ?? []
+        let quitButton = UIBarButtonItem(title: "Quit SDK", style: .plain, target: self, action: #selector(quitSDKAction))
+        buttons.append(quitButton)
+        navigationItem.rightBarButtonItems = buttons
     }
     
     @objc func skipModuleAct() {
@@ -44,6 +57,27 @@ class SDKViewOptionsController: UIViewController {
             self.navigationController?.pushViewController(nextMod, animated: true)
         }
     }
+    
+    @objc func quitSDKAction() {
+        let alert = UIAlertController(title: "Uyarı", message: "SDK Kapatılacak, onaylıyor musunuz ?", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Hayır", style: .cancel, handler: nil))
+        alert.addAction(UIAlertAction(title: "Evet", style: .destructive, handler: { [weak self] _ in
+            guard let self = self else { return }
+            self.manager.killSDKByUser { [weak self] resp in
+                guard let self = self else { return }
+                if resp { // eğer websockete kapatma isteğine dair haber gittiyse
+                    self.dismiss(animated: true)
+                } else {
+                    print("")
+                }
+            }
+        }))
+        DispatchQueue.main.async {
+            self.present(alert, animated: true, completion: nil)
+        }
+    }
+    
+    
     
     func listenToSocketConnection(callCompleted: Bool) {
         if callCompleted {
