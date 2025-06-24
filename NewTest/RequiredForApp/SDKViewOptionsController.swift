@@ -22,10 +22,9 @@ class SDKViewOptionsController: UIViewController {
         super.viewDidLoad()
         print("viewDidLoad: \(self)")
         self.addSkipModuleButton()
-        if !(self is SDKIdentifyLoginViewController) || !(self is SDKCallScreenViewController) {
+        if !(self is SDKIdentifyLoginViewController) && !(self is SDKCallScreenViewController) {
             self.addQuitButton()
         }
-        
     }
     
     override func viewWillAppear(_ animated: Bool) {
