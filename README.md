@@ -3,6 +3,9 @@ Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.
 
 ### Sample App 
 
+## Build 107:
+- SDK'i işlemler tamamlanmadan kapatabilme özelliği eklendi
+
 ## Build 106:
 - Sunucudan maksimum dosya yükleme boyutunu al
 
