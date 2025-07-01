@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23231" systemVersion="24A335" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
+    <entity name="EnvServers" representedClassName="EnvServers" syncable="YES" codeGenerationType="class">
+        <attribute name="apiUrl" optional="YES" attributeType="String"/>
+        <attribute name="envTitle" optional="YES" attributeType="String"/>
+        <attribute name="socketUrl" optional="YES" attributeType="String"/>
+        <attribute name="stunUrl" optional="YES" attributeType="String"/>
+        <attribute name="turnPass" optional="YES" attributeType="String"/>
+        <attribute name="turnUrl" optional="YES" attributeType="String"/>
+        <attribute name="turnUser" optional="YES" attributeType="String"/>
+    </entity>
+</model>

@@ -369,7 +369,7 @@ class SDKLivenessViewController: SDKBaseViewController {
     
 //    func shareVideo(_ videoURL: URL) {
 //        let activityViewController = UIActivityViewController(activityItems: [videoURL], applicationActivities: nil)
-//        
+//
 //        activityViewController.excludedActivityTypes = [
 //            .assignToContact,
 //            .print
@@ -619,12 +619,34 @@ extension SDKLivenessViewController: ARSCNViewDelegate {
         switch self.nextStep {
             case .turnLeft:
                 if allowLeft {
-                    self.checkTurnLeft(jawVal: jawLeft ?? 0)
+                    let val = jawLeft ?? 0
+                    let rightVal = jawRight ?? 0
+                    if rightVal > 0.15 {
+                        DispatchQueue.main.async {
+                            self.stepInfoLbl.text = "Kafanızı sola çevirmelisiniz, sağa çevirmeyin."
+                            let generator = UINotificationFeedbackGenerator()
+                            generator.notificationOccurred(.error)
+                        }
+                    } else {
+                        self.checkTurnLeft(jawVal: val)
+                        break
+                    }
                 }
                 break
             case .turnRight:
                 if allowRight {
-                    self.checkTurnRight(jawVal: jawRight ?? 0)
+                    let val = jawRight ?? 0
+                    let leftVal = jawLeft ?? 0
+                    if leftVal > 0.15 {
+                        DispatchQueue.main.async {
+                            self.stepInfoLbl.text = "Kafanızı sağa çevirmelisiniz, sola çevirmeyin."
+                            let generator = UINotificationFeedbackGenerator()
+                            generator.notificationOccurred(.error)
+                        }
+                    } else {
+                        self.checkTurnRight(jawVal: val)
+                        break
+                    }
                 }
                 break
             case .smile:
