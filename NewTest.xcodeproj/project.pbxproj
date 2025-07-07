@@ -149,7 +149,6 @@
 		48E8E43129266B8A0045C3F8 /* SDKSpeechRecViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E8E42F29266B8A0045C3F8 /* SDKSpeechRecViewController.swift */; };
 		48E8E43229266B8A0045C3F8 /* SDKSpeechRecViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 48E8E43029266B8A0045C3F8 /* SDKSpeechRecViewController.xib */; };
 		48F0867829F7CA4E00FCA4BF /* QKMRZScanner in Frameworks */ = {isa = PBXBuildFile; productRef = 48F0867729F7CA4E00FCA4BF /* QKMRZScanner */; };
-		48F88A652E13D08500BB3881 /* FaceMovementType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48F88A642E13D08500BB3881 /* FaceMovementType.swift */; };
 		DF7BC16A2D4A279600372CAB /* Env.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = DF7BC1682D4A279600372CAB /* Env.xcdatamodeld */; };
 /* End PBXBuildFile section */
 
@@ -318,7 +317,6 @@
 		48DE1484290A7D3A00057EAD /* UIViewController+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+.swift"; sourceTree = "<group>"; };
 		48E8E42F29266B8A0045C3F8 /* SDKSpeechRecViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKSpeechRecViewController.swift; sourceTree = "<group>"; };
 		48E8E43029266B8A0045C3F8 /* SDKSpeechRecViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SDKSpeechRecViewController.xib; sourceTree = "<group>"; };
-		48F88A642E13D08500BB3881 /* FaceMovementType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceMovementType.swift; sourceTree = "<group>"; };
 		DF7BC1692D4A279600372CAB /* Env.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Env.xcdatamodel; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -349,7 +347,6 @@
 		481065962922645900053004 /* Liveness */ = {
 			isa = PBXGroup;
 			children = (
-				48F88A642E13D08500BB3881 /* FaceMovementType.swift */,
 				48DD2F2A2B8DD56A0091FCCE /* NewScanner */,
 				48549AD82A41800D00F6838B /* SDKLivenessViewController.swift */,
 				48549AD92A41800D00F6838B /* SDKLivenessViewController.xib */,
@@ -1079,7 +1076,6 @@
 				482D2BD32A547AC000F1344F /* EditScanViewController.swift in Sources */,
 				483BDB0F28F459CC00635BCC /* AppDelegate.swift in Sources */,
 				48DD2F2D2B8DD57D0091FCCE /* SDKNewLivenessViewController.swift in Sources */,
-				48F88A652E13D08500BB3881 /* FaceMovementType.swift in Sources */,
 				48CD8D0129792D5A008573F8 /* SDKLangManager.swift in Sources */,
 				488B29FB2E05BFDC00D1B6A0 /* Env.xcdatamodeld in Sources */,
 				48E8E43129266B8A0045C3F8 /* SDKSpeechRecViewController.swift in Sources */,

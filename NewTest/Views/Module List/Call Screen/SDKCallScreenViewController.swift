@@ -126,9 +126,24 @@ class SDKCallScreenViewController: SDKBaseViewController {
         let alert = UIAlertController(title: "Uyarı", message: "Görüşmeyi kapatırsanız tüm işlemler iptal edilecektir, onaylıyor musunuz?", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "Hayır", style: .cancel, handler: nil))
         alert.addAction(UIAlertAction(title: "Evet", style: .destructive, handler: { [weak self] _ in
-            self?.closeSDK()
+            self?.closeByUser()
         }))
-        self.present(alert, animated: true, completion: nil)
+        
+        DispatchQueue.main.async {
+            self.present(alert, animated: true, completion: nil)
+        }
+    }
+    
+    func closeByUser() {
+        self.manager.terminateCallByUser { resp in
+            if resp {
+                let x = SDKThankYouViewController()
+                x.completeStatus = .notCompleted
+                if let nav = self.navigationController {
+                    nav.pushViewController(x, animated: true)
+                }
+            }
+        }
     }
     
 }
@@ -236,9 +251,9 @@ extension SDKCallScreenViewController: SDKSocketListener {
                         }
                 }
             case .missedCall: // belirli süre boyunca telefon çaldı fakat müşteri açmadı veya temsilci aradı fakat telefon açılmadan aramayı sonlandırdı
-            self.dismiss(animated: true) {
-                self.callIsDone(doneStatus: .missedCall)
-            }
+                self.dismiss(animated: true) {
+                    self.callIsDone(doneStatus: .missedCall)
+                }
             
             case .connectionErr:  // socket kopması durumunda tetiklenir
                 setupCallScreen(inCall: false) // kameraları kapatıp bekleme ekranı görüntüsünü aktif eder
