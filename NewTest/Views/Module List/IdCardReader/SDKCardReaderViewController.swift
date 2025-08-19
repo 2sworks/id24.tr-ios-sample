@@ -225,7 +225,7 @@ class SDKCardReaderViewController: SDKBaseViewController {
                             self.hideLoader()
                             self.checkButtonStatus()
                         } else {
-                            self.showToast(title: self.translate(text: .coreError), subTitle: "\(webResp.msg ?? self.translate(text: .coreUploadError))", attachTo: self.view) {
+                            self.showToast(title: self.translate(text: .coreError), subTitle: "\(webResp.messages?.first ?? self.translate(text: .coreUploadError))", attachTo: self.view) {
                                 self.hideLoader()
                             }
                         }
@@ -252,7 +252,7 @@ class SDKCardReaderViewController: SDKBaseViewController {
                                     self.hideLoader()
                                     self.checkButtonStatus()
                                 } else {
-                                    self.showToast(title: self.translate(text: .coreError), subTitle: "\(webResp.msg ?? self.translate(text: .coreUploadError))", attachTo: self.view) {
+                                    self.showToast(title: self.translate(text: .coreError), subTitle: "\(webResp.messages?.first ?? self.translate(text: .coreUploadError))", attachTo: self.view) {
                                         self.hideLoader()
                                     }
                                 }
@@ -271,7 +271,7 @@ class SDKCardReaderViewController: SDKBaseViewController {
                             self.hideLoader()
                             self.checkButtonStatus()
                         } else {
-                            self.showToast(title: self.translate(text: .coreError), subTitle: "\(webResp.msg ?? self.translate(text: .coreUploadError))", attachTo: self.view) {
+                            self.showToast(title: self.translate(text: .coreError), subTitle: "\(webResp.messages?.first ?? self.translate(text: .coreUploadError))", attachTo: self.view) {
                                 self.hideLoader()
                             }
                         }
@@ -289,9 +289,16 @@ class SDKCardReaderViewController: SDKBaseViewController {
                             print("Front OCR \(self.manager.sdkFrontInfo.asDictionary())")
                             print("Back OCR \(self.manager.sdkBackInfo.asDictionary())")
                             self.manager.uploadIdPhoto(idPhoto: self.backIdPhoto.image ?? UIImage(), selfieType: .backId) { webResp in
-                                self.photoBackSide = true
-                                self.hideLoader()
-                                self.checkButtonStatus()
+                                if webResp.result == true {
+                                    self.photoBackSide = true
+                                    self.hideLoader()
+                                    self.checkButtonStatus()
+                                } else {
+                                    self.showToast(title: self.translate(text: .coreError), subTitle: "\(webResp.messages?.first ?? self.translate(text: .coreUploadError))", attachTo: self.view) {
+                                        self.hideLoader()
+                                    }
+                                }
+                                
                             }
                         }
                     }
@@ -307,7 +314,7 @@ class SDKCardReaderViewController: SDKBaseViewController {
                             self.hideLoader()
                             self.checkButtonStatus()
                         } else {
-                            self.showToast(title: self.translate(text: .coreError), subTitle: "\(webResp.msg ?? self.translate(text: .coreUploadError))", attachTo: self.view) {
+                            self.showToast(title: self.translate(text: .coreError), subTitle: "\(webResp.messages?.first ?? self.translate(text: .coreUploadError))", attachTo: self.view) {
                                 self.hideLoader()
                             }
                         }

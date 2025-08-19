@@ -115,8 +115,8 @@
 		486A111E2B07BED000A34623 /* CameraPermission in Frameworks */ = {isa = PBXBuildFile; productRef = 486A111D2B07BED000A34623 /* CameraPermission */; };
 		486A11202B07BED000A34623 /* MicrophonePermission in Frameworks */ = {isa = PBXBuildFile; productRef = 486A111F2B07BED000A34623 /* MicrophonePermission */; };
 		486A11222B07BED000A34623 /* SpeechRecognizerPermission in Frameworks */ = {isa = PBXBuildFile; productRef = 486A11212B07BED000A34623 /* SpeechRecognizerPermission */; };
-		486C06F02E0ADA8D0092F032 /* IdentifySDK.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 486C06EE2E0AD3530092F032 /* IdentifySDK.xcframework */; };
-		486C06F12E0ADA8D0092F032 /* IdentifySDK.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 486C06EE2E0AD3530092F032 /* IdentifySDK.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		4879C9092E5497C700FA7DD3 /* IdentifySDK.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4879C9072E5497C100FA7DD3 /* IdentifySDK.xcframework */; };
+		4879C90A2E5497C700FA7DD3 /* IdentifySDK.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4879C9072E5497C100FA7DD3 /* IdentifySDK.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		487D31AB2BEB913400305684 /* AZERI.json in Resources */ = {isa = PBXBuildFile; fileRef = 487D31A92BEB913400305684 /* AZERI.json */; };
 		487D31AC2BEB913400305684 /* RUSSIAN.json in Resources */ = {isa = PBXBuildFile; fileRef = 487D31AA2BEB913400305684 /* RUSSIAN.json */; };
 		4880596E291D0EBD0058C7CD /* Toast in Frameworks */ = {isa = PBXBuildFile; productRef = 4880596D291D0EBD0058C7CD /* Toast */; settings = {ATTRIBUTES = (Required, ); }; };
@@ -159,7 +159,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				486C06F12E0ADA8D0092F032 /* IdentifySDK.xcframework in Embed Frameworks */,
+				4879C90A2E5497C700FA7DD3 /* IdentifySDK.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -279,7 +279,7 @@
 		486A110F2B07BAA200A34623 /* SDKModuleListViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SDKModuleListViewController.swift; sourceTree = "<group>"; };
 		486A11102B07BAA200A34623 /* SDKModuleListViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SDKModuleListViewController.xib; sourceTree = "<group>"; };
 		486A11142B07BAAA00A34623 /* SDKIdentifyLoginViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SDKIdentifyLoginViewController.xib; sourceTree = "<group>"; };
-		486C06EE2E0AD3530092F032 /* IdentifySDK.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = IdentifySDK.xcframework; sourceTree = "<group>"; };
+		4879C9072E5497C100FA7DD3 /* IdentifySDK.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = IdentifySDK.xcframework; sourceTree = "<group>"; };
 		487D31A92BEB913400305684 /* AZERI.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = AZERI.json; sourceTree = "<group>"; };
 		487D31AA2BEB913400305684 /* RUSSIAN.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = RUSSIAN.json; sourceTree = "<group>"; };
 		4881A7FD29238CB400EB4072 /* SDKAddressConfirmViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKAddressConfirmViewController.swift; sourceTree = "<group>"; };
@@ -335,7 +335,7 @@
 				4831E1F32B69284400B67891 /* IQKeyboardManagerSwift in Frameworks */,
 				48171405294716830095A64F /* netfox in Frameworks */,
 				48F0867829F7CA4E00FCA4BF /* QKMRZScanner in Frameworks */,
-				486C06F02E0ADA8D0092F032 /* IdentifySDK.xcframework in Frameworks */,
+				4879C9092E5497C700FA7DD3 /* IdentifySDK.xcframework in Frameworks */,
 				4857BFFB2902D636001FE850 /* Starscream in Frameworks */,
 				48D802292924F6B000B9BB83 /* CHIOTPField in Frameworks */,
 			);
@@ -846,7 +846,7 @@
 		48F88A662E13E60900BB3881 /* SDK */ = {
 			isa = PBXGroup;
 			children = (
-				486C06EE2E0AD3530092F032 /* IdentifySDK.xcframework */,
+				4879C9072E5497C100FA7DD3 /* IdentifySDK.xcframework */,
 			);
 			path = SDK;
 			sourceTree = "<group>";
@@ -1267,7 +1267,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = NewTest/NewTest.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 107;
+				CURRENT_PROJECT_VERSION = 108;
 				DEVELOPMENT_TEAM = 3EPV7AGLM2;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1309,7 +1309,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = NewTest/NewTest.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 107;
+				CURRENT_PROJECT_VERSION = 108;
 				DEVELOPMENT_TEAM = 3EPV7AGLM2;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",

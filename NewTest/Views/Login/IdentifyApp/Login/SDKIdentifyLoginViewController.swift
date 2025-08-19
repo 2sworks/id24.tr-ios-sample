@@ -203,7 +203,10 @@ class SDKIdentifyLoginViewController: SDKBaseViewController {
             logLevel: .all,
             bigCustomerCam: editedShowBigCustomer,
             selectedModules: self.selectedModuleList,
-            idCardLang: self.idLang
+            idCardLang: self.idLang,
+            showThankYouPage: true,
+            showNFCNotFoundPage: true,
+            supportU18: true,
         ) { socketStats, apiResp, webErr in
                 
             print("socket resp : \(socketStats)")

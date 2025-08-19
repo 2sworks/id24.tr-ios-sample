@@ -113,13 +113,10 @@ class SDKCallScreenViewController: SDKBaseViewController {
     }
     
     private func callIsDone(doneStatus: CallStatus) {
-        self.manager.getNextModule { nextVC in
-            if nextVC == self.manager.thankYouViewController {
-                let x  = SDKThankYouViewController()
-                x.completeStatus = doneStatus
-                self.navigationController?.pushViewController(x, animated: true)
-            }
-        }
+        self.manager.forceQuitSDK()
+        let x  = SDKThankYouViewController()
+        x.completeStatus = doneStatus
+        self.navigationController?.pushViewController(x, animated: true)
     }
     
     @IBAction func endCallAct(_ sender: UIButton) {
@@ -251,6 +248,8 @@ extension SDKCallScreenViewController: SDKSocketListener {
                         }
                 }
             case .missedCall: // belirli süre boyunca telefon çaldı fakat müşteri açmadı veya temsilci aradı fakat telefon açılmadan aramayı sonlandırdı
+                self.listenToSocketConnection(callCompleted: true)
+                setupCallScreen(inCall: false)
                 self.dismiss(animated: true) {
                     self.callIsDone(doneStatus: .missedCall)
                 }
