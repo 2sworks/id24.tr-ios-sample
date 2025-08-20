@@ -1267,7 +1267,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = NewTest/NewTest.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 108;
+				CURRENT_PROJECT_VERSION = 111;
 				DEVELOPMENT_TEAM = 3EPV7AGLM2;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1275,6 +1275,7 @@
 				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = NewTest/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Identify Sample";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_NFCReaderUsageDescription = "NFC Kullanım izni";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Görüntülü görüşme yapmak ve diğer modülleri kullanabilmek için izniniz gerekmektedir";
@@ -1309,7 +1310,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = NewTest/NewTest.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 108;
+				CURRENT_PROJECT_VERSION = 111;
 				DEVELOPMENT_TEAM = 3EPV7AGLM2;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1317,6 +1318,7 @@
 				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = NewTest/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Identify Sample";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_NFCReaderUsageDescription = "NFC Kullanım izni";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Görüntülü görüşme yapmak ve diğer modülleri kullanabilmek için izniniz gerekmektedir";
