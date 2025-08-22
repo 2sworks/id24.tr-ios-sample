@@ -20,6 +20,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Override point for customization after application launch.        
         UIApplication.shared.isIdleTimerDisabled = true
         IQKeyboardManager.shared.enable = true
+        SDKReachabilityHelper.shared.observeReachability()
         NFX.sharedInstance().start()
         startFirstScreen()
         return true
