@@ -187,6 +187,8 @@ class SDKIdentifyLoginViewController: SDKBaseViewController {
             self.identIdArea.text = "1404df9c1cbd6c66bbb3c9217ea4bbfc1157fd33"
         } else if identIdArea.text == "busra" {
             self.identIdArea.text = "14412dd4616298aabbd80c9628860ed8d214c288"
+        } else if identIdArea.text == "c" {
+            self.identIdArea.text = "651b830832f0d289a830db0f5704c9677657b0de"
         }
         
         self.showLoader()
@@ -381,7 +383,7 @@ extension SDKIdentifyLoginViewController { // Dil seçme & değiştirme işlemle
         }
         
         let fifthAct: UIAlertAction = UIAlertAction(title: "QA", style: .default) { action -> Void in
-            self.selectedServer.apiUrl = "https://api.id24tr-qa.bssgmbh.works"
+            self.selectedServer.apiUrl = "https://apiqa.identify.com.tr"
             self.selectedServer.envTitle = "QA"
             self.connectSDK()
         }

@@ -29,18 +29,6 @@ class SDKPrepareViewController: SDKBaseViewController {
     var authSpeech = false
     var authMic = false
     
-    var camReq: CameraPermission {
-        return CameraPermission.camera
-    }
-    
-    var speechReq: SpeechPermission {
-        return SpeechPermission.speech
-    }
-    
-    var micReq: MicrophonePermission {
-        return MicrophonePermission.microphone
-    }
-
     override func viewDidLoad() {
         super.viewDidLoad()
         self.checkPermissions()

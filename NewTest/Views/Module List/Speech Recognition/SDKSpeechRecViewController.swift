@@ -27,6 +27,11 @@ class SDKSpeechRecViewController: SDKBaseViewController, UIGestureRecognizerDele
         self.setupUI()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        checkSpeechPermission()
+    }
+    
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         self.resetCache()

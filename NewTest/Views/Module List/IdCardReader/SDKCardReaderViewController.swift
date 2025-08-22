@@ -42,6 +42,7 @@ class SDKCardReaderViewController: SDKBaseViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        checkCameraPermission()
         if self.manager.tryedNfcComparisonCount >= 2 {
             setContinueButton(isActive: false)
         }

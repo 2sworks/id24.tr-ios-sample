@@ -36,6 +36,7 @@ class SDKCallScreenViewController: SDKBaseViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        checkCameraAndMicPermission()
         self.setupUI()
         setupCallScreen(inCall: false)
         self.manager.socketMessageListener = self

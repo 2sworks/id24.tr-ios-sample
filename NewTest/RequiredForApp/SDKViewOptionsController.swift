@@ -9,6 +9,10 @@ import Foundation
 import UIKit
 import IdentifySDK
 import Toast
+import CameraPermission
+import SpeechRecognizerPermission
+import MicrophonePermission
+import PermissionsKit
 
 class SDKViewOptionsController: UIViewController {
     
@@ -224,6 +228,18 @@ class SDKViewOptionsController: UIViewController {
 class SDKBaseViewController: SDKViewOptionsController {
     
     let nc = NotificationCenter.default
+    
+    var camReq: CameraPermission {
+        return CameraPermission.camera
+    }
+    
+    var speechReq: SpeechPermission {
+        return SpeechPermission.speech
+    }
+    
+    var micReq: MicrophonePermission {
+        return MicrophonePermission.microphone
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -287,6 +303,65 @@ class SDKBaseViewController: SDKViewOptionsController {
         return topController!
     }
    
+    func checkCameraPermission() {
+        let cameraCheck = CameraPermission.camera
+        if cameraCheck.authorized == false {
+            cameraCheck.request {
+                if cameraCheck.status == .denied {
+                    self.oneButtonAlertShow(message: self.translate(text: .prepareCam), title1: self.translate(text: .coreSettings)) {
+                        cameraCheck.openSettingPage()
+                    }
+                }
+            }
+        }
+    }
+    
+    func checkMicrophonePermission() {
+        let micCheck = MicrophonePermission.microphone
+        if micCheck.authorized == false {
+            if micCheck.status == .denied {
+                self.oneButtonAlertShow(message: self.translate(text: .prepareMic), title1: self.translate(text: .coreSettings)) {
+                    micCheck.openSettingPage()
+                }
+            } else if micCheck.status == .notDetermined {
+                micCheck.request {
+                    
+                }
+            }
+        }
+    }
+    
+    func checkCameraAndMicPermission() {
+        let cameraCheck = CameraPermission.camera
+        if cameraCheck.authorized == false {
+            cameraCheck.request {
+                if cameraCheck.status == .denied {
+                    self.oneButtonAlertShow(message: self.translate(text: .prepareCam), title1: self.translate(text: .coreSettings)) {
+                        cameraCheck.openSettingPage()
+                    }
+                } else {
+                    self.checkMicrophonePermission()
+                }
+            }
+        } else {
+            checkMicrophonePermission()
+        }
+    }
+    
+    func checkSpeechPermission() {
+        let speechCheck = SpeechPermission.speech
+        if speechCheck.authorized == false {
+            if speechCheck.status == .denied {
+                self.oneButtonAlertShow(message: self.translate(text: .prepareSpeech), title1: self.translate(text: .coreSettings)) {
+                    speechCheck.openSettingPage()
+                }
+            } else if speechCheck.status == .notDetermined {
+                speechCheck.request {
+                    
+                }
+            }
+        }
+    }
     
 }
 extension SDKBaseViewController: IdentifyTrackingListener {

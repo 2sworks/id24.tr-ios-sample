@@ -22,6 +22,7 @@ class SDKPassportReaderViewController: SDKBaseViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        checkCameraPermission()
         mrzScannerView.startScanning()
         mrzScannerView.vibrateOnResult = true
     }

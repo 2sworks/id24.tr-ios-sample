@@ -21,6 +21,11 @@ class SDKSelfieViewController: SDKBaseViewController {
         self.setupUI()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        checkCameraPermission()
+    }
+    
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
 //        self.resetCache()

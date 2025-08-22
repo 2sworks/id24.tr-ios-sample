@@ -96,6 +96,7 @@ class SDKLivenessViewController: SDKBaseViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        checkCameraPermission()
         if nextStep == nil {
             self.getNextTest()
         } else if nextStep == .completed {

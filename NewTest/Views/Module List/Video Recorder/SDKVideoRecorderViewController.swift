@@ -28,6 +28,7 @@ class SDKVideoRecorderViewController: SDKBaseViewController {
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        checkCameraAndMicPermission()
         self.resetCache()
     }
     
