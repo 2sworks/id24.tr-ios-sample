@@ -1276,6 +1276,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = NewTest/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Identify Sample";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_NFCReaderUsageDescription = "NFC Kullanım izni";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Görüntülü görüşme yapmak ve diğer modülleri kullanabilmek için izniniz gerekmektedir";
@@ -1319,6 +1320,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = NewTest/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Identify Sample";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_NFCReaderUsageDescription = "NFC Kullanım izni";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Görüntülü görüşme yapmak ve diğer modülleri kullanabilmek için izniniz gerekmektedir";
