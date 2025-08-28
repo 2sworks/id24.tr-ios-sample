@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		36BF33502E572348007F92CE /* SDKReachabilityHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36BF334F2E572348007F92CE /* SDKReachabilityHelper.swift */; };
 		480961182C64E70C00B9E6D5 /* v2api.identify.com.tr.cer in Resources */ = {isa = PBXBuildFile; fileRef = 48BFF0D02BBAF3940088D67E /* v2api.identify.com.tr.cer */; };
 		480C1E4F2BDB8B8D0076D28B /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 480C1E4E2BDB8B8D0076D28B /* PrivacyInfo.xcprivacy */; };
 		480E76A9297A868E0071B049 /* GERMAN.json in Resources */ = {isa = PBXBuildFile; fileRef = 48CD8D0429792E26008573F8 /* GERMAN.json */; };
@@ -167,6 +168,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		36BF334F2E572348007F92CE /* SDKReachabilityHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKReachabilityHelper.swift; sourceTree = "<group>"; };
 		480099BA2B175C5C00325ED0 /* SDKIdentifyLoginViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SDKIdentifyLoginViewController.swift; sourceTree = "<group>"; };
 		480C1E4E2BDB8B8D0076D28B /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		481065972922646600053004 /* SDKLivenessViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKLivenessViewController.swift; sourceTree = "<group>"; };
@@ -632,6 +634,7 @@
 				485C15582907F3A7007B9ED0 /* SDKUIView+.swift */,
 				485C15592907F3A7007B9ED0 /* SDKCgRect+.swift */,
 				48CD8CFE29792C8F008573F8 /* SDKIdentifyColorTheme.swift */,
+				36BF334F2E572348007F92CE /* SDKReachabilityHelper.swift */,
 			);
 			path = RequiredForApp;
 			sourceTree = "<group>";
@@ -1079,6 +1082,7 @@
 				48CD8D0129792D5A008573F8 /* SDKLangManager.swift in Sources */,
 				488B29FB2E05BFDC00D1B6A0 /* Env.xcdatamodeld in Sources */,
 				48E8E43129266B8A0045C3F8 /* SDKSpeechRecViewController.swift in Sources */,
+				36BF33502E572348007F92CE /* SDKReachabilityHelper.swift in Sources */,
 				485C155E2907F3A7007B9ED0 /* SDKUIStackView+.swift in Sources */,
 				482D2BC12A547AC000F1344F /* CaptureSessionManager.swift in Sources */,
 				482D2BD72A547AC000F1344F /* CIRectangleDetector.swift in Sources */,
