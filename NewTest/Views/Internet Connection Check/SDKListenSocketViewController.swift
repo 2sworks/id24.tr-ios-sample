@@ -39,14 +39,6 @@ class SDKListenSocketViewController: SDKBaseViewController {
             toggleButton(disabled: true)
         }
         
-        let btn = UIButton(frame: CGRect(x: 100, y: 100, width: 100, height: 50))
-        btn.setTitle("kapat", for: .normal)
-        btn.addTarget(self, action: #selector(dism), for: .touchUpInside)
-        view.addSubview(btn)
-    }
-    
-    @objc func dism() {
-        dismiss(animated: false)
     }
     
     @objc func tapButton() {
