@@ -213,7 +213,7 @@ class SDKIdentifyLoginViewController: SDKBaseViewController {
                 
             print("socket resp : \(socketStats)")
             if let err = webErr, err.errorMessages != "" { // web servisten hata gelirse
-                self.showToast(type:. fail, title: self.translate(text: .coreError), subTitle: err.errorMessages, attachTo: self.view) {
+                self.showToast(type:. fail, title: self.translate(text: .coreError), subTitle: apiResp.response_status == 409 ? apiResp.messages?.first : err.errorMessages, attachTo: self.view) {
                     self.hideLoader()
                 }
             } else { // hata yoksa işlemlere devam ediyoruz

@@ -92,7 +92,7 @@ class SDKSelfieViewController: SDKBaseViewController {
                 self.manager.tryedSelfieComparisonCount = 1 // resetliyoruz
                 self.isEnableSubmit(enabled: true)
             } else {
-                self.showToast(type:.fail, title: self.translate(text: .coreUploadError), attachTo: self.view) {
+                self.showToast(type:.fail, title: "\(webResp.messages?.first ?? self.translate(text: .coreUploadError))", attachTo: self.view) {
                     return
                 }
                 self.hideLoader()

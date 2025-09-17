@@ -526,7 +526,7 @@ class SDKLivenessViewController: SDKBaseViewController {
                 }
             } else {
                 DispatchQueue.main.async {
-                    self.showToast(type:.fail, title: self.translate(text: .coreError), subTitle: self.translate(text: .coreUploadError), attachTo: self.view) {
+                    self.showToast(type:.fail, title: self.translate(text: .coreError), subTitle: "\(uploadResp.messages?.first ?? self.translate(text: .coreUploadError))", attachTo: self.view) {
                         self.oneButtonAlertShow(message: "Fotoğraf yüklenirken hata oluştu, sonraki adıma geçiliyor.", title1: "Tamam") {
                             uploaded(false)
                             self.resumeSession()
