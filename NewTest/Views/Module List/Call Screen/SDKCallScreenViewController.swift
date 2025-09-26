@@ -28,7 +28,7 @@ class SDKCallScreenViewController: SDKBaseViewController {
     @IBOutlet weak var smsStackView: UIView!
     @IBOutlet weak var timeInfoLbl: UILabel!
     private var confStarted = false // ilk kez bağlantı kurulma - temsilci ve kişinin kamerasını bu değişkene göre aktif eder
-
+    var checkedSignLang = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -36,13 +36,18 @@ class SDKCallScreenViewController: SDKBaseViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        
+        if manager.connectToSignLang {
+            if !checkedSignLang {
+                self.checkSignLang()
+                return
+            }
+        }
+        
         checkCameraAndMicPermission()
         self.setupUI()
         setupCallScreen(inCall: false)
         self.manager.socketMessageListener = self
-        if manager.connectToSignLang {
-            self.checkSignLang()
-        }
         navigationItem.rightBarButtonItem = nil
         self.navigationItem.hidesBackButton = true
     }
@@ -63,8 +68,8 @@ class SDKCallScreenViewController: SDKBaseViewController {
     
     private func checkSignLang() {
         let signVC = SDKSignLangViewController()
-        signVC.isModalInPresentation = true
-        self.present(signVC, animated: true)
+        signVC.delegate = self
+        self.navigationController?.pushViewController(signVC, animated: false)
     }
     
     private func setupCallScreen(inCall: Bool) { // bekleme ekranı veya aktif görüşme ekranı arasındaki geçişi sağlar
@@ -308,6 +313,12 @@ extension SDKCallScreenViewController: UITextFieldDelegate {
         }
     }
     
+}
+
+extension SDKCallScreenViewController: SDKSignLangViewControllerDelegate {
+    func sdkSignLangViewControllerDidFinish(_ controller: SDKSignLangViewController) {
+        checkedSignLang = true
+    }
 }
 
 extension UIView {
