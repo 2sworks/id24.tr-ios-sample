@@ -73,6 +73,8 @@ class SDKCallScreenViewController: SDKBaseViewController {
             self.callScreen.isHidden = !inCall
             if inCall {
                 self.navigationController?.setNavigationBarHidden(true, animated: true)
+            } else {
+                self.navigationController?.setNavigationBarHidden(false, animated: true)
             }
         }
     }
