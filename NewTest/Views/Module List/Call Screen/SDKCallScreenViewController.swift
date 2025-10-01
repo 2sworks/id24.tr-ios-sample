@@ -83,7 +83,11 @@ class SDKCallScreenViewController: SDKBaseViewController {
         let remoteVideoView = manager.webRTCClient.remoteVideoView()
         let localVideoView = manager.webRTCClient.localVideoView()
         if self.manager.showBigCustomerCam {
-            manager.webRTCClient.setupRemoteViewFrame(frame: CGRect(x: 0, y: 0, width:self.myCam.frame.width * 2, height: self.myCam.frame.height))
+            if self.manager.agentViewScale == 1 {
+                manager.webRTCClient.setupRemoteViewFrame(frame: CGRect(x: 0, y: 0, width: self.myCam.frame.width, height: self.myCam.frame.height * 2))
+            } else {
+                manager.webRTCClient.setupRemoteViewFrame(frame: CGRect(x: 0, y: 0, width: self.myCam.frame.width * 2, height: self.myCam.frame.height))
+            }
             remoteVideoView.contentMode = .scaleToFill
             manager.webRTCClient.setupLocalViewFrame(frame: CGRect(x: 0, y: 0, width: self.customerCam.frame.width, height: self.customerCam.frame.height))
             remoteVideoView.center = CGPoint(x: myCam.frame.size.width  / 2, y: myCam.frame.size.height / 2)
