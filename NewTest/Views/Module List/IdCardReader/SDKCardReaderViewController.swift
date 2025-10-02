@@ -290,10 +290,14 @@ class SDKCardReaderViewController: SDKBaseViewController {
                             print("Front OCR \(self.manager.sdkFrontInfo.asDictionary())")
                             print("Back OCR \(self.manager.sdkBackInfo.asDictionary())")
                             self.manager.uploadIdPhoto(idPhoto: self.backIdPhoto.image ?? UIImage(), selfieType: .backId) { webResp in
-                                if webResp.result == true {
+                                if webResp.result == true && webResp.data?.comparison == true {
                                     self.photoBackSide = true
                                     self.hideLoader()
                                     self.checkButtonStatus()
+                                } else if webResp.result == true && webResp.data?.comparison == false {
+                                    self.showToast(title: self.translate(text: .coreError), subTitle: "\(webResp.messages?.first ?? self.translate(text: .activeNfcExit))", attachTo: self.view) {
+                                        self.hideLoader()
+                                    }
                                 } else {
                                     self.showToast(title: self.translate(text: .coreError), subTitle: "\(webResp.messages?.first ?? self.translate(text: .coreUploadError))", attachTo: self.view) {
                                         self.hideLoader()
