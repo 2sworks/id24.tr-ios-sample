@@ -33,7 +33,6 @@ class SDKNfcViewController: SDKBaseViewController {
     @IBOutlet weak var expDateLbl: UILabel!
     
     var showOnlyEditScreen = false
-    var nfcComparisonCount = 1
     
     override func viewDidLoad() {
         super.viewDidLoad()
