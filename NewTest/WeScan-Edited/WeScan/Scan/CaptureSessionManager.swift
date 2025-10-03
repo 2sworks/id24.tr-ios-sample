@@ -89,13 +89,20 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
 
         super.init()
         
-        
-        if (deviceName() == "iPhone15,2" || deviceName() ==  "iPhone15,3" || deviceName() == "iPhone16,1" || deviceName() == "iPhone16,2") {
-            self.newDevice = AVCaptureDevice.default(.builtInDualWideCamera, for: AVMediaType.video, position: .back)
-        } else {
-            self.newDevice = AVCaptureDevice.default(for: AVMediaType.video)
+        let deviceTypes: [AVCaptureDevice.DeviceType] = [
+            .builtInTripleCamera, //14promax
+            .builtInDualCamera,
+            .builtInDualWideCamera, //13
+            .builtInWideAngleCamera,
+            .builtInUltraWideCamera //13
+        ]
+        let discoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: deviceTypes, mediaType: .video, position: .back)
+
+        guard let device = discoverySession.devices.first else {
+            let error = ImageScannerControllerError.inputDevice
+            delegate?.captureSessionManager(self, didFailWithError: error)
+            return nil
         }
-        
 
         captureSession.beginConfiguration()
 
@@ -105,11 +112,11 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
         videoOutput.alwaysDiscardsLateVideoFrames = true
 
         defer {
-            newDevice?.unlockForConfiguration()
+            device.unlockForConfiguration()
             captureSession.commitConfiguration()
         }
 
-        guard let deviceInput = try? AVCaptureDeviceInput(device: self.newDevice!),
+        guard let deviceInput = try? AVCaptureDeviceInput(device: device),
             captureSession.canAddInput(deviceInput),
             captureSession.canAddOutput(photoOutput),
             captureSession.canAddOutput(videoOutput) else {
@@ -119,28 +126,18 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
         }
 
         do {
-            try newDevice?.lockForConfiguration()
+            try device.lockForConfiguration()
         } catch {
             let error = ImageScannerControllerError.inputDevice
             delegate?.captureSessionManager(self, didFailWithError: error)
             return
         }
 
-        newDevice?.isSubjectAreaChangeMonitoringEnabled = true
-
         captureSession.addInput(deviceInput)
         captureSession.addOutput(photoOutput)
         captureSession.addOutput(videoOutput)
-
-        let photoPreset = AVCaptureSession.Preset.photo
-
-        if captureSession.canSetSessionPreset(photoPreset) {
-            captureSession.sessionPreset = photoPreset
-
-            if photoOutput.isLivePhotoCaptureSupported {
-                photoOutput.isLivePhotoCaptureEnabled = true
-            }
-        }
+                
+        device.videoZoomFactor = 2.0
 
         videoPreviewLayer.session = captureSession
         videoPreviewLayer.videoGravity = .resizeAspectFill
