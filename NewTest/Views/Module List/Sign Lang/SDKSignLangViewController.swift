@@ -7,7 +7,13 @@
 
 import UIKit
 
+protocol SDKSignLangViewControllerDelegate: AnyObject {
+    func sdkSignLangViewControllerDidFinish(_ controller: SDKSignLangViewController)
+}
+
 class SDKSignLangViewController: SDKBaseViewController {
+    
+    weak var delegate: SDKSignLangViewControllerDelegate?
 
     @IBOutlet weak var signSwitch: UISwitch!
     @IBOutlet weak var acceptBtn: IdentifyButton!
@@ -25,7 +31,8 @@ class SDKSignLangViewController: SDKBaseViewController {
         self.acceptBtn.onTap = {
             self.manager.connectToSignLang = self.signSwitch.isOn
             self.manager.sendStep()
-            self.dismiss(animated: true)
+            self.delegate?.sdkSignLangViewControllerDidFinish(self)
+            self.navigationController?.popViewController(animated: false)
         }
         self.acceptBtn.populate()
     }
