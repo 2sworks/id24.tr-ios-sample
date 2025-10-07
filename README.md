@@ -3,10 +3,17 @@ Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.
 
 ### Sample App 
 
+## Build 126:
+- Kimlik çekimlerinde yeni cihazlardaki yakınlaştırma modu uyumu sağlandı
+- İşaret dili seçimi ekranında görüntülü görüşme kuyruğuna düşmemesi sağlandı
+- Agent görüntüsünün dikey ölçüde gösterilebilmesi sağlandı
+- Süresi geçmiş ident için hata mesajı gösterimi eklendi
+- İlgili ekranlara kamera, mikrofon ve konuşma izni kontrolleri eklendi
+- Tekrar Bağlan butonuna internet bağlantısı kontrolü eklendi
+
 ## Build 107:
 - SDK'i işlemler tamamlanmadan kapatabilme özelliği eklendi
 - Müşterinin çağrıyı sonlandırabilmesi eklendi
-
 
 ## Build 106:
 - Sunucudan maksimum dosya yükleme boyutunu al
@@ -33,8 +40,6 @@ Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.
 - login ekranı yeni SDK kurulumuna göre düzenlendi
 - login ekranında socket hata vermesi durumunda ekstra durum bildirimi eklendi
 
-
-
 ## Build 80:
 - scanner ekranında daha hızlı fotoğraf çekimi sağlandı 
 - active result için NfcViewController, CardreaderViewController ve ThankYouViewController buna bağlı olarak güncellendi
@@ -57,6 +62,12 @@ Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.
 
 
 ### SDK Son Güncelleme:
+
+## 2.3.9
+- appVersion, appBuild, sdkVersion bilgilerinin gönderilmesi sağlandı
+- agentViewScale desteği eklendi
+- ident_id trim eklendi
+- doc_type desteği eklendi
 
 ## 2.3.1
 - Sunucudan maksimum dosya yükleme boyutunu al
