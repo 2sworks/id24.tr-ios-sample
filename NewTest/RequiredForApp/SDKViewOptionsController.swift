@@ -26,7 +26,7 @@ class SDKViewOptionsController: UIViewController {
         super.viewDidLoad()
         print("viewDidLoad: \(self)")
         self.addSkipModuleButton()
-        if !(self is SDKIdentifyLoginViewController) && !(self is SDKCallScreenViewController) {
+        if !(self is SDKIdentifyLoginViewController) && !(self is SDKCallScreenViewController) && !(self is ServerSettingsViewController) && !(self is EnvListViewController) {
             self.addQuitButton()
         }
     }
