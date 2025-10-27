@@ -46,7 +46,7 @@ class SDKIdentifyLoginViewController: SDKBaseViewController {
         self.manager.setSDKLang(lang: .eng)
         self.manager.loginModuleController = SDKLoginViewController.instantiate()
         self.manager.selfieModuleController = SDKSelfieViewController.instantiate()
-        self.manager.idCardModuleController = SDKCardReaderViewController.instantiate()
+        self.manager.idCardModuleController = CaptureViewController()
         self.manager.nfcModuleController = SDKNfcViewController.instantiate()
         self.manager.signatureModuleController = SDKSignatureViewController.instantiate()
         self.manager.videoRecorderModuleController = SDKVideoRecorderViewController.instantiate()
