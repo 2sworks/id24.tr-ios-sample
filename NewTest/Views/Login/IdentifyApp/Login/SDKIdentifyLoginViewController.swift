@@ -204,7 +204,8 @@ class SDKIdentifyLoginViewController: SDKBaseViewController {
             identCardType: [.idCard, .passport, .oldSchool], // destekleyeceğiniz kart tipleri
             signLangSupport: editedSignLang, // işitme engelliler için müşteri temsilcisi desteği
             nfcMaxErrorCount: 3,
-            logLevel: .all,
+            logLevel: .online,
+            logOnlineSecretKey: "dGhpc19pc19qdXN0X2R1bW15X3NlY3JldF9mb3JfZGVtbw==",
             bigCustomerCam: editedShowBigCustomer,
             selectedModules: self.selectedModuleList,
             idCardLang: self.idLang,
