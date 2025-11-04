@@ -284,7 +284,7 @@ final class CaptureViewController: SDKBaseViewController {
     // Content thresholds (gevşetildi)
     private let aspectMin: CGFloat = 0.45
     private let aspectMax: CGFloat = 0.78
-    private let coverageMin: CGFloat = 0.58
+    private let coverageMin: CGFloat = 0.35
     private let coverageMax: CGFloat = 0.93
 
     private var ovdBaselineGlare: Float?
@@ -686,24 +686,14 @@ final class CaptureViewController: SDKBaseViewController {
 
     // MARK: - Çekim sonrası işleme
     private func processCaptured(_ ci: CIImage, step: CaptureStep) -> CIImage {
-        var out: CIImage
         if let rect = detectRectangleSync(in: ci), let warped = perspectiveCorrect(image: ci, rect: rect) {
-            let padX = warped.extent.width * 0.02
-            let padY = warped.extent.height * 0.02
-            out = forceLandscape(warped.cropped(to: warped.extent.insetBy(dx: padX, dy: padY)))
+            let cropped = warped
+            return cropped.oriented(.down).oriented(.upMirrored)
         } else {
-            let roi = docRectROI(in: ci.extent).insetBy(dx: ci.extent.width*0.02, dy: ci.extent.height*0.02)
-            out = forceLandscape(ci.cropped(to: roi))
+            let roi = docRectROI(in: ci.extent)
+            let cropped = ci.cropped(to: roi)
+            return cropped.oriented(.down).oriented(.upMirrored)
         }
-        // Otomatik düzeltme: önce mirror kontrolü, sonra yön (adım bazlı)
-        out = unMirrorIfNeeded(out)
-        switch step {
-        case .back:
-            out = flipBackIfNeeded(out)
-        case .front, .ovd:
-            out = flipFrontIfNeeded(out)
-        }
-        return out
     }
     private func detectRectangleSync(in ci: CIImage) -> VNRectangleObservation? {
         let req = VNDetectRectanglesRequest()
@@ -745,23 +735,21 @@ final class CaptureViewController: SDKBaseViewController {
         let bandH = h * 0.35
         let x = ci.extent.origin.x + w * 0.05
         let bandW = w * 0.90
+
         let bottom = CGRect(x: x, y: ci.extent.origin.y, width: bandW, height: bandH)
         let top = CGRect(x: x, y: ci.extent.maxY - bandH, width: bandW, height: bandH)
+
         let topScore = mrzChevronScore(ciImage: ci, roi: top)
         let bottomScore = mrzChevronScore(ciImage: ci, roi: bottom)
-        return (topScore > bottomScore + 3) ? ci.oriented(.down) : ci
+
+        // Ancak çok bariz şekilde tepedeyse döndür
+        return (topScore >= bottomScore + 12) ? ci.oriented(.down) : ci
     }
     // Front/OVD: alt bant metin üstten çok yoğunsa 180° çevir
+    // TR kimlikte alt taraf her zaman daha dolu, eski heuristic hep 180° yaptırıyordu.
+    // Ön ve OVD için şimdilik hiç çevirmiyoruz.
     private func flipFrontIfNeeded(_ ci: CIImage) -> CIImage {
-        let h = ci.extent.height, w = ci.extent.width
-        let bandH = h * 0.45
-        let x = ci.extent.origin.x + w * 0.05
-        let bandW = w * 0.90
-        let bottom = CGRect(x: x, y: ci.extent.origin.y + h*0.02, width: bandW, height: bandH)
-        let top = CGRect(x: x, y: ci.extent.maxY - bandH - h*0.02, width: bandW, height: bandH)
-        let topScore = textAlphaNumScore(ciImage: ci, roi: top)
-        let bottomScore = textAlphaNumScore(ciImage: ci, roi: bottom)
-        return (bottomScore > topScore + 10) ? ci.oriented(.down) : ci
+        return ci
     }
 
     // Basit metin skoru ve ayna (mirror) düzeltmesi
@@ -1009,26 +997,6 @@ final class ReviewViewController2: UIViewController {
     init(front: UIImage?, ovd: UIImage?, back: UIImage?) { self.front = front; self.ovd = ovd; self.back = back; super.init(nibName: nil, bundle: nil) }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
-    // Helper: force orientation/mirroring for review display
-    private func fixedImageForReview(_ image: UIImage?, step: CaptureStep) -> UIImage? {
-        guard let image = image else { return nil }
-        guard let cg = image.cgImage else { return image }
-        var ci = CIImage(cgImage: cg)
-        switch step {
-        case .front:
-            // FRONT: left-to-right flip (mirror only)
-            ci = ci.oriented(.down)
-        case .ovd:
-            // OVD: keep previous behavior (flip up = 180° rotate + horizontal mirror)
-            ci = ci.oriented(.down).oriented(.upMirrored)
-        case .back:
-            // BACK: top-to-bottom flip (vertical mirror) -> 180° rotate + horizontal mirror
-            ci = ci.oriented(.upMirrored)
-        }
-        let ctx = CIContext()
-        guard let out = ctx.createCGImage(ci, from: ci.extent) else { return image }
-        return UIImage(cgImage: out, scale: UIScreen.main.scale, orientation: .up)
-    }
 
     override func viewDidLoad() {
         super.viewDidLoad(); view.backgroundColor = .systemBackground
@@ -1048,10 +1016,6 @@ final class ReviewViewController2: UIViewController {
         stack.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(stack)
 
-        // Apply explicit review fixes
-        let fixedFront = fixedImageForReview(front, step: .front)
-        let fixedOvd   = fixedImageForReview(ovd,   step: .ovd)
-        let fixedBack  = fixedImageForReview(back,  step: .back)
 
         func makeBlock(_ image: UIImage?, _ name: String) -> UIView {
             let container = UIView(); container.clipsToBounds = true
@@ -1085,9 +1049,9 @@ final class ReviewViewController2: UIViewController {
             return container
         }
 
-        stack.addArrangedSubview(makeBlock(fixedFront, "Ön Yüz"))
-        stack.addArrangedSubview(makeBlock(fixedOvd,   "OVD/Parlama"))
-        stack.addArrangedSubview(makeBlock(fixedBack,  "Arka Yüz"))
+        stack.addArrangedSubview(makeBlock(front, "Ön Yüz"))
+        stack.addArrangedSubview(makeBlock(ovd,   "OVD/Parlama"))
+        stack.addArrangedSubview(makeBlock(back,  "Arka Yüz"))
 
         let close = UIButton(type: .system)
         close.setTitle("Kapat", for: .normal)
