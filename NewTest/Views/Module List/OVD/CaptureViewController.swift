@@ -284,7 +284,7 @@ final class CaptureViewController: SDKBaseViewController {
     // Content thresholds (gevşetildi)
     private let aspectMin: CGFloat = 0.45
     private let aspectMax: CGFloat = 0.78
-    private let coverageMin: CGFloat = 0.35
+    private let coverageMin: CGFloat = 0.40
     private let coverageMax: CGFloat = 0.93
 
     private var ovdBaselineGlare: Float?
@@ -686,14 +686,25 @@ final class CaptureViewController: SDKBaseViewController {
 
     // MARK: - Çekim sonrası işleme
     private func processCaptured(_ ci: CIImage, step: CaptureStep) -> CIImage {
-        if let rect = detectRectangleSync(in: ci), let warped = perspectiveCorrect(image: ci, rect: rect) {
-            let cropped = warped
-            return cropped.oriented(.down).oriented(.upMirrored)
-        } else {
-            let roi = docRectROI(in: ci.extent)
-            let cropped = ci.cropped(to: roi)
-            return cropped.oriented(.down).oriented(.upMirrored)
-        }
+        let imgRect = ci.extent
+        let viewSize = view.bounds.size
+        // previewLayer.videoGravity = .resizeAspectFill, reverse that
+        let scale = max(viewSize.width / imgRect.width, viewSize.height / imgRect.height)
+        let shownWidth  = imgRect.width * scale
+        let shownHeight = imgRect.height * scale
+        let xOffset = (viewSize.width  - shownWidth)  / 2.0
+        let yOffset = (viewSize.height - shownHeight) / 2.0
+
+        let r = guideRectInView
+        var cropRect = CGRect(
+            x: (r.origin.x - xOffset) / scale,
+            y: (r.origin.y - yOffset) / scale,
+            width: r.size.width / scale,
+            height: r.size.height / scale
+        ).integral
+
+        cropRect = cropRect.intersection(imgRect)
+        return ci.cropped(to: cropRect)
     }
     private func detectRectangleSync(in ci: CIImage) -> VNRectangleObservation? {
         let req = VNDetectRectanglesRequest()
@@ -772,7 +783,7 @@ final class CaptureViewController: SDKBaseViewController {
     // Create UIImage with resolved orientation for review screen
     private func makeUIImage(from ci: CIImage) -> UIImage? {
         guard let cg = context.createCGImage(ci, from: ci.extent) else { return nil }
-        return UIImage(cgImage: cg, scale: UIScreen.main.scale, orientation: .up)
+        return UIImage(cgImage: cg)   // .up zorlamıyoruz
     }
 }
 
