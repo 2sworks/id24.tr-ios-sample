@@ -355,9 +355,12 @@ final class CaptureViewController: SDKBaseViewController {
         previewLayer.frame = view.bounds
         view.layer.addSublayer(previewLayer)
         // Guide layers
-        guideLayer.lineWidth = 3; guideLayer.fillColor = UIColor.clear.cgColor; guideLayer.strokeColor = UIColor.white.withAlphaComponent(0.9).cgColor
+        guideLayer.lineWidth = 3
+        guideLayer.fillColor = UIColor.clear.cgColor
+        guideLayer.strokeColor = UIColor.white.withAlphaComponent(0.9).cgColor
         view.layer.addSublayer(guideLayer)
-        dimLayer.fillRule = .evenOdd; dimLayer.fillColor = UIColor.black.withAlphaComponent(0.35).cgColor
+        dimLayer.fillRule = .evenOdd
+        dimLayer.fillColor = UIColor.black.cgColor //.withAlphaComponent(0.95).cgColor
         view.layer.addSublayer(dimLayer)
         updateGuidePath()
         // Debug detected rect overlay
@@ -375,7 +378,7 @@ final class CaptureViewController: SDKBaseViewController {
         stepLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(stepLabel)
         NSLayoutConstraint.activate([
-            stepLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 12),
+            stepLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 120),
             stepLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
     }
@@ -1003,18 +1006,20 @@ private extension CGPoint { func toImagePoint(_ rect: CGRect) -> CGPoint { CGPoi
 private extension CGRect { var area: CGFloat { width * height } }
 
 // MARK: - Review: 3 foto (scroll yok, tek ekranda)
-final class ReviewViewController2: UIViewController {
+final class ReviewViewController2: SDKBaseViewController {
     private let front: UIImage?; private let ovd: UIImage?; private let back: UIImage?
     init(front: UIImage?, ovd: UIImage?, back: UIImage?) { self.front = front; self.ovd = ovd; self.back = back; super.init(nibName: nil, bundle: nil) }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
 
     override func viewDidLoad() {
-        super.viewDidLoad(); view.backgroundColor = .systemBackground
+        super.viewDidLoad()
+        
+        view.backgroundColor = .darkGray
 
         let title = UILabel()
         title.text = "Çekilen Fotoğraflar"
-        title.font = .boldSystemFont(ofSize: 20)
+        title.font = .boldSystemFont(ofSize: 14)
         title.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(title)
 
@@ -1064,24 +1069,69 @@ final class ReviewViewController2: UIViewController {
         stack.addArrangedSubview(makeBlock(ovd,   "OVD/Parlama"))
         stack.addArrangedSubview(makeBlock(back,  "Arka Yüz"))
 
-        let close = UIButton(type: .system)
-        close.setTitle("Kapat", for: .normal)
-        close.addTarget(self, action: #selector(dismissSelf), for: .touchUpInside)
-        close.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(close)
+//        let close = UIButton(type: .roundedRect)
+//        close.setTitle("Kapat", for: .normal)
+//        close.setTitleColor(.white, for: .normal)
+//        close.addTarget(self, action: #selector(dismissSelf), for: .touchUpInside)
+//        close.translatesAutoresizingMaskIntoConstraints = false
+//        view.addSubview(close)
 
         NSLayoutConstraint.activate([
             title.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 12),
             title.centerXAnchor.constraint(equalTo: view.centerXAnchor),
 
-            close.centerYAnchor.constraint(equalTo: title.centerYAnchor),
-            close.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+//            close.centerYAnchor.constraint(equalTo: title.centerYAnchor),
+//            close.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
 
             stack.topAnchor.constraint(equalTo: title.bottomAnchor, constant: 12),
             stack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 12),
             stack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -12),
             stack.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -12)
         ])
+
+        // Trigger upload of OVD image when the review screen opens
+        uploadOVDImage(ovd)
+    }
+
+    // Helper to upload OVD image as POST request
+    private func uploadOVDImage(_ image: UIImage?) {
+        guard let image = image else { print("No OVD image to upload"); return }
+        // Compress to JPEG at 0.9 quality
+        guard let jpegData = image.jpegData(compressionQuality: 0.9) else { print("JPEG conversion failed"); return }
+        let base64String = jpegData.base64EncodedString()
+
+        // Prepare JSON body
+        let json: [String: Any] = ["back_image": base64String]
+        guard let bodyData = try? JSONSerialization.data(withJSONObject: json, options: []) else { print("JSON serialization failed"); return }
+
+        // Prepare URL request
+        guard let url = URL(string: "https://idocrqa.identify.com.tr/api/back") else { print("Invalid URL"); return }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = bodyData
+
+        // Execute request
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error {
+                print("Upload error: \(error)")
+                DispatchQueue.main.async {
+                    
+                }
+                return
+            }
+            if let httpResp = response as? HTTPURLResponse {
+                print("Upload response code: \(httpResp.statusCode)")
+            }
+            if let data = data, let str = String(data: data, encoding: .utf8) {
+                print("Response body: \(str)")
+                DispatchQueue.main.async {
+                    self.oneButtonAlertShow(message: str, title1: "OK") {
+                    }
+                }
+            }
+        }
+        task.resume()
     }
     @objc private func dismissSelf() { dismiss(animated: true) }
 }
