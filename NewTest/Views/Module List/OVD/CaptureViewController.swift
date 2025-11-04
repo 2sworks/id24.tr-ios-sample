@@ -360,7 +360,7 @@ final class CaptureViewController: SDKBaseViewController {
         guideLayer.strokeColor = UIColor.white.withAlphaComponent(0.9).cgColor
         view.layer.addSublayer(guideLayer)
         dimLayer.fillRule = .evenOdd
-        dimLayer.fillColor = UIColor.black.cgColor //.withAlphaComponent(0.95).cgColor
+        dimLayer.fillColor = UIColor.black.withAlphaComponent(0.8).cgColor
         view.layer.addSublayer(dimLayer)
         updateGuidePath()
         // Debug detected rect overlay
@@ -449,7 +449,9 @@ final class CaptureViewController: SDKBaseViewController {
         guideLayer.fillColor = UIColor.clear.cgColor
         if guideLayer.strokeColor == nil { guideLayer.strokeColor = UIColor.white.withAlphaComponent(0.9).cgColor }
         let outer = UIBezierPath(rect: view.bounds); outer.append(rectPath)
-        dimLayer.path = outer.cgPath; dimLayer.fillRule = .evenOdd; dimLayer.fillColor = UIColor.black.withAlphaComponent(0.35).cgColor
+        dimLayer.path = outer.cgPath
+        dimLayer.fillRule = .evenOdd
+        dimLayer.fillColor = UIColor.black.withAlphaComponent(0.8).cgColor
     }
     private func setGuideDetected(_ ok: Bool) {
         CATransaction.begin(); CATransaction.setDisableActions(true)
@@ -1111,8 +1113,10 @@ final class ReviewViewController2: SDKBaseViewController {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = bodyData
 
+        self.showLoader()
         // Execute request
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            self.hideLoader()
             if let error {
                 print("Upload error: \(error)")
                 DispatchQueue.main.async {
@@ -1126,7 +1130,8 @@ final class ReviewViewController2: SDKBaseViewController {
             if let data = data, let str = String(data: data, encoding: .utf8) {
                 print("Response body: \(str)")
                 DispatchQueue.main.async {
-                    self.oneButtonAlertShow(message: str, title1: "OK") {
+                    self.oneButtonAlertShow(message: str, title1: "Copy Base64 to Clipboard") {
+                        UIPasteboard.general.string = base64String
                     }
                 }
             }
