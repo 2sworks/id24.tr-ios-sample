@@ -212,6 +212,8 @@ final class CaptureViewController: SDKBaseViewController {
     private let photoOutput = AVCapturePhotoOutput()
     private let videoOutput = AVCaptureVideoDataOutput()
     private var previewLayer: AVCaptureVideoPreviewLayer!
+    // Speech
+    private let instructionSpeaker = AVSpeechSynthesizer()
 
     // Queues
     private let visionQueue = DispatchQueue(label: "vision.queue")
@@ -317,11 +319,24 @@ final class CaptureViewController: SDKBaseViewController {
         view.backgroundColor = .black
         setupPreview()
         setupUI()
+        speakInstruction("Kimlik ön yüzünü okutun", delay: 0.2)
         startMotionMonitoring()
         sessionQueue.async { [weak self] in
             guard let self = self else { return }
             self.setupSession()
             self.session.startRunning()
+        }
+    }
+    // MARK: - Instruction Speaker
+    private func speakInstruction(_ text: String, delay: TimeInterval = 0.0) {
+        guard !text.isEmpty else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+            guard let self = self else { return }
+            self.instructionSpeaker.stopSpeaking(at: .immediate)
+            let utterance = AVSpeechUtterance(string: text)
+            utterance.voice = AVSpeechSynthesisVoice(language: "tr-TR")
+            utterance.rate = 0.56
+            self.instructionSpeaker.speak(utterance)
         }
     }
 
@@ -496,6 +511,7 @@ final class CaptureViewController: SDKBaseViewController {
                     self.ovdBaselineRainbow = nil
                     self.ovdStartTs = CFAbsoluteTimeGetCurrent()
                     DispatchQueue.main.async { self.stepLabel.text = "OVD – Flaş açık, kartı hafif yukarı/aşağı hareket ettirin" }
+                    self.speakInstruction("Kimliği hafifçe yukarı aşağı döndürerek, gökkuşağı baskının görünmesini sağlayın", delay: 3.0)
                     self.currentStep = .ovd
                     self.ovdCaptured = false
                     self.ovdBaselineGlare = nil
@@ -521,6 +537,7 @@ final class CaptureViewController: SDKBaseViewController {
                         self.stopPipelinesBeforeReview()
                         DispatchQueue.main.async {
                             self.stepLabel.text = "✅ Arka yüz kaydedildi – Tamamlandı"
+                            self.speakInstruction("Kimlik arka yüz tamamlandı", delay: 0.25)
                             self.setGuideDetected(false)
                             let review = ReviewViewController2(front: self.frontUIImage, ovd: self.ovdUIImage, back: self.backUIImage)
                             review.modalPresentationStyle = .fullScreen
@@ -818,14 +835,21 @@ extension CaptureViewController: AVCapturePhotoCaptureDelegate {
         switch captureReason {
         case .front:
             frontShot = processedCI; frontUIImage = ui
-            DispatchQueue.main.async { self.stepLabel.text = "✅ Ön yüz kaydedildi – OVD adımı" }
+            DispatchQueue.main.async {
+                self.stepLabel.text = "✅ Ön yüz kaydedildi – OVD adımı"
+                self.speakInstruction("Kimlik ön yüz tamamlandı", delay: 0.25)
+            }
             processForOCR(ciImage: processedCI)
         case .ovd:
             ovdShot = processedCI; ovdUIImage = ui
             setTorch(on: false); currentStep = .back; ovdBaselineGlare = nil; ovdBaselineChroma = nil
             self.mrzPresence = false
             self.mrzProbeInFlight = false
-            DispatchQueue.main.async { self.stepLabel.text = "✅ OVD kaydedildi – Arka yüzü hizalayın"; self.setGuideDetected(false) }
+            DispatchQueue.main.async {
+                self.stepLabel.text = "✅ OVD kaydedildi – Arka yüzü hizalayın"; self.setGuideDetected(false)
+                self.speakInstruction("Fotoğraf alındı", delay: 0.25)
+                self.speakInstruction("Kimlik arka yüzü okutun", delay: 2.00)
+            }
         case .back:
             backShot = processedCI; backUIImage = ui
             processForOCR(ciImage: processedCI)
@@ -1006,6 +1030,35 @@ private extension VNRectangleObservation {
 }
 private extension CGPoint { func toImagePoint(_ rect: CGRect) -> CGPoint { CGPoint(x: x*rect.width + rect.origin.x, y: (1-y)*rect.height + rect.origin.y) } }
 private extension CGRect { var area: CGFloat { width * height } }
+
+
+// UILabel subclass that speaks when text changes, only if new and not the same as last spoken, with debouncing and cancellation
+private final class SpeakingLabel: UILabel {
+    private let speech = AVSpeechSynthesizer()
+    private var speakToken: Int = 0
+    private var lastSpokenText: String?
+
+    override var text: String? {
+        didSet {
+            guard let text = text, !text.isEmpty else { return }
+            // Only speak if text changed
+            guard text != lastSpokenText else { return }
+            lastSpokenText = text
+
+            speakToken &+= 1
+            let currentToken = speakToken
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { [weak self] in
+                guard let self = self else { return }
+                guard currentToken == self.speakToken else { return }
+                self.speech.stopSpeaking(at: .immediate)
+                let utterance = AVSpeechUtterance(string: text)
+                utterance.voice = AVSpeechSynthesisVoice(language: "tr-TR")
+                utterance.rate = 0.48
+                self.speech.speak(utterance)
+            }
+        }
+    }
+}
 
 // MARK: - Review: 3 foto (scroll yok, tek ekranda)
 final class ReviewViewController2: SDKBaseViewController {
