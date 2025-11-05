@@ -1009,7 +1009,13 @@ private extension CGRect { var area: CGFloat { width * height } }
 
 // MARK: - Review: 3 foto (scroll yok, tek ekranda)
 final class ReviewViewController2: SDKBaseViewController {
-    private let front: UIImage?; private let ovd: UIImage?; private let back: UIImage?
+    private let front: UIImage?
+    private let ovd: UIImage?
+    private let back: UIImage?
+    // Store references to image views for gesture
+    private var frontImageView: UIImageView?
+    private var ovdImageView: UIImageView?
+    private var backImageView: UIImageView?
     init(front: UIImage?, ovd: UIImage?, back: UIImage?) { self.front = front; self.ovd = ovd; self.back = back; super.init(nibName: nil, bundle: nil) }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
@@ -1034,13 +1040,14 @@ final class ReviewViewController2: SDKBaseViewController {
         stack.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(stack)
 
-
-        func makeBlock(_ image: UIImage?, _ name: String) -> UIView {
+        // Helper returns container view and assigns image view
+        func makeBlock(_ image: UIImage?, _ name: String, assign: @escaping (UIImageView) -> Void) -> UIView {
             let container = UIView(); container.clipsToBounds = true
 
             let iv = UIImageView(image: image)
             iv.contentMode = .scaleAspectFit
             iv.translatesAutoresizingMaskIntoConstraints = false
+            iv.isUserInteractionEnabled = true
             container.addSubview(iv)
 
             NSLayoutConstraint.activate([
@@ -1064,12 +1071,13 @@ final class ReviewViewController2: SDKBaseViewController {
                 badge.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 8)
             ])
 
+            assign(iv)
             return container
         }
 
-        stack.addArrangedSubview(makeBlock(front, "Ön Yüz"))
-        stack.addArrangedSubview(makeBlock(ovd,   "OVD/Parlama"))
-        stack.addArrangedSubview(makeBlock(back,  "Arka Yüz"))
+        stack.addArrangedSubview(makeBlock(front, "Ön Yüz") { iv in self.frontImageView = iv })
+        stack.addArrangedSubview(makeBlock(ovd,   "OVD/Parlama") { iv in self.ovdImageView = iv })
+        stack.addArrangedSubview(makeBlock(back,  "Arka Yüz") { iv in self.backImageView = iv })
 
 //        let close = UIButton(type: .roundedRect)
 //        close.setTitle("Kapat", for: .normal)
@@ -1081,62 +1089,109 @@ final class ReviewViewController2: SDKBaseViewController {
         NSLayoutConstraint.activate([
             title.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 12),
             title.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-
-//            close.centerYAnchor.constraint(equalTo: title.centerYAnchor),
-//            close.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-
             stack.topAnchor.constraint(equalTo: title.bottomAnchor, constant: 12),
             stack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 12),
             stack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -12),
             stack.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -12)
         ])
 
-        // Trigger upload of OVD image when the review screen opens
-        uploadOVDImage(ovd)
+        // Add tap gestures to image views to copy Base64 to clipboard
+        if let iv = frontImageView {
+            let tap = UITapGestureRecognizer(target: self, action: #selector(copyFrontBase64))
+            iv.addGestureRecognizer(tap)
+        }
+        if let iv = ovdImageView {
+            let tap = UITapGestureRecognizer(target: self, action: #selector(copyOVDBase64))
+            iv.addGestureRecognizer(tap)
+        }
+        if let iv = backImageView {
+            let tap = UITapGestureRecognizer(target: self, action: #selector(copyBackBase64))
+            iv.addGestureRecognizer(tap)
+        }
+
+        // Trigger upload of all images when the review screen opens
+        uploadFront()
+        uploadOVD()
+        uploadBack()
     }
 
-    // Helper to upload OVD image as POST request
-    private func uploadOVDImage(_ image: UIImage?) {
-        guard let image = image else { print("No OVD image to upload"); return }
-        // Compress to JPEG at 0.9 quality
-        guard let jpegData = image.jpegData(compressionQuality: 0.9) else { print("JPEG conversion failed"); return }
+    // General image uploader
+    private func uploadImage(_ image: UIImage?, to urlString: String, bodyKey: String, title: String) {
+        guard let image = image else {
+            print("No \(title) image to upload")
+            return
+        }
+        guard let jpegData = image.jpegData(compressionQuality: 0.9) else {
+            print("JPEG conversion failed for \(title)")
+            return
+        }
         let base64String = jpegData.base64EncodedString()
-
-        // Prepare JSON body
-        let json: [String: Any] = ["back_image": base64String]
+        // clean
+        let cleanedBase64 = base64String
+            .replacingOccurrences(of: "\\", with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let json: [String: Any] = [bodyKey: cleanedBase64]
         guard let bodyData = try? JSONSerialization.data(withJSONObject: json, options: []) else { print("JSON serialization failed"); return }
-
-        // Prepare URL request
-        guard let url = URL(string: "https://idocrqa.identify.com.tr/api/back") else { print("Invalid URL"); return }
+        // remove escaped slashes
+        var finalBodyData = bodyData
+        if var jsonString = String(data: bodyData, encoding: .utf8) {
+            jsonString = jsonString.replacingOccurrences(of: "\\/", with: "/")
+            finalBodyData = jsonString.data(using: .utf8) ?? bodyData
+        }
+        guard let url = URL(string: urlString) else { print("Invalid URL"); return }
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = bodyData
+        request.httpBody = finalBodyData
 
-        self.showLoader()
-        // Execute request
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            self.hideLoader()
-            if let error {
-                print("Upload error: \(error)")
+            if let error = error {
+                print("Upload error (\(title)): \(error)")
                 DispatchQueue.main.async {
-                    
+                    self.oneButtonAlertShow(message: error.localizedDescription, title1: title.uppercased()) { }
                 }
                 return
             }
-            if let httpResp = response as? HTTPURLResponse {
-                print("Upload response code: \(httpResp.statusCode)")
-            }
+            var msg = ""
             if let data = data, let str = String(data: data, encoding: .utf8) {
-                print("Response body: \(str)")
-                DispatchQueue.main.async {
-                    self.oneButtonAlertShow(message: str, title1: "Copy Base64 to Clipboard") {
-                        UIPasteboard.general.string = base64String
-                    }
-                }
+                msg = str
+                print("Response (\(title)): \(str)")
+            } else {
+                msg = "No response body"
+            }
+            DispatchQueue.main.async {
+                self.oneButtonAlertShow(appName: title, message: msg, title1: "OK") { }
             }
         }
         task.resume()
     }
+    private func uploadFront() {
+        uploadImage(front, to: "https://idocrqa.identify.com.tr/api/front", bodyKey: "front_image", title: "front-front")
+    }
+    private func uploadOVD() {
+        uploadImage(ovd, to: "https://idocrqa.identify.com.tr/api/front", bodyKey: "front_image", title: "idcheck-ovd")
+    }
+    private func uploadBack() {
+        uploadImage(back, to: "https://idocrqa.identify.com.tr/api/back", bodyKey: "back_image", title: "back-back")
+    }
     @objc private func dismissSelf() { dismiss(animated: true) }
+
+    // Clipboard selectors
+    @objc private func copyFrontBase64() {
+        copyImageBase64(front, label: "front")
+    }
+    @objc private func copyOVDBase64() {
+        copyImageBase64(ovd, label: "ovd")
+    }
+    @objc private func copyBackBase64() {
+        copyImageBase64(back, label: "back")
+    }
+    private func copyImageBase64(_ image: UIImage?, label: String) {
+        guard let image = image, let jpegData = image.jpegData(compressionQuality: 0.9) else { return }
+        let b64 = jpegData.base64EncodedString()
+        UIPasteboard.general.string = b64
+        DispatchQueue.main.async {
+            self.oneButtonAlertShow(message: "\(label) base64 panoya kopyalandı", title1: "OK") { }
+        }
+    }
 }
