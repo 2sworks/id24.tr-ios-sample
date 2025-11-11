@@ -212,6 +212,7 @@ class SDKIdentifyLoginViewController: SDKBaseViewController {
             showThankYouPage: true,
             showNFCNotFoundPage: true,
             supportU18: true,
+            enableAutoRotateOCR: true
         ) { socketStats, apiResp, webErr in
                 
             print("socket resp : \(socketStats)")
