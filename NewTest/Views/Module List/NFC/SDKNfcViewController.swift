@@ -227,7 +227,11 @@ class SDKNfcViewController: SDKBaseViewController {
                     let alertExpMsg = self.translate(text: .activeNfcExit)
                     if self.manager.nfcComparisonCount == self.manager.tryedNfcComparisonCount {
                         self.oneButtonAlertShow(message: alertExpMsg, title1: "Tamam") {
-                            self.closeSDK()
+                            if self.manager.activeComparisonResultSkipModule == "1" {
+                                self.goToNextPage()
+                            } else {
+                                self.closeSDK()
+                            }
                         }
                     } else {
                         self.oneButtonAlertShow(message: alertMsg, title1: "Tamam") {

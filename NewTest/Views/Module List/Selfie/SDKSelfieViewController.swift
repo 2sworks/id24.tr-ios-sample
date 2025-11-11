@@ -76,7 +76,13 @@ class SDKSelfieViewController: SDKBaseViewController {
                 let alertExpMsg = self.translate(text: .activeSelfieExit)
                 if self.manager.selfieComparisonCount == self.manager.tryedSelfieComparisonCount {
                     self.oneButtonAlertShow(message: alertExpMsg, title1: "Tamam") {
-                        self.closeSDK()
+                        if self.manager.activeComparisonResultSkipModule == "1" {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: {
+                                self.skipModuleAct()
+                            })
+                        } else {
+                            self.closeSDK()
+                        }
                     }
                 } else {
                     self.oneButtonAlertShow(message: alertMsg, title1: "Tamam") {

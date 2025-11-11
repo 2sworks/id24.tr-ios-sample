@@ -297,6 +297,13 @@ class SDKCardReaderViewController: SDKBaseViewController {
                                 } else if webResp.result == true && webResp.data?.comparison == false {
                                     self.showToast(title: self.translate(text: .coreError), subTitle: "\(webResp.messages?.first ?? self.translate(text: .activeNfcExit))", attachTo: self.view) {
                                         self.hideLoader()
+                                        if self.manager.activeComparisonResultSkipModule == "1" {
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: {
+                                                self.skipModuleAct()
+                                            })
+                                        } else {
+                                            self.closeSDK()
+                                        }
                                     }
                                 } else {
                                     self.showToast(title: self.translate(text: .coreError), subTitle: "\(webResp.messages?.first ?? self.translate(text: .coreUploadError))", attachTo: self.view) {
