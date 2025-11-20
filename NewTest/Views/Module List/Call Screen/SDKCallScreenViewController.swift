@@ -27,6 +27,7 @@ class SDKCallScreenViewController: SDKBaseViewController {
     @IBOutlet weak var qualityImg: UIImageView! // bağlantı kalitesi imajı
     @IBOutlet weak var smsStackView: UIView!
     @IBOutlet weak var timeInfoLbl: UILabel!
+    @IBOutlet weak var endCallButton: UIButton!
     private var confStarted = false // ilk kez bağlantı kurulma - temsilci ve kişinin kamerasını bu değişkene göre aktif eder
     var checkedSignLang = false
     
@@ -63,7 +64,9 @@ class SDKCallScreenViewController: SDKBaseViewController {
         self.waitDesc2.text = self.translate(text: .waitingDesc2)
         self.smsLblDesc.text = self.translate(text: .enterSmsCode)
         self.plsWaitLbl.text = self.translate(text: .corePlsWait)
-        
+        self.endCallButton.isUserInteractionEnabled = true
+        self.endCallButton.isEnabled = true
+        self.endCallButton.alpha = 1.0
     }
     
     private func checkSignLang() {
@@ -239,6 +242,11 @@ extension SDKCallScreenViewController: SDKSocketListener {
                     return
                 }
                 print("yüz yüze görüşme başlıyor")
+            case .disableEndCallButton:
+                self.endCallButton.isUserInteractionEnabled = false
+                self.endCallButton.isEnabled = false
+                self.endCallButton.alpha = 0.3
+                print("bitirme butonu kapatıldı")
             case .networkQuality(let quality):
                 print("bağlantı kalitesine göre sinyal resmi basılıyor")
                 switch quality {

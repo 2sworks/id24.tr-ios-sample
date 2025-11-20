@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23727" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24412" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_0" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23721"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24405"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -23,6 +23,7 @@
                 <outlet property="callScreen" destination="1Ge-oL-6lD" id="1Vg-hx-sv8"/>
                 <outlet property="codeTxt" destination="584-GN-Fbj" id="acc-ly-6mj"/>
                 <outlet property="customerCam" destination="H13-C5-KUq" id="6Ur-EL-Dp7"/>
+                <outlet property="endCallButton" destination="XNu-pi-4vV" id="akb-rq-yGL"/>
                 <outlet property="myCam" destination="JWh-MT-aW9" id="F3S-S5-gLt"/>
                 <outlet property="plsWaitLbl" destination="NNT-O3-uf5" id="dNo-bQ-1cg"/>
                 <outlet property="qualityImg" destination="xrv-lg-chm" id="sLV-FN-8Q7"/>
