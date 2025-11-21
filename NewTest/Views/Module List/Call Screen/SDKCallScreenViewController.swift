@@ -243,6 +243,9 @@ extension SDKCallScreenViewController: SDKSocketListener {
                 }
                 print("yüz yüze görüşme başlıyor")
             case .disableEndCallButton:
+                if topMostController().isKind(of: UIAlertController.self) {
+                    self.dismiss(animated: false)
+                }
                 self.endCallButton.isUserInteractionEnabled = false
                 self.endCallButton.isEnabled = false
                 self.endCallButton.alpha = 0.3
