@@ -7,6 +7,7 @@
 
 import UIKit
 import Foundation
+import IdentifySDK
 import AVFoundation
 import Vision
 import CoreImage
@@ -224,6 +225,7 @@ final class CaptureViewController: SDKBaseViewController {
     private var currentStep: CaptureStep = .front
     private var captureReason: CaptureStep = .front
     private var isCapturing = false
+    private var isOCRInFlight = false
     private var ovdCaptured = false
 
     // Vision/CI
@@ -499,11 +501,15 @@ final class CaptureViewController: SDKBaseViewController {
 
     // MARK: OCR Pipeline
     private func processForOCR(ciImage: CIImage) {
+        self.dlog("> processForOCR")
         detectRectangle(in: ciImage) { [weak self] rectObs in
+            self?.dlog("> processForOCR - detectRectangle")
             guard let self = self else { return }
             self.dlog("processForOCR step=\(self.currentStep.rawValue) rectFound=\(rectObs != nil)")
             self.lastRectObservation = rectObs
             let warped = self.perspectiveCorrect(image: ciImage, rect: rectObs) ?? ciImage
+            startOCR(ciImage: warped)
+            /*
             self.runOCR(on: warped) { texts in
                 let fields = self.extractFields(from: texts.joined(separator: " "))
                 print("[OCR][\(self.currentStep.rawValue)] fields: name=\(fields.name ?? "-") surname=\(fields.surname ?? "-") TCKN=\(fields.idNumber ?? "-") bday=\(fields.birthDate ?? "-")")
@@ -546,8 +552,181 @@ final class CaptureViewController: SDKBaseViewController {
                     }
                 }
             }
+            */
         }
     }
+    
+    private func startOCR(ciImage: CIImage) {
+        // Tek seferde tek OCR/upload pipeline çalışsın
+        if isOCRInFlight {
+            dlog("startOCR ignored (in-flight) step=\(currentStep.rawValue)")
+            return
+        }
+        isOCRInFlight = true
+        let img = UIImage(ciImage: ciImage)
+        switch self.currentStep {
+        case .front:
+            //self.showLoader()
+            self.manager.startFrontIdOcr(frontImg:img) { resp, err in
+                if err != nil {
+                    DispatchQueue.main.async {
+                        self.isOCRInFlight = false
+                        self.showToast(type: .fail,
+                                       title: self.translate(text: .coreError),
+                                       subTitle: err?.errorMessages ?? "",
+                                       attachTo: self.view) {
+                            return
+                        }
+                    }
+                } else {
+                    print(self.manager.sdkFrontInfo.asDictionary())
+                    self.manager.uploadIdPhoto(idPhoto: img) { webResp in
+                        if webResp.result == true {
+                            // Front OCR + upload başarılı -> OVD adımına geç
+                            print("[FrontUpload] success, moving to OVD step")
+                            DispatchQueue.main.async {
+                                self.moveToOVDStep()
+                            }
+                        } else {
+                            // Front başarısız -> FRONT adımında kal, yeniden denemeye izin ver
+                            DispatchQueue.main.async {
+                                self.showToast(title: self.translate(text: .coreError),
+                                               subTitle: "\(webResp.messages?.first ?? self.translate(text: .coreUploadError))",
+                                               attachTo: self.view) {
+                                                //self.hideLoader()
+                                               }
+                                // Kullanıcıya tekrar denemesi için rehberlik
+                                self.stepLabel.text = "Ön Yüz – Tekrar deneyin, kılavuz içine hizalayın"
+                                self.speakInstruction("Kimlik ön yüzünü tekrar kılavuz içine hizalayın ve sabit tutun", delay: 0.3)
+                                self.setGuideDetected(false)
+                            }
+                        }
+                        self.isOCRInFlight = false
+                    }
+                }
+            }
+        case .ovd:
+            self.manager.uploadIdPhoto(idPhoto: img, selfieType: .frontIdOvd) { webResp in
+                if webResp.result == true {
+                    // OVD upload başarılı -> Back adımına geç
+                    print("[FrontOVDUpload] success, moving to Back step")
+                    DispatchQueue.main.async {
+                        self.moveToBackStepAfterOVDSuccess()
+                    }
+                } else {
+                    // OVD başarısız -> OVD adımında kal, yeniden denemeye izin ver
+                    DispatchQueue.main.async {
+                        self.showToast(title: self.translate(text: .coreError),
+                                       subTitle: "\(webResp.messages?.first ?? self.translate(text: .coreUploadError))",
+                                       attachTo: self.view) {
+                            //self.hideLoader()
+                                       }
+                        self.prepareOVDRetry()
+                    }
+                }
+                self.isOCRInFlight = false
+            }
+        case .back:
+            //self.showLoader()
+            self.manager.startBackIdOcr(frontImg: img) { resp, err in
+                if err != nil {
+                    DispatchQueue.main.async {
+                        self.isOCRInFlight = false
+                        self.showToast(type: .fail,
+                                       title: self.translate(text: .coreError),
+                                       subTitle: self.translate(text: .wrongBackSide),
+                                       attachTo: self.view) {
+                            return
+                        }
+                    }
+                } else {
+                    print("Front OCR \(self.manager.sdkFrontInfo.asDictionary())")
+                    print("Back OCR \(self.manager.sdkBackInfo.asDictionary())")
+                    self.manager.uploadIdPhoto(idPhoto: img, selfieType: .backId) { webResp in
+                        if webResp.result == true && webResp.data?.comparison == true {
+                            // success; nothing extra here for now
+                        } else if webResp.result == true && webResp.data?.comparison == false {
+                            DispatchQueue.main.async {
+                                self.showToast(title: self.translate(text: .coreError),
+                                               subTitle: "\(webResp.messages?.first ?? self.translate(text: .activeNfcExit))",
+                                               attachTo: self.view) {
+                                                }
+                            }
+                        } else {
+                            DispatchQueue.main.async {
+                                self.showToast(title: self.translate(text: .coreError),
+                                               subTitle: "\(webResp.messages?.first ?? self.translate(text: .coreUploadError))",
+                                               attachTo: self.view) {
+                                               }
+                            }
+                        }
+                        self.isOCRInFlight = false
+                    }
+                }
+            }
+        }
+    }
+
+    // FRONT başarılı olduktan sonra OVD adımına geçiş
+    private func moveToOVDStep() {
+        // OVD baseline ve state reset
+        ovdBaselineRainbow = nil
+        ovdBaselineGlare = nil
+        ovdBaselineChroma = nil
+        ovdArmed = false
+        ovdMovementAccum = 0
+        lastRectCenterY = nil
+        ovdCaptured = false
+        mrzPresence = false
+        mrzProbeInFlight = false
+        ovdStartTs = CFAbsoluteTimeGetCurrent()
+        
+        currentStep = .ovd
+        
+        DispatchQueue.main.async {
+            self.stepLabel.text = "OVD – Flaş açık, kartı hafif yukarı/aşağı hareket ettirin"
+            self.setGuideDetected(false)
+            self.speakInstruction("Kimliği hafifçe yukarı aşağı döndürerek, gökkuşağı baskının görünmesini sağlayın", delay: 3.0)
+            self.setTorch(on: true)
+        }
+    }
+
+    // OVD sonrası server başarılı dönerse Back adımına geçiş
+    private func moveToBackStepAfterOVDSuccess() {
+        // Back adımına geçerken OVD state'lerini sıfırla
+        currentStep = .back
+        ovdBaselineGlare = nil
+        ovdBaselineChroma = nil
+        ovdBaselineRainbow = nil
+        ovdHold = 0
+        mrzPresence = false
+        mrzProbeInFlight = false
+        ovdCaptured = true  // bu OVD için tekrar çekim yapılmasın
+
+        setTorch(on: false)
+        setGuideDetected(false)
+        stepLabel.text = "✅ OVD kaydedildi – Arka yüzü hizalayın"
+        speakInstruction("Fotoğraf alındı", delay: 0.25)
+        speakInstruction("Kimlik arka yüzü okutun", delay: 2.0)
+    }
+
+    // OVD upload başarısız olduğunda aynı adımda kal ve tekrar denemeye hazırla
+    private func prepareOVDRetry() {
+        // yeni OVD için state reset
+        ovdCaptured = false
+        ovdBaselineRainbow = nil
+        ovdBaselineGlare = nil
+        ovdBaselineChroma = nil
+        ovdHold = 0
+        ovdStartTs = CFAbsoluteTimeGetCurrent()
+        ovdWhiteOut = false
+
+        stepLabel.text = "OVD – Tekrar deneyin, kartı hafifçe yukarı/aşağı hareket ettirin"
+        speakInstruction("Kimliği hafifçe yukarı aşağı döndürerek, gökkuşağı baskıyı tekrar görünür yapın", delay: 0.3)
+        setGuideDetected(false)
+        setTorch(on: true)
+    }
+    
     // MRZ-dedicated OCR for better chevron capture
     private func runMRZOCR(on ciImage: CIImage, completion: @escaping ([String]) -> Void) {
         // focus on lower band
@@ -836,20 +1015,15 @@ extension CaptureViewController: AVCapturePhotoCaptureDelegate {
         case .front:
             frontShot = processedCI; frontUIImage = ui
             DispatchQueue.main.async {
-                self.stepLabel.text = "✅ Ön yüz kaydedildi – OVD adımı"
-                self.speakInstruction("Kimlik ön yüz tamamlandı", delay: 0.25)
+                self.stepLabel.text = "✅ Ön yüz kaydedildi"
+                self.speakInstruction("Kimlik ön yüz kontrol ediliyor", delay: 0.25)
             }
             processForOCR(ciImage: processedCI)
         case .ovd:
             ovdShot = processedCI; ovdUIImage = ui
-            setTorch(on: false); currentStep = .back; ovdBaselineGlare = nil; ovdBaselineChroma = nil
-            self.mrzPresence = false
-            self.mrzProbeInFlight = false
-            DispatchQueue.main.async {
-                self.stepLabel.text = "✅ OVD kaydedildi – Arka yüzü hizalayın"; self.setGuideDetected(false)
-                self.speakInstruction("Fotoğraf alındı", delay: 0.25)
-                self.speakInstruction("Kimlik arka yüzü okutun", delay: 2.00)
-            }
+            // OVD çekildi; server doğrulaması için OCR/upload pipeline'ına gönder
+            setTorch(on: false)
+            processForOCR(ciImage: processedCI)
         case .back:
             backShot = processedCI; backUIImage = ui
             processForOCR(ciImage: processedCI)
@@ -963,7 +1137,7 @@ extension CaptureViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
                         self.setGuideDetected(canFire)
                     }
 
-                    if canFire && !self.isCapturing {
+                    if canFire && !self.isCapturing && !self.isOCRInFlight {
                         self.lastReadyFireTs = now
                         self.readyScore = 0
                         self.capture(reason: self.currentStep)
@@ -1010,7 +1184,7 @@ extension CaptureViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
                 self.setGuideDetected(hit)
             }
 
-            if hit && !self.isCapturing && !self.ovdCaptured {
+            if hit && !self.isCapturing && !self.ovdCaptured && !self.isOCRInFlight {
                 self.ovdCaptured = true
                 DispatchQueue.main.async { self.stepLabel.text = "OVD – Parlama yakalandı, çekiliyor…" }
                 self.capture(reason: .ovd)
