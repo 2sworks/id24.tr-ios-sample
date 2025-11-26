@@ -262,6 +262,10 @@ final class CaptureViewController: SDKBaseViewController {
     }
     private var ovdCaptured = false
 
+    // Flow configuration: OVD step can be enabled/disabled from outside.
+    // Default: true (OVD aşaması aktif). Dışarıdan false yapılırsa FRONT -> BACK akışı kullanılır.
+    var isOVDEnabled: Bool = false
+
     // Vision/CI
     private let context = CIContext()
     private let mrzParser = MRZParser()
@@ -638,10 +642,17 @@ final class CaptureViewController: SDKBaseViewController {
                         print(self.manager.sdkFrontInfo.asDictionary())
                         self.manager.uploadIdPhoto(idPhoto: img) { webResp in
                             if webResp.result == true {
-                                // Front OCR + upload başarılı -> OVD adımına geç
-                                print("[FrontUpload] success, moving to OVD step")
-                                DispatchQueue.main.async {
-                                    self.moveToOVDStep()
+                                // Front OCR + upload başarılı -> OVD adımına geç veya OVD devre dışı ise direkt BACK adımına
+                                if self.isOVDEnabled {
+                                    print("[FrontUpload] success, moving to OVD step")
+                                    DispatchQueue.main.async {
+                                        self.moveToOVDStep()
+                                    }
+                                } else {
+                                    print("[FrontUpload] success, OVD disabled -> moving directly to Back step")
+                                    DispatchQueue.main.async {
+                                        self.moveToBackStepSkippingOVD()
+                                    }
                                 }
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                                     self.setGuideDetected(false)
@@ -792,6 +803,23 @@ final class CaptureViewController: SDKBaseViewController {
         stepLabel.text = "✅ OVD kaydedildi – Arka yüzü hizalayın"
         speakInstruction("Fotoğraf alındı", delay: 0.25)
         speakInstruction("Kimlik arka yüzü okutun", delay: 2.0)
+    }
+
+    // OVD opsiyonel olduğunda, FRONT başarılı olunca doğrudan BACK adımına geçiş
+    private func moveToBackStepSkippingOVD() {
+        currentStep = .back
+        ovdBaselineGlare = nil
+        ovdBaselineChroma = nil
+        ovdBaselineRainbow = nil
+        ovdHold = 0
+        mrzPresence = false
+        mrzProbeInFlight = false
+        ovdCaptured = false
+
+        setTorch(on: false)
+        setGuideDetected(false)
+        stepLabel.text = "✅ Ön yüz kaydedildi – Arka yüzü hizalayın"
+        speakInstruction("Kimlik arka yüzü okutun", delay: 0.5)
     }
 
     // OVD upload başarısız olduğunda aynı adımda kal ve tekrar denemeye hazırla
