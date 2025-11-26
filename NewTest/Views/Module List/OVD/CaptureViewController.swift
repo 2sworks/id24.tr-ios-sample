@@ -264,7 +264,7 @@ final class CaptureViewController: SDKBaseViewController {
 
     // Flow configuration: OVD step can be enabled/disabled from outside.
     // Default: true (OVD aşaması aktif). Dışarıdan false yapılırsa FRONT -> BACK akışı kullanılır.
-    var isOVDEnabled: Bool = false
+    var isOVDEnabled: Bool = true
 
     // Vision/CI
     private let context = CIContext()
@@ -359,7 +359,7 @@ final class CaptureViewController: SDKBaseViewController {
     private var ovdHold = 0
 
     // Still foto için minimum dikdörtgen alan oranı (çok küçükse warp etme)
-    private let stillMinRectAreaRatio: CGFloat = 0.08
+    private let stillMinRectAreaRatio: CGFloat = 0.05
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -468,16 +468,62 @@ final class CaptureViewController: SDKBaseViewController {
 
     private func showDetectedRect(_ rectObs: VNRectangleObservation?) {
         DispatchQueue.main.async {
-            guard let r = rectObs else {
-                self.detectedRectLayer.path = nil
-                return }
-            let bb = r.boundingBox
-            let meta = CGRect(x: bb.origin.x, y: 1 - bb.origin.y - bb.size.height, width: bb.size.width, height: bb.size.height)
-            let uiRect = self.previewLayer.layerRectConverted(fromMetadataOutputRect: meta)
-            let path = UIBezierPath(roundedRect: uiRect, cornerRadius: 8)
-            self.detectedRectLayer.path = path.cgPath
+            // Artık kullanıcıya sarı çerçeve göstermiyoruz.
+            self.detectedRectLayer.path = nil
         }
     }
+    /// Guide alanı içindeki still görüntü için, WeScan tarzı Quadrilateral tespiti.
+    /// Bu fonksiyon, VisionRectangleDetector.completeImageRequest mantığını senkron şekilde tekrarlar.
+    private func detectQuadSync(in image: CIImage) -> Quadrilateral? {
+        let width = image.extent.width
+        let height = image.extent.height
+
+        let handler = VNImageRequestHandler(ciImage: image, options: [:])
+        var foundQuad: Quadrilateral?
+
+        let rectRequest = VNDetectRectanglesRequest { request, error in
+            guard error == nil,
+                  let results = request.results as? [VNRectangleObservation],
+                  !results.isEmpty else {
+                return
+            }
+
+            let quads: [Quadrilateral] = results.map(Quadrilateral.init)
+            guard let biggest = quads.biggest() else {
+                return
+            }
+
+            // VN sonuçları normalize koordinattadır; genişlik/yükseklik ile ölçekleyelim.
+            let transform = CGAffineTransform.identity
+                .scaledBy(x: width, y: height)
+
+            foundQuad = biggest.applying(transform)
+        }
+
+        rectRequest.minimumConfidence = 0.8
+        rectRequest.maximumObservations = 15
+        rectRequest.minimumAspectRatio = 0.3
+
+        do {
+            try handler.perform([rectRequest])
+        } catch {
+            dlog("detectQuadSync error: \(error)")
+        }
+
+        return foundQuad
+    }
+
+    /// WeScan Quadrilateral kullanarak perspektif düzeltme.
+    private func perspectiveCorrect(image: CIImage, quad: Quadrilateral) -> CIImage? {
+        let f = CIFilter.perspectiveCorrection()
+        f.inputImage = image
+        f.topLeft = quad.topLeft
+        f.topRight = quad.topRight
+        f.bottomLeft = quad.bottomLeft
+        f.bottomRight = quad.bottomRight
+        return f.outputImage
+    }
+
 
     private func setTorch(on: Bool, level: Float = 0.6) {
         guard let device = videoDevice, device.hasTorch else { return }
@@ -1060,68 +1106,59 @@ final class CaptureViewController: SDKBaseViewController {
         return roi.intersection(extent)
     }
 
+    /// Captured still image'i kırparken kullanılacak ana fonksiyon.
+    /// - step: front/back/ovd
+    /// Bu versiyon:
+    ///  - Sarı çerçeve / live rect kullanmaz.
+    ///  - Sadece guide alanı içindeki kısmı kullanır (guide dışı tamamen atılır).
+    ///  - Guide içindeki görüntüde WeScan tarzı Quadrilateral bularak perspektif düzeltme yapar.
     private func processCaptured(_ ci: CIImage, step: CaptureStep) -> CIImage {
-        // *** Always force landscape before ANY crop logic ***
-        //let ci = forceLandscape(ci)
-
         let extent = ci.extent
-        let roi = centeredDocRectROI(in: extent)
 
-        // 1) OVD: aynı davranış, her zaman guide benzeri alan
-//        if case .ovd = step {
-//            return ci.cropped(to: roi)
-//        }
+        // 1) Guide alanına karşılık gelen ROI'yi hesapla
+        let roiInImage = docRectROI(in: extent)
 
-        // FRONT/BACK:
-        // Önce canlı sarı çerçeve (lastRectObservation) büyük ve ID oranına uygunsa
-        // doğrudan o bounding box'a crop et.
-        if let liveRect = lastRectObservation {
-            let bb = liveRect.toImageRect(imageRect: extent)
-            let areaRatio = bb.area / max(extent.area, 1)
-            let sides = sideLengths(of: liveRect)
-            let ratio = min(sides.w, sides.h) / max(sides.w, sides.h)
+        // Guide dışındaki her şeyi tamamen at: sadece guide içini kullanacağız
+        let croppedToGuide = ci.cropped(to: roiInImage)
 
-            let sizeOK = areaRatio >= stillMinRectAreaRatio
-            let aspectOK = (ratio >= aspectMin && ratio <= aspectMax)
+        // CIImage koordinat sistemini (0,0)'a taşı: Vision/Quadrilateral kodu origin=0 varsayıyor
+        let normalized = croppedToGuide.transformed(by: CGAffineTransform(translationX: -roiInImage.origin.x,
+                                                                          y: -roiInImage.origin.y))
 
-            if sizeOK && aspectOK {
-                let clipped = bb.intersection(extent)
-                if !clipped.isNull && clipped.area > 0 {
-                    return ci.cropped(to: clipped)
-                }
+        // OVD için ekstra perspektif/rect gerekmiyor; sadece guide içini kullan
+        if case .ovd = step {
+            return normalized
+        }
+
+        // FRONT/BACK için: guide içindeki normalized görüntüde Quadrilateral tespiti yap
+        if let quad = detectQuadSync(in: normalized) {
+            // Önce kartın açısına göre perspektif düzeltme (kimlik kenarlarıyla tam hizalı crop)
+            if let warped = perspectiveCorrect(image: normalized, quad: quad) {
+                // Mirror işlemi yapma; sadece yatay konuma zorla
+                let landscape = forceLandscape(warped)
+                return landscape
             }
         }
 
-        // Sonra still frame üzerinde yeni bir dikdörtgen bulmayı dene.
-        if let rect = detectRectangleSync(in: ci) {
-            let bb = rect.toImageRect(imageRect: extent)
-            let areaRatio = bb.area / max(extent.area, 1)
-            let sides = sideLengths(of: rect)
-            let ratio = min(sides.w, sides.h) / max(sides.w, sides.h)
-
-            let sizeOK = areaRatio >= stillMinRectAreaRatio
-            let aspectOK = (ratio >= aspectMin && ratio <= aspectMax)
-
-            if sizeOK && aspectOK {
-                let clipped = bb.intersection(extent)
-                if !clipped.isNull && clipped.area > 0 {
-                    return ci.cropped(to: clipped)
-                }
-            }
-        }
-
-        // Hiç düzgün dikdörtgen yoksa, guide benzeri alana crop et (fallback)
-        return ci.cropped(to: roi)
+        // Hiç düzgün quad bulunamazsa: en azından guide alanını düz crop + yatay hale getir.
+        return forceLandscape(normalized)
     }
-    private func detectRectangleSync(in ci: CIImage) -> VNRectangleObservation? {
+    
+    private func detectRectangleSync(in ci: CIImage,
+                                     orientation: CGImagePropertyOrientation = .up) -> VNRectangleObservation? {
         let req = VNDetectRectanglesRequest()
         req.minimumAspectRatio = 0.5
         req.minimumSize = 0.04
         req.quadratureTolerance = 25.0
         req.minimumConfidence = 0.5
         req.maximumObservations = 1
-        let handler = VNImageRequestHandler(ciImage: ci, orientation: .up, options: [:])
-        do { try handler.perform([req]) } catch { return nil }
+        let handler = VNImageRequestHandler(ciImage: ci, orientation: orientation, options: [:])
+        do {
+            try handler.perform([req])
+        } catch {
+            dlog("detectRectangleSync VN error: \(error)")
+            return nil
+        }
         return (req.results as? [VNRectangleObservation])?.first
     }
 
@@ -1192,16 +1229,17 @@ extension CaptureViewController: AVCapturePhotoCaptureDelegate {
         // 1) Raw JPEG verisini al
         guard let data = photo.fileDataRepresentation() else { return }
 
-        // 2) CIImage yarat (henüz rotate etme)
+        // 2) CIImage yarat (henüz rotate/mirror etme)
         let originalCI = CIImage(data: data) ?? CIImage()
 
-        // 3) RAW orientation ile crop yap (guide & sarı rect doğru alansın diye)
+        // 3) Still foto üzerinde taze dikdörtgen tespiti ve doğru crop/warp
         let croppedCI = self.processCaptured(originalCI, step: captureReason)
 
-        // 4) Crop sonrası tek tip dön → sağa 90°
-        let ciRaw = croppedCI.oriented(.right)
+        // 4) Gerekli orientation/mirror düzeltmeleri processCaptured içinde yapıldığı için
+        // burada ek bir rotate/mirror uygulamadan devam ediyoruz.
+        let ciRaw = croppedCI
 
-        print("[Capture] RAW resolution after pre-rotation crop: \(ciRaw.extent.size)")
+        print("[Capture] RAW resolution after rect-based crop: \(ciRaw.extent.size)")
 
         guard let ui = self.makeUIImage(from: ciRaw) else { return }
         
