@@ -1125,9 +1125,10 @@ final class CaptureViewController: SDKBaseViewController {
         let normalized = croppedToGuide.transformed(by: CGAffineTransform(translationX: -roiInImage.origin.x,
                                                                           y: -roiInImage.origin.y))
 
-        // OVD için ekstra perspektif/rect gerekmiyor; sadece guide içini kullan
+        // OVD için ekstra perspektif/rect gerekmiyor; sadece guide içini kullan.
+        // Ancak review ekranında diğerleriyle tutarlı olması için yatay (landscape) hale getir.
         if case .ovd = step {
-            return normalized
+            return forceLandscape(normalized)
         }
 
         // FRONT/BACK için: guide içindeki normalized görüntüde Quadrilateral tespiti yap

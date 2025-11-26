@@ -188,7 +188,7 @@ class SDKIdentifyLoginViewController: SDKBaseViewController {
         } else if identIdArea.text == "busra" {
             self.identIdArea.text = "14412dd4616298aabbd80c9628860ed8d214c288"
         } else if identIdArea.text == "c" {
-            self.identIdArea.text = "651b830832f0d289a830db0f5704c9677657b0de"
+            self.identIdArea.text = "329c88034046fabb07a441938c933fe0f5cbff46"
         } else if identIdArea.text == "c2" {
             self.identIdArea.text = "a170357f1ed311b3c49880a5ec2f1d78d0bf624d"
         }
@@ -211,6 +211,7 @@ class SDKIdentifyLoginViewController: SDKBaseViewController {
             showThankYouPage: true,
             showNFCNotFoundPage: true,
             supportU18: true,
+            enableAutoRotateOCR: true
         ) { socketStats, apiResp, webErr in
                 
             print("socket resp : \(socketStats)")
