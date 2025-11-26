@@ -319,11 +319,16 @@ final class CaptureViewController: SDKBaseViewController {
     private let readyScoreFire: Int = 8
     private var lastReadyFireTs: CFAbsoluteTime = 0
 
-    // Content thresholds (gevşetildi)
+    // Content thresholds
     private let aspectMin: CGFloat = 0.45
     private let aspectMax: CGFloat = 0.78
-    private let coverageMin: CGFloat = 0.40
-    private let coverageMax: CGFloat = 0.93
+
+    /// Otomatik çekim için: dikdörtgenin guide alanını neredeyse tamamen doldurmasını istiyoruz.
+    /// coverage = (rect ∩ guide) / guideArea  ≈ 1.0, tolerans ~%2–3
+    private let coverageTarget: CGFloat = 1.0
+    private let coverageTolerance: CGFloat = 0.30
+    private var coverageMin: CGFloat { coverageTarget - coverageTolerance }  // ~0.97
+    private var coverageMax: CGFloat { coverageTarget + coverageTolerance }  // ~1.03 (pratikte coverage ≤ 1.0
 
     private var ovdBaselineGlare: Float?
     private var ovdBaselineChroma: Float?
@@ -374,7 +379,7 @@ final class CaptureViewController: SDKBaseViewController {
             self.instructionSpeaker.stopSpeaking(at: .immediate)
             let utterance = AVSpeechUtterance(string: text)
             utterance.voice = AVSpeechSynthesisVoice(language: "tr-TR")
-            utterance.rate = 0.56
+            utterance.rate = 0.6
             self.instructionSpeaker.speak(utterance)
         }
     }
@@ -568,30 +573,31 @@ final class CaptureViewController: SDKBaseViewController {
     // MARK: OCR Pipeline
     private func processForOCR(ciImage: CIImage) {
         self.dlog("> processForOCR")
-        // Still foto: ROI kullanma, orientation .up, overlay gösterme
-        detectRectangle(in: ciImage, useGuideROI: false, orientation: .up, showOverlay: false) { [weak self] rectObs in
-            self?.dlog("> processForOCR - detectRectangle (still)")
-            guard let self = self else { return }
-            self.dlog("processForOCR step=\(self.currentStep.rawValue) rectFound=\(rectObs != nil)")
-            self.lastRectObservation = rectObs
-
-            var finalImage = ciImage
-            if let r = rectObs {
-                let bb = r.toImageRect(imageRect: ciImage.extent)
-                let areaRatio = bb.area / max(ciImage.extent.area, 1)
-                if areaRatio >= self.stillMinRectAreaRatio {
-                    if let warped = self.perspectiveCorrect(image: ciImage, rect: r) {
-                        finalImage = warped
-                    }
-                } else {
-                    self.dlog(String(format: "Skip warp: small rect (%.1f%% of image)", areaRatio*100))
-                }
-            } else {
-                self.dlog("No rect on still; using original image")
-            }
-
-            self.startOCR(ciImage: finalImage)
-        }
+        self.startOCR(ciImage: ciImage)
+//        // Still foto: ROI kullanma, orientation .up, overlay gösterme
+//        detectRectangle(in: ciImage, useGuideROI: false, orientation: .up, showOverlay: false) { [weak self] rectObs in
+//            self?.dlog("> processForOCR - detectRectangle (still)")
+//            guard let self = self else { return }
+//            self.dlog("processForOCR step=\(self.currentStep.rawValue) rectFound=\(rectObs != nil)")
+//            self.lastRectObservation = rectObs
+//
+//            var finalImage = ciImage
+//            if let r = rectObs {
+//                let bb = r.toImageRect(imageRect: ciImage.extent)
+//                let areaRatio = bb.area / max(ciImage.extent.area, 1)
+//                if areaRatio >= self.stillMinRectAreaRatio {
+//                    if let warped = self.perspectiveCorrect(image: ciImage, rect: r) {
+//                        finalImage = warped
+//                    }
+//                } else {
+//                    self.dlog(String(format: "Skip warp: small rect (%.1f%% of image)", areaRatio*100))
+//                }
+//            } else {
+//                self.dlog("No rect on still; using original image")
+//            }
+//
+//            self.startOCR(ciImage: ciImage)
+//        }
     }
     
     private func startOCR(ciImage: CIImage) {
@@ -605,31 +611,96 @@ final class CaptureViewController: SDKBaseViewController {
         let img = self.makeUIImage(from: ciImage) ?? UIImage(ciImage: ciImage)
         switch self.currentStep {
         case .front:
-            print(">> manager: \(self.manager)")
-            self.manager.uploadIdPhoto(idPhoto: img) { webResp in
-                if webResp.result == true {
-                    print("[FrontUpload] success, moving to OVD step")
-                    DispatchQueue.main.async {
-                        self.moveToOVDStep()
-                    }
-                } else {
-                    DispatchQueue.main.async {
-                        self.showToast(title: self.translate(text: .coreError),
-                                       subTitle: "\(webResp.messages?.first ?? self.translate(text: .coreUploadError))",
-                                       attachTo: self.view) { }
-                        self.stepLabel.text = "Ön Yüz – Tekrar deneyin, kılavuz içine hizalayın"
-                        self.speakInstruction("Kimlik ön yüzünü tekrar kılavuz içine hizalayın ve sabit tutun", delay: 0.3)
-                        self.setGuideDetected(false)
+            self.manager.startFrontIdOcr(frontImg:img) { resp, err in
+                    print("[startOCR] startFrontIdOcr callback err=\(err != nil)")
+                    if err != nil {
+                        DispatchQueue.main.async {
+                            
+                            
+                            // Kullanıcıya tekrar denemesi için rehberlik
+                            self.stepLabel.text = "Ön Yüz – Tekrar deneyin, kılavuz içine hizalayın"
+                            self.speakInstruction("Kimlik ön yüzünü tekrar kılavuz içine hizalayın ve sabit tutun", delay: 0.3)
+                            
+                            self.showToast(type: .fail,
+                                           title: self.translate(text: .coreError),
+                                           subTitle: err?.errorMessages ?? "",
+                                           attachTo: self.view) {
+                                return
+                            }
+                        }
+                        
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                            self.setGuideDetected(false)
+                            self.isOCRInFlight = false
+                        }
+                        
+                    } else {
+                        print(self.manager.sdkFrontInfo.asDictionary())
+                        self.manager.uploadIdPhoto(idPhoto: img) { webResp in
+                            if webResp.result == true {
+                                // Front OCR + upload başarılı -> OVD adımına geç
+                                print("[FrontUpload] success, moving to OVD step")
+                                DispatchQueue.main.async {
+                                    self.moveToOVDStep()
+                                }
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                                    self.setGuideDetected(false)
+                                    self.isOCRInFlight = false
+                                }
+                            } else {
+                                // Front başarısız -> FRONT adımında kal, yeniden denemeye izin ver
+                                DispatchQueue.main.async {
+                                    self.showToast(title: self.translate(text: .coreError),
+                                                   subTitle: "\(webResp.messages?.first ?? self.translate(text: .coreUploadError))",
+                                                   attachTo: self.view) {
+                                                    //self.hideLoader()
+                                                   }
+                                    // Kullanıcıya tekrar denemesi için rehberlik
+                                    self.stepLabel.text = "Ön Yüz – Tekrar deneyin, kılavuz içine hizalayın"
+                                    self.speakInstruction("Kimlik ön yüzünü tekrar kılavuz içine hizalayın ve sabit tutun", delay: 0.3)
+
+                                }
+                                
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                                    self.setGuideDetected(false)
+                                    self.isOCRInFlight = false
+                                }
+                            }
+                            //self.isOCRInFlight = false
+                        }
                     }
                 }
-                self.isOCRInFlight = false
-            }
+            
+//            self.manager.uploadIdPhoto(idPhoto: img) { webResp in
+//                if webResp.result == true {
+//                    print("[FrontUpload] success, moving to OVD step")
+//                    DispatchQueue.main.async {
+//                        self.moveToOVDStep()
+//                    }
+//                } else {
+//                    DispatchQueue.main.async {
+//                        self.showToast(title: self.translate(text: .coreError),
+//                                       subTitle: "\(webResp.messages?.first ?? self.translate(text: .coreUploadError))",
+//                                       attachTo: self.view) { }
+//                        self.stepLabel.text = "Ön Yüz – Tekrar deneyin, kılavuz içine hizalayın"
+//                        self.speakInstruction("Kimlik ön yüzünü tekrar kılavuz içine hizalayın ve sabit tutun", delay: 0.3)
+//                        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+//                            self.setGuideDetected(false)
+//                        }
+//                    }
+//                }
+//                self.isOCRInFlight = false
+//            }
         case .ovd:
             self.manager.uploadIdPhoto(idPhoto: img, selfieType: .frontIdOvd) { webResp in
                 if webResp.result == true {
                     print("[FrontOVDUpload] success, moving to Back step")
                     DispatchQueue.main.async {
                         self.moveToBackStepAfterOVDSuccess()
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                        //self.setGuideDetected(false)
+                        self.isOCRInFlight = false
                     }
                 } else {
                     DispatchQueue.main.async {
@@ -638,8 +709,13 @@ final class CaptureViewController: SDKBaseViewController {
                                        attachTo: self.view) { }
                         self.prepareOVDRetry()
                     }
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                        //self.setGuideDetected(false)
+                        self.isOCRInFlight = false
+                    }
                 }
-                self.isOCRInFlight = false
+                //self.isOCRInFlight = false
             }
         case .back:
             self.manager.startBackIdOcr(frontImg: img) { resp, err in
@@ -957,25 +1033,57 @@ final class CaptureViewController: SDKBaseViewController {
     }
 
     private func processCaptured(_ ci: CIImage, step: CaptureStep) -> CIImage {
+        // *** Always force landscape before ANY crop logic ***
+        //let ci = forceLandscape(ci)
+
         let extent = ci.extent
         let roi = centeredDocRectROI(in: extent)
 
-        switch step {
-        case .ovd:
-            // OVD için her zaman guide benzeri alana crop et; tüm foto gitmesin.
-            return ci.cropped(to: roi)
+        // 1) OVD: aynı davranış, her zaman guide benzeri alan
+//        if case .ovd = step {
+//            return ci.cropped(to: roi)
+//        }
 
-        case .front, .back:
-            // Ön ve arka yüzde önce dikdörtgen bulup perspektif düzeltmeyi dene.
-            if let rect = detectRectangleSync(in: ci),
-               let warped = perspectiveCorrect(image: ci, rect: rect) {
-                // Rect bulunduysa, perspektif düzeltilmiş kartı gönder.
-                return warped
-            } else {
-                // Rect yoksa bile yine de guide benzeri alana crop et; tüm imajı verme.
-                return ci.cropped(to: roi)
+        // FRONT/BACK:
+        // Önce canlı sarı çerçeve (lastRectObservation) büyük ve ID oranına uygunsa
+        // doğrudan o bounding box'a crop et.
+        if let liveRect = lastRectObservation {
+            let bb = liveRect.toImageRect(imageRect: extent)
+            let areaRatio = bb.area / max(extent.area, 1)
+            let sides = sideLengths(of: liveRect)
+            let ratio = min(sides.w, sides.h) / max(sides.w, sides.h)
+
+            let sizeOK = areaRatio >= stillMinRectAreaRatio
+            let aspectOK = (ratio >= aspectMin && ratio <= aspectMax)
+
+            if sizeOK && aspectOK {
+                let clipped = bb.intersection(extent)
+                if !clipped.isNull && clipped.area > 0 {
+                    return ci.cropped(to: clipped)
+                }
             }
         }
+
+        // Sonra still frame üzerinde yeni bir dikdörtgen bulmayı dene.
+        if let rect = detectRectangleSync(in: ci) {
+            let bb = rect.toImageRect(imageRect: extent)
+            let areaRatio = bb.area / max(extent.area, 1)
+            let sides = sideLengths(of: rect)
+            let ratio = min(sides.w, sides.h) / max(sides.w, sides.h)
+
+            let sizeOK = areaRatio >= stillMinRectAreaRatio
+            let aspectOK = (ratio >= aspectMin && ratio <= aspectMax)
+
+            if sizeOK && aspectOK {
+                let clipped = bb.intersection(extent)
+                if !clipped.isNull && clipped.area > 0 {
+                    return ci.cropped(to: clipped)
+                }
+            }
+        }
+
+        // Hiç düzgün dikdörtgen yoksa, guide benzeri alana crop et (fallback)
+        return ci.cropped(to: roi)
     }
     private func detectRectangleSync(in ci: CIImage) -> VNRectangleObservation? {
         let req = VNDetectRectanglesRequest()
@@ -1056,37 +1164,37 @@ extension CaptureViewController: AVCapturePhotoCaptureDelegate {
         // 1) Raw JPEG verisini al
         guard let data = photo.fileDataRepresentation() else { return }
 
-        // 2) CIImage oluştur ve önce mirror düzelt, sonra sola 90 derece döndür.
-        var ciRaw = CIImage(data: data) ?? CIImage()
-        // önce mirror düzelt
-        ciRaw = ciRaw.oriented(.upMirrored)
-        // sonra sola 90 derece döndür
-        ciRaw = ciRaw.oriented(.right)
+        // 2) CIImage yarat (henüz rotate etme)
+        let originalCI = CIImage(data: data) ?? CIImage()
 
-        print("[Capture] RAW resolution: \(ciRaw.extent.size) (mirror fixed, no extra rotation)")
+        // 3) RAW orientation ile crop yap (guide & sarı rect doğru alansın diye)
+        let croppedCI = self.processCaptured(originalCI, step: captureReason)
 
-        // 3) Sadece crop / rect / warp mantığını uygula
-        let processedCI = self.processCaptured(ciRaw, step: captureReason)
-        guard let ui = self.makeUIImage(from: processedCI) else { return }
+        // 4) Crop sonrası tek tip dön → sağa 90°
+        let ciRaw = croppedCI.oriented(.right)
+
+        print("[Capture] RAW resolution after pre-rotation crop: \(ciRaw.extent.size)")
+
+        guard let ui = self.makeUIImage(from: ciRaw) else { return }
         
         switch captureReason {
         case .front:
-            frontShot = processedCI
+            frontShot = ciRaw
             frontUIImage = ui
             DispatchQueue.main.async {
                 self.stepLabel.text = "✅ Ön yüz kaydedildi"
                 self.speakInstruction("Kimlik ön yüz kontrol ediliyor", delay: 0.25)
             }
-            processForOCR(ciImage: processedCI)
+            processForOCR(ciImage: ciRaw)
         case .ovd:
-            ovdShot = processedCI
+            ovdShot = ciRaw
             ovdUIImage = ui
             setTorch(on: false)
-            processForOCR(ciImage: processedCI)
+            processForOCR(ciImage: ciRaw)
         case .back:
-            backShot = processedCI
+            backShot = ciRaw
             backUIImage = ui
-            processForOCR(ciImage: processedCI)
+            processForOCR(ciImage: ciRaw)
         }
     }
 }
