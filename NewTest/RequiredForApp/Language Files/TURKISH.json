@@ -161,6 +161,8 @@
   "ActiveSelfieExit" : "Yeterli sayıda deneme yaptınız, teşekkürler.",
   "ActiveNfcWarn" : "Form ve NFC verileriniz uyuşmamaktadır. Lütfen doğru kimlik fotoğrafını tekrar çekiniz.",
   "ActiveNfcExit" : "Kimlik bilgileri ile formdaki veriler uyuşmamaktadır. Yeterli sayıda deneme yaptınız, teşekkürler.",
+  "ActiveOcrWarn" : "OCR ve MRZ verileriniz uyuşmamaktadır. Lütfen doğru kimlik fotoğrafını tekrar çekiniz.",
+  "ActiveOcrExit" : "OCR ve MRZ verileriniz uyuşmamaktadır. Yeterli sayıda deneme yaptınız, teşekkürler.",
   "AddressPdfErrorTitle" : "Geçersiz Dosya Boyutu",
   "AddressPdfErrorMessage" : "Yüklemek istediğiniz dosya 5 MB'dan büyük olamaz. Lütfen daha küçük bir dosya seçin."
 }

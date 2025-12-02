@@ -293,16 +293,26 @@ class SDKCardReaderViewController: SDKBaseViewController {
                                 if webResp.result == true && webResp.data?.comparison == true {
                                     self.photoBackSide = true
                                     self.hideLoader()
+                                    self.manager.tryedOcrComparisonCount = 1 // resetliyoruz
                                     self.checkButtonStatus()
                                 } else if webResp.result == true && webResp.data?.comparison == false {
-                                    self.showToast(title: self.translate(text: .coreError), subTitle: "\(webResp.messages?.first ?? self.translate(text: .activeNfcExit))", attachTo: self.view) {
-                                        self.hideLoader()
-                                        if self.manager.activeComparisonResultSkipModule == "1" {
-                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: {
-                                                self.skipModuleAct()
-                                            })
-                                        } else {
-                                            self.closeSDK()
+                                    self.hideLoader()
+                                    let alertMsg = self.translate(text: .activeOcrWarn)
+                                    let alertExpMsg = self.translate(text: .activeOcrExit)
+                                    if self.manager.ocrComparisonCount == self.manager.tryedOcrComparisonCount {
+                                        self.oneButtonAlertShow(message: alertExpMsg, title1: "Tamam") {
+                                            if self.manager.activeComparisonResultSkipModule == "1" {
+                                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: {
+                                                    self.skipModuleAct()
+                                                })
+                                            } else {
+                                                self.closeSDK()
+                                            }
+                                        }
+                                    } else {
+                                        self.manager.tryedOcrComparisonCount += 1
+                                        self.oneButtonAlertShow(message: alertMsg, title1: "Tamam") {
+                                            
                                         }
                                     }
                                 } else {

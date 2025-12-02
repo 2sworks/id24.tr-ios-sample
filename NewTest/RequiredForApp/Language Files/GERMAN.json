@@ -161,6 +161,8 @@
   "ActiveSelfieExit" : "Sie haben ausreichend Versuche unternommen, Vielen Dank.",
   "ActiveNfcWarn" : "Ihre Formular und NFC Daten stimmen nicht überein. Bitte nehmen Sie das korrekte Ausweisfoto erneut auf.",
   "ActiveNfcExit" : "Ihre Identifikationsdaten stimmen nicht mit den Angaben im Formular überein. Sie haben ausreichend Versuche unternommen, Vielen Dank.",
+  "ActiveOcrWarn" : "Ihre OCR- und MRZ-Daten stimmen nicht überein. Bitte machen Sie das korrekte Ausweisfoto erneut.",
+  "ActiveOcrExit" : "Ihre OCR- und MRZ-Daten stimmen nicht überein. Sie haben ausreichend Versuche unternommen, vielen Dank.",
   "AddressPdfErrorTitle" : "Ungültige Dateigröße",
   "AddressPdfErrorMessage" : "Die Datei, die Sie hochladen möchten, darf nicht größer als 5 MB sein. Bitte wählen Sie eine kleinere Datei aus."
 }
