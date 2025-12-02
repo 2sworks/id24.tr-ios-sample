@@ -18,101 +18,6 @@ import ImageIO
 // MARK: - Capture Step
 private enum CaptureStep: String { case front = "front", back = "back", ovd = "ovd" }
 
-// MARK: - Basit Modeller
-struct OCRFields {
-    var name: String?
-    var surname: String?
-    var idNumber: String?
-    var birthDate: String?
-}
-
-struct MRZResult {
-    let rawLines: [String]
-    let documentNumber: String?   // Seri No
-    let birthDate: String?        // YYMMDD
-    let expiryDate: String?       // YYMMDD
-    let nationality: String?      // Örn: "TUR"
-    let surname: String?
-    let givenNames: String?
-    let tckn: String?             // 11 haneli
-    let isValid: Bool
-}
-
-// MARK: - MRZ Parser (basit)
-final class MRZParser {
-    func parse(lines: [String]) -> MRZResult? {
-        let cleaned = lines.map { $0.trimmingCharacters(in: .whitespacesAndNewlines).uppercased() }
-        guard cleaned.count >= 2 else { return nil }
-        if cleaned.count >= 3 { return parseTD1(cleaned) }
-        if cleaned[0].count > 40 { return parseTD3(cleaned) } else { return parseTD2(cleaned) }
-    }
-    private func parseTD1(_ L: [String]) -> MRZResult? {
-        guard L.count >= 3 else { return nil }
-        let l1 = L[0], l2 = L[1], l3 = L[2]
-        let (surname, given) = splitNameFromLine(l1)
-        let documentNumber = takeUntil(l2, stop: "<")
-        let birthDate = extractDateYYMMDD(in: l2)
-        let expiryDate = extractSecondDateYYMMDD(in: l2)
-        let nationality = extractNationality(in: l2)
-        let all = L.joined()
-        let tckn = extractTCKN(in: all)
-        return MRZResult(rawLines: [l1,l2,l3], documentNumber: documentNumber, birthDate: birthDate, expiryDate: expiryDate, nationality: nationality, surname: surname, givenNames: given, tckn: tckn, isValid: true)
-    }
-    private func parseTD2(_ L: [String]) -> MRZResult? {
-        guard L.count >= 2 else { return nil }
-        let l1 = L[0], l2 = L[1]
-        let (surname, given) = splitNameFromLine(l1)
-        let documentNumber = takeUntil(l2, stop: "<")
-        let birthDate = extractDateYYMMDD(in: l2)
-        let expiryDate = extractSecondDateYYMMDD(in: l2)
-        let nationality = extractNationality(in: l2)
-        let all = L.joined()
-        let tckn = extractTCKN(in: all)
-        return MRZResult(rawLines: [l1,l2], documentNumber: documentNumber, birthDate: birthDate, expiryDate: expiryDate, nationality: nationality, surname: surname, givenNames: given, tckn: tckn, isValid: true)
-    }
-    private func parseTD3(_ L: [String]) -> MRZResult? {
-        guard L.count >= 2 else { return nil }
-        let l1 = L[0], l2 = L[1]
-        let (surname, given) = splitNameFromLine(l1)
-        let documentNumber = takeUntil(l2, stop: "<")
-        let birthDate = extractDateYYMMDD(in: l2)
-        let expiryDate = extractSecondDateYYMMDD(in: l2)
-        let nationality = extractNationality(in: l2)
-        let all = L.joined()
-        let tckn = extractTCKN(in: all)
-        return MRZResult(rawLines: [l1,l2], documentNumber: documentNumber, birthDate: birthDate, expiryDate: expiryDate, nationality: nationality, surname: surname, givenNames: given, tckn: tckn, isValid: true)
-    }
-    private func splitNameFromLine(_ line: String) -> (String?, String?) {
-        guard let range = line.range(of: "<<") else { return (nil, nil) }
-        let left = String(line[..<range.lowerBound])
-        let right = String(line[range.upperBound...])
-        let surname = left.components(separatedBy: "<").last
-        let given = right.replacingOccurrences(of: "<", with: " ").trimmingCharacters(in: .whitespaces)
-        return (surname, given)
-    }
-    private func takeUntil(_ s: String, stop: Character) -> String? { var out = ""
-        for ch in s { if ch == stop { break }
-            out.append(ch) }
-        return out.isEmpty ? nil : out }
-    private func extractDateYYMMDD(in s: String) -> String? { if let r = s.range(of: #"\d{6}"#, options: .regularExpression) { return String(s[r]) }
-        return nil }
-    private func extractSecondDateYYMMDD(in s: String) -> String? {
-        let matches = s.matches(for: #"\d{6}"#)
-        return matches.count >= 2 ? matches[1] : nil }
-    private func extractNationality(in s: String) -> String? { if let r = s.range(of: #"[A-Z<]{3}"#, options: .regularExpression) { return String(s[r]).replacingOccurrences(of: "<", with: "") }
-        return nil }
-    private func extractTCKN(in s: String) -> String? {
-        if let r = s.range(of: #"\b\d{11}\b"#, options: .regularExpression) { return String(s[r]) }
-        return nil
-    }
-}
-private extension String {
-    func matches(for regex: String) -> [String] {
-        (try? NSRegularExpression(pattern: regex))?
-            .matches(in: self, range: NSRange(location: 0, length: (self as NSString).length))
-            .map { (self as NSString).substring(with: $0.range) } ?? []
-    }
-}
 
 // MARK: - OVD / Parlama Analizörü
 final class OVDAnalyzer {
@@ -268,7 +173,6 @@ final class CaptureViewController: SDKBaseViewController {
 
     // Vision/CI
     private let context = CIContext()
-    private let mrzParser = MRZParser()
     private let ovd = OVDAnalyzer()
     private var lastRectObservation: VNRectangleObservation?
 
@@ -884,25 +788,6 @@ final class CaptureViewController: SDKBaseViewController {
         setTorch(on: true)
     }
     
-    // MRZ-dedicated OCR for better chevron capture
-    private func runMRZOCR(on ciImage: CIImage, completion: @escaping ([String]) -> Void) {
-        let roi = docRectROI(in: ciImage.extent)
-        let mrzH = roi.height * 0.45
-        let mrzROI = CGRect(x: roi.origin.x + roi.width * 0.05,
-                            y: roi.origin.y,
-                            width: roi.width * 0.90,
-                            height: mrzH)
-        let cropped = ciImage.cropped(to: mrzROI)
-        let req = VNRecognizeTextRequest { req, _ in
-            let texts = (req.results as? [VNRecognizedTextObservation])?.compactMap { $0.topCandidates(1).first?.string } ?? []
-            completion(texts)
-        }
-        req.recognitionLevel = .accurate
-        req.usesLanguageCorrection = false
-        req.minimumTextHeight = 0.0045
-        let handler = VNImageRequestHandler(ciImage: cropped, options: [:])
-        do { try handler.perform([req]) } catch { completion([]) }
-    }
 
     // Gelişmiş: ROI/Orientation ayarlı dikdörtgen tespiti
     private func detectRectangle(in image: CIImage,
@@ -991,31 +876,6 @@ final class CaptureViewController: SDKBaseViewController {
         do { try handler.perform([req]) } catch { completion([]) }
     }
 
-    private func extractMRZ(from texts: [String]) -> MRZResult? {
-        var mrzLines = texts.filter { $0.contains("<") }
-        if mrzLines.isEmpty {
-            mrzLines = texts.filter { line in
-                let u = line.uppercased()
-                return u.contains("TUR")
-                    || (line.matches(for: #"\b\d{11}\b"#).count > 0)
-                    || (line.matches(for: #"\b\d{6}\b"#).count >= 2)
-                    || (line.count >= 20)
-            }
-        }
-        guard !mrzLines.isEmpty else { return nil }
-        return mrzParser.parse(lines: mrzLines)
-    }
-
-    private func extractFields(from text: String) -> OCRFields {
-        var out = OCRFields()
-        if let tckn = text.matches(for: #"\b\d{11}\b"#).first { out.idNumber = tckn }
-        if let range = text.range(of: "SOYADI") { let sub = text[range.upperBound...]
-            out.surname = sub.split(separator: " ").first.map(String.init) }
-        if let r2 = text.range(of: "ADI") { let sub = text[r2.upperBound...]
-            out.name = sub.split(separator: " ").first.map(String.init) }
-        if let d = text.matches(for: #"\b(\d{2}[./-]\d{2}[./-]\d{4}|\d{6})\b"#).first { out.birthDate = d }
-        return out
-    }
 
     private func sideLengths(of r: VNRectangleObservation) -> (w: CGFloat, h: CGFloat) {
         func dist(_ a: CGPoint, _ b: CGPoint) -> CGFloat { let dx = a.x - b.x, dy = a.y - b.y
@@ -1025,17 +885,6 @@ final class CaptureViewController: SDKBaseViewController {
         return (w, h)
     }
 
-    // MARK: - İçerik tabanlı yardımcılar
-    private func rectCenterY(_ rectObs: VNRectangleObservation?, extent: CGRect) -> CGFloat {
-        if let r = rectObs {
-            let bb = r.boundingBox
-            let normCenterY = 1.0 - (bb.origin.y + bb.size.height/2.0)
-            return normCenterY * extent.height + extent.origin.y
-        } else {
-            let roi = self.docRectROI(in: extent)
-            return roi.midY
-        }
-    }
 
     private func probeMRZPresence(in ciImage: CIImage, roi: CGRect, completion: @escaping (Bool) -> Void) {
         let mrzH = roi.height * 0.45
@@ -1065,18 +914,6 @@ final class CaptureViewController: SDKBaseViewController {
         DispatchQueue.global(qos: .userInitiated).async { do { try handler.perform([req]) } catch { completion(false) } }
     }
 
-    /// EXIF orientation değerini ayna (mirror) varyantlarından arındırıp temel yönüne indirger.
-    /// Böylece düz çekimde gereksiz mirror ve 180° sapmaları engelleriz.
-    private func normalizedExifOrientation(from metadata: [String: Any]) -> Int32 {
-        let raw = (metadata[kCGImagePropertyOrientation as String] as? NSNumber)?.int32Value ?? 1
-        switch raw {
-        case 2: return 1   // upMirrored -> up
-        case 4: return 3   // downMirrored -> down
-        case 5: return 6   // leftMirrored -> right
-        case 7: return 8   // rightMirrored -> left
-        default: return raw
-        }
-    }
 
     // Görüntüyü mutlaka yatay yap
     private func forceLandscape(_ ci: CIImage) -> CIImage {
@@ -1085,26 +922,6 @@ final class CaptureViewController: SDKBaseViewController {
 
     // MARK: - Çekim sonrası işleme
 
-    /// ID kartı için, canlı kılavuz alanına benzer merkezlenmiş bir ROI üretir.
-    /// Still fotolarda preview-layer koordinatları ile birebir eşleşme garantisi olmadığı için
-    /// burada sadece oran olarak benzer bir alan kullanıyoruz ki tüm görüntü gitmesin.
-    private func centeredDocRectROI(in extent: CGRect) -> CGRect {
-        // Genişliğin %60'ı kadar al, ID oranına göre yükseklik hesapla ve merkeze yerleştir
-        var width = extent.width * 0.6
-        var height = width / idAspect
-
-        // Çok yüksekse biraz kıs
-        let maxHeight = extent.height * 0.7
-        if height > maxHeight {
-            height = maxHeight
-            width = height * idAspect
-        }
-
-        let x = extent.midX - width / 2.0
-        let y = extent.midY - height / 2.0
-        let roi = CGRect(x: x, y: y, width: width, height: height)
-        return roi.intersection(extent)
-    }
 
     /// Captured still image'i kırparken kullanılacak ana fonksiyon.
     /// - step: front/back/ovd
@@ -1145,75 +962,6 @@ final class CaptureViewController: SDKBaseViewController {
         return forceLandscape(normalized)
     }
     
-    private func detectRectangleSync(in ci: CIImage,
-                                     orientation: CGImagePropertyOrientation = .up) -> VNRectangleObservation? {
-        let req = VNDetectRectanglesRequest()
-        req.minimumAspectRatio = 0.5
-        req.minimumSize = 0.04
-        req.quadratureTolerance = 25.0
-        req.minimumConfidence = 0.5
-        req.maximumObservations = 1
-        let handler = VNImageRequestHandler(ciImage: ci, orientation: orientation, options: [:])
-        do {
-            try handler.perform([req])
-        } catch {
-            dlog("detectRectangleSync VN error: \(error)")
-            return nil
-        }
-        return (req.results as? [VNRectangleObservation])?.first
-    }
-
-    private func mrzChevronScore(ciImage: CIImage, roi: CGRect) -> Int {
-        let cropped = ciImage.cropped(to: roi)
-        let req = VNRecognizeTextRequest()
-        req.recognitionLevel = .fast
-        req.usesLanguageCorrection = false
-        let handler = VNImageRequestHandler(ciImage: cropped, options: [:])
-        do { try handler.perform([req]) } catch { return 0 }
-        let lines = (req.results as? [VNRecognizedTextObservation])?.compactMap { $0.topCandidates(1).first?.string } ?? []
-        return lines.reduce(0) { $0 + $1.filter { $0 == "<" }.count }
-    }
-    private func textAlphaNumScore(ciImage: CIImage, roi: CGRect) -> Int {
-        let cropped = ciImage.cropped(to: roi)
-        let req = VNRecognizeTextRequest()
-        req.recognitionLevel = .fast
-        req.usesLanguageCorrection = false
-        let handler = VNImageRequestHandler(ciImage: cropped, options: [:])
-        do { try handler.perform([req]) } catch { return 0 }
-        let lines = (req.results as? [VNRecognizedTextObservation])?.compactMap { $0.topCandidates(1).first?.string } ?? []
-        return lines.reduce(0) { $0 + $1.filter { $0.isLetter || $0.isNumber }.count }
-    }
-    private func flipBackIfNeeded(_ ci: CIImage) -> CIImage {
-        let h = ci.extent.height, w = ci.extent.width
-        let bandH = h * 0.35
-        let x = ci.extent.origin.x + w * 0.05
-        let bandW = w * 0.90
-
-        let bottom = CGRect(x: x, y: ci.extent.origin.y, width: bandW, height: bandH)
-        let top = CGRect(x: x, y: ci.extent.maxY - bandH, width: bandW, height: bandH)
-
-        let topScore = mrzChevronScore(ciImage: ci, roi: top)
-        let bottomScore = mrzChevronScore(ciImage: ci, roi: bottom)
-        return (topScore >= bottomScore + 12) ? ci.oriented(.down) : ci
-    }
-    private func flipFrontIfNeeded(_ ci: CIImage) -> CIImage {
-        return ci
-    }
-
-    private func textScoreWhole(_ ci: CIImage) -> Int {
-        let e = ci.extent
-        let roi = CGRect(x: e.origin.x + e.width * 0.08,
-                         y: e.origin.y + e.height * 0.15,
-                         width: e.width * 0.84,
-                         height: e.height * 0.70)
-        return textAlphaNumScore(ciImage: ci, roi: roi)
-    }
-    private func unMirrorIfNeeded(_ ci: CIImage) -> CIImage {
-        let s0 = textScoreWhole(ci)
-        let mirrored = ci.oriented(.upMirrored)
-        let s1 = textScoreWhole(mirrored)
-        return (s1 > s0 + 8) ? mirrored : ci
-    }
 
     private func makeUIImage(from ci: CIImage) -> UIImage? {
         guard let cg = context.createCGImage(ci, from: ci.extent) else { return nil }
@@ -1447,32 +1195,6 @@ private extension CGPoint { func toImagePoint(_ rect: CGRect) -> CGPoint { CGPoi
 private extension CGRect { var area: CGFloat { width * height } }
 
 
-// UILabel subclass that speaks when text changes, only if new and not the same as last spoken, with debouncing and cancellation
-private final class SpeakingLabel: UILabel {
-    private let speech = AVSpeechSynthesizer()
-    private var speakToken: Int = 0
-    private var lastSpokenText: String?
-
-    override var text: String? {
-        didSet {
-            guard let text = text, !text.isEmpty else { return }
-            guard text != lastSpokenText else { return }
-            lastSpokenText = text
-
-            speakToken &+= 1
-            let currentToken = speakToken
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { [weak self] in
-                guard let self = self else { return }
-                guard currentToken == self.speakToken else { return }
-                self.speech.stopSpeaking(at: .immediate)
-                let utterance = AVSpeechUtterance(string: text)
-                utterance.voice = AVSpeechSynthesisVoice(language: "tr-TR")
-                utterance.rate = 0.48
-                self.speech.speak(utterance)
-            }
-        }
-    }
-}
 
 // MARK: - Review: 3 foto (scroll yok, tek ekranda)
 final class ReviewViewController2: SDKBaseViewController {
