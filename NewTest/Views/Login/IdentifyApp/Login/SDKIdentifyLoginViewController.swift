@@ -188,7 +188,7 @@ class SDKIdentifyLoginViewController: SDKBaseViewController {
         } else if identIdArea.text == "busra" {
             self.identIdArea.text = "14412dd4616298aabbd80c9628860ed8d214c288"
         } else if identIdArea.text == "c" {
-            self.identIdArea.text = "651b830832f0d289a830db0f5704c9677657b0de"
+            self.identIdArea.text = "28da9f91fc106811821ea60f0b18de42994b599a"
         } else if identIdArea.text == "c2" {
             self.identIdArea.text = "a170357f1ed311b3c49880a5ec2f1d78d0bf624d"
         }

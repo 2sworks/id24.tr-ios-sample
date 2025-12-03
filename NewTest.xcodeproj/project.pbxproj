@@ -90,8 +90,6 @@
 		483BDB1828F459CC00635BCC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 483BDB1728F459CC00635BCC /* Assets.xcassets */; };
 		483BDB1B28F459CC00635BCC /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 483BDB1928F459CC00635BCC /* LaunchScreen.storyboard */; };
 		48420BA72A8B61840005250F /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 48420BA62A8B61840005250F /* WebRTC */; };
-		48549ADA2A41800E00F6838B /* SDKLivenessViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48549AD82A41800D00F6838B /* SDKLivenessViewController.swift */; };
-		48549ADB2A41800E00F6838B /* SDKLivenessViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 48549AD92A41800D00F6838B /* SDKLivenessViewController.xib */; };
 		4857BFF82902D621001FE850 /* OpenSSL in Frameworks */ = {isa = PBXBuildFile; productRef = 4857BFF72902D621001FE850 /* OpenSSL */; settings = {ATTRIBUTES = (Required, ); }; };
 		4857BFFB2902D636001FE850 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = 4857BFFA2902D636001FE850 /* Starscream */; settings = {ATTRIBUTES = (Required, ); }; };
 		485C15322907D2E8007B9ED0 /* SDKLoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485C15302907D2E8007B9ED0 /* SDKLoginViewController.swift */; };
@@ -253,8 +251,6 @@
 		483BDB1728F459CC00635BCC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		483BDB1A28F459CC00635BCC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		483BDB1C28F459CC00635BCC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		48549AD82A41800D00F6838B /* SDKLivenessViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SDKLivenessViewController.swift; sourceTree = "<group>"; };
-		48549AD92A41800D00F6838B /* SDKLivenessViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SDKLivenessViewController.xib; sourceTree = "<group>"; };
 		485C15302907D2E8007B9ED0 /* SDKLoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKLoginViewController.swift; sourceTree = "<group>"; };
 		485C15312907D2E8007B9ED0 /* SDKLoginViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SDKLoginViewController.xib; sourceTree = "<group>"; };
 		485C15382907D3CF007B9ED0 /* SDKViewOptionsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKViewOptionsController.swift; sourceTree = "<group>"; };
@@ -350,8 +346,6 @@
 			isa = PBXGroup;
 			children = (
 				48DD2F2A2B8DD56A0091FCCE /* NewScanner */,
-				48549AD82A41800D00F6838B /* SDKLivenessViewController.swift */,
-				48549AD92A41800D00F6838B /* SDKLivenessViewController.xib */,
 				481065972922646600053004 /* SDKLivenessViewController.swift */,
 				481065982922646600053004 /* SDKLivenessViewController.xib */,
 			);
@@ -1005,7 +999,6 @@
 				48171423294734FA0095A64F /* SDKPassportReaderViewController.xib in Resources */,
 				48DD2F2E2B8DD57D0091FCCE /* SDKNewLivenessViewController.xib in Resources */,
 				48A151EC292B73BA005B376B /* SDKSignLangViewController.xib in Resources */,
-				48549ADB2A41800E00F6838B /* SDKLivenessViewController.xib in Resources */,
 				482D2BBD2A547AC000F1344F /* enhance@3x.png in Resources */,
 				482D2BB92A547AC000F1344F /* flashUnavailable@2x.png in Resources */,
 			);
@@ -1033,7 +1026,6 @@
 				482769462BDFB4D000D5675D /* SocketLogTableViewCell.swift in Sources */,
 				481065992922646600053004 /* SDKLivenessViewController.swift in Sources */,
 				482D2BD02A547AC000F1344F /* UIImage+SFSymbol.swift in Sources */,
-				48549ADA2A41800E00F6838B /* SDKLivenessViewController.swift in Sources */,
 				485C15392907D3CF007B9ED0 /* SDKViewOptionsController.swift in Sources */,
 				485C155B2907F3A7007B9ED0 /* SDKUIApplication+.swift in Sources */,
 				485C155F2907F3A7007B9ED0 /* SDKString+.swift in Sources */,
@@ -1271,7 +1263,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = NewTest/NewTest.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 139;
+				CURRENT_PROJECT_VERSION = 141;
 				DEVELOPMENT_TEAM = 9D3UPKQ9AL;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1315,7 +1307,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = NewTest/NewTest.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 139;
+				CURRENT_PROJECT_VERSION = 141;
 				DEVELOPMENT_TEAM = 9D3UPKQ9AL;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",

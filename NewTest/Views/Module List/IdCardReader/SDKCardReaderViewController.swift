@@ -247,11 +247,32 @@ class SDKCardReaderViewController: SDKBaseViewController {
                         } else {
                             print(self.manager.sdkFrontInfo.asDictionary())
                             self.manager.uploadIdPhoto(idPhoto: self.frontIdPhoto.image ?? UIImage()) { webResp in
-                                if webResp.result == true {
+                                if webResp.result == true && webResp.data?.comparison == true {
                                     self.photoFrontSide = true
                                     self.cardSide = .backId
                                     self.hideLoader()
+                                    self.manager.tryedOcrComparisonCount = 1 // resetliyoruz
                                     self.checkButtonStatus()
+                                }  else if webResp.result == true && webResp.data?.comparison == false {
+                                    self.hideLoader()
+                                    let alertMsg = self.translate(text: .activeOcrWarn)
+                                    let alertExpMsg = self.translate(text: .activeOcrExit)
+                                    if self.manager.ocrComparisonCount == self.manager.tryedOcrComparisonCount {
+                                        self.oneButtonAlertShow(message: alertExpMsg, title1: "Tamam") {
+                                            if self.manager.activeComparisonResultSkipModule == "1" {
+                                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: {
+                                                    self.skipModuleAct()
+                                                })
+                                            } else {
+                                                self.closeSDK()
+                                            }
+                                        }
+                                    } else {
+                                        self.manager.tryedOcrComparisonCount += 1
+                                        self.oneButtonAlertShow(message: alertMsg, title1: "Tamam") {
+                                            
+                                        }
+                                    }
                                 } else {
                                     self.showToast(title: self.translate(text: .coreError), subTitle: "\(webResp.messages?.first ?? self.translate(text: .coreUploadError))", attachTo: self.view) {
                                         self.hideLoader()
@@ -287,8 +308,7 @@ class SDKCardReaderViewController: SDKBaseViewController {
                                 return
                             }
                         } else {
-                            print("Front OCR \(self.manager.sdkFrontInfo.asDictionary())")
-                            print("Back OCR \(self.manager.sdkBackInfo.asDictionary())")
+                            print(self.manager.sdkBackInfo.asDictionary())
                             self.manager.uploadIdPhoto(idPhoto: self.backIdPhoto.image ?? UIImage(), selfieType: .backId) { webResp in
                                 if webResp.result == true && webResp.data?.comparison == true {
                                     self.photoBackSide = true
