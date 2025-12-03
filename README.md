@@ -3,6 +3,12 @@ Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.
 
 ### Sample App 
 
+## Build 141:
+- Kimlik çekimlerinde otomatik yön düzeltme seçeneği eklendi
+- Aktif karşılaştırmada modül atlama kontrolü eklendi
+- Agent durum seçtiğinde arama butonunun devre dışı bırakılması sağlandı
+- OCR, NFC ve Selfie adımlarında tekrar deneme sayısı kontrolleri eklendi
+
 ## Build 126:
 - Kimlik çekimlerinde yeni cihazlardaki yakınlaştırma modu uyumu sağlandı
 - İşaret dili seçimi ekranında görüntülü görüşme kuyruğuna düşmemesi sağlandı
@@ -62,6 +68,11 @@ Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.
 
 
 ### SDK Son Güncelleme:
+
+## 2.3.14
+- disableEndCallButton socket aksiyonu eklendi
+- enableAutoRotateOCR sdk parametresi eklendi
+- active_comparison_result_skip_module eklendi
 
 ## 2.3.9
 - appVersion, appBuild, sdkVersion bilgilerinin gönderilmesi sağlandı
