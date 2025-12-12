@@ -30,9 +30,12 @@ class SDKCallScreenViewController: SDKBaseViewController {
     @IBOutlet weak var endCallButton: UIButton!
     private var confStarted = false // ilk kez bağlantı kurulma - temsilci ve kişinin kamerasını bu değişkene göre aktif eder
     var checkedSignLang = false
+    var isTerminating = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        isTerminating = false
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -96,7 +99,7 @@ class SDKCallScreenViewController: SDKBaseViewController {
             } else {
                 manager.webRTCClient.setupRemoteViewFrame(frame: CGRect(x: 0, y: 0, width: self.myCam.frame.width * 2, height: self.myCam.frame.height))
             }
-            remoteVideoView.contentMode = .scaleToFill
+            remoteVideoView.contentMode = .scaleAspectFill
             manager.webRTCClient.setupLocalViewFrame(frame: CGRect(x: 0, y: 0, width: self.customerCam.frame.width, height: self.customerCam.frame.height))
             remoteVideoView.center = CGPoint(x: myCam.frame.size.width  / 2, y: myCam.frame.size.height / 2)
             customerCam.clipsToBounds = true
@@ -109,6 +112,7 @@ class SDKCallScreenViewController: SDKBaseViewController {
             customerCam.clipsToBounds = true
             manager.webRTCClient.setupLocalViewFrame(frame: CGRect(x: 0, y: 0, width: self.myCam.frame.width, height: self.myCam.frame.height))
             remoteVideoView.center = CGPoint(x: customerCam.frame.size.width  / 2, y: customerCam.frame.size.height / 2)
+            remoteVideoView.contentMode = .scaleAspectFill
             self.myCam.addSubview(localVideoView)
             self.customerCam.addSubview(remoteVideoView)
             manager.webRTCClient.calculateLocalSize()
@@ -205,12 +209,55 @@ extension SDKCallScreenViewController: SDKSocketListener {
                 print("kart çerçevesi açıldı")
             case .closeCardCircle:
                 print("kart çerçevesi kapatıldı")
-            case .terminateCall:
+        case .terminateCall(let terminateReason, let statusSummaryType):
+            
+            print("terminateCall: (terminateReason=\(terminateReason ?? "-"), statusSummaryType=\(statusSummaryType ?? "-"))")
+            
+            guard !isTerminating else {
+                print("terminateCall: zaten bitiyor, bekliyoruz...")
+                return
+            }
+            
+            isTerminating = true
+
+            let hasStatus: Bool = {
+                guard let type = statusSummaryType else { return false }
+                return type == "positive" || type == "negative"
+            }()
+
+            switch terminateReason {
+
+            case "NORMAL_CLOSE_BY_AGENT", "AGENT_SOCKET_NETWORK_PROBLEM", "AGENT_FORCE_DISCONNECT_FOR_AUTO_CLOSE":
+                // Agent normal kapattı / socket network koptu
+                if hasStatus {
+                    // durum seçili → görüşme sonlanmıştır, sdk kapanır
+                    endCall()
+                } else {
+                    // durum seçilmemiş → yeniden bağlan ekranı + bekleme odası
+                    reconnect()
+                }
+
+            default:
+                // İleride yeni reason gelirse, güvenli taraf
+                reconnect()
+            }
+            
+            func endCall() {
+                // GÖRÜŞME BİTTİ → SDK KAPANIR
                 self.listenToSocketConnection(callCompleted: true)
-                setupCallScreen(inCall: false)
-                self.callIsDone(doneStatus: .completed)
-                
-                print("görüşme kapandı")
+                self.setupCallScreen(inCall: false)
+                self.callIsDone(doneStatus: statusSummaryType == "positive" ? .completed : .notCompleted)
+                print("görüşme kapandı (terminateReason=\(terminateReason ?? "-"), statusSummaryType=\(statusSummaryType ?? "-"))")
+            }
+
+            func reconnect() {
+                // YENİDEN BAĞLAN / BEKLEME ODASI
+                self.listenToSocketConnection(callCompleted: false)
+                self.openSocketDisconnect(callCompleted: false)
+                self.setupCallScreen(inCall: false)
+                print("yeniden bağlan akışı (terminateReason=\(terminateReason ?? "-"), statusSummaryType=\(statusSummaryType ?? "-"))")
+            }
+            
             case .imOffline:
                 print("bağlantı kopartıldı - panelde sayfa yenilendi - browser kapatıldı")
                 confStarted = false
