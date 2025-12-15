@@ -69,6 +69,9 @@ Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.
 
 ### SDK Son Güncelleme:
 
+## 2.3.15
+- Selfie modülünde sadece tek yüz algılandığında ilerlenmesi sağlandı
+
 ## 2.3.14
 - disableEndCallButton socket aksiyonu eklendi
 - enableAutoRotateOCR sdk parametresi eklendi
