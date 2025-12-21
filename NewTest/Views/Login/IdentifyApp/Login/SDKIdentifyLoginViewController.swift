@@ -62,12 +62,6 @@ class SDKIdentifyLoginViewController: SDKBaseViewController {
             self.jbView.isHidden = false
             print("cihazda jb tespit edildi, bu durumu yönetebilirsiniz.")
         }
-//        self.selectedServer.apiUrl = "https://api.identify.com.tr/"
-        self.selectedServer.turnUrl = "turn:185.32.14.165:3478"
-        self.selectedServer.stunUrl = "stun:185.32.14.165:3478"
-        self.selectedServer.turnUser = "itrturn"
-        self.selectedServer.turnPassword = "itrpass"
-        
         self.selectedServer.apiUrl = "https://v2api.identify.com.tr"
         self.selectedServer.websocketUrl = "wss://v2ws.identify.com.tr"
     }
@@ -209,6 +203,7 @@ class SDKIdentifyLoginViewController: SDKBaseViewController {
             bigCustomerCam: editedShowBigCustomer,
             selectedModules: self.selectedModuleList,
             idCardLang: self.idLang,
+            turnKey: "AEdHh9OZu1kg+nSBSd2UNMu9y4Kc3xVfgTsvw+PTAic=",
             showThankYouPage: true,
             showNFCNotFoundPage: true,
             supportU18: true,
@@ -412,11 +407,6 @@ extension SDKIdentifyLoginViewController { // Dil seçme & değiştirme işlemle
                 
                 let newAct: UIAlertAction = UIAlertAction(title: item.value(forKey: "envTitle") as? String, style: .default) { action -> Void in
                     self.selectedServer.apiUrl = item.value(forKey: "apiUrl") as! String
-//                    self.selectedServer.websocketUrl = item.value(forKey: "socketUrl") as! String
-//                    self.selectedServer.turnUrl = item.value(forKey: "turnUrl") as! String
-//                    self.selectedServer.stunUrl = item.value(forKey: "stunUrl") as! String
-//                    self.selectedServer.turnUser = item.value(forKey: "turnUser") as! String
-//                    self.selectedServer.turnPassword = item.value(forKey: "turnPass") as! String
                     self.selectedServer.envTitle = item.value(forKey: "envTitle") as! String
                     self.connectSDK()
                 }
