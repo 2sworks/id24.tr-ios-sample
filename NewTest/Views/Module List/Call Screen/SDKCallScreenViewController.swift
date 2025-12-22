@@ -222,6 +222,29 @@ extension SDKCallScreenViewController: SDKSocketListener {
             isTerminating = true
             
             if terminateReason == "TURN_DISCONNECTED" {
+                reconnect()
+            } else {
+                
+                let hasStatus: Bool = {
+                    guard let type = statusSummaryType else { return false }
+                    return type == "positive" || type == "negative"
+                }()
+                
+                if hasStatus {
+                    
+                    self.listenToSocketConnection(callCompleted: true)
+                    self.setupCallScreen(inCall: false)
+                    self.callIsDone(doneStatus: statusSummaryType == "positive" ? .completed : .notCompleted)
+                    isTerminating = false
+                    return
+                    
+                } else {
+                    reconnect()
+                }
+                
+            }
+            
+            func reconnect() {
                 manager.socket.disconnect()
                 setupCallScreen(inCall: false) // kameraları kapatıp bekleme ekranı görüntüsünü aktif eder
                 openSocketDisconnect(callCompleted: false) // bağlantı koptuğuna dair disconnect penceresini present eder
@@ -229,10 +252,6 @@ extension SDKCallScreenViewController: SDKSocketListener {
                 return
             }
             
-            self.listenToSocketConnection(callCompleted: true)
-            self.setupCallScreen(inCall: false)
-            self.callIsDone(doneStatus: statusSummaryType == "positive" ? .completed : .notCompleted)
-            isTerminating = false
             
         case .imOffline:
             print("bağlantı kopartıldı - panelde sayfa yenilendi - browser kapatıldı")
