@@ -212,10 +212,10 @@ class SDKNfcViewController: SDKBaseViewController {
             } else {
                 self.hideLoader()
                 if webResponse.result == false {
-                    if webResponse.msg == "MAX_ERR_COUNT" {
+                    if webResponse.messages?.first == "MAX_ERR_COUNT" {
                         self.goToNextPage()
                     } else {
-                        if let errMsg = webResponse.msg, errMsg != "" {
+                        if let errMsg = webResponse.messages?.first, errMsg != "" {
                             self.oneButtonAlertShow(message:errMsg, title1: "Hata") {
                                 return
                             }

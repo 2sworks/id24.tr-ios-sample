@@ -62,6 +62,12 @@ class SDKSignatureViewController: SDKBaseViewController {
 //                self.manager.getNextModule { nextVC in
 //                    self.navigationController?.pushViewController(nextVC, animated: true)
 //                }
+            } else {
+                DispatchQueue.main.async {
+                    self.showToast(type:.fail, title: self.translate(text: .coreError), subTitle: "\(webResp.messages?.first ?? self.translate(text: .coreUploadError))", attachTo: self.view) {
+                        return
+                    }
+                }
             }
         }
     }
