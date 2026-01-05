@@ -14,7 +14,7 @@ protocol CallScreenDelegate: AnyObject {
 }
 
 class SDKCallScreenViewController: SDKBaseViewController {
-
+    
     @IBOutlet weak var plsWaitLbl: UILabel!
     @IBOutlet weak var smsLblDesc: UILabel!
     @IBOutlet weak var waitDesc1: UILabel!
@@ -30,9 +30,12 @@ class SDKCallScreenViewController: SDKBaseViewController {
     @IBOutlet weak var endCallButton: UIButton!
     private var confStarted = false // ilk kez bağlantı kurulma - temsilci ve kişinin kamerasını bu değişkene göre aktif eder
     var checkedSignLang = false
+    var isTerminating = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        isTerminating = false
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -96,7 +99,7 @@ class SDKCallScreenViewController: SDKBaseViewController {
             } else {
                 manager.webRTCClient.setupRemoteViewFrame(frame: CGRect(x: 0, y: 0, width: self.myCam.frame.width * 2, height: self.myCam.frame.height))
             }
-            remoteVideoView.contentMode = .scaleToFill
+            remoteVideoView.contentMode = .scaleAspectFill
             manager.webRTCClient.setupLocalViewFrame(frame: CGRect(x: 0, y: 0, width: self.customerCam.frame.width, height: self.customerCam.frame.height))
             remoteVideoView.center = CGPoint(x: myCam.frame.size.width  / 2, y: myCam.frame.size.height / 2)
             customerCam.clipsToBounds = true
@@ -109,6 +112,7 @@ class SDKCallScreenViewController: SDKBaseViewController {
             customerCam.clipsToBounds = true
             manager.webRTCClient.setupLocalViewFrame(frame: CGRect(x: 0, y: 0, width: self.myCam.frame.width, height: self.myCam.frame.height))
             remoteVideoView.center = CGPoint(x: customerCam.frame.size.width  / 2, y: customerCam.frame.size.height / 2)
+            remoteVideoView.contentMode = .scaleAspectFill
             self.myCam.addSubview(localVideoView)
             self.customerCam.addSubview(remoteVideoView)
             manager.webRTCClient.calculateLocalSize()
@@ -182,107 +186,147 @@ extension SDKCallScreenViewController: CallScreenDelegate {
 extension SDKCallScreenViewController: SDKSocketListener {
     
     func listenSocketMessage(message: SDKCallActions) {
-        switch message {
-            case .incomingCall:
-                print("yeni bir çağrı geliyor")
-                let nextVC = SDKRingViewController()
-                nextVC.delegate = self
-                self.present(nextVC, animated:true)
-            case .comingSms:
-                self.openSMS()
-                print("sms geliyor")
-            case .endCall:
-                manager.socket.disconnect()
-                print("görüşme tamamlandı, sonraki modüle geçebiliriz")
-            
-            case .approveSms(let tanCode):
-                print("sms onaylandı :\(tanCode)")
-            case .openWarningCircle:
-                print("surat çerçevesi açıldı")
-            case .closeWarningCircle:
-                print("surat çerçevesi kapatıldı")
-            case .openCardCircle:
-                print("kart çerçevesi açıldı")
-            case .closeCardCircle:
-                print("kart çerçevesi kapatıldı")
-            case .terminateCall:
-                self.listenToSocketConnection(callCompleted: true)
-                setupCallScreen(inCall: false)
-                self.callIsDone(doneStatus: .completed)
-                
-                print("görüşme kapandı")
-            case .imOffline:
-                print("bağlantı kopartıldı - panelde sayfa yenilendi - browser kapatıldı")
-                confStarted = false
-                setupCallScreen(inCall: false)
-            case .updateQueue(let order, let min):
-                self.timeInfoLbl.text = "\(self.translate(text: .waitingDesc1Live))\(order)\(self.translate(text: .waitingDesc2Live))\(min)\(self.translate(text: .waitingDesc3Live))"
-            case .photoTaken(let msg):
-                print("temsilci ekran fotoğrafı çekti \(msg)")
-                self.showToast(title: msg, subTitle: "", attachTo: self.view) {
-                    return
-                }
-            case .subrejectedDismiss:
-                print("aynı odada başka kişi var")
-            case .subscribed:
-                print("odaya katılım sağlandı")
-            case .openNfcRemote(let birthDate, let validDate, let serialNo):
-                manager.startRemoteNFC(birthDate: birthDate, validDate: validDate, docNo: serialNo)
-                print("uzaktan nfc başlatıldı")
         
-            case .editNfcProcess:
-                print("kullanıcıya mrz datalarını düzeltme ekranı açıyoruz")
-                let editVC = SDKNfcViewController()
-                editVC.showOnlyEditScreen = true
-                self.present(editVC, animated: true)
-                
-            case .startTransfer:
-                self.showToast(title: "Kameranız ayarlanıyor, lütfen bekleyin", attachTo: self.view) {
-                    self.start2SideTransfer()
-                    return
-                }
-                print("yüz yüze görüşme başlıyor")
-            case .disableEndCallButton:
-                if topMostController().isKind(of: UIAlertController.self) {
-                    self.dismiss(animated: false)
-                }
-                self.endCallButton.isUserInteractionEnabled = false
-                self.endCallButton.isEnabled = false
-                self.endCallButton.alpha = 0.3
-                print("bitirme butonu kapatıldı")
-            case .networkQuality(let quality):
-                print("bağlantı kalitesine göre sinyal resmi basılıyor")
-                switch quality {
-                    case "bad":
-                        DispatchQueue.main.async {
-                            self.qualityImg.image = UIImage(named: "badConn")
-                        }
-                    case "medium":
-                        DispatchQueue.main.async {
-                            self.qualityImg.image = UIImage(named: "mediumConn")
-                        }
-                    case "good":
-                        DispatchQueue.main.async {
-                            self.qualityImg.image = UIImage(named: "goodConn")
-                        }
-                    default:
-                        DispatchQueue.main.async {
-                            self.qualityImg.image = UIImage()
-                        }
-                }
-            case .missedCall: // belirli süre boyunca telefon çaldı fakat müşteri açmadı veya temsilci aradı fakat telefon açılmadan aramayı sonlandırdı
-                self.listenToSocketConnection(callCompleted: true)
-                setupCallScreen(inCall: false)
-                self.dismiss(animated: true) {
-                    self.callIsDone(doneStatus: .missedCall)
-                }
+        guard !isTerminating else {
+            print("terminateCall: zaten bitiyor, bekliyoruz...")
+            return
+        }
+        
+        switch message {
+        case .incomingCall:
+            print("yeni bir çağrı geliyor")
+            let nextVC = SDKRingViewController()
+            nextVC.delegate = self
+            self.present(nextVC, animated:true)
+        case .comingSms:
+            self.openSMS()
+            print("sms geliyor")
+        case .endCall:
+            manager.socket.disconnect()
+            print("görüşme tamamlandı, sonraki modüle geçebiliriz")
             
-            case .connectionErr:  // socket kopması durumunda tetiklenir
+        case .approveSms(let tanCode):
+            print("sms onaylandı :\(tanCode)")
+        case .openWarningCircle:
+            print("surat çerçevesi açıldı")
+        case .closeWarningCircle:
+            print("surat çerçevesi kapatıldı")
+        case .openCardCircle:
+            print("kart çerçevesi açıldı")
+        case .closeCardCircle:
+            print("kart çerçevesi kapatıldı")
+        case .terminateCall(let terminateReason, let statusSummaryType):
+            
+            print("terminateCall: (terminateReason=\(terminateReason ?? "-"), statusSummaryType=\(statusSummaryType ?? "-"))")
+            
+            isTerminating = true
+            
+            if terminateReason == "TURN_DISCONNECTED" {
+                reconnect()
+            } else {
+                
+                let hasStatus: Bool = {
+                    guard let type = statusSummaryType else { return false }
+                    return type == "positive" || type == "negative"
+                }()
+                
+                if hasStatus {
+                    
+                    self.listenToSocketConnection(callCompleted: true)
+                    self.setupCallScreen(inCall: false)
+                    self.callIsDone(doneStatus: statusSummaryType == "positive" ? .completed : .notCompleted)
+                    isTerminating = false
+                    return
+                    
+                } else {
+                    reconnect()
+                }
+                
+            }
+            
+            func reconnect() {
+                manager.socket.disconnect()
                 setupCallScreen(inCall: false) // kameraları kapatıp bekleme ekranı görüntüsünü aktif eder
                 openSocketDisconnect(callCompleted: false) // bağlantı koptuğuna dair disconnect penceresini present eder
-            @unknown default:
+                isTerminating = false
                 return
             }
+            
+            
+        case .imOffline:
+            print("bağlantı kopartıldı - panelde sayfa yenilendi - browser kapatıldı")
+            confStarted = false
+            setupCallScreen(inCall: false)
+        case .updateQueue(let order, let min):
+            self.timeInfoLbl.text = "\(self.translate(text: .waitingDesc1Live))\(order)\(self.translate(text: .waitingDesc2Live))\(min)\(self.translate(text: .waitingDesc3Live))"
+        case .photoTaken(let msg):
+            print("temsilci ekran fotoğrafı çekti \(msg)")
+            self.showToast(title: msg, subTitle: "", attachTo: self.view) {
+                return
+            }
+        case .subrejectedDismiss:
+            print("aynı odada başka kişi var")
+        case .subscribed:
+            print("odaya katılım sağlandı")
+        case .openNfcRemote(let birthDate, let validDate, let serialNo):
+            manager.startRemoteNFC(birthDate: birthDate, validDate: validDate, docNo: serialNo)
+            print("uzaktan nfc başlatıldı")
+            
+        case .editNfcProcess:
+            print("kullanıcıya mrz datalarını düzeltme ekranı açıyoruz")
+            let editVC = SDKNfcViewController()
+            editVC.showOnlyEditScreen = true
+            self.present(editVC, animated: true)
+            
+        case .startTransfer:
+            self.showToast(title: "Kameranız ayarlanıyor, lütfen bekleyin", attachTo: self.view) {
+                self.start2SideTransfer()
+                return
+            }
+            print("yüz yüze görüşme başlıyor")
+        case .disableEndCallButton:
+            if topMostController().isKind(of: UIAlertController.self) {
+                self.dismiss(animated: false)
+            }
+            self.endCallButton.isUserInteractionEnabled = false
+            self.endCallButton.isEnabled = false
+            self.endCallButton.alpha = 0.3
+            print("bitirme butonu kapatıldı")
+        case .networkQuality(let quality):
+            print("bağlantı kalitesine göre sinyal resmi basılıyor")
+            switch quality {
+            case "bad":
+                DispatchQueue.main.async {
+                    self.qualityImg.image = UIImage(named: "badConn")
+                }
+            case "medium":
+                DispatchQueue.main.async {
+                    self.qualityImg.image = UIImage(named: "mediumConn")
+                }
+            case "good":
+                DispatchQueue.main.async {
+                    self.qualityImg.image = UIImage(named: "goodConn")
+                }
+            default:
+                DispatchQueue.main.async {
+                    self.qualityImg.image = UIImage()
+                }
+            }
+        case .missedCall: // belirli süre boyunca telefon çaldı fakat müşteri açmadı veya temsilci aradı fakat telefon açılmadan aramayı sonlandırdı
+            self.listenToSocketConnection(callCompleted: true)
+            setupCallScreen(inCall: false)
+            self.dismiss(animated: true) {
+                self.callIsDone(doneStatus: .missedCall)
+            }
+            
+        case .connectionErr:  // socket kopması durumunda tetiklenir
+            setupCallScreen(inCall: false) // kameraları kapatıp bekleme ekranı görüntüsünü aktif eder
+            openSocketDisconnect(callCompleted: false) // bağlantı koptuğuna dair disconnect penceresini present eder
+        case .wrongSocketActionErr(_):
+            break
+        @unknown default:
+            return
+        }
     }
 }
 
@@ -339,7 +383,7 @@ extension SDKCallScreenViewController: SDKSignLangViewControllerDelegate {
 }
 
 extension UIView {
-
+    
     // Using a function since `var image` might conflict with an existing variable
     // (like on `UIImageView`)
     func asImage() -> UIImage {

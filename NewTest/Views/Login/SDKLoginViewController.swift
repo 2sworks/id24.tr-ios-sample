@@ -107,7 +107,8 @@ class SDKLoginViewController: SDKViewOptionsController {
             nfcMaxErrorCount: 3,
             logLevel: .all,
             bigCustomerCam: true,
-            selectedModules: []
+            selectedModules: [],
+            turnKey: ""
         ) { socketStats, apiResp, webErr in
                 
             print("socket resp : \(socketStats)")
