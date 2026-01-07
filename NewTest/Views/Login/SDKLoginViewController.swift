@@ -32,6 +32,7 @@ class SDKLoginViewController: SDKViewOptionsController {
         self.manager.loginModuleController = SDKLoginViewController.instantiate()
         self.manager.selfieModuleController = SDKSelfieViewController.instantiate()
         self.manager.idCardModuleController = SDKCardReaderViewController.instantiate()
+        self.manager.idCardOVDModuleController = SDKOVDViewController.instantiate()
         self.manager.nfcModuleController = SDKNfcViewController.instantiate()
         self.manager.signatureModuleController = SDKSignatureViewController.instantiate()
         self.manager.videoRecorderModuleController = SDKVideoRecorderViewController.instantiate()

@@ -1,5 +1,5 @@
 //
-//  CaptureViewController.swift
+//  SDKOVDViewController.swift
 //  NewTest
 //
 //  Created by Can Aksoy on 23.10.2025.
@@ -141,7 +141,7 @@ private extension CIContext {
 }
 
 // MARK: - Capture View Controller
-final class CaptureViewController: SDKBaseViewController {
+final class SDKOVDViewController: SDKBaseViewController {
     // AV
     private let session = AVCaptureSession()
     private var videoDevice: AVCaptureDevice?
@@ -698,6 +698,9 @@ final class CaptureViewController: SDKBaseViewController {
                                 self.stopPipelinesBeforeReview()
                                 self.stepLabel.text = "✅ Kimlik doğrulama tamamlandı"
                                 self.speakInstruction("Kimlik doğrulama tamamlandı", delay: 0.1)
+                                self.manager.getNextModule { nextVC in
+                                    self.navigationController?.pushViewController(nextVC, animated: true)
+                                }
                             }
                         } else {
                             DispatchQueue.main.async {
@@ -970,7 +973,7 @@ final class CaptureViewController: SDKBaseViewController {
 }
 
 // MARK: - AVCapture Delegeleri
-extension CaptureViewController: AVCapturePhotoCaptureDelegate {
+extension SDKOVDViewController: AVCapturePhotoCaptureDelegate {
     func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
         defer { isCapturing = false }
         guard error == nil else { return }
@@ -1014,7 +1017,7 @@ extension CaptureViewController: AVCapturePhotoCaptureDelegate {
     }
 }
 
-private extension CaptureViewController {
+private extension SDKOVDViewController {
     func rainbowMaxScoreDetailed(in ciImage: CIImage, baseROI: CGRect) -> (score: Float, bins: Int) {
         func clamp(_ r: CGRect, in bounds: CGRect) -> CGRect { r.intersection(bounds) }
         let bx = baseROI.origin.x, by = baseROI.origin.y, bw = baseROI.size.width, bh = baseROI.size.height
@@ -1037,7 +1040,7 @@ private extension CaptureViewController {
     }
 }
 
-extension CaptureViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
+extension SDKOVDViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         if isReviewMode { return }
         guard let buf = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }

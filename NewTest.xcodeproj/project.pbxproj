@@ -7,8 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		366929892F0E8DBE00A67DAB /* SDKOVDViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 366929882F0E8DBE00A67DAB /* SDKOVDViewController.xib */; };
 		36BF33502E572348007F92CE /* SDKReachabilityHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36BF334F2E572348007F92CE /* SDKReachabilityHelper.swift */; };
-		36E1B3BF2EAA42FB004F791C /* CaptureViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36E1B3BE2EAA42FB004F791C /* CaptureViewController.swift */; };
+		36E1B3BF2EAA42FB004F791C /* SDKOVDViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36E1B3BE2EAA42FB004F791C /* SDKOVDViewController.swift */; };
 		480961182C64E70C00B9E6D5 /* v2api.identify.com.tr.cer in Resources */ = {isa = PBXBuildFile; fileRef = 48BFF0D02BBAF3940088D67E /* v2api.identify.com.tr.cer */; };
 		480C1E4F2BDB8B8D0076D28B /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 480C1E4E2BDB8B8D0076D28B /* PrivacyInfo.xcprivacy */; };
 		480E76A9297A868E0071B049 /* GERMAN.json in Resources */ = {isa = PBXBuildFile; fileRef = 48CD8D0429792E26008573F8 /* GERMAN.json */; };
@@ -167,8 +168,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		366929882F0E8DBE00A67DAB /* SDKOVDViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SDKOVDViewController.xib; sourceTree = "<group>"; };
 		36BF334F2E572348007F92CE /* SDKReachabilityHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKReachabilityHelper.swift; sourceTree = "<group>"; };
-		36E1B3BE2EAA42FB004F791C /* CaptureViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureViewController.swift; sourceTree = "<group>"; };
+		36E1B3BE2EAA42FB004F791C /* SDKOVDViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKOVDViewController.swift; sourceTree = "<group>"; };
 		480099BA2B175C5C00325ED0 /* SDKIdentifyLoginViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SDKIdentifyLoginViewController.swift; sourceTree = "<group>"; };
 		480C1E4E2BDB8B8D0076D28B /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		481065972922646600053004 /* SDKLivenessViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKLivenessViewController.swift; sourceTree = "<group>"; };
@@ -347,7 +349,8 @@
 		36E1B3C02EAA464B004F791C /* OVD */ = {
 			isa = PBXGroup;
 			children = (
-				36E1B3BE2EAA42FB004F791C /* CaptureViewController.swift */,
+				36E1B3BE2EAA42FB004F791C /* SDKOVDViewController.swift */,
+				366929882F0E8DBE00A67DAB /* SDKOVDViewController.xib */,
 			);
 			path = OVD;
 			sourceTree = "<group>";
@@ -970,6 +973,7 @@
 				482769472BDFB4D000D5675D /* SDKModuleListViewController.xib in Resources */,
 				482769482BDFB4D000D5675D /* SocketLogTableViewCell.xib in Resources */,
 				482769492BDFB4D000D5675D /* SDKSocketLogsViewController.xib in Resources */,
+				366929892F0E8DBE00A67DAB /* SDKOVDViewController.xib in Resources */,
 				4827694A2BDFB4D000D5675D /* ServerSettingsViewController.xib in Resources */,
 				4827694B2BDFB4D000D5675D /* SDKIdentifyLoginViewController.xib in Resources */,
 				4827694C2BDFB4D000D5675D /* EnvListViewController.xib in Resources */,
@@ -1099,7 +1103,7 @@
 				482D2BDD2A547AC000F1344F /* CaptureSession+Flash.swift in Sources */,
 				485C15682907FC69007B9ED0 /* SDKCardReaderViewController.swift in Sources */,
 				48DD2F292B8DD4DE0091FCCE /* IdentifyProgressBar.swift in Sources */,
-				36E1B3BF2EAA42FB004F791C /* CaptureViewController.swift in Sources */,
+				36E1B3BF2EAA42FB004F791C /* SDKOVDViewController.swift in Sources */,
 				485C155D2907F3A7007B9ED0 /* SDKUIImageView+.swift in Sources */,
 				485C157C2908190D007B9ED0 /* SDKNfcViewController.swift in Sources */,
 			);
