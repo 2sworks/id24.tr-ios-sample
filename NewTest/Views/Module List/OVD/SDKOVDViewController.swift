@@ -26,7 +26,6 @@ final class SDKOVDViewController: SDKBaseViewController {
     private let photoOutput = AVCapturePhotoOutput()
     private let videoOutput = AVCaptureVideoDataOutput()
     private var previewLayer: AVCaptureVideoPreviewLayer!
-    // Speech
     private let instructionSpeaker = AVSpeechSynthesizer()
 
     // Queues
@@ -42,22 +41,13 @@ final class SDKOVDViewController: SDKBaseViewController {
     private var ovdCaptured = false
 
     // Flow configuration: OVD step can be enabled/disabled from outside.
-    // Default: true (OVD aşaması aktif). Dışarıdan false yapılırsa FRONT -> BACK akışı kullanılır.
+    // Default: true (OVD aşaması aktif). false yapılırsa FRONT -> BACK akışı kullanılır.
     var isOVDEnabled: Bool = true
-
-    // Vision/CI
-    private var lastRectObservation: VNRectangleObservation?
 
     // UI
     private let stepLabel = UILabel()
     private let guideLayer = CAShapeLayer()
     private let dimLayer = CAShapeLayer()
-    private let detectedRectLayer = CAShapeLayer()
-
-    // Debug
-    private var noRectCounter = 0
-    private var lastDebugLogTime: CFAbsoluteTime = 0
-    private var debugLogEnabled = true
 
     // Guide geometry
     private var guideRectInView: CGRect = .zero
@@ -68,16 +58,14 @@ final class SDKOVDViewController: SDKBaseViewController {
     private var stableDuration: TimeInterval = 0
     private let requiredStableDuration: TimeInterval = 0.6
     private let sharpnessThreshold: Float = 0.006
-    private let movementArmThresholdRatio: CGFloat = 0.015 // daha küçük hareketle arm
 
     // OVD hareket tespiti (gyro/acc tabanlı)
     private var motionMoveScore = 0
-    private var isDeviceMovingOVD: Bool { motionMoveScore >= 3 }
 
     // OVD ek state
     private var ovdBaselineRainbow: Float?
     private var ovdStartTs: CFAbsoluteTime = 0
-    private var isReviewMode = false
+
     // Helper: stop all pipelines before review
     private func stopPipelinesBeforeReview() {
         // stop torch
@@ -88,9 +76,6 @@ final class SDKOVDViewController: SDKBaseViewController {
         videoOutput.setSampleBufferDelegate(nil, queue: nil)
         // stop session
         sessionQueue.async { [weak self] in self?.session.stopRunning() }
-        // silence logs
-        debugLogEnabled = false
-        isReviewMode = true
     }
 
     // Hysteresis & cooldown (frame scoring)
@@ -114,28 +99,12 @@ final class SDKOVDViewController: SDKBaseViewController {
     private var ovdBaselineChroma: Float?
     private var lastRectDetectTime: CFAbsoluteTime = CFAbsoluteTimeGetCurrent()
     private var rectDetectInFlight = false
-    private var stableSharpStart: CFAbsoluteTime? = nil
-
-    // Shots
-    private var frontShot: CIImage?
-    private var ovdShot: CIImage?
-    private var backShot: CIImage?
-    private var frontUIImage: UIImage?
-    private var ovdUIImage: UIImage?
-    private var backUIImage: UIImage?
 
     // UX gating (içerik tabanlı)
-    private var ovdArmed = false
-    private var ovdMovementAccum: CGFloat = 0
-    private var lastRectCenterY: CGFloat?
-    private var ovdRectDetectInFlight = false
     private var mrzProbeInFlight = false
     private var mrzPresence = false
     private var ovdWhiteOut = false
     private var ovdHold = 0
-
-    // Still foto için minimum dikdörtgen alan oranı (çok küçükse warp etme)
-    private let stillMinRectAreaRatio: CGFloat = 0.05
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -143,7 +112,7 @@ final class SDKOVDViewController: SDKBaseViewController {
         view.backgroundColor = .black
         setupPreview()
         setupUI()
-        speakInstruction("Kimlik ön yüzünü okutun", delay: 0.2)
+        speakInstruction(self.translate(text: .ovdScanFrontSide), delay: 0.2)
         startMotionMonitoring()
         sessionQueue.async { [weak self] in
             guard let self = self else { return }
@@ -206,18 +175,13 @@ final class SDKOVDViewController: SDKBaseViewController {
         dimLayer.fillColor = UIColor.black.withAlphaComponent(0.8).cgColor
         view.layer.addSublayer(dimLayer)
         updateGuidePath()
-        // Debug detected rect overlay
-        detectedRectLayer.strokeColor = UIColor.systemYellow.cgColor
-        detectedRectLayer.fillColor = UIColor.clear.cgColor
-        detectedRectLayer.lineWidth = 2
-        view.layer.addSublayer(detectedRectLayer)
     }
 
     private func setupUI() {
         stepLabel.textColor = .white
         stepLabel.font = .boldSystemFont(ofSize: 16)
         stepLabel.textAlignment = .center
-        stepLabel.text = "Ön Yüz – Kılavuz içine hizalayın"
+        stepLabel.text = self.translate(text: .ovdFrontAlignGuide)
         stepLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(stepLabel)
         NSLayoutConstraint.activate([
@@ -225,13 +189,6 @@ final class SDKOVDViewController: SDKBaseViewController {
             stepLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
     }
-
-    // MARK: Debug / Helpers
-    private func dlog(_ msg: @autoclosure () -> String) { guard debugLogEnabled else { return }
-        let now = CFAbsoluteTimeGetCurrent()
-        if now - lastDebugLogTime > 0.2 {
-            //print("[DBG] " + msg())
-            lastDebugLogTime = now } }
 
     private func currentCGImageOrientation() -> CGImagePropertyOrientation {
         let av = videoOutput.connections.first?.videoOrientation ?? .portrait
@@ -243,12 +200,6 @@ final class SDKOVDViewController: SDKBaseViewController {
         @unknown default: return .right }
     }
 
-    private func showDetectedRect(_ rectObs: VNRectangleObservation?) {
-        DispatchQueue.main.async {
-            // Artık kullanıcıya sarı çerçeve göstermiyoruz.
-            self.detectedRectLayer.path = nil
-        }
-    }
 
 
     private func setTorch(on: Bool, level: Float = 0.6) {
@@ -334,7 +285,7 @@ final class SDKOVDViewController: SDKBaseViewController {
     private func capture(reason: CaptureStep) {
         // OCR/upload pipeline devam ederken veya mevcut bir foto işlenirken yeni çekim başlatma
         guard !isCapturing, !isOCRInFlight else {
-            //dlog("capture(\(reason.rawValue)) ignored (isCapturing=\(isCapturing) isOCRInFlight=\(isOCRInFlight))")
+            //print("capture(\(reason.rawValue)) ignored (isCapturing=\(isCapturing) isOCRInFlight=\(isOCRInFlight))")
             return
         }
         isCapturing = true
@@ -347,15 +298,11 @@ final class SDKOVDViewController: SDKBaseViewController {
     }
 
     // MARK: OCR Pipeline
-    private func processForOCR(ciImage: CIImage) {
-        self.startOCR(ciImage: ciImage)
-    }
-    
     private func startOCR(ciImage: CIImage) {
         //print("[startOCR] entering step=\(currentStep.rawValue) isOCRInFlight=\(isOCRInFlight)")
         // Tek seferde tek OCR/upload pipeline çalışsın
         if isOCRInFlight {
-            //dlog("startOCR ignored (in-flight) step=\(currentStep.rawValue)")
+            //print("startOCR ignored (in-flight) step=\(currentStep.rawValue)")
             return
         }
         isOCRInFlight = true
@@ -366,11 +313,9 @@ final class SDKOVDViewController: SDKBaseViewController {
                     print("[startOCR] startFrontIdOcr callback err=\(err != nil)")
                     if err != nil {
                         DispatchQueue.main.async {
-                            
-                            
                             // Kullanıcıya tekrar denemesi için rehberlik
-                            self.stepLabel.text = "Ön Yüz – Tekrar deneyin, kılavuz içine hizalayın"
-                            self.speakInstruction("Kimlik ön yüzünü tekrar kılavuz içine hizalayın ve sabit tutun", delay: 0.3)
+                            self.stepLabel.text = self.translate(text: .ovdFrontRetryAlign)
+                            self.speakInstruction(self.translate(text: .ovdFrontRetryAlignSpeech), delay: 0.3)
                             
                             self.showToast(type: .fail,
                                            title: self.translate(text: .coreError),
@@ -414,8 +359,8 @@ final class SDKOVDViewController: SDKBaseViewController {
                                                     //self.hideLoader()
                                                    }
                                     // Kullanıcıya tekrar denemesi için rehberlik
-                                    self.stepLabel.text = "Ön Yüz – Tekrar deneyin, kılavuz içine hizalayın"
-                                    self.speakInstruction("Kimlik ön yüzünü tekrar kılavuz içine hizalayın ve sabit tutun", delay: 0.3)
+                                    self.stepLabel.text = self.translate(text: .ovdFrontRetryAlign)
+                                    self.speakInstruction(self.translate(text: .ovdFrontRetryAlignSpeech), delay: 0.3)
 
                                 }
                                 
@@ -424,31 +369,10 @@ final class SDKOVDViewController: SDKBaseViewController {
                                     self.isOCRInFlight = false
                                 }
                             }
-                            //self.isOCRInFlight = false
                         }
                     }
                 }
             
-//            self.manager.uploadIdPhoto(idPhoto: img) { webResp in
-//                if webResp.result == true {
-//                    print("[FrontUpload] success, moving to OVD step")
-//                    DispatchQueue.main.async {
-//                        self.moveToOVDStep()
-//                    }
-//                } else {
-//                    DispatchQueue.main.async {
-//                        self.showToast(title: self.translate(text: .coreError),
-//                                       subTitle: "\(webResp.messages?.first ?? self.translate(text: .coreUploadError))",
-//                                       attachTo: self.view) { }
-//                        self.stepLabel.text = "Ön Yüz – Tekrar deneyin, kılavuz içine hizalayın"
-//                        self.speakInstruction("Kimlik ön yüzünü tekrar kılavuz içine hizalayın ve sabit tutun", delay: 0.3)
-//                        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-//                            self.setGuideDetected(false)
-//                        }
-//                    }
-//                }
-//                self.isOCRInFlight = false
-//            }
         case .ovd:
             self.manager.uploadIdPhoto(idPhoto: img, selfieType: .frontIdOvd) { webResp in
                 if webResp.result == true {
@@ -493,8 +417,8 @@ final class SDKOVDViewController: SDKBaseViewController {
                             // Tüm akış başarıyla tamamlandı: capture session ve pipelineları durdur.
                             DispatchQueue.main.async {
                                 self.stopPipelinesBeforeReview()
-                                self.stepLabel.text = "✅ Kimlik doğrulama tamamlandı"
-                                self.speakInstruction("Kimlik doğrulama tamamlandı", delay: 0.1)
+                                self.stepLabel.text = self.translate(text: .ovdVerificationCompleted)
+                                self.speakInstruction(self.translate(text: .ovdVerificationCompletedSpeech), delay: 0.1)
                                 self.manager.getNextModule { nextVC in
                                     self.navigationController?.pushViewController(nextVC, animated: true)
                                 }
@@ -519,9 +443,6 @@ final class SDKOVDViewController: SDKBaseViewController {
         ovdBaselineRainbow = nil
         ovdBaselineGlare = nil
         ovdBaselineChroma = nil
-        ovdArmed = false
-        ovdMovementAccum = 0
-        lastRectCenterY = nil
         ovdCaptured = false
         mrzPresence = false
         mrzProbeInFlight = false
@@ -530,9 +451,9 @@ final class SDKOVDViewController: SDKBaseViewController {
         currentStep = .ovd
         
         DispatchQueue.main.async {
-            self.stepLabel.text = "OVD – Flaş açık, kartı hafif yukarı/aşağı hareket ettirin"
+            self.stepLabel.text = self.translate(text: .ovdFlashMoveCard)
             self.setGuideDetected(false)
-            self.speakInstruction("Kimliği hafifçe yukarı aşağı döndürerek, gökkuşağı baskının görünmesini sağlayın", delay: 3.0)
+            self.speakInstruction(self.translate(text: .ovdRotateRainbowSpeech), delay: 3.0)
             self.setTorch(on: true)
         }
     }
@@ -550,9 +471,9 @@ final class SDKOVDViewController: SDKBaseViewController {
 
         setTorch(on: false)
         setGuideDetected(false)
-        stepLabel.text = "✅ OVD kaydedildi – Arka yüzü hizalayın"
-        speakInstruction("Fotoğraf alındı", delay: 0.25)
-        speakInstruction("Kimlik arka yüzü okutun", delay: 2.0)
+        stepLabel.text = self.translate(text: .ovdSavedAlignBack)
+        speakInstruction(self.translate(text: .ovdPhotoTaken), delay: 0.25)
+        speakInstruction(self.translate(text: .ovdScanBackSide), delay: 2.0)
     }
 
     // OVD opsiyonel olduğunda, FRONT başarılı olunca doğrudan BACK adımına geçiş
@@ -568,8 +489,8 @@ final class SDKOVDViewController: SDKBaseViewController {
 
         setTorch(on: false)
         setGuideDetected(false)
-        stepLabel.text = "✅ Ön yüz kaydedildi – Arka yüzü hizalayın"
-        speakInstruction("Kimlik arka yüzü okutun", delay: 0.5)
+        stepLabel.text = self.translate(text: .ovdFrontSavedAlignBack)
+        speakInstruction(self.translate(text: .ovdScanBackSide), delay: 0.5)
     }
 
     // OVD upload başarısız olduğunda aynı adımda kal ve tekrar denemeye hazırla
@@ -582,18 +503,16 @@ final class SDKOVDViewController: SDKBaseViewController {
         ovdStartTs = CFAbsoluteTimeGetCurrent()
         ovdWhiteOut = false
 
-        stepLabel.text = "OVD – Tekrar deneyin, kartı hafifçe yukarı/aşağı hareket ettirin"
-        speakInstruction("Kimliği hafifçe yukarı aşağı döndürerek, gökkuşağı baskıyı tekrar görünür yapın", delay: 0.3)
+        stepLabel.text = self.translate(text: .ovdRetryMoveCard)
+        speakInstruction(self.translate(text: .ovdRotateRainbowRetrySpeech), delay: 0.3)
         setGuideDetected(false)
         setTorch(on: true)
     }
     
-
     // Gelişmiş: ROI/Orientation ayarlı dikdörtgen tespiti
     private func detectRectangle(in image: CIImage,
                                  useGuideROI: Bool,
                                  orientation: CGImagePropertyOrientation,
-                                 showOverlay: Bool,
                                  completion: @escaping (VNRectangleObservation?) -> Void) {
         visionQueue.async {
             let req = VNDetectRectanglesRequest()
@@ -613,7 +532,7 @@ final class SDKOVDViewController: SDKBaseViewController {
 
             let handler = VNImageRequestHandler(ciImage: image, orientation: orientation, options: [:])
             do { try handler.perform([req]) } catch {
-                self.dlog("VN perform error: \(error)")
+                //print("VN perform error: \(error)")
                 completion(nil)
                 return
             }
@@ -628,7 +547,7 @@ final class SDKOVDViewController: SDKBaseViewController {
                 req2.maximumObservations = 1
                 let handler2 = VNImageRequestHandler(ciImage: image, orientation: orientation, options: [:])
                 do { try handler2.perform([req2]) } catch {
-                    self.dlog("VN2 error: \(error)")
+                    //print("VN2 error: \(error)")
                     completion(nil)
                     return
                 }
@@ -638,11 +557,7 @@ final class SDKOVDViewController: SDKBaseViewController {
             if let r = result {
                 let s = self.manager.sideLengths(of: r)
                 let ratio = min(s.w, s.h) / max(s.w, s.h)
-                self.dlog(String(format: "Rect OK conf=%.2f ROI=%@ orient=%d short/long=%.3f", r.confidence, usedROI.description, orientation.rawValue, ratio))
-                if showOverlay { self.showDetectedRect(result) }
-            } else {
-                self.dlog("Rect NONE ROI=\(usedROI) orient=\(orientation.rawValue)")
-                if showOverlay { self.showDetectedRect(nil) }
+                //print(String(format: "Rect OK conf=%.2f ROI=%@ orient=%d short/long=%.3f", r.confidence, usedROI.description, orientation.rawValue, ratio))
             }
             completion(result)
         }
@@ -650,7 +565,7 @@ final class SDKOVDViewController: SDKBaseViewController {
 
     // Eski imza (canlı video için)
     private func detectRectangle(in image: CIImage, completion: @escaping (VNRectangleObservation?) -> Void) {
-        detectRectangle(in: image, useGuideROI: true, orientation: currentCGImageOrientation(), showOverlay: true, completion: completion)
+        detectRectangle(in: image, useGuideROI: true, orientation: currentCGImageOrientation(), completion: completion)
     }
 
 
@@ -682,22 +597,16 @@ extension SDKOVDViewController: AVCapturePhotoCaptureDelegate {
         
         switch captureReason {
         case .front:
-            frontShot = ciRaw
-            frontUIImage = ui
             DispatchQueue.main.async {
-                self.stepLabel.text = "✅ Ön yüz kaydedildi"
-                self.speakInstruction("Kimlik ön yüz kontrol ediliyor", delay: 0.25)
+                self.stepLabel.text = self.translate(text: .ovdFrontSaved)
+                self.speakInstruction(self.translate(text: .ovdFrontChecking), delay: 0.25)
             }
-            processForOCR(ciImage: ciRaw)
+            startOCR(ciImage: ciRaw)
         case .ovd:
-            ovdShot = ciRaw
-            ovdUIImage = ui
             setTorch(on: false)
-            processForOCR(ciImage: ciRaw)
+            startOCR(ciImage: ciRaw)
         case .back:
-            backShot = ciRaw
-            backUIImage = ui
-            processForOCR(ciImage: ciRaw)
+            startOCR(ciImage: ciRaw)
         }
     }
 }
@@ -705,7 +614,7 @@ extension SDKOVDViewController: AVCapturePhotoCaptureDelegate {
 
 extension SDKOVDViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        if isReviewMode { return }
+
         guard let buf = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
         let ci = CIImage(cvImageBuffer: buf)
         switch currentStep {
@@ -716,7 +625,6 @@ extension SDKOVDViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
                 lastRectDetectTime = now
                 detectRectangle(in: ci) { [weak self] rectObs in
                     guard let self = self else { return }
-                    self.lastRectObservation = rectObs
                     self.rectDetectInFlight = false
                     let extent = ci.extent
                     let roi = self.docRectROI(in: extent)
@@ -724,10 +632,6 @@ extension SDKOVDViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
                     let stableOK = self.stableDuration >= self.requiredStableDuration
                     let hasRect = (rectObs != nil)
 
-                    let nowTs = CFAbsoluteTimeGetCurrent()
-                    if stableOK && (sharp >= self.sharpnessThreshold) {
-                        if self.stableSharpStart == nil { self.stableSharpStart = nowTs }
-                    } else { self.stableSharpStart = nil }
 
                     if self.currentStep == .back && hasRect && !self.mrzPresence && !self.mrzProbeInFlight {
                         self.mrzProbeInFlight = true
@@ -735,24 +639,17 @@ extension SDKOVDViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
                             guard let self = self else { return }
                             self.mrzPresence = ok
                             self.mrzProbeInFlight = false
-                            self.dlog("MRZ presence=\(ok)")
+                            //print("MRZ presence=\(ok)")
                         }
                     }
 
                     var coverage: CGFloat = 0
                     var ratio: CGFloat = 0
-                    var rectTooSmall = true
                     if let ro = rectObs {
                         let bb = self.manager.toImageRect(observation: ro, imageRect: ci.extent)
                         coverage = bb.intersection(roi).area / max(roi.area, 1)
                         let s = self.manager.sideLengths(of: ro)
                         ratio = min(s.w, s.h) / max(s.w, s.h)
-                        let rectArea = bb.area
-                        let minAcceptableArea = roi.area * 0.50
-                        rectTooSmall = (rectArea < minAcceptableArea)
-                        if rectTooSmall {
-                            self.dlog("Rect too small: \(Int(bb.width))x\(Int(bb.height)) area=\(Int(rectArea)) minReq=\(Int(minAcceptableArea))")
-                        }
                     }
 
                     let (_, _, whiteOutFB) = self.manager.ovdColorMetrics(ciImage: ci, roi: roi)
@@ -774,21 +671,19 @@ extension SDKOVDViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
                     let mrzGateOK = (self.currentStep != .back) || self.mrzPresence
                     let canFire = mrzGateOK && (self.readyScore >= self.readyScoreFire) && ((now - self.lastReadyFireTs) > 1.0)
 
-                    self.dlog(String(format: "why: AOK=%d COV=%d SHP=%d STB=%d MRZ=%d GLR=%d thr(shp)=%.4f ratio=%.3f cov=%.2f score=%d",
-                                     aspectOk ? 1 : 0, coverageOk ? 1 : 0, sharpOk ? 1 : 0, stableOk ? 1 : 0, self.mrzPresence ? 1 : 0, glareBlock ? 1 : 0,
-                                     sharpMin, ratio, coverage, self.readyScore))
+                    //print(String(format: "why: AOK=%d COV=%d SHP=%d STB=%d MRZ=%d GLR=%d thr(shp)=%.4f ratio=%.3f cov=%.2f score=%d", aspectOk ? 1 : 0, coverageOk ? 1 : 0, sharpOk ? 1 : 0, stableOk ? 1 : 0, self.mrzPresence ? 1 : 0, glareBlock ? 1 : 0, sharpMin, ratio, coverage, self.readyScore))
 
                     DispatchQueue.main.async {
                         switch self.currentStep {
                         case .front:
-                            if !hasRect { self.stepLabel.text = "Ön Yüz – Kılavuz içine hizalayın" }
-                            else if coverage < self.coverageMin { self.stepLabel.text = "Ön Yüz – Biraz yaklaştırın" }
-                            else { self.stepLabel.text = canFire ? "Ön Yüz – Hazır, çekiliyor…" : "Ön Yüz – Hizalandı, sabitleyin" }
+                            if !hasRect { self.stepLabel.text = self.translate(text: .ovdFrontAlignGuide) }
+                            else if coverage < self.coverageMin { self.stepLabel.text = self.translate(text: .ovdFrontMoveCloser) }
+                            else { self.stepLabel.text = canFire ? self.translate(text: .ovdFrontReadyCapturing) : self.translate(text: .ovdFrontAlignedHold) }
                         case .back:
-                            if !hasRect { self.stepLabel.text = "Arka Yüz – Kılavuz içine hizalayın" }
-                            else if coverage < self.coverageMin { self.stepLabel.text = "Arka Yüz – Biraz yaklaştırın" }
-                            else if !mrzGateOK { self.stepLabel.text = "Arka Yüz – MRZ (<<<) okunmadı, alt banda yaklaştırın" }
-                            else { self.stepLabel.text = canFire ? "Arka Yüz – Hazır, çekiliyor…" : "Arka Yüz – Hizalandı, sabitleyin" }
+                            if !hasRect { self.stepLabel.text = self.translate(text: .ovdBackAlignGuide) }
+                            else if coverage < self.coverageMin { self.stepLabel.text = self.translate(text: .ovdBackMoveCloser) }
+                            else if !mrzGateOK { self.stepLabel.text = self.translate(text: .ovdBackMrzNotRead) }
+                            else { self.stepLabel.text = canFire ? self.translate(text: .ovdBackReadyCapturing) : self.translate(text: .ovdBackAlignedHold) }
                         case .ovd: break
                         }
                         self.setGuideDetected(canFire)
@@ -829,16 +724,16 @@ extension SDKOVDViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
             let minOvdTimeOk = (CFAbsoluteTimeGetCurrent() - self.ovdStartTs) > 0.8
             let hit = minOvdTimeOk && (self.ovdHold >= 4)
 
-            self.dlog("OVD pass=\(pass) bins=\(bins) rnb=\(String(format: "%.3f", rainbow)) Δr=\(String(format: "%.3f", deltaRainbow)) whiteOut=\(whiteOut) hold=\(self.ovdHold)")
+            //print("OVD pass=\(pass) bins=\(bins) rnb=\(String(format: "%.3f", rainbow)) Δr=\(String(format: "%.3f", deltaRainbow)) whiteOut=\(whiteOut) hold=\(self.ovdHold)")
 
             DispatchQueue.main.async {
-                if whiteOut { self.stepLabel.text = "OVD – Çok beyaz, kartı hafifçe açılı tutun" }
+                if whiteOut { self.stepLabel.text = self.translate(text: .ovdTooWhiteTilt) }
                 self.setGuideDetected(hit)
             }
 
             if hit && !self.isCapturing && !self.ovdCaptured && !self.isOCRInFlight {
                 self.ovdCaptured = true
-                DispatchQueue.main.async { self.stepLabel.text = "OVD – Parlama yakalandı, çekiliyor…" }
+                DispatchQueue.main.async { self.stepLabel.text = self.translate(text: .ovdGlareCaptured) }
                 self.capture(reason: .ovd)
             }
         }

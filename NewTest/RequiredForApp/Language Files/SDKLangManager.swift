@@ -383,6 +383,58 @@ extension SDKLangManager {
                 return self.readKey(key: "LivenessRecordingFailedToast")
             case .livenessRecordingRetryAction:
                 return self.readKey(key: "LivenessRecordingRetryAction")
+            case .ovdScanFrontSide:
+                return self.readKey(key: "OvdScanFrontSide")
+            case .ovdFrontAlignGuide:
+                return self.readKey(key: "OvdFrontAlignGuide")
+            case .ovdFrontRetryAlign:
+                return self.readKey(key: "OvdFrontRetryAlign")
+            case .ovdFrontRetryAlignSpeech:
+                return self.readKey(key: "OvdFrontRetryAlignSpeech")
+            case .ovdVerificationCompleted:
+                return self.readKey(key: "OvdVerificationCompleted")
+            case .ovdVerificationCompletedSpeech:
+                return self.readKey(key: "OvdVerificationCompletedSpeech")
+            case .ovdFlashMoveCard:
+                return self.readKey(key: "OvdFlashMoveCard")
+            case .ovdRotateRainbowSpeech:
+                return self.readKey(key: "OvdRotateRainbowSpeech")
+            case .ovdSavedAlignBack:
+                return self.readKey(key: "OvdSavedAlignBack")
+            case .ovdPhotoTaken:
+                return self.readKey(key: "OvdPhotoTaken")
+            case .ovdScanBackSide:
+                return self.readKey(key: "OvdScanBackSide")
+            case .ovdFrontSavedAlignBack:
+                return self.readKey(key: "OvdFrontSavedAlignBack")
+            case .ovdRetryMoveCard:
+                return self.readKey(key: "OvdRetryMoveCard")
+            case .ovdRotateRainbowRetrySpeech:
+                return self.readKey(key: "OvdRotateRainbowRetrySpeech")
+            case .ovdFrontSaved:
+                return self.readKey(key: "OvdFrontSaved")
+            case .ovdFrontChecking:
+                return self.readKey(key: "OvdFrontChecking")
+            case .ovdFrontMoveCloser:
+                return self.readKey(key: "OvdFrontMoveCloser")
+            case .ovdFrontReadyCapturing:
+                return self.readKey(key: "OvdFrontReadyCapturing")
+            case .ovdFrontAlignedHold:
+                return self.readKey(key: "OvdFrontAlignedHold")
+            case .ovdBackAlignGuide:
+                return self.readKey(key: "OvdBackAlignGuide")
+            case .ovdBackMoveCloser:
+                return self.readKey(key: "OvdBackMoveCloser")
+            case .ovdBackMrzNotRead:
+                return self.readKey(key: "OvdBackMrzNotRead")
+            case .ovdBackReadyCapturing:
+                return self.readKey(key: "OvdBackReadyCapturing")
+            case .ovdBackAlignedHold:
+                return self.readKey(key: "OvdBackAlignedHold")
+            case .ovdTooWhiteTilt:
+                return self.readKey(key: "OvdTooWhiteTilt")
+            case .ovdGlareCaptured:
+                return self.readKey(key: "OvdGlareCaptured")
         }
     }
 }
@@ -553,4 +605,30 @@ public enum SDKKeywords {
     case scanErrDegree
     case addressPdfErrorTitle
     case addressPdfErrorMessage
+    case ovdScanFrontSide
+    case ovdFrontAlignGuide
+    case ovdFrontRetryAlign
+    case ovdFrontRetryAlignSpeech
+    case ovdVerificationCompleted
+    case ovdVerificationCompletedSpeech
+    case ovdFlashMoveCard
+    case ovdRotateRainbowSpeech
+    case ovdSavedAlignBack
+    case ovdPhotoTaken
+    case ovdScanBackSide
+    case ovdFrontSavedAlignBack
+    case ovdRetryMoveCard
+    case ovdRotateRainbowRetrySpeech
+    case ovdFrontSaved
+    case ovdFrontChecking
+    case ovdFrontMoveCloser
+    case ovdFrontReadyCapturing
+    case ovdFrontAlignedHold
+    case ovdBackAlignGuide
+    case ovdBackMoveCloser
+    case ovdBackMrzNotRead
+    case ovdBackReadyCapturing
+    case ovdBackAlignedHold
+    case ovdTooWhiteTilt
+    case ovdGlareCaptured
 }
