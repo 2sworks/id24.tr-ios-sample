@@ -128,6 +128,7 @@
   "WaitingDesc1Live": "Sie befinden sich an ",
   "WaitingDesc2Live": "  Position. Die voraussichtliche Wartezeit beträgt ca. ",
   "WaitingDesc3Live": " Minuten.",
+  "CallScreenWaitRepresentative": "Unser Kundenvertreter trifft die letzten Vorbereitungen, um Sie anzurufen. Bitte warten Sie, ohne die App zu schließen.",
   "DocType": "Select doc type",
   "LivenessLookCam": "Schauen Sie bitte in die Kamera",
   "NfcKeyErrTitle" : "Fehlende oder fehlerhafte Informationen",

@@ -258,7 +258,13 @@ extension SDKCallScreenViewController: SDKSocketListener {
             confStarted = false
             setupCallScreen(inCall: false)
         case .updateQueue(let order, let min):
-            self.timeInfoLbl.text = "\(self.translate(text: .waitingDesc1Live))\(order)\(self.translate(text: .waitingDesc2Live))\(min)\(self.translate(text: .waitingDesc3Live))"
+            
+            if order == "0" || min == "0" {
+                print("🔔 [QUEUE] Sıra bilgisi yok veya geçersiz, default text gösteriliyor")
+                self.timeInfoLbl.text = self.translate(text: .callScreenWaitRepresentative)
+            } else {
+                self.timeInfoLbl.text = "\(self.translate(text: .waitingDesc1Live))\(order)\(self.translate(text: .waitingDesc2Live))\(min)\(self.translate(text: .waitingDesc3Live))"
+            }
         case .photoTaken(let msg):
             print("temsilci ekran fotoğrafı çekti \(msg)")
             self.showToast(title: msg, subTitle: "", attachTo: self.view) {

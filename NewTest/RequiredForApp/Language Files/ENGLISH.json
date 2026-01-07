@@ -128,6 +128,7 @@
   "WaitingDesc1Live": "There are ",
   "WaitingDesc2Live": " person ahead of you. Your wait time takes approximately ",
   "WaitingDesc3Live": " minutes",
+  "CallScreenWaitRepresentative": "Our customer representative is making the final preparations to call you. Please wait without closing the app.",
   "DocType": "Select doc type",
   "LivenessLookCam": "Please look at the camera",
   "NfcKeyErrTitle" : "Missing or incorrect information found!",

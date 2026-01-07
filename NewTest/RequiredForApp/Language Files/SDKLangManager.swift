@@ -289,6 +289,8 @@ extension SDKLangManager {
                 return self.readKey(key: "WaitingDesc2Live")
             case .waitingDesc3Live:
                 return self.readKey(key: "WaitingDesc3Live")
+            case .callScreenWaitRepresentative:
+                return self.readKey(key: "CallScreenWaitRepresentative")
             case .docType:
                 return self.readKey(key: "DocType")
             case .livenessLookCam:
@@ -568,6 +570,7 @@ public enum SDKKeywords {
     case waitingDesc1Live
     case waitingDesc2Live
     case waitingDesc3Live
+    case callScreenWaitRepresentative
     case docType
     case livenessLookCam
     case nfcKeyErrTitle
