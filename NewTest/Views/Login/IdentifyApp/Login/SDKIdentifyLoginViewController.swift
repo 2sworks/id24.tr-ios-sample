@@ -46,7 +46,7 @@ class SDKIdentifyLoginViewController: SDKBaseViewController {
         self.manager.setSDKLang(lang: .eng)
         self.manager.loginModuleController = SDKLoginViewController.instantiate()
         self.manager.selfieModuleController = SDKSelfieViewController.instantiate()
-        self.manager.idCardModuleController = SDKCardReaderViewController.instantiate()
+        self.manager.idCardModuleController = CaptureViewController()
         self.manager.nfcModuleController = SDKNfcViewController.instantiate()
         self.manager.signatureModuleController = SDKSignatureViewController.instantiate()
         self.manager.videoRecorderModuleController = SDKVideoRecorderViewController.instantiate()
@@ -182,7 +182,7 @@ class SDKIdentifyLoginViewController: SDKBaseViewController {
         } else if identIdArea.text == "busra" {
             self.identIdArea.text = "14412dd4616298aabbd80c9628860ed8d214c288"
         } else if identIdArea.text == "c" {
-            self.identIdArea.text = "28da9f91fc106811821ea60f0b18de42994b599a"
+            self.identIdArea.text = "b4dfaf98b0664032195eac628944f8f715ac7d51"
         } else if identIdArea.text == "c2" {
             self.identIdArea.text = "a170357f1ed311b3c49880a5ec2f1d78d0bf624d"
         }
