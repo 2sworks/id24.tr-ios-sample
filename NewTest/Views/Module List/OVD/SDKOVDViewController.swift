@@ -18,128 +18,6 @@ import ImageIO
 // MARK: - Capture Step
 private enum CaptureStep: String { case front = "front", back = "back", ovd = "ovd" }
 
-
-// MARK: - OVD / Parlama Analizörü
-final class OVDAnalyzer {
-    private let context = CIContext(options: [.useSoftwareRenderer: false])
-    private let conv = CIFilter.convolution3X3()
-    init() {
-        conv.weights = CIVector(values: [ -1,-1,-1, -1,8,-1, -1,-1,-1 ], count: 9)
-        conv.bias = 0
-    }
-    /// Parlama tespiti: çok parlak piksel oranı (yaklaşık)
-    func glareScore(ciImage: CIImage, roi: CGRect) -> Float {
-        let crop = ciImage.cropped(to: roi)
-        let hist = CIFilter.areaHistogram()
-        hist.inputImage = crop
-        hist.extent = crop.extent
-        hist.scale = 1
-        hist.count = 256
-        guard let out = hist.outputImage,
-              let cg = context.createCGImage(out, from: CGRect(x: 0, y: 0, width: 256, height: 1)),
-              let provider = cg.dataProvider, let raw = provider.data else { return 0 }
-        let ptr = CFDataGetBytePtr(raw)!
-        var bright: Float = 0
-        var total: Float = 0
-        let width = cg.width
-        let step = cg.bitsPerPixel/8
-        for x in 0..<width {
-            let off = x*step
-            let v = Float(ptr[off])
-            total += v
-            if x >= 240 { bright += v } }
-        return total <= 0 ? 0 : min(1, bright/total)
-    }
-    /// Texture (kenar) enerjisi ~ Laplacian ortalaması (yaklaşık netlik)
-    func textureMean(ciImage: CIImage, roi: CGRect) -> Float {
-        let crop = ciImage.cropped(to: roi)
-        conv.inputImage = crop
-        guard let edged = conv.outputImage else { return 0 }
-        let avg = CIFilter.areaAverage()
-        avg.inputImage = edged
-        avg.extent = crop.extent
-        guard let out = avg.outputImage, let px = context.renderPixel(out) else { return 0 }
-        return Float((px.r + px.g + px.b)/3.0)
-    }
-    /// Renk metrikleri: beyaz patlama ve renk canlılığı
-    func colorMetrics(ciImage: CIImage, roi: CGRect) -> (brightness: Float, chroma: Float, whiteOut: Bool) {
-        let crop = ciImage.cropped(to: roi)
-        let avg = CIFilter.areaAverage()
-        avg.inputImage = crop
-        avg.extent = crop.extent
-        guard let out = avg.outputImage, let px = context.renderPixel(out) else { return (0,0,false) }
-        let r = max(0.0, min(1.0, px.r)), g = max(0.0, min(1.0, px.g)), b = max(0.0, min(1.0, px.b))
-        let v = Float(max(r, max(g, b)))
-        let minc = Float(min(r, min(g, b)))
-        let s: Float = v == 0 ? 0 : (v - minc) / v
-        let mean = Float((r + g + b) / 3.0)
-        let varRGB = (powf(Float(r) - mean, 2) + powf(Float(g) - mean, 2) + powf(Float(b) - mean, 2)) / 3.0
-        let chroma = sqrtf(max(0, varRGB))
-        let whiteOut = (v > 0.85 && s < 0.12)
-        return (v, chroma, whiteOut)
-    }
-    /// Gökkuşağı benzeri renkli parlama skoru (detaylı): score + görülen renk kovası sayısı + coverage
-    func rainbowScoreDetailed(ciImage: CIImage, roi: CGRect) -> (score: Float, binsPresent: Int, coverage: Float) {
-        let crop = ciImage.cropped(to: roi)
-        guard let cg = context.createCGImage(crop, from: crop.extent) else { return (0,0,0) }
-        let w = 48, h = 48
-        let cs = CGColorSpaceCreateDeviceRGB()
-        var buf = [UInt8](repeating: 0, count: w*h*4)
-        guard let ctx = CGContext(data: &buf, width: w, height: h, bitsPerComponent: 8,
-                                  bytesPerRow: w*4, space: cs,
-                                  bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return (0,0,0) }
-        ctx.interpolationQuality = .low
-        ctx.draw(cg, in: CGRect(x: 0, y: 0, width: w, height: h))
-        var bins = [Int](repeating: 0, count: 6)
-        var hits = 0
-        for i in 0..<(w*h) {
-            let r = Float(buf[i*4+0]) / 255.0
-            let g = Float(buf[i*4+1]) / 255.0
-            let b = Float(buf[i*4+2]) / 255.0
-            let maxv = max(r, max(g, b))
-            let minv = min(r, min(g, b))
-            let v = maxv
-            let s: Float = maxv == 0 ? 0 : (maxv - minv) / maxv
-            if v > 0.6 && s > 0.3 {
-                let d = maxv - minv
-                var hdeg: Float = 0
-                if d == 0 { hdeg = 0 }
-                else if maxv == r { hdeg = 60 * fmodf(((g - b) / d), 6) }
-                else if maxv == g { hdeg = 60 * (((b - r) / d) + 2) }
-                else { hdeg = 60 * (((r - g) / d) + 4) }
-                if hdeg < 0 { hdeg += 360 }
-                let bin: Int
-                switch hdeg {
-                case 0..<30, 330..<360: bin = 0
-                case 30..<90:           bin = 1
-                case 90..<150:          bin = 2
-                case 150..<210:         bin = 3
-                case 210..<270:         bin = 4
-                default:                bin = 5
-                }
-                bins[bin] += 1
-                hits += 1
-            }
-        }
-        let present = bins.filter { $0 > 0 }.count
-        let coverage = Float(hits) / Float(w*h)
-        let score = coverage * (Float(present) / 6.0)
-        return (score, present, coverage)
-    }
-    /// Geriye dönük uyum için eski imza
-    func rainbowScore(ciImage: CIImage, roi: CGRect) -> Float { rainbowScoreDetailed(ciImage: ciImage, roi: roi).score }
-}
-private extension CIContext {
-    func renderPixel(_ image: CIImage) -> (r: Double,g: Double,b: Double,a: Double)? {
-        guard let cg = createCGImage(image, from: CGRect(x: 0, y: 0, width: 1, height: 1)) else { return nil }
-        let cs = CGColorSpaceCreateDeviceRGB()
-        var buf = [UInt8](repeating: 0, count: 4)
-        let ctx = CGContext(data: &buf, width: 1, height: 1, bitsPerComponent: 8, bytesPerRow: 4, space: cs, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
-        ctx?.draw(cg, in: CGRect(x: 0, y: 0, width: 1, height: 1))
-        return (Double(buf[0])/255.0, Double(buf[1])/255.0, Double(buf[2])/255.0, Double(buf[3])/255.0)
-    }
-}
-
 // MARK: - Capture View Controller
 final class SDKOVDViewController: SDKBaseViewController {
     // AV
@@ -160,11 +38,7 @@ final class SDKOVDViewController: SDKBaseViewController {
     private var currentStep: CaptureStep = .front
     private var captureReason: CaptureStep = .front
     private var isCapturing = false
-    private var isOCRInFlight = false {
-        didSet {
-            print(">> isOCRInFlight: \(isOCRInFlight)")
-        }
-    }
+    private var isOCRInFlight = false
     private var ovdCaptured = false
 
     // Flow configuration: OVD step can be enabled/disabled from outside.
@@ -172,8 +46,6 @@ final class SDKOVDViewController: SDKBaseViewController {
     var isOVDEnabled: Bool = true
 
     // Vision/CI
-    private let context = CIContext()
-    private let ovd = OVDAnalyzer()
     private var lastRectObservation: VNRectangleObservation?
 
     // UI
@@ -357,7 +229,8 @@ final class SDKOVDViewController: SDKBaseViewController {
     // MARK: Debug / Helpers
     private func dlog(_ msg: @autoclosure () -> String) { guard debugLogEnabled else { return }
         let now = CFAbsoluteTimeGetCurrent()
-        if now - lastDebugLogTime > 0.2 { print("[DBG] " + msg())
+        if now - lastDebugLogTime > 0.2 {
+            //print("[DBG] " + msg())
             lastDebugLogTime = now } }
 
     private func currentCGImageOrientation() -> CGImagePropertyOrientation {
@@ -375,57 +248,6 @@ final class SDKOVDViewController: SDKBaseViewController {
             // Artık kullanıcıya sarı çerçeve göstermiyoruz.
             self.detectedRectLayer.path = nil
         }
-    }
-    /// Guide alanı içindeki still görüntü için, WeScan tarzı Quadrilateral tespiti.
-    /// Bu fonksiyon, VisionRectangleDetector.completeImageRequest mantığını senkron şekilde tekrarlar.
-    private func detectQuadSync(in image: CIImage) -> Quadrilateral? {
-        let width = image.extent.width
-        let height = image.extent.height
-
-        let handler = VNImageRequestHandler(ciImage: image, options: [:])
-        var foundQuad: Quadrilateral?
-
-        let rectRequest = VNDetectRectanglesRequest { request, error in
-            guard error == nil,
-                  let results = request.results as? [VNRectangleObservation],
-                  !results.isEmpty else {
-                return
-            }
-
-            let quads: [Quadrilateral] = results.map(Quadrilateral.init)
-            guard let biggest = quads.biggest() else {
-                return
-            }
-
-            // VN sonuçları normalize koordinattadır; genişlik/yükseklik ile ölçekleyelim.
-            let transform = CGAffineTransform.identity
-                .scaledBy(x: width, y: height)
-
-            foundQuad = biggest.applying(transform)
-        }
-
-        rectRequest.minimumConfidence = 0.8
-        rectRequest.maximumObservations = 15
-        rectRequest.minimumAspectRatio = 0.3
-
-        do {
-            try handler.perform([rectRequest])
-        } catch {
-            dlog("detectQuadSync error: \(error)")
-        }
-
-        return foundQuad
-    }
-
-    /// WeScan Quadrilateral kullanarak perspektif düzeltme.
-    private func perspectiveCorrect(image: CIImage, quad: Quadrilateral) -> CIImage? {
-        let f = CIFilter.perspectiveCorrection()
-        f.inputImage = image
-        f.topLeft = quad.topLeft
-        f.topRight = quad.topRight
-        f.bottomLeft = quad.bottomLeft
-        f.bottomRight = quad.bottomRight
-        return f.outputImage
     }
 
 
@@ -512,7 +334,7 @@ final class SDKOVDViewController: SDKBaseViewController {
     private func capture(reason: CaptureStep) {
         // OCR/upload pipeline devam ederken veya mevcut bir foto işlenirken yeni çekim başlatma
         guard !isCapturing, !isOCRInFlight else {
-            dlog("capture(\(reason.rawValue)) ignored (isCapturing=\(isCapturing) isOCRInFlight=\(isOCRInFlight))")
+            //dlog("capture(\(reason.rawValue)) ignored (isCapturing=\(isCapturing) isOCRInFlight=\(isOCRInFlight))")
             return
         }
         isCapturing = true
@@ -526,43 +348,18 @@ final class SDKOVDViewController: SDKBaseViewController {
 
     // MARK: OCR Pipeline
     private func processForOCR(ciImage: CIImage) {
-        self.dlog("> processForOCR")
         self.startOCR(ciImage: ciImage)
-//        // Still foto: ROI kullanma, orientation .up, overlay gösterme
-//        detectRectangle(in: ciImage, useGuideROI: false, orientation: .up, showOverlay: false) { [weak self] rectObs in
-//            self?.dlog("> processForOCR - detectRectangle (still)")
-//            guard let self = self else { return }
-//            self.dlog("processForOCR step=\(self.currentStep.rawValue) rectFound=\(rectObs != nil)")
-//            self.lastRectObservation = rectObs
-//
-//            var finalImage = ciImage
-//            if let r = rectObs {
-//                let bb = r.toImageRect(imageRect: ciImage.extent)
-//                let areaRatio = bb.area / max(ciImage.extent.area, 1)
-//                if areaRatio >= self.stillMinRectAreaRatio {
-//                    if let warped = self.perspectiveCorrect(image: ciImage, rect: r) {
-//                        finalImage = warped
-//                    }
-//                } else {
-//                    self.dlog(String(format: "Skip warp: small rect (%.1f%% of image)", areaRatio*100))
-//                }
-//            } else {
-//                self.dlog("No rect on still; using original image")
-//            }
-//
-//            self.startOCR(ciImage: ciImage)
-//        }
     }
     
     private func startOCR(ciImage: CIImage) {
-        print("[startOCR] entering step=\(currentStep.rawValue) isOCRInFlight=\(isOCRInFlight)")
+        //print("[startOCR] entering step=\(currentStep.rawValue) isOCRInFlight=\(isOCRInFlight)")
         // Tek seferde tek OCR/upload pipeline çalışsın
         if isOCRInFlight {
-            dlog("startOCR ignored (in-flight) step=\(currentStep.rawValue)")
+            //dlog("startOCR ignored (in-flight) step=\(currentStep.rawValue)")
             return
         }
         isOCRInFlight = true
-        let img = self.makeUIImage(from: ciImage) ?? UIImage(ciImage: ciImage)
+        let img = self.manager.makeUIImage(from: ciImage) ?? UIImage(ciImage: ciImage)
         switch self.currentStep {
         case .front:
             self.manager.startFrontIdOcr(frontImg:img) { resp, err in
@@ -839,7 +636,7 @@ final class SDKOVDViewController: SDKBaseViewController {
             }
 
             if let r = result {
-                let s = self.sideLengths(of: r)
+                let s = self.manager.sideLengths(of: r)
                 let ratio = min(s.w, s.h) / max(s.w, s.h)
                 self.dlog(String(format: "Rect OK conf=%.2f ROI=%@ orient=%d short/long=%.3f", r.confidence, usedROI.description, orientation.rawValue, ratio))
                 if showOverlay { self.showDetectedRect(result) }
@@ -856,120 +653,10 @@ final class SDKOVDViewController: SDKBaseViewController {
         detectRectangle(in: image, useGuideROI: true, orientation: currentCGImageOrientation(), showOverlay: true, completion: completion)
     }
 
-    private func perspectiveCorrect(image: CIImage, rect: VNRectangleObservation?) -> CIImage? {
-        guard let r = rect else { return nil }
-        let f = CIFilter.perspectiveCorrection()
-        f.inputImage = image
-        f.topLeft = r.topLeft.toImagePoint(image.extent)
-        f.topRight = r.topRight.toImagePoint(image.extent)
-        f.bottomLeft = r.bottomLeft.toImagePoint(image.extent)
-        f.bottomRight = r.bottomRight.toImagePoint(image.extent)
-        return f.outputImage
-    }
-
-    private func runOCR(on ciImage: CIImage, completion: @escaping ([String]) -> Void) {
-        let req = VNRecognizeTextRequest { req, _ in
-            let texts = (req.results as? [VNRecognizedTextObservation])?.compactMap { $0.topCandidates(1).first?.string } ?? []
-            completion(texts)
-        }
-        req.recognitionLevel = .accurate
-        req.usesLanguageCorrection = true
-        req.recognitionLanguages = ["tr-TR","en-US"]
-        let handler = VNImageRequestHandler(ciImage: ciImage, options: [:])
-        do { try handler.perform([req]) } catch { completion([]) }
-    }
-
-
-    private func sideLengths(of r: VNRectangleObservation) -> (w: CGFloat, h: CGFloat) {
-        func dist(_ a: CGPoint, _ b: CGPoint) -> CGFloat { let dx = a.x - b.x, dy = a.y - b.y
-            return sqrt(dx*dx + dy*dy) }
-        let w = (dist(r.topLeft, r.topRight) + dist(r.bottomLeft, r.bottomRight)) / 2.0
-        let h = (dist(r.topLeft, r.bottomLeft) + dist(r.topRight, r.bottomRight)) / 2.0
-        return (w, h)
-    }
-
-
-    private func probeMRZPresence(in ciImage: CIImage, roi: CGRect, completion: @escaping (Bool) -> Void) {
-        let mrzH = roi.height * 0.45
-        let mrzROI = CGRect(x: roi.origin.x + roi.width * 0.05,
-                            y: roi.origin.y,
-                            width: roi.width * 0.90,
-                            height: mrzH)
-        let cropped = ciImage.cropped(to: mrzROI)
-        let req = VNRecognizeTextRequest { req, _ in
-            let lines = (req.results as? [VNRecognizedTextObservation])?.compactMap { $0.topCandidates(1).first?.string } ?? []
-            let joined = lines.joined(separator: " ")
-            let chevrons = joined.filter { $0 == "<" }.count
-            let longLines = lines.filter { $0.count >= 18 }.count
-            let hasTUR = joined.uppercased().contains("TUR")
-            let hasYYMMDD = (joined.range(of: #"\b\d{6}\b"#, options: .regularExpression) != nil)
-            let has11 = (joined.range(of: #"\b\d{11}\b"#, options: .regularExpression) != nil)
-            let mrzLike = (chevrons >= 10)
-                       || (chevrons >= 6 && hasTUR && hasYYMMDD)
-                       || (has11 && hasYYMMDD)
-            print("[MRZprobe] chevrons=\(chevrons) longLines=\(longLines) hasTUR=\(hasTUR) hasYYMMDD=\(hasYYMMDD) has11=\(has11) mrzLike=\(mrzLike)")
-            completion(mrzLike)
-        }
-        req.recognitionLevel = .fast
-        req.usesLanguageCorrection = false
-        req.minimumTextHeight = 0.006
-        let handler = VNImageRequestHandler(ciImage: cropped, options: [:])
-        DispatchQueue.global(qos: .userInitiated).async { do { try handler.perform([req]) } catch { completion(false) } }
-    }
-
-
-    // Görüntüyü mutlaka yatay yap
-    private func forceLandscape(_ ci: CIImage) -> CIImage {
-        return ci.extent.width >= ci.extent.height ? ci : ci.oriented(.right)
-    }
 
     // MARK: - Çekim sonrası işleme
 
 
-    /// Captured still image'i kırparken kullanılacak ana fonksiyon.
-    /// - step: front/back/ovd
-    /// Bu versiyon:
-    ///  - Sarı çerçeve / live rect kullanmaz.
-    ///  - Sadece guide alanı içindeki kısmı kullanır (guide dışı tamamen atılır).
-    ///  - Guide içindeki görüntüde WeScan tarzı Quadrilateral bularak perspektif düzeltme yapar.
-    private func processCaptured(_ ci: CIImage, step: CaptureStep) -> CIImage {
-        let extent = ci.extent
-
-        // 1) Guide alanına karşılık gelen ROI'yi hesapla
-        let roiInImage = docRectROI(in: extent)
-
-        // Guide dışındaki her şeyi tamamen at: sadece guide içini kullanacağız
-        let croppedToGuide = ci.cropped(to: roiInImage)
-
-        // CIImage koordinat sistemini (0,0)'a taşı: Vision/Quadrilateral kodu origin=0 varsayıyor
-        let normalized = croppedToGuide.transformed(by: CGAffineTransform(translationX: -roiInImage.origin.x,
-                                                                          y: -roiInImage.origin.y))
-
-        // OVD için ekstra perspektif/rect gerekmiyor; sadece guide içini kullan.
-        // Ancak review ekranında diğerleriyle tutarlı olması için yatay (landscape) hale getir.
-        if case .ovd = step {
-            return forceLandscape(normalized)
-        }
-
-        // FRONT/BACK için: guide içindeki normalized görüntüde Quadrilateral tespiti yap
-        if let quad = detectQuadSync(in: normalized) {
-            // Önce kartın açısına göre perspektif düzeltme (kimlik kenarlarıyla tam hizalı crop)
-            if let warped = perspectiveCorrect(image: normalized, quad: quad) {
-                // Mirror işlemi yapma; sadece yatay konuma zorla
-                let landscape = forceLandscape(warped)
-                return landscape
-            }
-        }
-
-        // Hiç düzgün quad bulunamazsa: en azından guide alanını düz crop + yatay hale getir.
-        return forceLandscape(normalized)
-    }
-    
-
-    private func makeUIImage(from ci: CIImage) -> UIImage? {
-        guard let cg = context.createCGImage(ci, from: ci.extent) else { return nil }
-        return UIImage(cgImage: cg)
-    }
 }
 
 // MARK: - AVCapture Delegeleri
@@ -985,15 +672,13 @@ extension SDKOVDViewController: AVCapturePhotoCaptureDelegate {
         let originalCI = CIImage(data: data) ?? CIImage()
 
         // 3) Still foto üzerinde taze dikdörtgen tespiti ve doğru crop/warp
-        let croppedCI = self.processCaptured(originalCI, step: captureReason)
-
-        // 4) Gerekli orientation/mirror düzeltmeleri processCaptured içinde yapıldığı için
-        // burada ek bir rotate/mirror uygulamadan devam ediyoruz.
-        let ciRaw = croppedCI
+        let extent = originalCI.extent
+        let roiInImage = docRectROI(in: extent)
+        let ciRaw = manager.processCaptured(originalCI, roiInImage: roiInImage, step: captureReason.rawValue)
 
         print("[Capture] RAW resolution after rect-based crop: \(ciRaw.extent.size)")
 
-        guard let ui = self.makeUIImage(from: ciRaw) else { return }
+        guard let ui = manager.makeUIImage(from: ciRaw) else { return }
         
         switch captureReason {
         case .front:
@@ -1017,28 +702,6 @@ extension SDKOVDViewController: AVCapturePhotoCaptureDelegate {
     }
 }
 
-private extension SDKOVDViewController {
-    func rainbowMaxScoreDetailed(in ciImage: CIImage, baseROI: CGRect) -> (score: Float, bins: Int) {
-        func clamp(_ r: CGRect, in bounds: CGRect) -> CGRect { r.intersection(bounds) }
-        let bx = baseROI.origin.x, by = baseROI.origin.y, bw = baseROI.size.width, bh = baseROI.size.height
-        var bestScore: Float = 0
-        var bestBins: Int = 0
-        for yi in 0..<4 {
-            for xi in 0..<4 {
-                let sub = CGRect(x: bx + bw*(0.05 + CGFloat(xi)*0.18),
-                                 y: by + bh*(0.05 + CGFloat(yi)*0.18),
-                                 width: bw*0.45, height: bh*0.45)
-                let roi = clamp(sub, in: ciImage.extent)
-                let det = self.ovd.rainbowScoreDetailed(ciImage: ciImage, roi: roi)
-                if det.score > bestScore {
-                    bestScore = det.score
-                    bestBins = det.binsPresent
-                }
-            }
-        }
-        return (bestScore, bestBins)
-    }
-}
 
 extension SDKOVDViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
@@ -1057,7 +720,7 @@ extension SDKOVDViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
                     self.rectDetectInFlight = false
                     let extent = ci.extent
                     let roi = self.docRectROI(in: extent)
-                    let sharp = self.ovd.textureMean(ciImage: ci, roi: roi)
+                    let sharp = self.manager.ovdTextureMean(ciImage: ci, roi: roi)
                     let stableOK = self.stableDuration >= self.requiredStableDuration
                     let hasRect = (rectObs != nil)
 
@@ -1068,7 +731,7 @@ extension SDKOVDViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
 
                     if self.currentStep == .back && hasRect && !self.mrzPresence && !self.mrzProbeInFlight {
                         self.mrzProbeInFlight = true
-                        self.probeMRZPresence(in: ci, roi: roi) { [weak self] ok in
+                        self.manager.probeMRZPresence(in: ci, roi: roi) { [weak self] ok in
                             guard let self = self else { return }
                             self.mrzPresence = ok
                             self.mrzProbeInFlight = false
@@ -1080,9 +743,9 @@ extension SDKOVDViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
                     var ratio: CGFloat = 0
                     var rectTooSmall = true
                     if let ro = rectObs {
-                        let bb = ro.toImageRect(imageRect: ci.extent)
+                        let bb = self.manager.toImageRect(observation: ro, imageRect: ci.extent)
                         coverage = bb.intersection(roi).area / max(roi.area, 1)
-                        let s = self.sideLengths(of: ro)
+                        let s = self.manager.sideLengths(of: ro)
                         ratio = min(s.w, s.h) / max(s.w, s.h)
                         let rectArea = bb.area
                         let minAcceptableArea = roi.area * 0.50
@@ -1092,7 +755,7 @@ extension SDKOVDViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
                         }
                     }
 
-                    let (_, _, whiteOutFB) = self.ovd.colorMetrics(ciImage: ci, roi: roi)
+                    let (_, _, whiteOutFB) = self.manager.ovdColorMetrics(ciImage: ci, roi: roi)
                     let glareBlock = whiteOutFB
 
                     let covf = Float(max(0, min(1, coverage)))
@@ -1142,11 +805,11 @@ extension SDKOVDViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
             let extent = ci.extent
             let base = extent.insetBy(dx: extent.width*0.10, dy: extent.height*0.18)
 
-            let g = self.ovd.glareScore(ciImage: ci, roi: base)
+            let g = self.manager.ovdGlareScore(ciImage: ci, roi: base)
             if self.ovdBaselineGlare == nil { self.ovdBaselineGlare = g }
-            let (_, chroma, whiteOut) = self.ovd.colorMetrics(ciImage: ci, roi: base)
+            let (_, chroma, whiteOut) = self.manager.ovdColorMetrics(ciImage: ci, roi: base)
             if self.ovdBaselineChroma == nil { self.ovdBaselineChroma = chroma }
-            let (rainbow, bins) = self.rainbowMaxScoreDetailed(in: ci, baseROI: base)
+            let (rainbow, bins) = self.manager.ovdRainbowMaxScoreDetailed(in: ci, baseROI: base)
             if self.ovdBaselineRainbow == nil { self.ovdBaselineRainbow = rainbow }
             let deltaRainbow = rainbow - (self.ovdBaselineRainbow ?? rainbow)
             self.ovdWhiteOut = whiteOut
@@ -1183,203 +846,5 @@ extension SDKOVDViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
 }
 
 // MARK: - Vision/Geometry yardımcıları
-private extension VNRectangleObservation {
-    func toImageRect(imageRect: CGRect) -> CGRect {
-        let tl = topLeft.toImagePoint(imageRect)
-        let tr = topRight.toImagePoint(imageRect)
-        let bl = bottomLeft.toImagePoint(imageRect)
-        let br = bottomRight.toImagePoint(imageRect)
-        let xs = [tl.x,tr.x,bl.x,br.x]
-        let ys = [tl.y,tr.y,bl.y,br.y]
-        return CGRect(x: xs.min()!, y: ys.min()!, width: xs.max()! - xs.min()!, height: ys.max()! - ys.min()!)
-    }
-}
 private extension CGPoint { func toImagePoint(_ rect: CGRect) -> CGPoint { CGPoint(x: x*rect.width + rect.origin.x, y: (1-y)*rect.height + rect.origin.y) } }
 private extension CGRect { var area: CGFloat { width * height } }
-
-
-
-// MARK: - Review: 3 foto (scroll yok, tek ekranda)
-final class ReviewViewController2: SDKBaseViewController {
-    private let front: UIImage?
-    private let ovd: UIImage?
-    private let back: UIImage?
-    private var frontImageView: UIImageView?
-    private var ovdImageView: UIImageView?
-    private var backImageView: UIImageView?
-    init(front: UIImage?, ovd: UIImage?, back: UIImage?) {
-        self.front = front
-        self.ovd = ovd
-        self.back = back
-        super.init(nibName: nil, bundle: nil)
-    }
-    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
-
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        view.backgroundColor = .darkGray
-
-        let title = UILabel()
-        title.text = "Çekilen Fotoğraflar"
-        title.font = .boldSystemFont(ofSize: 14)
-        title.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(title)
-
-        let stack = UIStackView()
-        stack.axis = .vertical
-        stack.alignment = .fill
-        stack.distribution = .fillEqually
-        stack.spacing = 8
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(stack)
-
-        func makeBlock(_ image: UIImage?, _ name: String, assign: @escaping (UIImageView) -> Void) -> UIView {
-            let container = UIView()
-            container.clipsToBounds = true
-
-            let iv = UIImageView(image: image)
-            iv.contentMode = .scaleAspectFit
-            iv.translatesAutoresizingMaskIntoConstraints = false
-            iv.isUserInteractionEnabled = true
-            container.addSubview(iv)
-
-            NSLayoutConstraint.activate([
-                iv.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-                iv.trailingAnchor.constraint(equalTo: container.trailingAnchor),
-                iv.topAnchor.constraint(equalTo: container.topAnchor),
-                iv.bottomAnchor.constraint(equalTo: container.bottomAnchor)
-            ])
-
-            let badge = UILabel()
-            badge.text = name
-            badge.textColor = .white
-            badge.font = .boldSystemFont(ofSize: 12)
-            badge.backgroundColor = UIColor.black.withAlphaComponent(0.5)
-            badge.layer.cornerRadius = 6
-            badge.clipsToBounds = true
-            badge.translatesAutoresizingMaskIntoConstraints = false
-            container.addSubview(badge)
-            NSLayoutConstraint.activate([
-                badge.topAnchor.constraint(equalTo: container.topAnchor, constant: 8),
-                badge.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 8)
-            ])
-
-            assign(iv)
-            return container
-        }
-
-        stack.addArrangedSubview(makeBlock(front, "Ön Yüz") { iv in self.frontImageView = iv })
-        stack.addArrangedSubview(makeBlock(ovd,   "OVD/Parlama") { iv in self.ovdImageView = iv })
-        stack.addArrangedSubview(makeBlock(back,  "Arka Yüz") { iv in self.backImageView = iv })
-
-        NSLayoutConstraint.activate([
-            title.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 12),
-            title.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            stack.topAnchor.constraint(equalTo: title.bottomAnchor, constant: 12),
-            stack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 12),
-            stack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -12),
-            stack.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -12)
-        ])
-
-        if let iv = frontImageView {
-            let tap = UITapGestureRecognizer(target: self, action: #selector(copyFrontBase64))
-            iv.addGestureRecognizer(tap)
-        }
-        if let iv = ovdImageView {
-            let tap = UITapGestureRecognizer(target: self, action: #selector(copyOVDBase64))
-            iv.addGestureRecognizer(tap)
-        }
-        if let iv = backImageView {
-            let tap = UITapGestureRecognizer(target: self, action: #selector(copyBackBase64))
-            iv.addGestureRecognizer(tap)
-        }
-
-        uploadFront()
-        uploadOVD()
-        uploadBack()
-    }
-
-    private func uploadImage(_ image: UIImage?, to urlString: String, bodyKey: String, title: String) {
-        guard let image = image else {
-            print("No \(title) image to upload")
-            return
-        }
-        guard let jpegData = image.jpegData(compressionQuality: 0.9) else {
-            print("JPEG conversion failed for \(title)")
-            return
-        }
-        let base64String = jpegData.base64EncodedString()
-        let cleanedBase64 = base64String
-            .replacingOccurrences(of: "\\", with: "")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        let json: [String: Any] = [bodyKey: cleanedBase64]
-        guard let bodyData = try? JSONSerialization.data(withJSONObject: json, options: []) else {
-            print("JSON serialization failed")
-            return
-        }
-        var finalBodyData = bodyData
-        if var jsonString = String(data: bodyData, encoding: .utf8) {
-            jsonString = jsonString.replacingOccurrences(of: "\\/", with: "/")
-            finalBodyData = jsonString.data(using: .utf8) ?? bodyData
-        }
-        guard let url = URL(string: urlString) else {
-            print("Invalid URL")
-            return }
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = finalBodyData
-
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                print("Upload error (\(title)): \(error)")
-                DispatchQueue.main.async {
-                    self.oneButtonAlertShow(message: error.localizedDescription, title1: title.uppercased()) { }
-                }
-                return
-            }
-            var msg = ""
-            if let data = data, let str = String(data: data, encoding: .utf8) {
-                msg = str
-                print("Response (\(title)): \(str)")
-            } else {
-                msg = "No response body"
-            }
-            DispatchQueue.main.async {
-                self.oneButtonAlertShow(appName: title, message: msg, title1: "OK") { }
-            }
-        }
-        task.resume()
-    }
-    private func uploadFront() {
-        uploadImage(front, to: "https://idocrqa.identify.com.tr/api/front", bodyKey: "front_image", title: "front-front")
-    }
-    private func uploadOVD() {
-        uploadImage(ovd, to: "https://idocrqa.identify.com.tr/api/front", bodyKey: "front_image", title: "idcheck-ovd")
-    }
-    private func uploadBack() {
-        uploadImage(back, to: "https://idocrqa.identify.com.tr/api/back", bodyKey: "back_image", title: "back-back")
-    }
-    @objc private func dismissSelf() { dismiss(animated: true) }
-
-    @objc private func copyFrontBase64() {
-        copyImageBase64(front, label: "front")
-    }
-    @objc private func copyOVDBase64() {
-        copyImageBase64(ovd, label: "ovd")
-    }
-    @objc private func copyBackBase64() {
-        copyImageBase64(back, label: "back")
-    }
-    private func copyImageBase64(_ image: UIImage?, label: String) {
-        guard let image = image, let jpegData = image.jpegData(compressionQuality: 0.9) else { return }
-        let b64 = jpegData.base64EncodedString()
-        UIPasteboard.general.string = b64
-        DispatchQueue.main.async {
-            self.oneButtonAlertShow(message: "\(label) base64 panoya kopyalandı", title1: "OK") { }
-        }
-    }
-}
-
