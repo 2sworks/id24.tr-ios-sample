@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		366929892F0E8DBE00A67DAB /* SDKOVDViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 366929882F0E8DBE00A67DAB /* SDKOVDViewController.xib */; };
+		36692AAE2F11120500A67DAB /* apiqa.identify.com.tr.cer in Resources */ = {isa = PBXBuildFile; fileRef = 36692AAD2F11120500A67DAB /* apiqa.identify.com.tr.cer */; };
 		36BF33502E572348007F92CE /* SDKReachabilityHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36BF334F2E572348007F92CE /* SDKReachabilityHelper.swift */; };
 		36E1B3BF2EAA42FB004F791C /* SDKOVDViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36E1B3BE2EAA42FB004F791C /* SDKOVDViewController.swift */; };
 		480961182C64E70C00B9E6D5 /* v2api.identify.com.tr.cer in Resources */ = {isa = PBXBuildFile; fileRef = 48BFF0D02BBAF3940088D67E /* v2api.identify.com.tr.cer */; };
@@ -169,6 +170,7 @@
 
 /* Begin PBXFileReference section */
 		366929882F0E8DBE00A67DAB /* SDKOVDViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SDKOVDViewController.xib; sourceTree = "<group>"; };
+		36692AAD2F11120500A67DAB /* apiqa.identify.com.tr.cer */ = {isa = PBXFileReference; lastKnownFileType = file; path = apiqa.identify.com.tr.cer; sourceTree = "<group>"; };
 		36BF334F2E572348007F92CE /* SDKReachabilityHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKReachabilityHelper.swift; sourceTree = "<group>"; };
 		36E1B3BE2EAA42FB004F791C /* SDKOVDViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKOVDViewController.swift; sourceTree = "<group>"; };
 		480099BA2B175C5C00325ED0 /* SDKIdentifyLoginViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SDKIdentifyLoginViewController.swift; sourceTree = "<group>"; };
@@ -577,6 +579,7 @@
 				48F88A662E13E60900BB3881 /* SDK */,
 				480C1E4E2BDB8B8D0076D28B /* PrivacyInfo.xcprivacy */,
 				48BFF0D02BBAF3940088D67E /* v2api.identify.com.tr.cer */,
+				36692AAD2F11120500A67DAB /* apiqa.identify.com.tr.cer */,
 				482D2B612A547A8600F1344F /* WeScan-Edited */,
 				4820A4A12924CDAC004DB388 /* sample.mp4 */,
 				485C15502907F3A7007B9ED0 /* RequiredForApp */,
@@ -1010,6 +1013,7 @@
 				482D2BBA2A547AC000F1344F /* flashUnavailable.png in Resources */,
 				485C15692907FC69007B9ED0 /* SDKCardReaderViewController.xib in Resources */,
 				480E76A9297A868E0071B049 /* GERMAN.json in Resources */,
+				36692AAE2F11120500A67DAB /* apiqa.identify.com.tr.cer in Resources */,
 				48BFE3CC2AEA994200980684 /* ExternalViewController.xib in Resources */,
 				48171423294734FA0095A64F /* SDKPassportReaderViewController.xib in Resources */,
 				48DD2F2E2B8DD57D0091FCCE /* SDKNewLivenessViewController.xib in Resources */,
@@ -1279,7 +1283,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = NewTest/NewTest.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 153;
+				CURRENT_PROJECT_VERSION = 157;
 				DEVELOPMENT_TEAM = 9D3UPKQ9AL;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1323,7 +1327,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = NewTest/NewTest.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 153;
+				CURRENT_PROJECT_VERSION = 157;
 				DEVELOPMENT_TEAM = 9D3UPKQ9AL;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",

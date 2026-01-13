@@ -127,7 +127,20 @@ final class SDKOVDViewController: SDKBaseViewController {
             guard let self = self else { return }
             self.instructionSpeaker.stopSpeaking(at: .immediate)
             let utterance = AVSpeechUtterance(string: text)
-            utterance.voice = AVSpeechSynthesisVoice(language: "tr-TR")
+            switch self.languageManager.sdkManager.sdkLang {
+            case .tr:
+                utterance.voice = AVSpeechSynthesisVoice(language: "tr-TR")
+            case .eng:
+                utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
+            case .de:
+                utterance.voice = AVSpeechSynthesisVoice(language: "de-DE")
+            case .ru:
+                utterance.voice = AVSpeechSynthesisVoice(language: "ru-RU")
+            case .az:
+                utterance.voice = AVSpeechSynthesisVoice(language: "az-AZ")
+            case .none, .some(_):
+                utterance.voice = AVSpeechSynthesisVoice(language: "tr-TR")
+            }
             utterance.rate = 0.6
             self.instructionSpeaker.speak(utterance)
         }
@@ -268,16 +281,36 @@ final class SDKOVDViewController: SDKBaseViewController {
     }
 
     private func docRectROI(in extent: CGRect) -> CGRect {
+        let isBackStep = (currentStep == .back || captureReason == .back)
+        let paddingFactor: CGFloat = isBackStep ? 1.20 : 1.0 // Arka yüz için %20 genişletme
+        
         if guideRectInView != .zero {
             let meta = previewLayer.metadataOutputRectConverted(fromLayerRect: guideRectInView)
-            let x = meta.origin.x * extent.width + extent.origin.x
-            let y = (1.0 - meta.origin.y - meta.size.height) * extent.height + extent.origin.y
-            let w = meta.size.width * extent.width
-            let h = meta.size.height * extent.height
+            var x = meta.origin.x * extent.width + extent.origin.x
+            var y = (1.0 - meta.origin.y - meta.size.height) * extent.height + extent.origin.y
+            var w = meta.size.width * extent.width
+            var h = meta.size.height * extent.height
+            
+            // Arka yüz için ROI'yi genişlet
+            if isBackStep {
+                let centerX = x + w / 2
+                let centerY = y + h / 2
+                w *= paddingFactor
+                h *= paddingFactor
+                x = centerX - w / 2
+                y = centerY - h / 2
+                
+                // ROI'nin extent sınırlarını aşmamasını sağla
+                x = max(extent.origin.x, min(x, extent.origin.x + extent.width - w))
+                y = max(extent.origin.y, min(y, extent.origin.y + extent.height - h))
+                w = min(w, extent.width - (x - extent.origin.x))
+                h = min(h, extent.height - (y - extent.origin.y))
+            }
+            
             return CGRect(x: x, y: y, width: w, height: h)
         }
-        let w = extent.width * 0.6
-        let h = w / idAspect
+        let w = extent.width * 0.6 * paddingFactor
+        let h = (w / paddingFactor) / idAspect * paddingFactor
         return CGRect(x: extent.midX - w/2, y: extent.midY - h/2, width: w, height: h)
     }
 
@@ -285,9 +318,10 @@ final class SDKOVDViewController: SDKBaseViewController {
     private func capture(reason: CaptureStep) {
         // OCR/upload pipeline devam ederken veya mevcut bir foto işlenirken yeni çekim başlatma
         guard !isCapturing, !isOCRInFlight else {
-            //print("capture(\(reason.rawValue)) ignored (isCapturing=\(isCapturing) isOCRInFlight=\(isOCRInFlight))")
+            //print("❌ capture(\(reason.rawValue)) ignored: isCapturing=\(isCapturing) isOCRInFlight=\(isOCRInFlight)")
             return
         }
+        //print("📸 capture(\(reason.rawValue)) called - starting photo capture")
         isCapturing = true
         captureReason = reason
         let settings = AVCapturePhotoSettings()
@@ -700,8 +734,6 @@ extension SDKOVDViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
             let extent = ci.extent
             let base = extent.insetBy(dx: extent.width*0.10, dy: extent.height*0.18)
 
-            let g = self.manager.ovdGlareScore(ciImage: ci, roi: base)
-            if self.ovdBaselineGlare == nil { self.ovdBaselineGlare = g }
             let (_, chroma, whiteOut) = self.manager.ovdColorMetrics(ciImage: ci, roi: base)
             if self.ovdBaselineChroma == nil { self.ovdBaselineChroma = chroma }
             let (rainbow, bins) = self.manager.ovdRainbowMaxScoreDetailed(in: ci, baseROI: base)
@@ -709,32 +741,57 @@ extension SDKOVDViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
             let deltaRainbow = rainbow - (self.ovdBaselineRainbow ?? rainbow)
             self.ovdWhiteOut = whiteOut
 
-            let rainbowThr: Float = 0.055
-            let deltaThr:   Float = 0.030
-            let minBins     = 4
-            let chromaRise: Float = 0.006
-            let chromaOKAbs = chroma > 0.022
-            let chromaOKRise = (chroma - (self.ovdBaselineChroma ?? chroma)) >= chromaRise
-            let chromaOK = chromaOKAbs || chromaOKRise
-
+            // Agresif threshold'lar: belirgin rainbow göründüğünde hemen capture
+            let rainbowThr: Float = 0.025  // Mutlak rainbow threshold
+            let deltaThr:   Float = 0.015   // Delta threshold (baseline'dan artış)
+            let minBins     = 2             // Minimum 2 farklı renk
+            
+            // Rainbow kontrolü: mutlak değer veya delta yeterliyse OK
             let binsOK = (bins >= minBins)
             let rainbowOK = (rainbow >= rainbowThr) || (deltaRainbow >= deltaThr)
-            let pass = (!whiteOut) && binsOK && chromaOK && rainbowOK
-            if pass { self.ovdHold = min(self.ovdHold + 1, 12) } else { self.ovdHold = max(self.ovdHold - 1, 0) }
-            let minOvdTimeOk = (CFAbsoluteTimeGetCurrent() - self.ovdStartTs) > 0.8
-            let hit = minOvdTimeOk && (self.ovdHold >= 4)
+            
+            // Basit mantık: beyaz patlama yoksa ve rainbow belirginse capture
+            // Netlik kontrolünü kaldırdık çünkü OVD adımında sharp değeri 0 dönüyor
+            let pass = (!whiteOut) && binsOK && rainbowOK
+            
+            // Hysteresis: pass ise hızlıca artır, değilse yavaşça azalt
+            if pass { 
+                self.ovdHold = min(self.ovdHold + 2, 10) // Daha hızlı artış
+            } else { 
+                self.ovdHold = max(self.ovdHold - 1, 0) 
+            }
+            
+            // Çok kısa bekleme: sadece 0.3 saniye ve 2 frame yeterli
+            let minOvdTimeOk = (CFAbsoluteTimeGetCurrent() - self.ovdStartTs) > 0.3
+            let hit = minOvdTimeOk && (self.ovdHold >= 2)
 
-            //print("OVD pass=\(pass) bins=\(bins) rnb=\(String(format: "%.3f", rainbow)) Δr=\(String(format: "%.3f", deltaRainbow)) whiteOut=\(whiteOut) hold=\(self.ovdHold)")
+            // Detaylı debug logları (kapalı)
+            //print("🔍 OVD DEBUG:")
+            //print("  rainbow=\(String(format: "%.4f", rainbow)) (thr=\(rainbowThr)) | delta=\(String(format: "%.4f", deltaRainbow)) (thr=\(deltaThr))")
+            //print("  bins=\(bins) (min=\(minBins)) | whiteOut=\(whiteOut) | chroma=\(String(format: "%.4f", chroma))")
+            //print("  binsOK=\(binsOK) | rainbowOK=\(rainbowOK)")
+            //print("  pass=\(pass) | hold=\(self.ovdHold) | minTimeOk=\(minOvdTimeOk) | hit=\(hit)")
+            //print("  baselineRainbow=\(String(format: "%.4f", self.ovdBaselineRainbow ?? 0))")
+            //print("---")
 
             DispatchQueue.main.async {
-                if whiteOut { self.stepLabel.text = self.translate(text: .ovdTooWhiteTilt) }
+                if whiteOut { 
+                    self.stepLabel.text = self.translate(text: .ovdTooWhiteTilt) 
+                } else if !rainbowOK {
+                    self.stepLabel.text = self.translate(text: .ovdFlashMoveCard)
+                } else {
+                    self.stepLabel.text = hit ? self.translate(text: .ovdGlareCaptured) : self.translate(text: .ovdFlashMoveCard)
+                }
                 self.setGuideDetected(hit)
             }
 
             if hit && !self.isCapturing && !self.ovdCaptured && !self.isOCRInFlight {
+                //print("✅ OVD CAPTURE TRIGGERED! hit=\(hit) isCapturing=\(self.isCapturing) ovdCaptured=\(self.ovdCaptured) isOCRInFlight=\(self.isOCRInFlight)")
                 self.ovdCaptured = true
                 DispatchQueue.main.async { self.stepLabel.text = self.translate(text: .ovdGlareCaptured) }
                 self.capture(reason: .ovd)
+            } else if hit {
+                //print("⚠️ OVD hit=\(hit) but blocked: isCapturing=\(self.isCapturing) ovdCaptured=\(self.ovdCaptured) isOCRInFlight=\(self.isOCRInFlight)")
             }
         }
     }

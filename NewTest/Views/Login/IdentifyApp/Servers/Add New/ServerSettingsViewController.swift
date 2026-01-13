@@ -21,6 +21,31 @@ class ServerSettingsViewController: SDKBaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.rightBarButtonItem = nil
+        setupKeyboardToolbar()
+    }
+
+    // MARK: - Setup
+    
+    func setupKeyboardToolbar() {
+        let toolbar = UIToolbar()
+        toolbar.sizeToFit()
+        
+        let flexSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+        let doneButton = UIBarButtonItem(title: "Bitti", style: .done, target: self, action: #selector(dismissKeyboard))
+        
+        toolbar.items = [flexSpace, doneButton]
+        
+        apiUrlTxt.inputAccessoryView = toolbar
+        turnUrlTxt.inputAccessoryView = toolbar
+        stunUrlTxt.inputAccessoryView = toolbar
+        turnUserTxt.inputAccessoryView = toolbar
+        turnPassTxt.inputAccessoryView = toolbar
+        socketUrlTxt.inputAccessoryView = toolbar
+        envTitleTxt.inputAccessoryView = toolbar
+    }
+    
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
     }
 
     @IBAction func saveAct(_ sender: Any) {
