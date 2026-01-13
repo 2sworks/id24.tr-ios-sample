@@ -118,6 +118,10 @@ final class SDKOVDViewController: SDKBaseViewController {
             guard let self = self else { return }
             self.setupSession()
             self.session.startRunning()
+            // Session başladıktan sonra odak noktasını ayarla
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                self.setFocusPointToCenter()
+            }
         }
     }
     // MARK: - Instruction Speaker
@@ -150,13 +154,73 @@ final class SDKOVDViewController: SDKBaseViewController {
     private func setupSession() {
         session.beginConfiguration()
         session.sessionPreset = .photo
-        guard let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
-              let input = try? AVCaptureDeviceInput(device: device), session.canAddInput(input) else {
+        
+        // Yakın mesafe için en iyi kamerayı seç
+        var device: AVCaptureDevice?
+        
+        // Önce ultra-wide kamera dene (iPhone 11+ için yakın mesafe için daha iyi)
+        // iOS 13+ ile ultra-wide kamera desteği var
+        if #available(iOS 13.0, *) {
+            if let ultraWide = AVCaptureDevice.default(.builtInUltraWideCamera, for: .video, position: .back) {
+                device = ultraWide
+            }
+        }
+        
+        // Ultra-wide bulunamazsa wide kamera kullan
+        if device == nil {
+            device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back)
+        }
+        
+        guard let selectedDevice = device,
+              let input = try? AVCaptureDeviceInput(device: selectedDevice),
+              session.canAddInput(input) else {
             session.commitConfiguration()
             return
         }
+        
         session.addInput(input)
-        videoDevice = device
+        videoDevice = selectedDevice
+        
+        // Odak ve exposure ayarlarını optimize et
+        do {
+            try selectedDevice.lockForConfiguration()
+            
+            // Continuous auto focus (yakın mesafe için daha iyi)
+            if selectedDevice.isFocusModeSupported(.continuousAutoFocus) {
+                selectedDevice.focusMode = .continuousAutoFocus
+            }
+            
+            // Macro mod aktifleştir (iOS 15+ ve desteklenen cihazlarda)
+            if #available(iOS 15.0, *) {
+                // Macro mod için özel odak ayarı (sadece desteklenen cihazlarda)
+                if selectedDevice.isLockingFocusWithCustomLensPositionSupported {
+                    // Minimum odak mesafesi için lens position ayarla
+                    // 0.0 = minimum odak mesafesi (yakın mesafe için)
+                    selectedDevice.setFocusModeLocked(lensPosition: 0.0) { _ in }
+                }
+            }
+            
+            // iPhone 11 gibi eski cihazlar için: Auto focus range restriction
+            // Yakın mesafe odak için optimize et
+            if #available(iOS 13.0, *) {
+                // Auto focus range restriction (yakın mesafe için)
+                if selectedDevice.isAutoFocusRangeRestrictionSupported {
+                    selectedDevice.autoFocusRangeRestriction = .near
+                }
+            }
+            
+            // Exposure ayarları
+            if selectedDevice.isExposureModeSupported(.continuousAutoExposure) {
+                selectedDevice.exposureMode = .continuousAutoExposure
+            }
+            
+            // Subject area change monitoring (yakın mesafe değişikliklerini algıla)
+            selectedDevice.isSubjectAreaChangeMonitoringEnabled = true
+            
+            selectedDevice.unlockForConfiguration()
+        } catch {
+            print("⚠️ Kamera konfigürasyon hatası: \(error)")
+        }
         if session.canAddOutput(photoOutput) {
             session.addOutput(photoOutput)
             photoOutput.isHighResolutionCaptureEnabled = true
@@ -230,6 +294,30 @@ final class SDKOVDViewController: SDKBaseViewController {
         } catch { print("Torch error: \(error)") }
     }
 
+    // Odak noktasını guide alanının merkezine ayarla
+    private func setFocusPointToCenter() {
+        guard let device = videoDevice else { return }
+        let focusPoint = CGPoint(x: 0.5, y: 0.5) // Ekranın merkezi
+        
+        do {
+            try device.lockForConfiguration()
+            
+            if device.isFocusPointOfInterestSupported && device.isFocusModeSupported(.continuousAutoFocus) {
+                device.focusPointOfInterest = focusPoint
+                device.focusMode = .continuousAutoFocus
+            }
+            
+            if device.isExposurePointOfInterestSupported && device.isExposureModeSupported(.continuousAutoExposure) {
+                device.exposurePointOfInterest = focusPoint
+                device.exposureMode = .continuousAutoExposure
+            }
+            
+            device.unlockForConfiguration()
+        } catch {
+            print("⚠️ Odak noktası ayarlama hatası: \(error)")
+        }
+    }
+    
     private func startMotionMonitoring() {
         guard motionManager.isDeviceMotionAvailable else { return }
         motionManager.deviceMotionUpdateInterval = 1.0/60.0

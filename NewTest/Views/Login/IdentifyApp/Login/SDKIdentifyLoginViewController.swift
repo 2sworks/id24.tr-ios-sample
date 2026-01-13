@@ -183,7 +183,7 @@ class SDKIdentifyLoginViewController: SDKBaseViewController {
         } else if identIdArea.text == "busra" {
             self.identIdArea.text = "14412dd4616298aabbd80c9628860ed8d214c288"
         } else if identIdArea.text == "c" {
-            self.identIdArea.text = "c8da9943104c08288883825dc3b5c24bbb0adba4"
+            self.identIdArea.text = "844cec31bb89593457efe4b507587cecf78e1991"
         } else if identIdArea.text == "c2" {
             self.identIdArea.text = "a170357f1ed311b3c49880a5ec2f1d78d0bf624d"
         }
@@ -195,8 +195,7 @@ class SDKIdentifyLoginViewController: SDKBaseViewController {
             baseApiUrl: self.selectedServer.apiUrl,
             networkOptions: SDKNetworkOptions(timeoutIntervalForRequest: 30,
                                               timeoutIntervalForResource: 30,
-                                              useSslPinning: self.useSSLPinning,
-                                              sslPinningBundles: [Bundle.main]),
+                                              useSslPinning: self.useSSLPinning),
             kpsData: nil, // EĞER ELİNİZDE KPS DEN GELEN KİMLİK DATALARI VARSA ALTTAKİ KODU AKTİF EDİP BU SATIRI SİLEBİLİRSİNİZ.
 //                kpsData: SDKKpsData(birthDate: "860704", validDate: "130627", serialNo: "YZM33MR63"),
             identCardType: [.idCard, .passport, .oldSchool], // destekleyeceğiniz kart tipleri
