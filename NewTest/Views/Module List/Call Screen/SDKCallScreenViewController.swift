@@ -227,7 +227,7 @@ extension SDKCallScreenViewController: SDKSocketListener {
                 
                 let hasStatus: Bool = {
                     guard let type = statusSummaryType else { return false }
-                    return type == "positive" || type == "negative"
+                    return type == "positive" || type == "negative" || type == "neutral"
                 }()
                 
                 if hasStatus {

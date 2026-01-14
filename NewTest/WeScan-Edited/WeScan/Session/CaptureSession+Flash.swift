@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import AVFoundation
 
 /// Extension to CaptureSession to manage the device flashlight
 extension CaptureSession {
@@ -19,27 +20,34 @@ extension CaptureSession {
     }
 
     /// Toggles the current device's flashlight on or off.
+    /// Thread-safe: Torch ayarları doğru şekilde yapılır, session'ı bloklamaz
     func toggleFlash() -> FlashState {
-        guard let device, device.isTorchAvailable else { return .unavailable }
-
+        guard let device = device as? AVCaptureDevice, device.isTorchAvailable else { return .unavailable }
+        
+        // Device'ın session'a bağlı olduğundan emin ol
+        guard device.isConnected else {
+            return .unavailable
+        }
+        
+        // Mevcut torch durumunu kontrol et
+        let currentMode = device.torchMode
+        let newMode: AVCaptureDevice.TorchMode = (currentMode == .on) ? .off : .on
+        
         do {
+            // Device'ı lock et (kısa süreli, session'ı bloklamaz)
             try device.lockForConfiguration()
-        } catch {
-            return .unknown
-        }
-
-        defer {
+            
+            // Torch modunu değiştir
+            device.torchMode = newMode
+            
+            // Hemen unlock et (session'ın devam etmesi için)
             device.unlockForConfiguration()
+            
+            // Yeni durumu döndür
+            return (newMode == .on) ? .on : .off
+        } catch {
+            // Lock başarısız olursa mevcut durumu döndür
+            return (currentMode == .on) ? .on : .off
         }
-
-        if device.torchMode == .on {
-            device.torchMode = .off
-            return .off
-        } else if device.torchMode == .off {
-            device.torchMode = .on
-            return .on
-        }
-
-        return .unknown
     }
 }

@@ -143,6 +143,9 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
         videoPreviewLayer.videoGravity = .resizeAspectFill
 
         videoOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "video_ouput_queue"))
+        
+        // CaptureSession.current.device'ı güncelle (torch ayarları için)
+        CaptureSession.current.device = device
     }
 
     // MARK: Capture Session Life Cycle
