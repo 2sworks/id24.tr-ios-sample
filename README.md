@@ -3,6 +3,13 @@ Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.
 
 ### Sample App 
 
+## Build 160:
+- TURN için şifreli kullanım opsiyonu eklendi.
+- Görüntülü görüşme sonlandırma senaryoları için sebep ve durum bilgileri eklendi
+- Sunucudan gelen hata mesajlarının gösteriminde düzenlemeler yapıldı
+- Kimlik çekim ekranındaki flaş çalışmama hatası düzenlendi
+- OVD (beta) ekranı eklendi
+
 ## Build 141:
 - Kimlik çekimlerinde otomatik yön düzeltme seçeneği eklendi
 - Aktif karşılaştırmada modül atlama kontrolü eklendi
@@ -68,6 +75,13 @@ Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.
 
 
 ### SDK Son Güncelleme:
+
+## 2.5.0
+- OCR kimlik ön yüz ve arka yüz iyileştirmeleri yapıldı
+- TURN için encryptedTurnCredential ve shortTermUsage parametreleri eklendi
+- terminateCall fonksiyonuna terminateReason ve statusSummaryType eklendi
+- response messages düzenlemeleri yapıldı
+- SDK online log iyileştirmeleri yapıldı
 
 ## 2.3.15
 - Selfie modülünde sadece tek yüz algılandığında ilerlenmesi sağlandı
