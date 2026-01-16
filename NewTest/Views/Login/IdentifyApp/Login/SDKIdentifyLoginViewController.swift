@@ -190,6 +190,7 @@ class SDKIdentifyLoginViewController: SDKBaseViewController {
         
         self.showLoader()
         
+        self.manager.enableDebugPrint = true
         self.manager.setupSDK(
             identId: identIdArea.text!,
             baseApiUrl: self.selectedServer.apiUrl,

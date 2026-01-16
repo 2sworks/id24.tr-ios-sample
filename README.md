@@ -3,6 +3,9 @@ Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.
 
 ### Sample App 
 
+## Build 162:
+- enableDebugPrint eklendi.
+
 ## Build 160:
 - TURN için şifreli kullanım opsiyonu eklendi.
 - Görüntülü görüşme sonlandırma senaryoları için sebep ve durum bilgileri eklendi
@@ -65,7 +68,6 @@ Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.
 - Missed Call için yeni status eklendi
 - Teşekkür ekranı güncellendi
 
-
 ## Build 73:
 - prepare modülünün örnek tasarımı eklendi
 - socketListener tarafına connectionErr eklendi
@@ -75,6 +77,10 @@ Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.
 
 
 ### SDK Son Güncelleme:
+
+## 2.5.1
+- Turn şifrelemeyi destekleme bilgisi backende gönderildi
+- enableDebugPrint ile print loglarını açıp kapatabilme opsiyonu eklendi
 
 ## 2.5.0
 - OCR kimlik ön yüz ve arka yüz iyileştirmeleri yapıldı
