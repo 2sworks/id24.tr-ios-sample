@@ -266,7 +266,7 @@ extension SDKAddressConfirmViewController: UIDocumentPickerDelegate, UINavigatio
             
             self.addressPdf = nil
             
-            self.idPhoto = image?.jpegData(compressionQuality: 0.5)?.base64EncodedString() ?? ""
+            self.idPhoto = image?.jpegData(compressionQuality: 0.9)?.base64EncodedString() ?? ""
             checkSubmitAvailablity()
         }
     }
@@ -277,7 +277,7 @@ extension SDKAddressConfirmViewController: ImageScannerControllerDelegate {
     func imageScannerController(_ scanner: ImageScannerController, didFinishScanningWithResults results: ImageScannerResults) {
         docPhoto.image = results.croppedScan.image
         docImg = results.croppedScan.image
-        self.idPhoto = results.croppedScan.image.jpegData(compressionQuality: 0.5)?.base64EncodedString() ?? ""
+        self.idPhoto = results.croppedScan.image.jpegData(compressionQuality: 0.9)?.base64EncodedString() ?? ""
         checkSubmitAvailablity()
         scanner.dismiss(animated: true)
     }
