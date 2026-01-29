@@ -1,7 +1,20 @@
 # Identify SDK Sample App
 Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.com.tr/docs/ios/first-setup/ adresinden ulaşabilirsiniz.
 
-### Sample App 
+# Son Güncellemeler
+
+### Build 165:
+- Adres fotoğraflarının daha kaliteli gönderilmesi sağlandı.
+
+### SDK 2.5.2
+- Kimlik OCR - Ad Soyad alanında özel karakterlerin algılanması engellendi.
+
+***
+
+## Sample App 
+
+## Build 165:
+- Adres fotoğraflarının daha kaliteli gönderilmesi sağlandı.
 
 ## Build 162:
 - enableDebugPrint eklendi.
@@ -76,7 +89,10 @@ Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.
 
 
 
-### SDK Son Güncelleme:
+## SDK
+
+## 2.5.2
+- Kimlik OCR - Ad Soyad alanında özel karakterlerin algılanması engellendi.
 
 ## 2.5.1
 - Turn şifrelemeyi destekleme bilgisi backende gönderildi
