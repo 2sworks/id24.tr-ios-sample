@@ -3,8 +3,8 @@ Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.
 
 # Son Güncellemeler
 
-### Build 165:
-- Adres fotoğraflarının daha kaliteli gönderilmesi sağlandı.
+### Build 166:
+- OVD modülünde iyileştirmeler yapıldı.
 
 ### SDK 2.5.2
 - Kimlik OCR - Ad Soyad alanında özel karakterlerin algılanması engellendi.
@@ -13,7 +13,10 @@ Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.
 
 ## Sample App 
 
-## Build 165:
+## Build 166:
+- OVD modülünde iyileştirmeler yapıldı.
+
+## Build 166:
 - Adres fotoğraflarının daha kaliteli gönderilmesi sağlandı.
 
 ## Build 162:
