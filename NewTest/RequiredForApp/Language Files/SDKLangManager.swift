@@ -417,16 +417,16 @@ extension SDKLangManager {
                 return self.readKey(key: "OvdFrontSaved")
             case .ovdFrontChecking:
                 return self.readKey(key: "OvdFrontChecking")
-            case .ovdFrontMoveCloser:
-                return self.readKey(key: "OvdFrontMoveCloser")
+            case .ovdChecking:
+                return self.readKey(key: "OvdChecking")
+            case .ovdBackChecking:
+                return self.readKey(key: "OvdBackChecking")
             case .ovdFrontReadyCapturing:
                 return self.readKey(key: "OvdFrontReadyCapturing")
             case .ovdFrontAlignedHold:
                 return self.readKey(key: "OvdFrontAlignedHold")
             case .ovdBackAlignGuide:
                 return self.readKey(key: "OvdBackAlignGuide")
-            case .ovdBackMoveCloser:
-                return self.readKey(key: "OvdBackMoveCloser")
             case .ovdBackMrzNotRead:
                 return self.readKey(key: "OvdBackMrzNotRead")
             case .ovdBackReadyCapturing:
@@ -624,11 +624,11 @@ public enum SDKKeywords {
     case ovdRotateRainbowRetrySpeech
     case ovdFrontSaved
     case ovdFrontChecking
-    case ovdFrontMoveCloser
+    case ovdChecking
+    case ovdBackChecking
     case ovdFrontReadyCapturing
     case ovdFrontAlignedHold
     case ovdBackAlignGuide
-    case ovdBackMoveCloser
     case ovdBackMrzNotRead
     case ovdBackReadyCapturing
     case ovdBackAlignedHold

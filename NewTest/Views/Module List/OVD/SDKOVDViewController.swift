@@ -91,14 +91,25 @@ final class SDKOVDViewController: SDKBaseViewController {
     /// Otomatik çekim için: dikdörtgenin guide alanını neredeyse tamamen doldurmasını istiyoruz.
     /// coverage = (rect ∩ guide) / guideArea  ≈ 1.0, tolerans ~%2–3
     private let coverageTarget: CGFloat = 1.0
-    private let coverageTolerance: CGFloat = 0.30
-    private var coverageMin: CGFloat { coverageTarget - coverageTolerance }  // ~0.97
-    private var coverageMax: CGFloat { coverageTarget + coverageTolerance }  // ~1.03 (pratikte coverage ≤ 1.0
+    private let coverageTolerance: CGFloat = 0.40  // 0.30'dan 0.40'a artırıldı (daha toleranslı)
+    private var coverageMin: CGFloat { coverageTarget - coverageTolerance }  // ~0.60 (capture için minimum)
+    private var coverageMax: CGFloat { coverageTarget + coverageTolerance }  // ~1.40 (pratikte coverage ≤ 1.0)
 
     private var ovdBaselineGlare: Float?
     private var ovdBaselineChroma: Float?
     private var lastRectDetectTime: CFAbsoluteTime = CFAbsoluteTimeGetCurrent()
     private var rectDetectInFlight = false
+    
+    // UI güncellemelerini throttle etmek için
+    private var lastUIUpdateTime: CFAbsoluteTime = 0
+    private let uiUpdateInterval: TimeInterval = 0.3 // 300ms'de bir UI güncelle
+    private var lastUIText: String = ""
+    
+    // Speech throttle - hızlı değişimi önlemek için
+    private var lastSpeechTime: CFAbsoluteTime = 0
+    private let speechThrottleInterval: TimeInterval = 3.0 // 3 saniyede bir speech
+    private var lastSpeechText: String = ""
+    private var isSpeaking: Bool = false
 
     // UX gating (içerik tabanlı)
     private var mrzProbeInFlight = false
@@ -124,12 +135,37 @@ final class SDKOVDViewController: SDKBaseViewController {
             }
         }
     }
-    // MARK: - Instruction Speaker
-    private func speakInstruction(_ text: String, delay: TimeInterval = 0.0) {
+    // MARK: - Instruction Ier
+    private func speakInstruction(_ text: String, delay: TimeInterval = 0.0, force: Bool = false) {
         guard !text.isEmpty else { return }
+        
+        let currentTime = CFAbsoluteTimeGetCurrent()
+        let timeSinceLastSpeech = currentTime - lastSpeechTime
+        
+        // Throttle kontrolü: Aynı text veya çok yakın zamanda konuşulmuşsa atla (force değilse)
+        if !force {
+            if text == lastSpeechText {
+                // Aynı text tekrar ediliyorsa atla
+                return
+            }
+            if timeSinceLastSpeech < speechThrottleInterval && isSpeaking {
+                // Son konuşmadan çok kısa süre geçmişse ve hala konuşuyorsa atla
+                return
+            }
+        }
+        
+        lastSpeechTime = currentTime
+        lastSpeechText = text
+        isSpeaking = true
+        
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
             guard let self = self else { return }
-            self.instructionSpeaker.stopSpeaking(at: .immediate)
+            
+            // Önceki konuşmayı durdur (sadece force değilse)
+            if !force {
+                self.instructionSpeaker.stopSpeaking(at: .immediate)
+            }
+            
             let utterance = AVSpeechUtterance(string: text)
             switch self.languageManager.sdkManager.sdkLang {
             case .tr:
@@ -146,7 +182,14 @@ final class SDKOVDViewController: SDKBaseViewController {
                 utterance.voice = AVSpeechSynthesisVoice(language: "tr-TR")
             }
             utterance.rate = 0.6
+            
             self.instructionSpeaker.speak(utterance)
+            
+            // Speech bitince isSpeaking'i false yap (tahmini süre: karakter sayısı * 0.1 + 1 saniye)
+            let estimatedDuration = Double(text.count) * 0.1 + 1.0
+            DispatchQueue.main.asyncAfter(deadline: .now() + estimatedDuration) { [weak self] in
+                self?.isSpeaking = false
+            }
         }
     }
 
@@ -370,7 +413,8 @@ final class SDKOVDViewController: SDKBaseViewController {
 
     private func docRectROI(in extent: CGRect) -> CGRect {
         let isBackStep = (currentStep == .back || captureReason == .back)
-        let paddingFactor: CGFloat = isBackStep ? 1.20 : 1.0 // Arka yüz için %20 genişletme
+        // Arka yüz için daha fazla genişletme (çipin croplanmaması için)
+        let paddingFactor: CGFloat = isBackStep ? 1.35 : 1.0 // Arka yüz için %35 genişletme (1.20'den artırıldı)
         
         if guideRectInView != .zero {
             let meta = previewLayer.metadataOutputRectConverted(fromLayerRect: guideRectInView)
@@ -379,7 +423,7 @@ final class SDKOVDViewController: SDKBaseViewController {
             var w = meta.size.width * extent.width
             var h = meta.size.height * extent.height
             
-            // Arka yüz için ROI'yi genişlet
+            // Arka yüz için ROI'yi genişlet (çip dahil tüm kimliği kapsaması için)
             if isBackStep {
                 let centerX = x + w / 2
                 let centerY = y + h / 2
@@ -540,7 +584,7 @@ final class SDKOVDViewController: SDKBaseViewController {
                             DispatchQueue.main.async {
                                 self.stopPipelinesBeforeReview()
                                 self.stepLabel.text = self.translate(text: .ovdVerificationCompleted)
-                                self.speakInstruction(self.translate(text: .ovdVerificationCompletedSpeech), delay: 0.1)
+                                self.speakInstruction(self.translate(text: .ovdVerificationCompletedSpeech), delay: 0.1, force: true)
                                 self.manager.getNextModule { nextVC in
                                     self.navigationController?.pushViewController(nextVC, animated: true)
                                 }
@@ -575,7 +619,8 @@ final class SDKOVDViewController: SDKBaseViewController {
         DispatchQueue.main.async {
             self.stepLabel.text = self.translate(text: .ovdFlashMoveCard)
             self.setGuideDetected(false)
-            self.speakInstruction(self.translate(text: .ovdRotateRainbowSpeech), delay: 3.0)
+            // OVD adımına geçerken speech'i force et (önemli durum değişikliği)
+            self.speakInstruction(self.translate(text: .ovdRotateRainbowSpeech), delay: 3.0, force: true)
             self.setTorch(on: true)
         }
     }
@@ -590,12 +635,16 @@ final class SDKOVDViewController: SDKBaseViewController {
         mrzPresence = false
         mrzProbeInFlight = false
         ovdCaptured = true
+        
+        // UI güncelleme state'ini sıfırla
+        lastUIUpdateTime = 0
+        lastUIText = ""
 
         setTorch(on: false)
         setGuideDetected(false)
         stepLabel.text = self.translate(text: .ovdSavedAlignBack)
-        speakInstruction(self.translate(text: .ovdPhotoTaken), delay: 0.25)
-        speakInstruction(self.translate(text: .ovdScanBackSide), delay: 2.0)
+        // Back adımına geçerken speech'i force et (önemli durum değişikliği)
+        speakInstruction(self.translate(text: .ovdScanBackSide), delay: 0.5, force: true)
     }
 
     // OVD opsiyonel olduğunda, FRONT başarılı olunca doğrudan BACK adımına geçiş
@@ -608,11 +657,16 @@ final class SDKOVDViewController: SDKBaseViewController {
         mrzPresence = false
         mrzProbeInFlight = false
         ovdCaptured = false
+        
+        // UI güncelleme state'ini sıfırla
+        lastUIUpdateTime = 0
+        lastUIText = ""
 
         setTorch(on: false)
         setGuideDetected(false)
         stepLabel.text = self.translate(text: .ovdFrontSavedAlignBack)
-        speakInstruction(self.translate(text: .ovdScanBackSide), delay: 0.5)
+        // Back adımına geçerken speech'i force et (önemli durum değişikliği)
+        speakInstruction(self.translate(text: .ovdScanBackSide), delay: 0.5, force: true)
     }
 
     // OVD upload başarısız olduğunda aynı adımda kal ve tekrar denemeye hazırla
@@ -720,14 +774,22 @@ extension SDKOVDViewController: AVCapturePhotoCaptureDelegate {
         switch captureReason {
         case .front:
             DispatchQueue.main.async {
-                self.stepLabel.text = self.translate(text: .ovdFrontSaved)
-                self.speakInstruction(self.translate(text: .ovdFrontChecking), delay: 0.25)
+                // Capture yapıldığında checking mesajı önemli, force et
+                self.speakInstruction(self.translate(text: .ovdFrontChecking), delay: 0.25, force: true)
             }
             startOCR(ciImage: ciRaw)
         case .ovd:
+            DispatchQueue.main.async {
+                // Capture yapıldığında checking mesajı önemli, force et
+                self.speakInstruction(self.translate(text: .ovdChecking), delay: 0.25, force: true)
+            }
             setTorch(on: false)
             startOCR(ciImage: ciRaw)
         case .back:
+            DispatchQueue.main.async {
+                // Capture yapıldığında checking mesajı önemli, force et
+                self.speakInstruction(self.translate(text: .ovdBackChecking), delay: 0.25, force: true)
+            }
             startOCR(ciImage: ciRaw)
         }
     }
@@ -795,19 +857,37 @@ extension SDKOVDViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
 
                     //print(String(format: "why: AOK=%d COV=%d SHP=%d STB=%d MRZ=%d GLR=%d thr(shp)=%.4f ratio=%.3f cov=%.2f score=%d", aspectOk ? 1 : 0, coverageOk ? 1 : 0, sharpOk ? 1 : 0, stableOk ? 1 : 0, self.mrzPresence ? 1 : 0, glareBlock ? 1 : 0, sharpMin, ratio, coverage, self.readyScore))
 
-                    DispatchQueue.main.async {
+                    // UI güncellemelerini throttle et (sürekli değişimi önle)
+                    let currentTime = CFAbsoluteTimeGetCurrent()
+                    let shouldUpdateUI = (currentTime - self.lastUIUpdateTime) >= self.uiUpdateInterval
+                    
+                    DispatchQueue.main.async { [weak self] in
+                        guard let self = self else { return }
+                        var newText: String = ""
                         switch self.currentStep {
                         case .front:
-                            if !hasRect { self.stepLabel.text = self.translate(text: .ovdFrontAlignGuide) }
-                            else if coverage < self.coverageMin { self.stepLabel.text = self.translate(text: .ovdFrontMoveCloser) }
-                            else { self.stepLabel.text = canFire ? self.translate(text: .ovdFrontReadyCapturing) : self.translate(text: .ovdFrontAlignedHold) }
+                            if !hasRect { newText = self.translate(text: .ovdFrontAlignGuide) }
+                            // Coverage capture için yeterli değilse "çerçeveye hizalayın" göster
+                            else if coverage < self.coverageMin { newText = self.translate(text: .ovdFrontAlignGuide) }
+                            else { newText = canFire ? self.translate(text: .ovdFrontReadyCapturing) : self.translate(text: .ovdFrontAlignedHold) }
                         case .back:
-                            if !hasRect { self.stepLabel.text = self.translate(text: .ovdBackAlignGuide) }
-                            else if coverage < self.coverageMin { self.stepLabel.text = self.translate(text: .ovdBackMoveCloser) }
-                            else if !mrzGateOK { self.stepLabel.text = self.translate(text: .ovdBackMrzNotRead) }
-                            else { self.stepLabel.text = canFire ? self.translate(text: .ovdBackReadyCapturing) : self.translate(text: .ovdBackAlignedHold) }
+                            if !hasRect { newText = self.translate(text: .ovdBackAlignGuide) }
+                            // Coverage capture için yeterli değilse "çerçeveye hizalayın" göster
+                            else if coverage < self.coverageMin { newText = self.translate(text: .ovdBackAlignGuide) }
+                            else if !mrzGateOK { newText = self.translate(text: .ovdBackMrzNotRead) }
+                            else { newText = canFire ? self.translate(text: .ovdBackReadyCapturing) : self.translate(text: .ovdBackAlignedHold) }
                         case .ovd: break
                         }
+                        
+                        // Sadece text değiştiyse veya throttle süresi geçtiyse güncelle
+                        if shouldUpdateUI || newText != self.lastUIText {
+                            if !newText.isEmpty {
+                                self.stepLabel.text = newText
+                                self.lastUIText = newText
+                                self.lastUIUpdateTime = currentTime
+                            }
+                        }
+                        
                         self.setGuideDetected(canFire)
                     }
 
