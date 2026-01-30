@@ -16,7 +16,7 @@ Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.
 ## Build 166:
 - OVD modülünde iyileştirmeler yapıldı.
 
-## Build 166:
+## Build 165:
 - Adres fotoğraflarının daha kaliteli gönderilmesi sağlandı.
 
 ## Build 162:
