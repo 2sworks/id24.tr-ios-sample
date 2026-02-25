@@ -3,6 +3,9 @@ Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.
 
 # Son Güncellemeler
 
+### SDK 2.5.3:
+- Sdk log api url eklendi.
+
 ### Build 166:
 - OVD modülünde iyileştirmeler yapıldı.
 
