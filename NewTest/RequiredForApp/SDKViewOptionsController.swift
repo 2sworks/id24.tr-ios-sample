@@ -14,13 +14,15 @@ import SpeechRecognizerPermission
 import MicrophonePermission
 import PermissionsKit
 
-class SDKViewOptionsController: UIViewController {
+class SDKViewOptionsController: UIViewController, SDKNoConnectionDelegate {
     
     let manager = IdentifyManager.shared
     let languageManager = SDKLangManager.shared
     var onTap: VoidHandler?
     public typealias VoidHandler = () -> Void
     var isExternalScreen = false
+    
+    func reconnectCompletedWithStatus(isWaitingRoom: Bool, statusType: String?) { }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -250,6 +252,7 @@ class SDKBaseViewController: SDKViewOptionsController {
     }
     
     @objc func reActiveScreen() { // wi-fi' dan lte' ye çekme gibi durumlarda socket kopması yaşanabilir, buna önlem olarak koptuğu zaman yeniden bağlan ekranı basıyoruz.
+        guard self is SDKCallScreenViewController else { return }
         guard let socket = manager.socket else { return }
         if socket.isConnected == false && self.manager.isAlreadyShowingReConnectScreen == false {
             self.openSocketDisconnect(callCompleted: false)
@@ -259,8 +262,9 @@ class SDKBaseViewController: SDKViewOptionsController {
     @objc func appMovedToBackground() { }
 
     @objc func appMovedToForeground() {
+        guard self is SDKCallScreenViewController else { return }
         if let socket = manager.socket {
-            if socket.isConnected == false  && self.manager.isAlreadyShowingReConnectScreen == false {
+            if socket.isConnected == false && self.manager.isAlreadyShowingReConnectScreen == false {
                 self.listenToSocketConnection(callCompleted: false)
             }
         }
@@ -414,11 +418,10 @@ public enum ToastType: String {
     case fail
 }
 
-extension SDKViewOptionsController: SDKNoConnectionDelegate {
+extension SDKViewOptionsController {
     
     func reconnectCompleted() { // bağlantı koptu, no internet ekranı geldi, sonra bağlantı yeniden kurulduysa
         self.manager.isAlreadyShowingReConnectScreen = false // üst üste ekran açmasını engellemek için ekledik
     }
-    
     
 }

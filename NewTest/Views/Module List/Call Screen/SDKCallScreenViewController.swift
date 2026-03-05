@@ -61,6 +61,7 @@ class SDKCallScreenViewController: SDKBaseViewController {
         self.confStarted = false
     }
     
+    
     private func setupUI() {
         UIApplication.shared.isIdleTimerDisabled = true // görüşürken veya beklerken ekran kapanmaması için
         self.waitDesc1.text = self.translate(text: .waitingDesc1)
@@ -158,6 +159,20 @@ class SDKCallScreenViewController: SDKBaseViewController {
                 if let nav = self.navigationController {
                     nav.pushViewController(x, animated: true)
                 }
+            }
+        }
+    }
+    
+    override func reconnectCompletedWithStatus(isWaitingRoom: Bool, statusType: String?) {
+        if isWaitingRoom {
+            print("reconnect: Waiting Room'a dönülüyor")
+            DispatchQueue.main.async {
+                self.setupCallScreen(inCall: false)
+            }
+        } else {
+            print("reconnect: Thank You Page açılıyor, statusType: \(statusType ?? "-")")
+            DispatchQueue.main.async {
+                self.callIsDone(doneStatus: statusType == "positive" ? .completed : .notCompleted)
             }
         }
     }

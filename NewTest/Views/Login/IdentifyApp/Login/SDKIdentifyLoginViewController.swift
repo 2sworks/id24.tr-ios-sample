@@ -208,6 +208,7 @@ class SDKIdentifyLoginViewController: SDKBaseViewController {
             selectedModules: self.selectedModuleList,
             idCardLang: self.idLang,
             turnKey: "AEdHh9OZu1kg+nSBSd2UNMu9y4Kc3xVfgTsvw+PTAic=",
+            wsSecretKey: "tgdRmdAABrWf9TCRJZIWoW3Bz0iPJpig5jtOkBN4pvU=",
             showThankYouPage: true,
             showNFCNotFoundPage: true,
             supportU18: true,

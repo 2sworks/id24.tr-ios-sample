@@ -9,6 +9,7 @@ import UIKit
 
 protocol SDKNoConnectionDelegate: AnyObject {
     func reconnectCompleted()
+    func reconnectCompletedWithStatus(isWaitingRoom: Bool, statusType: String?)
 }
 
 class SDKListenSocketViewController: SDKBaseViewController {
@@ -61,19 +62,24 @@ class SDKListenSocketViewController: SDKBaseViewController {
     
     func reconnectSocket() {
         
-        manager.reconnectToSocket { [weak self] resp in
-            guard let self = `self` else { return }
-            if resp.isConnected {
+        self.manager.reconnectToSocket(callback: { [weak self] socket in
+            guard let self = self else { return }
+            if socket.isConnected {
                 reConnectBtn.setTitle("!!!!!!", for: .normal)
                 self.delegate?.reconnectCompleted()
                 print("tekrar bağlantı kuruldu")
-                self.dismiss(animated: resp.isConnected)
+                self.dismiss(animated: true)
             } else {
-                self.toggleButton(disabled: resp.isConnected)
+                self.toggleButton(disabled: false)
                 reConnectBtn.setTitle("#####", for: .normal)
             }
-        }
-        
+        }, statusCallback: { [weak self] statusSummary in
+            guard let self = self else { return }
+            let isWaitingRoom = statusSummary?.id == -3
+            DispatchQueue.main.async {
+                self.delegate?.reconnectCompletedWithStatus(isWaitingRoom: isWaitingRoom, statusType: statusSummary?.type)
+            }
+        })
     }
     
     func toggleButton(disabled: Bool) {
