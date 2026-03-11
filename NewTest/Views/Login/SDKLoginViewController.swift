@@ -38,7 +38,7 @@ class SDKLoginViewController: SDKViewOptionsController {
         self.manager.videoRecorderModuleController = SDKVideoRecorderViewController.instantiate()
         self.manager.livenessModuleController = SDKLivenessViewController.instantiate()
         self.manager.addressModuleController = SDKAddressConfirmViewController.instantiate()
-        self.manager.liveStreamModuleController = SDKCallScreenViewController.instantiate()
+        self.manager.callWaitModuleController = SDKCallScreenViewController.instantiate()
         self.manager.speechModuleController = SDKSpeechRecViewController.instantiate()
         self.manager.thankYouViewController = SDKThankYouViewController.instantiate()
         self.manager.prepareViewController = SDKPrepareViewController.instantiate()
