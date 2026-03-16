@@ -250,7 +250,7 @@
 		482D2BAE2A547AC000F1344F /* CaptureSession+Orientation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CaptureSession+Orientation.swift"; sourceTree = "<group>"; };
 		482D2BAF2A547AC000F1344F /* CaptureSession.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CaptureSession.swift; sourceTree = "<group>"; };
 		482D2BB02A547AC000F1344F /* CaptureSession+Focus.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CaptureSession+Focus.swift"; sourceTree = "<group>"; };
-		483BDB0B28F459CC00635BCC /* NewTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NewTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		483BDB0B28F459CC00635BCC /* IdentifyTR.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = IdentifyTR.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		483BDB0E28F459CC00635BCC /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		483BDB1728F459CC00635BCC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		483BDB1A28F459CC00635BCC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -567,7 +567,7 @@
 		483BDB0C28F459CC00635BCC /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				483BDB0B28F459CC00635BCC /* NewTest.app */,
+				483BDB0B28F459CC00635BCC /* IdentifyTR.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -866,9 +866,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		483BDB0A28F459CC00635BCC /* NewTest */ = {
+		483BDB0A28F459CC00635BCC /* IdentifyTR */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 483BDB1F28F459CC00635BCC /* Build configuration list for PBXNativeTarget "NewTest" */;
+			buildConfigurationList = 483BDB1F28F459CC00635BCC /* Build configuration list for PBXNativeTarget "IdentifyTR" */;
 			buildPhases = (
 				483BDB0728F459CC00635BCC /* Sources */,
 				483BDB0828F459CC00635BCC /* Frameworks */,
@@ -879,7 +879,7 @@
 			);
 			dependencies = (
 			);
-			name = NewTest;
+			name = IdentifyTR;
 			packageProductDependencies = (
 				4857BFF72902D621001FE850 /* OpenSSL */,
 				4857BFFA2902D636001FE850 /* Starscream */,
@@ -895,7 +895,7 @@
 				4831E1F22B69284400B67891 /* IQKeyboardManagerSwift */,
 			);
 			productName = NewTest;
-			productReference = 483BDB0B28F459CC00635BCC /* NewTest.app */;
+			productReference = 483BDB0B28F459CC00635BCC /* IdentifyTR.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -957,7 +957,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				483BDB0A28F459CC00635BCC /* NewTest */,
+				483BDB0A28F459CC00635BCC /* IdentifyTR */,
 			);
 		};
 /* End PBXProject section */
@@ -1289,7 +1289,7 @@
 				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = NewTest/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Identify Sample";
+				INFOPLIST_KEY_CFBundleDisplayName = "Identify v3";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_NFCReaderUsageDescription = "NFC Kullanım izni";
@@ -1333,7 +1333,7 @@
 				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = NewTest/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Identify Sample";
+				INFOPLIST_KEY_CFBundleDisplayName = "Identify v3";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_NFCReaderUsageDescription = "NFC Kullanım izni";
@@ -1373,7 +1373,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		483BDB1F28F459CC00635BCC /* Build configuration list for PBXNativeTarget "NewTest" */ = {
+		483BDB1F28F459CC00635BCC /* Build configuration list for PBXNativeTarget "IdentifyTR" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				483BDB2028F459CC00635BCC /* Debug */,

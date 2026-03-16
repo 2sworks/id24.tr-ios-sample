@@ -15,8 +15,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "483BDB0A28F459CC00635BCC"
-               BuildableName = "NewTest.app"
-               BlueprintName = "NewTest"
+               BuildableName = "IdentifyTR.app"
+               BlueprintName = "IdentifyTR"
                ReferencedContainer = "container:NewTest.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -45,8 +45,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "483BDB0A28F459CC00635BCC"
-            BuildableName = "NewTest.app"
-            BlueprintName = "NewTest"
+            BuildableName = "IdentifyTR.app"
+            BlueprintName = "IdentifyTR"
             ReferencedContainer = "container:NewTest.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -59,7 +59,7 @@
       </EnvironmentVariables>
       <AdditionalOptions>
          <AdditionalOption
-            key = "MallocStackLogging"
+            key = "MallocScribble"
             value = ""
             isEnabled = "YES">
          </AdditionalOption>
@@ -69,7 +69,7 @@
             isEnabled = "YES">
          </AdditionalOption>
          <AdditionalOption
-            key = "MallocScribble"
+            key = "MallocStackLogging"
             value = ""
             isEnabled = "YES">
          </AdditionalOption>
@@ -86,8 +86,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "483BDB0A28F459CC00635BCC"
-            BuildableName = "NewTest.app"
-            BlueprintName = "NewTest"
+            BuildableName = "IdentifyTR.app"
+            BlueprintName = "IdentifyTR"
             ReferencedContainer = "container:NewTest.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
