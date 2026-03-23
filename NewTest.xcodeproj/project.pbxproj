@@ -149,7 +149,8 @@
 		48E8E43129266B8A0045C3F8 /* SDKSpeechRecViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E8E42F29266B8A0045C3F8 /* SDKSpeechRecViewController.swift */; };
 		48E8E43229266B8A0045C3F8 /* SDKSpeechRecViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 48E8E43029266B8A0045C3F8 /* SDKSpeechRecViewController.xib */; };
 		48F0867829F7CA4E00FCA4BF /* QKMRZScanner in Frameworks */ = {isa = PBXBuildFile; productRef = 48F0867729F7CA4E00FCA4BF /* QKMRZScanner */; };
-		8AAA583D2F7143B000637E9F /* IdentifySDK.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8AAA583C2F7143B000637E9F /* IdentifySDK.xcframework */; };
+		8A83BCA92F7186980026EDDA /* IdentifySDK.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8AAA583C2F7143B000637E9F /* IdentifySDK.xcframework */; };
+		8A83BCAA2F7186980026EDDA /* IdentifySDK.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 8AAA583C2F7143B000637E9F /* IdentifySDK.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		DF7BC16A2D4A279600372CAB /* Env.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = DF7BC1682D4A279600372CAB /* Env.xcdatamodeld */; };
 /* End PBXBuildFile section */
 
@@ -160,6 +161,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				8A83BCAA2F7186980026EDDA /* IdentifySDK.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -337,7 +339,7 @@
 				4831E1F32B69284400B67891 /* IQKeyboardManagerSwift in Frameworks */,
 				48171405294716830095A64F /* netfox in Frameworks */,
 				48F0867829F7CA4E00FCA4BF /* QKMRZScanner in Frameworks */,
-				8AAA583D2F7143B000637E9F /* IdentifySDK.xcframework in Frameworks */,
+				8A83BCA92F7186980026EDDA /* IdentifySDK.xcframework in Frameworks */,
 				4857BFFB2902D636001FE850 /* Starscream in Frameworks */,
 				48D802292924F6B000B9BB83 /* CHIOTPField in Frameworks */,
 			);
