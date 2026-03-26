@@ -1,36 +1,56 @@
 import Foundation
 import SystemConfiguration
+import Combine
 
-class SDKReachabilityHelper {
+// MARK: - SDKReachabilityHelper
 
-static let shared = SDKReachabilityHelper()
-var reachability : Reachability!
+final class SDKReachabilityHelper: ObservableObject {
 
-func observeReachability(){
-    self.reachability = try! Reachability()
-    NotificationCenter.default.addObserver(self, selector:#selector(self.reachabilityChanged), name: NSNotification.Name.reachabilityChanged, object: nil)
-    do {
-        try self.reachability.startNotifier()
+    static let shared = SDKReachabilityHelper()
+
+    /// Mevcut bağlantı durumu — SwiftUI ve Combine ile reactive olarak izlenebilir.
+    @Published private(set) var connection: Reachability.Connection = .unavailable
+
+    /// Bağlantı mevcut mu?
+    var isConnected: Bool { connection != .unavailable }
+
+    private var reachability: Reachability?
+    private var cancellable: AnyCancellable?
+
+    private init() {}
+
+    // MARK: - Public
+
+    func observeReachability() {
+        do {
+            reachability = try Reachability()
+        } catch {
+            print("Reachability oluşturulamadı: \(error.localizedDescription)")
+            return
+        }
+
+        // NotificationCenter'ı Combine ile dinle — @objc selector gereksiz
+        cancellable = NotificationCenter.default
+            .publisher(for: .reachabilityChanged, object: reachability)
+            .compactMap { $0.object as? Reachability }
+            .map { $0.connection }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] newConnection in
+                self?.connection = newConnection
+            }
+
+        do {
+            try reachability?.startNotifier()
+        } catch {
+            print("Reachability notifier başlatılamadı: \(error.localizedDescription)")
+        }
     }
-    catch(let error) {
-        print("Error occured while starting reachability notifications : \(error.localizedDescription)")
-    }
-}
 
-@objc func reachabilityChanged(note: Notification) {
-    let reachability = note.object as! Reachability
-    switch reachability.connection {
-    case .cellular:
-        print("Network available via Cellular Data.")
-        break
-    case .wifi:
-        print("Network available via WiFi.")
-        break
-    case .unavailable:
-        print("🚨🚨🚨 Network is unavailable.")
-        break
+    func stopObserving() {
+        reachability?.stopNotifier()
+        cancellable?.cancel()
+        cancellable = nil
     }
-  }
 }
 
 public enum ReachabilityError: Error {

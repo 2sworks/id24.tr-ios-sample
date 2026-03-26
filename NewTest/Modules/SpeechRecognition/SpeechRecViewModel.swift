@@ -1,0 +1,120 @@
+//
+//  SpeechRecViewModel.swift
+//  NewTest
+//
+//  Konusma tanima ekraninin ViewModel'i.
+//  SFSpeechRecognizer ile kayit, metin karsilastirma, SDK bildirimi.
+//  SDK: sendSpeechStatus(isCompleted:)
+//
+
+import Foundation
+import Speech
+import AVFoundation
+import IdentifySDK
+
+@MainActor
+final class SpeechRecViewModel: BaseModuleViewModel {
+
+    // MARK: - Published State
+
+    /// Kullanicinin soymesi gereken kelime (SDK tarafindan belirlenir)
+    @Published private(set) var targetWord: String = "Berlin"
+
+    /// Kayit devam ediyor mu
+    @Published private(set) var isRecording: Bool = false
+
+    /// Tanima sonucu
+    @Published private(set) var recognizedText: String = ""
+
+    /// Basari durumu
+    @Published private(set) var speechSuccess: Bool = false
+
+    // MARK: - Private
+
+    private var speechRecognizer: SFSpeechRecognizer?
+    private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
+    private var recognitionTask: SFSpeechRecognitionTask?
+    private let audioEngine = AVAudioEngine()
+
+    // MARK: - Init
+
+    override init() {
+        super.init()
+        setupSpeechRecognizer()
+    }
+
+    private func setupSpeechRecognizer() {
+        speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "tr-TR"))
+    }
+
+    // MARK: - Kayit Baslat / Durdur
+
+    func startRecording() {
+        guard !isRecording else { return }
+        recognizedText = ""
+        speechSuccess = false
+        isRecording = true
+
+        let request = SFSpeechAudioBufferRecognitionRequest()
+        recognitionRequest = request
+
+        let inputNode = audioEngine.inputNode
+        request.shouldReportPartialResults = true
+
+        recognitionTask = speechRecognizer?.recognitionTask(with: request) { [weak self] result, error in
+            Task { @MainActor in
+                guard let self else { return }
+                if let result {
+                    self.recognizedText = result.bestTranscription.formattedString
+                }
+                if error != nil || result?.isFinal == true {
+                    self.stopRecording()
+                    self.checkResult()
+                }
+            }
+        }
+
+        let recordingFormat = inputNode.outputFormat(forBus: 0)
+        inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { buffer, _ in
+            request.append(buffer)
+        }
+
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.record, mode: .default, options: [.defaultToSpeaker])
+            try AVAudioSession.sharedInstance().setActive(true, options: .notifyOthersOnDeactivation)
+            audioEngine.prepare()
+            try audioEngine.start()
+        } catch {
+            errorMessage = error.localizedDescription
+            stopRecording()
+        }
+    }
+
+    func stopRecording() {
+        audioEngine.stop()
+        audioEngine.inputNode.removeTap(onBus: 0)
+        recognitionRequest?.endAudio()
+        recognitionTask?.cancel()
+        recognitionTask = nil
+        recognitionRequest = nil
+        isRecording = false
+    }
+
+    // MARK: - Sonuc Kontrolu
+
+    private func checkResult() {
+        let matched = recognizedText.lowercased().contains(targetWord.lowercased())
+        if matched {
+            speechSuccess = true
+        } else {
+            errorMessage = "'\(targetWord)' soylenmedi, tekrar deneyin"
+        }
+    }
+
+    // MARK: - SDK Bildirimi
+
+    func confirmSpeech(appState: AppStateViewModel) {
+        manager.sendSpeechStatus(isCompleted: true)
+        appState.advanceToNextModule()
+    }
+}

@@ -28,7 +28,7 @@ class SDKViewOptionsController: UIViewController, SDKNoConnectionDelegate {
         super.viewDidLoad()
         print("viewDidLoad: \(self)")
         self.addSkipModuleButton()
-        if !(self is SDKIdentifyLoginViewController) && !(self is SDKCallScreenViewController) && !(self is ServerSettingsViewController) && !(self is EnvListViewController) {
+        if !(self is SDKCallScreenViewController) {
             self.addQuitButton()
         }
     }
@@ -142,14 +142,8 @@ class SDKViewOptionsController: UIViewController, SDKNoConnectionDelegate {
         navigationItem.titleView = imageView
     }
     
-    @objc  func openSocketLogs() {
-//        self.closeSDK()
-        self.dismiss(animated: true) {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: {
-                let socketLogVC = SDKSocketLogsViewController()
-                self.present(socketLogVC, animated: true)
-            })
-        }
+    @objc func openSocketLogs() {
+        // SDKSocketLogsViewController kaldirildi
     }
     
     func addGradientBackground(view: UIView) {

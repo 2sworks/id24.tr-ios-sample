@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import SwiftUI
 
 extension UIImage {
     
@@ -71,4 +72,29 @@ extension UIImage {
 
         return newImage
     }
+}
+
+// MARK: - SwiftUI Image Extensions
+
+extension Image {
+
+    /// Şablonlama modu ile renklendirme (tint).
+    /// Kullanım: Image("icon").sdkTinted(.blue)
+    func sdkTinted(_ color: Color) -> some View {
+        self
+            .renderingMode(.template)
+            .foregroundColor(color)
+    }
+
+    /// Görüntüyü belirtilen açıda (radyan) döndürür.
+    /// Kullanım: Image("arrow").sdkRotated(radians: .pi / 2)
+    func sdkRotated(radians: CGFloat) -> some View {
+        self.rotationEffect(.radians(radians))
+    }
+}
+
+extension UIImage {
+
+    /// UIImage'ı SwiftUI Image'a dönüştürür.
+    var asImage: Image { Image(uiImage: self) }
 }

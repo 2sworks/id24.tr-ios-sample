@@ -6,7 +6,7 @@
 //  Copyright © 2022 CocoaPods. All rights reserved.
 //
 
-import UIKit
+import Foundation
 
 extension String {
     

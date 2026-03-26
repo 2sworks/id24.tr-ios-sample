@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SwiftUI
 import IQKeyboardManagerSwift
 import netfox
 import IdentifySDK
@@ -23,22 +24,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         IQKeyboardManager.shared.enableAutoToolbar = true
         SDKReachabilityHelper.shared.observeReachability()
         NFX.sharedInstance().start()
-        startFirstScreen()
+        startSwiftUIScreen()
         return true
     }
-    
-    func startFirstScreen() {
+
+    // MARK: - SwiftUI Entry Point
+
+    func startSwiftUIScreen() {
         self.window = UIWindow(frame: UIScreen.main.bounds)
-        let firstVC = SDKIdentifyLoginViewController()
-        let firstNC = UINavigationController(rootViewController: firstVC)
+        let rootView = IdentifyRootView()
+        let hostingVC = UIHostingController(rootView: rootView)
+        let nc = UINavigationController(rootViewController: hostingVC)
         UINavigationBar.appearance().tintColor = .white
-//        UINavigationBar.appearance().prefersLargeTitles = false
-//        UINavigationBar.appearance().backgroundColor = KHTheme.grayColor
-//        UIBarButtonItem.appearance().tintColor = .white // pushtan sonra ki sayfanın buton rengi
-//        UINavigationBar.appearance().titleTextAttributes = [NSAttributedString.Key.foregroundColor : UIColor.white]
-        self.window?.rootViewController = firstNC
+        self.window?.rootViewController = nc
         self.window?.makeKeyAndVisible()
     }
+
     
     lazy var persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "Env")

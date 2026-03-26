@@ -35,7 +35,7 @@ class SDKListenSocketViewController: SDKBaseViewController {
         reConnectBtn.dropShadow(color: .black, opacity: 0.3, offSet: CGSize(width: -1, height: 1), radius: 9, scale: true)
         reConnectBtn.addTarget(self, action: #selector(tapButton), for: .touchUpInside)
         
-        if SDKReachabilityHelper.shared.reachability.connection == .unavailable {
+        if SDKReachabilityHelper.shared.connection == .unavailable {
             reConnectBtn.setTitle(self.translate(text: .coreNoInternet), for: .normal)
             toggleButton(disabled: true)
         }

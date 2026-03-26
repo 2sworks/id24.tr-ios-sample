@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import SwiftUI
 
 extension UIView {
     
@@ -48,5 +49,47 @@ extension UIView {
             layer.cornerRadius = newValue
             layer.masksToBounds = newValue > 0
         }
+    }
+}
+
+// MARK: - SwiftUI View Extensions
+
+extension View {
+
+    /// Identify SDK gölge stili
+    func sdkShadow(
+        color: Color = .black,
+        opacity: Double = 0.3,
+        offset: CGSize = CGSize(width: -1, height: 1),
+        radius: CGFloat = 9
+    ) -> some View {
+        self.shadow(
+            color: color.opacity(opacity),
+            radius: radius,
+            x: offset.width,
+            y: offset.height
+        )
+    }
+
+    /// Belirli köşeleri yuvarlama (SwiftUI)
+    func sdkRoundCorners(_ corners: UIRectCorner, radius: CGFloat) -> some View {
+        clipShape(RoundedCornerShape(corners: corners, radius: radius))
+    }
+}
+
+// MARK: - RoundedCornerShape
+
+/// `sdkRoundCorners` için yardımcı Shape
+struct RoundedCornerShape: Shape {
+    var corners: UIRectCorner
+    var radius: CGFloat
+
+    func path(in rect: CGRect) -> Path {
+        let path = UIBezierPath(
+            roundedRect: rect,
+            byRoundingCorners: corners,
+            cornerRadii: CGSize(width: radius, height: radius)
+        )
+        return Path(path.cgPath)
     }
 }
