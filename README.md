@@ -4,19 +4,19 @@ Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.
 # Son Güncellemeler
 
 ### SDK 2.5.4:
-•⁠  ⁠iceTransportPolicy relay den .all’a çekildi.
-•⁠  ⁠Nfc iyileştirmesi yapıldı algılama seviyeleri değiştirildi.
-•⁠  ⁠SendIdentStatusInfo ile görüntülü görüşme kopması sonrasında durum seçilmemesi halinde bekleme odasına dönmesi eklendi.
-•⁠  ⁠uploadAddressInfo’da sıkıştırma ayarları güncellendi.
-•⁠  ⁠socket_auth ile token ile bağlantı sürece dahil edildi artık müşterile ile agent arasında token ile görüntülü görüşme sağlanabiliyor.
-•⁠  ⁠liveStreamModuleController ismi -> callWaitModuleController ismi ile değiştirildi.
-•⁠  ⁠Socket mesajında gönderilen Live Stream ismi Call Wait Screen ile değiştirildi.
+- iceTransportPolicy relay den .all’a çekildi.
+- ⁠Nfc iyileştirmesi yapıldı algılama seviyeleri değiştirildi.
+- ⁠SendIdentStatusInfo ile görüntülü görüşme kopması sonrasında durum seçilmemesi halinde bekleme odasına dönmesi eklendi.
+- ⁠uploadAddressInfo’da sıkıştırma ayarları güncellendi.
+- ⁠socket_auth ile token ile bağlantı sürece dahil edildi artık müşterile ile agent arasında token ile görüntülü görüşme sağlanabiliyor.
+- liveStreamModuleController ismi -> callWaitModuleController ismi ile değiştirildi.
+- ⁠Socket mesajında gönderilen Live Stream ismi Call Wait Screen ile değiştirildi.
 
 ### Build 178:
--⁠  ⁠NFC de iyileştirmeler yapıldı.
--⁠  ⁠Adress modülünde ki görselinin sunucuya gönderilirken kalitesinin düşmesindeki ayarlar yükseltildi.
--⁠  ⁠Bağlantı koptuğunda eğer durum seçilmediyse bekleme odasına yönlendirme geliştirmesi yapıldı via “-3” durum kodu.
--⁠  ⁠liveStreamModuleController ismi -> callWaitModuleController ismi ile değiştirildi.
+- ⁠NFC de iyileştirmeler yapıldı.
+- ⁠Adress modülünde ki görselinin sunucuya gönderilirken kalitesinin düşmesindeki ayarlar yükseltildi.
+- ⁠Bağlantı koptuğunda eğer durum seçilmediyse bekleme odasına yönlendirme geliştirmesi yapıldı via “-3” durum kodu.
+-  ⁠liveStreamModuleController ismi -> callWaitModuleController ismi ile değiştirildi.
 - ⁠Websocket secret key geliştirilmesi yapıldı isteğe göre artık görüntülü görüşme token ile peer to peer güvenlik seviyesine çıkarıldı.
 -  ws token generate token hatası giderildi.
 
