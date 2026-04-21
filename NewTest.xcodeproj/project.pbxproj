@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -149,8 +149,13 @@
 		48E8E43129266B8A0045C3F8 /* SDKSpeechRecViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E8E42F29266B8A0045C3F8 /* SDKSpeechRecViewController.swift */; };
 		48E8E43229266B8A0045C3F8 /* SDKSpeechRecViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 48E8E43029266B8A0045C3F8 /* SDKSpeechRecViewController.xib */; };
 		48F0867829F7CA4E00FCA4BF /* QKMRZScanner in Frameworks */ = {isa = PBXBuildFile; productRef = 48F0867729F7CA4E00FCA4BF /* QKMRZScanner */; };
-		8ABC4E462F71F1B400858A90 /* IdentifySDK.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8ABC4E442F71F18E00858A90 /* IdentifySDK.xcframework */; };
-		8ABC4E472F71F1B400858A90 /* IdentifySDK.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 8ABC4E442F71F18E00858A90 /* IdentifySDK.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		8A693BF02F96CF2700013843 /* SDKCallScreenViewController+Liveness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A693BEF2F96CF2700013843 /* SDKCallScreenViewController+Liveness.swift */; };
+		8A693BF52F96CF3400013843 /* CallLivenessAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A693BF12F96CF3400013843 /* CallLivenessAnalyzer.swift */; };
+		8A693BF62F96CF3400013843 /* LivenessConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A693BF32F96CF3400013843 /* LivenessConfig.swift */; };
+		8A693BF72F96CF3400013843 /* FaceMetrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A693BF22F96CF3400013843 /* FaceMetrics.swift */; };
+		8A693BF82F96CF3400013843 /* LivenessListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A693BF42F96CF3400013843 /* LivenessListener.swift */; };
+		8AC7D6F82F7BBC03009AD3D4 /* IdentifySDK.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8AC7D6F62F7BBBFE009AD3D4 /* IdentifySDK.xcframework */; };
+		8AC7D6F92F7BBC03009AD3D4 /* IdentifySDK.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 8AC7D6F62F7BBBFE009AD3D4 /* IdentifySDK.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		DF7BC16A2D4A279600372CAB /* Env.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = DF7BC1682D4A279600372CAB /* Env.xcdatamodeld */; };
 /* End PBXBuildFile section */
 
@@ -161,7 +166,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				8ABC4E472F71F1B400858A90 /* IdentifySDK.xcframework in Embed Frameworks */,
+				8AC7D6F92F7BBC03009AD3D4 /* IdentifySDK.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -320,7 +325,12 @@
 		48DE1484290A7D3A00057EAD /* UIViewController+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+.swift"; sourceTree = "<group>"; };
 		48E8E42F29266B8A0045C3F8 /* SDKSpeechRecViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKSpeechRecViewController.swift; sourceTree = "<group>"; };
 		48E8E43029266B8A0045C3F8 /* SDKSpeechRecViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SDKSpeechRecViewController.xib; sourceTree = "<group>"; };
-		8ABC4E442F71F18E00858A90 /* IdentifySDK.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = IdentifySDK.xcframework; sourceTree = "<group>"; };
+		8A693BEF2F96CF2700013843 /* SDKCallScreenViewController+Liveness.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SDKCallScreenViewController+Liveness.swift"; sourceTree = "<group>"; };
+		8A693BF12F96CF3400013843 /* CallLivenessAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallLivenessAnalyzer.swift; sourceTree = "<group>"; };
+		8A693BF22F96CF3400013843 /* FaceMetrics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceMetrics.swift; sourceTree = "<group>"; };
+		8A693BF32F96CF3400013843 /* LivenessConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivenessConfig.swift; sourceTree = "<group>"; };
+		8A693BF42F96CF3400013843 /* LivenessListener.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivenessListener.swift; sourceTree = "<group>"; };
+		8AC7D6F62F7BBBFE009AD3D4 /* IdentifySDK.xcframework */ = {isa = PBXFileReference; expectedSignature = "AppleDeveloperProgram:99VB9LSMYZ:Ayhan Tekir"; lastKnownFileType = wrapper.xcframework; path = IdentifySDK.xcframework; sourceTree = "<group>"; };
 		DF7BC1692D4A279600372CAB /* Env.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Env.xcdatamodel; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -339,7 +349,7 @@
 				4831E1F32B69284400B67891 /* IQKeyboardManagerSwift in Frameworks */,
 				48171405294716830095A64F /* netfox in Frameworks */,
 				48F0867829F7CA4E00FCA4BF /* QKMRZScanner in Frameworks */,
-				8ABC4E462F71F1B400858A90 /* IdentifySDK.xcframework in Frameworks */,
+				8AC7D6F82F7BBC03009AD3D4 /* IdentifySDK.xcframework in Frameworks */,
 				4857BFFB2902D636001FE850 /* Starscream in Frameworks */,
 				48D802292924F6B000B9BB83 /* CHIOTPField in Frameworks */,
 			);
@@ -577,7 +587,7 @@
 		483BDB0D28F459CC00635BCC /* NewTest */ = {
 			isa = PBXGroup;
 			children = (
-				8ABC4E442F71F18E00858A90 /* IdentifySDK.xcframework */,
+				8AC7D6F62F7BBBFE009AD3D4 /* IdentifySDK.xcframework */,
 				480C1E4E2BDB8B8D0076D28B /* PrivacyInfo.xcprivacy */,
 				48BFF0D02BBAF3940088D67E /* v2api.identify.com.tr.cer */,
 				36692AAD2F11120500A67DAB /* apiqa.identify.com.tr.cer */,
@@ -699,8 +709,10 @@
 		4881A8082923BEDD00EB4072 /* Call Screen */ = {
 			isa = PBXGroup;
 			children = (
+				8A693BF92F96CF3800013843 /* Extension */,
 				4881A80D2923BEF700EB4072 /* RingScreen */,
 				4881A8092923BEF400EB4072 /* SDKCallScreenViewController.swift */,
+				8A693BEF2F96CF2700013843 /* SDKCallScreenViewController+Liveness.swift */,
 				4881A80A2923BEF400EB4072 /* SDKCallScreenViewController.xib */,
 			);
 			path = "Call Screen";
@@ -856,6 +868,17 @@
 				48E8E43029266B8A0045C3F8 /* SDKSpeechRecViewController.xib */,
 			);
 			path = "Speech Recognition";
+			sourceTree = "<group>";
+		};
+		8A693BF92F96CF3800013843 /* Extension */ = {
+			isa = PBXGroup;
+			children = (
+				8A693BF12F96CF3400013843 /* CallLivenessAnalyzer.swift */,
+				8A693BF22F96CF3400013843 /* FaceMetrics.swift */,
+				8A693BF32F96CF3400013843 /* LivenessConfig.swift */,
+				8A693BF42F96CF3400013843 /* LivenessListener.swift */,
+			);
+			path = Extension;
 			sourceTree = "<group>";
 		};
 		8A6DA0202F55B9C30070041C /* Frameworks */ = {
@@ -1052,6 +1075,7 @@
 				4881A8102923BF0000EB4072 /* SDKRingViewController.swift in Sources */,
 				482D2BC22A547AC000F1344F /* ShutterButton.swift in Sources */,
 				482D2BC72A547AC000F1344F /* CGPoint+Utils.swift in Sources */,
+				8A693BF02F96CF2700013843 /* SDKCallScreenViewController+Liveness.swift in Sources */,
 				482D2BC62A547AC000F1344F /* AVCaptureVideoOrientation+Utils.swift in Sources */,
 				482D2BC52A547AC000F1344F /* ScannerViewController.swift in Sources */,
 				482D2BD62A547AC000F1344F /* VisionRectangleDetector.swift in Sources */,
@@ -1109,6 +1133,10 @@
 				48DD2F292B8DD4DE0091FCCE /* IdentifyProgressBar.swift in Sources */,
 				36E1B3BF2EAA42FB004F791C /* SDKOVDViewController.swift in Sources */,
 				485C155D2907F3A7007B9ED0 /* SDKUIImageView+.swift in Sources */,
+				8A693BF52F96CF3400013843 /* CallLivenessAnalyzer.swift in Sources */,
+				8A693BF62F96CF3400013843 /* LivenessConfig.swift in Sources */,
+				8A693BF72F96CF3400013843 /* FaceMetrics.swift in Sources */,
+				8A693BF82F96CF3400013843 /* LivenessListener.swift in Sources */,
 				485C157C2908190D007B9ED0 /* SDKNfcViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

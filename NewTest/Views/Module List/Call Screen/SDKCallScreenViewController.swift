@@ -54,11 +54,13 @@ class SDKCallScreenViewController: SDKBaseViewController {
         self.manager.socketMessageListener = self
         navigationItem.rightBarButtonItem = nil
         self.navigationItem.hidesBackButton = true
+        setupLiveness()
     }
     
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         self.confStarted = false
+        stopLiveness()
     }
     
     
@@ -129,10 +131,12 @@ class SDKCallScreenViewController: SDKBaseViewController {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4, execute: {
             self.setupCameras()
             self.hideLoader()
+            self.startLiveness()
         })
     }
     
     private func callIsDone(doneStatus: CallStatus) {
+        stopLiveness()
         self.manager.forceQuitSDK()
         let x  = SDKThankYouViewController()
         x.completeStatus = doneStatus
@@ -152,6 +156,7 @@ class SDKCallScreenViewController: SDKBaseViewController {
     }
     
     func closeByUser() {
+        stopLiveness()
         self.manager.terminateCallByUser { resp in
             if resp {
                 let x = SDKThankYouViewController()
@@ -166,6 +171,7 @@ class SDKCallScreenViewController: SDKBaseViewController {
     override func reconnectCompletedWithStatus(isWaitingRoom: Bool, statusType: String?) {
         if isWaitingRoom {
             print("reconnect: Waiting Room'a dönülüyor")
+            stopLiveness()
             DispatchQueue.main.async {
                 self.setupCallScreen(inCall: false)
             }
@@ -217,6 +223,7 @@ extension SDKCallScreenViewController: SDKSocketListener {
             self.openSMS()
             print("sms geliyor")
         case .endCall:
+            stopLiveness()
             manager.socket.disconnect()
             print("görüşme tamamlandı, sonraki modüle geçebiliriz")
             
@@ -271,6 +278,7 @@ extension SDKCallScreenViewController: SDKSocketListener {
         case .imOffline:
             print("bağlantı kopartıldı - panelde sayfa yenilendi - browser kapatıldı")
             confStarted = false
+            stopLiveness()
             setupCallScreen(inCall: false)
         case .updateQueue(let order, let min):
             
@@ -334,6 +342,7 @@ extension SDKCallScreenViewController: SDKSocketListener {
                 }
             }
         case .missedCall: // belirli süre boyunca telefon çaldı fakat müşteri açmadı veya temsilci aradı fakat telefon açılmadan aramayı sonlandırdı
+            stopLiveness()
             self.listenToSocketConnection(callCompleted: true)
             setupCallScreen(inCall: false)
             self.dismiss(animated: true) {
