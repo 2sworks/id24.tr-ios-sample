@@ -22,6 +22,14 @@ extension String {
         return dateFormatter.string(from: date ?? Date())
     }
     
+    func toNFCReadDate() -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd.MM.yyyy"
+        let date = dateFormatter.date(from: self)
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        return dateFormatter.string(from: date ?? Date())
+    }
+    
     func toPassportMrzDate() -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-M-dd h:m:ss Z"
