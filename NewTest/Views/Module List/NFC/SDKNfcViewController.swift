@@ -33,6 +33,8 @@ class SDKNfcViewController: SDKBaseViewController {
     @IBOutlet weak var expDateLbl: UILabel!
     
     var showOnlyEditScreen = false
+    private var nfcKeyErrorCount = 0
+    private let nfcKeyMaxErrorCount = 3
     
     override func viewDidLoad() {
         super.viewDidLoad()
