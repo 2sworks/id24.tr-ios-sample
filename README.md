@@ -13,7 +13,7 @@ Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.
 - WebSocket bağlantısında 15 saniye timeout eklendi, süre aşımında bağlanamadı logu basılıyor.
 - SDK log URL yapılandırmasında çift slash ve hatalı path formatları otomatik temizleniyor.
 
-### Build 179:
+### Build 180:
 - NFC ekranında okuma anahtarları NFC başlatılmadan önce backend'e gönderilerek doğrulanıyor.
 - 3 ardışık NFC anahtar hatası sonrasında modül atlanıyor.
 - Tarih formatı dönüştürme (`toNFCReadDate`) eklendi.
