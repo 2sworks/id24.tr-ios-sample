@@ -1,6 +1,7 @@
 
 import ARKit
 import simd
+import IdentifySDK
 
 // MARK: - CallLivenessAnalyzer
 
@@ -46,6 +47,8 @@ internal final class CallLivenessAnalyzer: NSObject {
     private var detectedActions                 = Set<LivenessActionType>()
     private var lastActionTimeMap               = [LivenessActionType: TimeInterval]()
     private var actionActiveStartTime           = [LivenessActionType: TimeInterval]()
+    private var lastRawBlendShapes: [ARFaceAnchor.BlendShapeLocation: NSNumber] = [:]
+    private var livenessReportTimer: Timer?
 
     private var continuousStartTime: TimeInterval = 0
     private var faceLostStartTime: TimeInterval   = 0
@@ -76,13 +79,22 @@ internal final class CallLivenessAnalyzer: NSObject {
         isRunning = true
         let configuration = ARFaceTrackingConfiguration()
         configuration.isLightEstimationEnabled = false
-        session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            self?.session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
+        }
+        let timer = Timer(timeInterval: 1.0, repeats: true) { [weak self] _ in
+            self?.sendLivenessReportIfNeeded()
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        livenessReportTimer = timer
         print("[CallLivenessAnalyzer] Liveness analizi başladı | config=\(config)")
     }
 
     /// Analizi durdurur; skor ve aksiyonlar korunur.
     func stop() {
         isRunning = false
+        livenessReportTimer?.invalidate()
+        livenessReportTimer = nil
         session.pause()
         print("[CallLivenessAnalyzer] Liveness durdu | skor=\(computeScore()) aksiyonlar=\(detectedActions)")
     }
@@ -339,6 +351,7 @@ internal final class CallLivenessAnalyzer: NSObject {
         detectedActions.removeAll()
         lastActionTimeMap.removeAll()
         actionActiveStartTime.removeAll()
+        lastRawBlendShapes.removeAll()
         lastProcessTime     = 0
         continuousStartTime = 0
         faceLostStartTime   = 0
@@ -346,6 +359,23 @@ internal final class CallLivenessAnalyzer: NSObject {
         isFacePresent       = false
         lastReportedSec     = -1
         isVerified          = false
+    }
+
+    private func sendLivenessReportIfNeeded() {
+        guard isRunning else { return }
+        lock.lock()
+        let shapes = lastRawBlendShapes
+        lock.unlock()
+        guard !shapes.isEmpty else { return }
+        var metricsDict: [String: Double] = [:]
+        for (key, value) in shapes {
+            let rounded = (Double(value.floatValue) * 100).rounded() / 100
+            if rounded > 0.0 {
+                metricsDict[key.rawValue] = rounded
+            }
+        }
+        guard !metricsDict.isEmpty else { return }
+        IdentifyManager.shared.sendLivenessReport(metrics: metricsDict)
     }
 }
 
@@ -369,6 +399,7 @@ extension CallLivenessAnalyzer: ARSessionDelegate {
         handleFacePresence(faceFound: faceAnchor != nil, now: now)
         guard let anchor = faceAnchor else { return }
 
+        lastRawBlendShapes = anchor.blendShapes
         let metrics = buildFaceMetrics(blendShapes: anchor.blendShapes, transform: anchor.transform)
 
         guard !isVerified else { return }
