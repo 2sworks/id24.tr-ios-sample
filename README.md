@@ -3,6 +3,21 @@ Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.
 
 # Son Güncellemeler
 
+### SDK 2.5.5:
+- NFC okuma anahtarları (seri no, doğum tarihi, geçerlilik tarihi) backend'e AES-256-CBC ile şifreli olarak gönderilebilir hale getirildi (`updateReadNFCKeys`).
+- OCR'da TCKN doğruluğu artırıldı: harf/rakam karışmaları (örn. O→0, I→1) düzeltilerek Luhn algoritmasıyla kontrol eklendi.
+- OCR tarih ayrıştırmasında slash (`/`) ve tire (`-`) karakterleri de nokta olarak normalize edilir hale getirildi.
+- OCR sonuçlarına `lowConfidenceFields` ve `rejectedFields` alanları eklendi.
+- NFC "Tag response error / no response" hatası için 400ms bekleme + 4 deneme hakkı eklendi.
+- BAC anahtarı hesaplandığında doğum tarihi, belge no ve geçerlilik tarihi loga yazılıyor.
+- WebSocket bağlantısında 15 saniye timeout eklendi, süre aşımında bağlanamadı logu basılıyor.
+- SDK log URL yapılandırmasında çift slash ve hatalı path formatları otomatik temizleniyor.
+
+### Build 179:
+- NFC ekranında okuma anahtarları NFC başlatılmadan önce backend'e gönderilerek doğrulanıyor.
+- 3 ardışık NFC anahtar hatası sonrasında modül atlanıyor.
+- Tarih formatı dönüştürme (`toNFCReadDate`) eklendi.
+
 ### SDK 2.5.4:
 - iceTransportPolicy relay den .all’a çekildi.
 - ⁠Nfc iyileştirmesi yapıldı algılama seviyeleri değiştirildi.
