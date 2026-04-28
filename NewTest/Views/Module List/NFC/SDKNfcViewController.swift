@@ -89,7 +89,23 @@ class SDKNfcViewController: SDKBaseViewController {
             data.idValidDateMRZ = self.errValidDate.text?.toMrzDate() ?? ""
             data.idDocumentNumberMRZ = self.errSerialNo.text ?? ""
             self.manager.sdkBackInfo = data
-            self.startNFC()
+            self.manager.updateReadNFCKeys(
+                serialNo: self.errSerialNo.text ?? "",
+                birthDate: self.errBirthday.text?.toNFCReadDate() ?? "",
+                expireDate: self.errValidDate.text?.toNFCReadDate() ?? ""
+            ) { success, errorMessage in
+                if success {
+                    self.startNFC()
+                } else {
+                    self.nfcKeyErrorCount += 1
+                    if self.nfcKeyErrorCount >= self.nfcKeyMaxErrorCount {
+                        self.goToNextPage()
+                    } else {
+                        let msg = errorMessage ?? "Bilinmeyen hata"
+                        self.oneButtonAlertShow(message: msg, title1: "Hata") {}
+                    }
+                }
+            }
         }
         errSaveBtn.populate()
         
