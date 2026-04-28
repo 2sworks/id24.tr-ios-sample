@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 60;
+	objectVersion = 56;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -149,19 +149,24 @@
 		48E8E43129266B8A0045C3F8 /* SDKSpeechRecViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E8E42F29266B8A0045C3F8 /* SDKSpeechRecViewController.swift */; };
 		48E8E43229266B8A0045C3F8 /* SDKSpeechRecViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 48E8E43029266B8A0045C3F8 /* SDKSpeechRecViewController.xib */; };
 		48F0867829F7CA4E00FCA4BF /* QKMRZScanner in Frameworks */ = {isa = PBXBuildFile; productRef = 48F0867729F7CA4E00FCA4BF /* QKMRZScanner */; };
-		8ABC4E462F71F1B400858A90 /* IdentifySDK.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8ABC4E442F71F18E00858A90 /* IdentifySDK.xcframework */; };
-		8ABC4E472F71F1B400858A90 /* IdentifySDK.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 8ABC4E442F71F18E00858A90 /* IdentifySDK.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		8A57C22C2FA0D3EA00B5942E /* IdentifySDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8A57C2292FA0D3E400B5942E /* IdentifySDK.framework */; };
+		8A57C22D2FA0D3EA00B5942E /* IdentifySDK.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 8A57C2292FA0D3E400B5942E /* IdentifySDK.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		8A693BF02F96CF2700013843 /* SDKCallScreenViewController+Liveness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A693BEF2F96CF2700013843 /* SDKCallScreenViewController+Liveness.swift */; };
+		8A693BF52F96CF3400013843 /* CallLivenessAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A693BF12F96CF3400013843 /* CallLivenessAnalyzer.swift */; };
+		8A693BF62F96CF3400013843 /* LivenessConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A693BF32F96CF3400013843 /* LivenessConfig.swift */; };
+		8A693BF72F96CF3400013843 /* FaceMetrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A693BF22F96CF3400013843 /* FaceMetrics.swift */; };
+		8A693BF82F96CF3400013843 /* LivenessListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A693BF42F96CF3400013843 /* LivenessListener.swift */; };
 		DF7BC16A2D4A279600372CAB /* Env.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = DF7BC1682D4A279600372CAB /* Env.xcdatamodeld */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		481000332AFA7D9200EBA869 /* Embed Frameworks */ = {
+		8A57C22E2FA0D3EA00B5942E /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				8ABC4E472F71F1B400858A90 /* IdentifySDK.xcframework in Embed Frameworks */,
+				8A57C22D2FA0D3EA00B5942E /* IdentifySDK.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -320,7 +325,12 @@
 		48DE1484290A7D3A00057EAD /* UIViewController+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+.swift"; sourceTree = "<group>"; };
 		48E8E42F29266B8A0045C3F8 /* SDKSpeechRecViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKSpeechRecViewController.swift; sourceTree = "<group>"; };
 		48E8E43029266B8A0045C3F8 /* SDKSpeechRecViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SDKSpeechRecViewController.xib; sourceTree = "<group>"; };
-		8ABC4E442F71F18E00858A90 /* IdentifySDK.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = IdentifySDK.xcframework; sourceTree = "<group>"; };
+		8A57C2292FA0D3E400B5942E /* IdentifySDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = IdentifySDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		8A693BEF2F96CF2700013843 /* SDKCallScreenViewController+Liveness.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SDKCallScreenViewController+Liveness.swift"; sourceTree = "<group>"; };
+		8A693BF12F96CF3400013843 /* CallLivenessAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallLivenessAnalyzer.swift; sourceTree = "<group>"; };
+		8A693BF22F96CF3400013843 /* FaceMetrics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceMetrics.swift; sourceTree = "<group>"; };
+		8A693BF32F96CF3400013843 /* LivenessConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivenessConfig.swift; sourceTree = "<group>"; };
+		8A693BF42F96CF3400013843 /* LivenessListener.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivenessListener.swift; sourceTree = "<group>"; };
 		DF7BC1692D4A279600372CAB /* Env.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Env.xcdatamodel; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -339,10 +349,9 @@
 				4831E1F32B69284400B67891 /* IQKeyboardManagerSwift in Frameworks */,
 				48171405294716830095A64F /* netfox in Frameworks */,
 				48F0867829F7CA4E00FCA4BF /* QKMRZScanner in Frameworks */,
-				8ABC4E462F71F1B400858A90 /* IdentifySDK.xcframework in Frameworks */,
 				4857BFFB2902D636001FE850 /* Starscream in Frameworks */,
 				48D802292924F6B000B9BB83 /* CHIOTPField in Frameworks */,
-				8A940CC72F98224900AE46D8 /* IdentifySDK.framework in Frameworks */,
+				8A57C22C2FA0D3EA00B5942E /* IdentifySDK.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -578,7 +587,6 @@
 		483BDB0D28F459CC00635BCC /* NewTest */ = {
 			isa = PBXGroup;
 			children = (
-				8ABC4E442F71F18E00858A90 /* IdentifySDK.xcframework */,
 				480C1E4E2BDB8B8D0076D28B /* PrivacyInfo.xcprivacy */,
 				48BFF0D02BBAF3940088D67E /* v2api.identify.com.tr.cer */,
 				36692AAD2F11120500A67DAB /* apiqa.identify.com.tr.cer */,
@@ -875,7 +883,7 @@
 		8A6DA0202F55B9C30070041C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				8A940CC62F98224900AE46D8 /* IdentifySDK.framework */,
+				8A57C2292FA0D3E400B5942E /* IdentifySDK.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -890,7 +898,7 @@
 				483BDB0728F459CC00635BCC /* Sources */,
 				483BDB0828F459CC00635BCC /* Frameworks */,
 				483BDB0928F459CC00635BCC /* Resources */,
-				481000332AFA7D9200EBA869 /* Embed Frameworks */,
+				8A57C22E2FA0D3EA00B5942E /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
