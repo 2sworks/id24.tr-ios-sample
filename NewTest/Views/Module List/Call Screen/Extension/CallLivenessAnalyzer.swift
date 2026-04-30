@@ -34,21 +34,30 @@ internal final class CallLivenessAnalyzer: NSObject {
     var config: LivenessConfig = LivenessConfig()
     weak var listener: LivenessListener?
 
+    /// Her ARKit frame'ini WebRTC'ye ileten köprü. `startLiveness()` çağrısında atanır.
+    var frameHandler: ((CVPixelBuffer) -> Void)?
+
     // MARK: Yaşam Durumu
 
     private(set) var isRunning: Bool = false
 
     // MARK: İç Durum
 
-    private let session = ARSession()
-    private let lock    = NSLock()
+    private let session   = ARSession()
+    private let lock      = NSLock()
+    private let sendQueue = DispatchQueue(label: "com.liveness.send", qos: .background)
 
+    private var isSessionActive: Bool          = false
     private var lastProcessTime: TimeInterval   = 0
+    private var lastFrameForwardTime: TimeInterval = 0
+    private let frameForwardInterval: TimeInterval = 1.0 / 24.0
     private var detectedActions                 = Set<LivenessActionType>()
     private var lastActionTimeMap               = [LivenessActionType: TimeInterval]()
     private var actionActiveStartTime           = [LivenessActionType: TimeInterval]()
     private var lastRawBlendShapes: [ARFaceAnchor.BlendShapeLocation: NSNumber] = [:]
     private var livenessReportTimer: Timer?
+    private var lastSentTime: TimeInterval      = 0
+    private let sendCooldown: TimeInterval      = 1.0
 
     private var continuousStartTime: TimeInterval = 0
     private var faceLostStartTime: TimeInterval   = 0
@@ -69,7 +78,37 @@ internal final class CallLivenessAnalyzer: NSObject {
 
     // MARK: Yaşam Döngüsü
 
-    /// Analizi başlatır ve iç durumu sıfırlar.
+    /// ARKit modelini arka planda yükler, kamerayı hemen serbest bırakır.
+    /// Görüşme bekleme ekranında çağrılır; model hazır olur, WebRTC ile çakışma olmaz.
+    func prewarm() {
+        guard ARFaceTrackingConfiguration.isSupported, !isSessionActive else { return }
+        let configuration = ARFaceTrackingConfiguration()
+        configuration.isLightEstimationEnabled = false
+        DispatchQueue.global(qos: .background).async { [weak self] in
+            guard let self else { return }
+            isSessionActive = true
+            session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
+            Thread.sleep(forTimeInterval: 0.2)
+            session.pause()
+            isSessionActive = false
+            print("[CallLivenessAnalyzer] Prewarm tamamlandı")
+        }
+    }
+
+    /// ARKit session'ını başlatır. Tekrar çağrılırsa sessizce yoksayılır.
+    func startSession() {
+        guard ARFaceTrackingConfiguration.isSupported, !isSessionActive else { return }
+        isSessionActive = true
+        let configuration = ARFaceTrackingConfiguration()
+        configuration.isLightEstimationEnabled = false
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            self?.session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
+            print("[CallLivenessAnalyzer] ARKit session başlatıldı")
+        }
+    }
+
+    /// Veri toplama ve sunucuya gönderimi başlatır.
+    /// Session zaten çalışıyorsa tekrar run() çağrılmaz — freeze olmaz.
     func start() {
         guard ARFaceTrackingConfiguration.isSupported else {
             print("[CallLivenessAnalyzer] ARFaceTracking bu cihazda desteklenmiyor")
@@ -77,22 +116,21 @@ internal final class CallLivenessAnalyzer: NSObject {
         }
         resetState()
         isRunning = true
-        let configuration = ARFaceTrackingConfiguration()
-        configuration.isLightEstimationEnabled = false
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            self?.session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
-        }
+        startSession()
+        livenessReportTimer?.invalidate()
         let timer = Timer(timeInterval: 1.0, repeats: true) { [weak self] _ in
-            self?.sendLivenessReportIfNeeded()
+            self?.sendQueue.async { self?.sendLivenessReportIfNeeded() }
         }
         RunLoop.main.add(timer, forMode: .common)
         livenessReportTimer = timer
         print("[CallLivenessAnalyzer] Liveness analizi başladı | config=\(config)")
     }
 
-    /// Analizi durdurur; skor ve aksiyonlar korunur.
+    /// Timer'ı durdurur ve session'ı kapatır.
     func stop() {
         isRunning = false
+        isSessionActive = false
+        frameHandler = nil
         livenessReportTimer?.invalidate()
         livenessReportTimer = nil
         session.pause()
@@ -363,19 +401,26 @@ internal final class CallLivenessAnalyzer: NSObject {
 
     private func sendLivenessReportIfNeeded() {
         guard isRunning else { return }
+
+        let now = Date().timeIntervalSince1970
+        guard now - lastSentTime >= sendCooldown else { return }
+        lastSentTime = now
+
         lock.lock()
-        let shapes = lastRawBlendShapes
+        let shapes  = lastRawBlendShapes
+        let actions = detectedActions
         lock.unlock()
+
         guard !shapes.isEmpty else { return }
         var metricsDict: [String: Double] = [:]
         for (key, value) in shapes {
             let rounded = (Double(value.floatValue) * 100).rounded() / 100
-            if rounded > 0.0 {
-                metricsDict[key.rawValue] = rounded
-            }
+            if rounded > 0.0 { metricsDict[key.rawValue] = rounded }
         }
         guard !metricsDict.isEmpty else { return }
-        IdentifyManager.shared.sendLivenessReport(metrics: metricsDict)
+
+        let actionStrings = actions.map { "\($0)" }
+        IdentifyManager.shared.sendLivenessReport(metrics: metricsDict, detectedActions: actionStrings)
     }
 }
 
@@ -402,11 +447,18 @@ extension CallLivenessAnalyzer: ARSessionDelegate {
         lastRawBlendShapes = anchor.blendShapes
         let metrics = buildFaceMetrics(blendShapes: anchor.blendShapes, transform: anchor.transform)
 
-        guard !isVerified else { return }
-
         detectBlendshapeActions(metrics: metrics, now: now)
         detectHeadPoseActions(metrics: metrics, now: now)
-        checkVerification(now: now)
+        if !isVerified { checkVerification(now: now) }
+    }
+
+    /// Her ARKit frame'ini 24fps'e throttle ederek WebRTC'ye iletir.
+    func session(_ session: ARSession, didUpdate frame: ARFrame) {
+        guard isRunning, frameHandler != nil else { return }
+        let now = frame.timestamp
+        guard now - lastFrameForwardTime >= frameForwardInterval else { return }
+        lastFrameForwardTime = now
+        frameHandler?(frame.capturedImage)
     }
 
     func session(_ session: ARSession, didFailWithError error: Error) {

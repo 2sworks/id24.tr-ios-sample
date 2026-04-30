@@ -156,6 +156,7 @@
 		8A693BF62F96CF3400013843 /* LivenessConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A693BF32F96CF3400013843 /* LivenessConfig.swift */; };
 		8A693BF72F96CF3400013843 /* FaceMetrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A693BF22F96CF3400013843 /* FaceMetrics.swift */; };
 		8A693BF82F96CF3400013843 /* LivenessListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A693BF42F96CF3400013843 /* LivenessListener.swift */; };
+		8A710D9E2FA230CB0079EDF2 /* LivenessStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A710D9D2FA230CA0079EDF2 /* LivenessStatusView.swift */; };
 		DF7BC16A2D4A279600372CAB /* Env.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = DF7BC1682D4A279600372CAB /* Env.xcdatamodeld */; };
 /* End PBXBuildFile section */
 
@@ -331,6 +332,7 @@
 		8A693BF22F96CF3400013843 /* FaceMetrics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceMetrics.swift; sourceTree = "<group>"; };
 		8A693BF32F96CF3400013843 /* LivenessConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivenessConfig.swift; sourceTree = "<group>"; };
 		8A693BF42F96CF3400013843 /* LivenessListener.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivenessListener.swift; sourceTree = "<group>"; };
+		8A710D9D2FA230CA0079EDF2 /* LivenessStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivenessStatusView.swift; sourceTree = "<group>"; };
 		DF7BC1692D4A279600372CAB /* Env.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Env.xcdatamodel; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -876,6 +878,7 @@
 				8A693BF22F96CF3400013843 /* FaceMetrics.swift */,
 				8A693BF32F96CF3400013843 /* LivenessConfig.swift */,
 				8A693BF42F96CF3400013843 /* LivenessListener.swift */,
+				8A710D9D2FA230CA0079EDF2 /* LivenessStatusView.swift */,
 			);
 			path = Extension;
 			sourceTree = "<group>";
@@ -1104,6 +1107,7 @@
 				48DE147B290A6C1900057EAD /* SDKColorManager.swift in Sources */,
 				48171422294734FA0095A64F /* SDKPassportReaderViewController.swift in Sources */,
 				48A151EB292B73BA005B376B /* SDKSignLangViewController.swift in Sources */,
+				8A710D9E2FA230CB0079EDF2 /* LivenessStatusView.swift in Sources */,
 				485C15322907D2E8007B9ED0 /* SDKLoginViewController.swift in Sources */,
 				482D2BC92A547AC000F1344F /* CGImagePropertyOrientation.swift in Sources */,
 				482D2BCD2A547AC000F1344F /* Array+Utils.swift in Sources */,
@@ -1311,7 +1315,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = NewTest/NewTest.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 178;
+				CURRENT_PROJECT_VERSION = 181;
 				DEVELOPMENT_TEAM = 9D3UPKQ9AL;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1355,7 +1359,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = NewTest/NewTest.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 178;
+				CURRENT_PROJECT_VERSION = 181;
 				DEVELOPMENT_TEAM = 9D3UPKQ9AL;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",

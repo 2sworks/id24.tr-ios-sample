@@ -19,7 +19,7 @@ internal struct LivenessConfig {
     // MARK: Zamanlama
 
     /// İki frame analizi arasındaki minimum süre (saniye)
-    var processIntervalSeconds: TimeInterval = 0.5
+    var processIntervalSeconds: TimeInterval = 1.0
     /// Aynı aksiyonun tekrar tetiklenmesi için bekleme süresi (saniye)
     var actionCooldownSeconds: TimeInterval = 3.0
     /// Geçici yüz kaybında kesintisiz sayacı sıfırlamadan bekleme (saniye)

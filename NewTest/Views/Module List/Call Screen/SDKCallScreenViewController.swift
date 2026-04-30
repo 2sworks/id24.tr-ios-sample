@@ -128,11 +128,8 @@ class SDKCallScreenViewController: SDKBaseViewController {
     }
     
     private func start2SideTransfer() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4, execute: {
-            self.setupCameras()
-            self.hideLoader()
-            self.startLiveness()
-        })
+        setupCameras()
+        startLiveness()
     }
     
     private func callIsDone(doneStatus: CallStatus) {
@@ -192,12 +189,6 @@ extension SDKCallScreenViewController: CallScreenDelegate {
             if let _ = connected, !connected! {
                 self.showToast(title: self.translate(text: .coreError), subTitle: errMsg?.errorMessages ?? "", attachTo: self.view) {
                     return
-                }
-            } else {
-                if sdpConnOk! { // sdp bağlantısı kuruldu
-                    DispatchQueue.main.async {
-                        self.showLoader()
-                    }
                 }
             }
         }
@@ -308,10 +299,7 @@ extension SDKCallScreenViewController: SDKSocketListener {
             self.present(editVC, animated: true)
             
         case .startTransfer:
-            self.showToast(title: "Kameranız ayarlanıyor, lütfen bekleyin", attachTo: self.view) {
-                self.start2SideTransfer()
-                return
-            }
+            DispatchQueue.main.async { [weak self] in self?.start2SideTransfer() }
             print("yüz yüze görüşme başlıyor")
         case .disableEndCallButton:
             if topMostController().isKind(of: UIAlertController.self) {
