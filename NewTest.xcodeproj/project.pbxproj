@@ -151,6 +151,8 @@
 		48F0867829F7CA4E00FCA4BF /* QKMRZScanner in Frameworks */ = {isa = PBXBuildFile; productRef = 48F0867729F7CA4E00FCA4BF /* QKMRZScanner */; };
 		8A940CC72F98224900AE46D8 /* IdentifySDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8A940CC62F98224900AE46D8 /* IdentifySDK.framework */; };
 		8A940CC82F98224900AE46D8 /* IdentifySDK.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 8A940CC62F98224900AE46D8 /* IdentifySDK.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		8D1E53752FAA85C3009A2EA1 /* SDKSelfieWithLivenessViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 8D1E53732FAA85C3009A2EA1 /* SDKSelfieWithLivenessViewController.xib */; };
+		8D1E53762FAA85C3009A2EA1 /* SDKSelfieWithLivenessViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D1E53722FAA85C3009A2EA1 /* SDKSelfieWithLivenessViewController.swift */; };
 		DF7BC16A2D4A279600372CAB /* Env.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = DF7BC1682D4A279600372CAB /* Env.xcdatamodeld */; };
 /* End PBXBuildFile section */
 
@@ -321,6 +323,8 @@
 		48E8E42F29266B8A0045C3F8 /* SDKSpeechRecViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKSpeechRecViewController.swift; sourceTree = "<group>"; };
 		48E8E43029266B8A0045C3F8 /* SDKSpeechRecViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SDKSpeechRecViewController.xib; sourceTree = "<group>"; };
 		8A940CC62F98224900AE46D8 /* IdentifySDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = IdentifySDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1E53722FAA85C3009A2EA1 /* SDKSelfieWithLivenessViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKSelfieWithLivenessViewController.swift; sourceTree = "<group>"; };
+		8D1E53732FAA85C3009A2EA1 /* SDKSelfieWithLivenessViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SDKSelfieWithLivenessViewController.xib; sourceTree = "<group>"; };
 		DF7BC1692D4A279600372CAB /* Env.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Env.xcdatamodel; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -753,6 +757,7 @@
 		48AB73F8291A75C800F591A4 /* Module List */ = {
 			isa = PBXGroup;
 			children = (
+				8D1E53712FAA85A6009A2EA1 /* SelfieWithLiveness */,
 				36E1B3C02EAA464B004F791C /* OVD */,
 				482531692B02631F00B0472C /* Prepare */,
 				48A151E8292B73B0005B376B /* Sign Lang */,
@@ -863,6 +868,15 @@
 				8A940CC62F98224900AE46D8 /* IdentifySDK.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		8D1E53712FAA85A6009A2EA1 /* SelfieWithLiveness */ = {
+			isa = PBXGroup;
+			children = (
+				8D1E53722FAA85C3009A2EA1 /* SDKSelfieWithLivenessViewController.swift */,
+				8D1E53732FAA85C3009A2EA1 /* SDKSelfieWithLivenessViewController.xib */,
+			);
+			path = SelfieWithLiveness;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -986,6 +1000,7 @@
 				480C1E4F2BDB8B8D0076D28B /* PrivacyInfo.xcprivacy in Resources */,
 				48AB73FC291A75E200F591A4 /* SDKSignatureViewController.xib in Resources */,
 				4813037F29221E1300E66D73 /* SDKVideoRecorderViewController.xib in Resources */,
+				8D1E53752FAA85C3009A2EA1 /* SDKSelfieWithLivenessViewController.xib in Resources */,
 				482D2BB82A547AC000F1344F /* flash@2x.png in Resources */,
 				4820A4A22924CDAD004DB388 /* sample.mp4 in Resources */,
 				485C154F2907DC19007B9ED0 /* SDKSelfieViewController.xib in Resources */,
@@ -1034,6 +1049,7 @@
 				4881A7FF29238CB400EB4072 /* SDKAddressConfirmViewController.swift in Sources */,
 				482D2BDA2A547AC000F1344F /* ReviewViewController.swift in Sources */,
 				482D2BDF2A547AC000F1344F /* CaptureSession.swift in Sources */,
+				8D1E53762FAA85C3009A2EA1 /* SDKSelfieWithLivenessViewController.swift in Sources */,
 				485C155C2907F3A7007B9ED0 /* SDKBundle+.swift in Sources */,
 				482D2BD52A547AC000F1344F /* Error.swift in Sources */,
 				4825316C2B02632900B0472C /* SDKPrepareViewController.swift in Sources */,
@@ -1283,7 +1299,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = NewTest/NewTest.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 180;
+				CURRENT_PROJECT_VERSION = 186;
 				DEVELOPMENT_TEAM = 9D3UPKQ9AL;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1327,7 +1343,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = NewTest/NewTest.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 180;
+				CURRENT_PROJECT_VERSION = 186;
 				DEVELOPMENT_TEAM = 9D3UPKQ9AL;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
