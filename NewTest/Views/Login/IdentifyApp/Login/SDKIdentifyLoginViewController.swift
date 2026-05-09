@@ -57,6 +57,7 @@ class SDKIdentifyLoginViewController: SDKBaseViewController {
         self.manager.speechModuleController = SDKSpeechRecViewController.instantiate()
         self.manager.thankYouViewController = SDKThankYouViewController.instantiate()
         self.manager.prepareViewController = SDKPrepareViewController.instantiate()
+        self.manager.selfieWithLivenessViewController = SDKSelfieWithLivenessViewController.instantiate()
         self.manager.socketMessageListener = self // eğer odada farklı bir kişi varsa listener sayesinde detect edebiliyoruz.
         self.setupUI()
         if manager.jailBreakStatus {
