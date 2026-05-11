@@ -532,7 +532,7 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
         showLoader()
         arView.session.pause()
 
-        manager.uploadIdPhoto(idPhoto: image, selfieType: .selfieWithLiveness) { [weak self] response in
+        manager.uploadIdPhoto(idPhoto: image, selfieType: .selfie) { [weak self] response in
             guard let self = self else { return }
             if response.result == true {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
