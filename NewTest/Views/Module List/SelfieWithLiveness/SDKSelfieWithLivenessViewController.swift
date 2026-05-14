@@ -130,6 +130,10 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
 
     private var lastInstructionText: String = "Hazırlanıyor..."
 
+    // Condition instruction debounce — 2 ardışık aynı frame sonra uygulanır
+    private var conditionInstructionPending: String = ""
+    private var conditionInstructionFrames: Int = 0
+
     private var smoothedIntensity: CGFloat?
 
     private var hyst_tooDark    = false
@@ -241,6 +245,8 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
         warmupFrameCounter = 0
         okFrameCounter  = 0
         badFrameCounter = 0
+        conditionInstructionPending = ""
+        conditionInstructionFrames  = 0
         smoothedIntensity = nil
         hyst_tooDark    = false
         hyst_tooBright  = false
@@ -253,6 +259,7 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
         hyst_tooLeft    = false
         hyst_tooRight   = false
         faceProgressLoader.isHidden = true
+        overlayMask.isHidden = false
         setInstruction("Hazırlanıyor...")
         arView.session.run(configuration)
     }
@@ -419,7 +426,7 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
         if condition == .ok {
             badFrameCounter = 0
             okFrameCounter += 1
-            setInstruction(instructionText(for: .ok))
+            queueConditionInstruction(instructionText(for: .ok))
 
             if state != .holding {
                 if okFrameCounter >= config.okFrameThreshold {
@@ -442,17 +449,19 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
             badFrameCounter += 1
 
             if state == .holding {
+                // Grace period: badFrameThreshold'a kadar holding state korunur,
+                // progress sıfırlanmaz. Talimat debounce ile hemen kuyruğa alınır.
+                queueConditionInstruction(instructionText(for: condition))
                 if badFrameCounter >= config.badFrameThreshold {
                     state = .faceDetected
                     holdStartDate = nil
                     faceProgressLoader.setProgress(0, animated: false)
-                    setInstruction(instructionText(for: condition))
                 }
             } else {
                 state = .faceDetected
                 holdStartDate = nil
                 faceProgressLoader.setProgress(0, animated: false)
-                setInstruction(instructionText(for: condition))
+                queueConditionInstruction(instructionText(for: condition))
             }
         }
     }
@@ -463,6 +472,8 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
         holdStartDate = nil
         okFrameCounter  = 0
         badFrameCounter = 0
+        conditionInstructionPending = ""
+        conditionInstructionFrames  = 0
         faceProgressLoader.setProgress(0, animated: false)
         setInstruction("Yüzünüzü çerçeve içine yerleştirin")
     }
@@ -489,11 +500,12 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
         setInstruction("Doğrulandı ✓")
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-            self.faceProgressLoader.isHidden = true
+            // Snapshot öncesi wireframe, loader ve oval mask gizlenir — temiz selfie.
+            // Upload boyunca gizli kalır; session yeniden başlayınca renderer yeni node oluşturur.
             self.faceNode?.isHidden = true
+            self.faceProgressLoader.isHidden = true
+            self.overlayMask.isHidden = true
             let image = self.arView.snapshot()
-            self.faceNode?.isHidden = false
-            self.faceProgressLoader.isHidden = false
             self.uploadAndProceed(image: image)
         }
     }
@@ -505,6 +517,8 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
         holdStartDate = nil
         okFrameCounter  = 0
         badFrameCounter = 0
+        conditionInstructionPending = ""
+        conditionInstructionFrames  = 0
         smoothedIntensity = nil
         hyst_tooDark    = false
         hyst_tooBright  = false
@@ -516,6 +530,7 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
         hyst_tooLow     = false
         hyst_tooLeft    = false
         hyst_tooRight   = false
+        overlayMask.isHidden = false
         hideLoader()
         faceProgressLoader.setProgress(0, animated: false)
         faceProgressLoader.updateRingColors(
@@ -562,6 +577,20 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
         guard text != lastInstructionText else { return }
         lastInstructionText = text
         instructionLabel.text = text
+    }
+
+    // Condition tabanlı talimatlar için debounce: aynı metin 2 ardışık frame'de
+    // görülmeden label güncellenmez. Tek frame'lik gürültü/hata talimatı önlenir.
+    private func queueConditionInstruction(_ text: String) {
+        if text == conditionInstructionPending {
+            conditionInstructionFrames += 1
+            if conditionInstructionFrames >= 2 {
+                setInstruction(text)
+            }
+        } else {
+            conditionInstructionPending = text
+            conditionInstructionFrames = 1
+        }
     }
 
     // Preview only
