@@ -10,6 +10,7 @@
 		36692AAE2F11120500A67DAB /* apiqa.identify.com.tr.cer in Resources */ = {isa = PBXBuildFile; fileRef = 36692AAD2F11120500A67DAB /* apiqa.identify.com.tr.cer */; };
 		36BF33502E572348007F92CE /* SDKReachabilityHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36BF334F2E572348007F92CE /* SDKReachabilityHelper.swift */; };
 		36E1B3BF2EAA42FB004F791C /* SDKOVDViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36E1B3BE2EAA42FB004F791C /* SDKOVDViewController.swift */; };
+		3AECA5C6A6447C54A8EF3935 /* Inter-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = B2B1C42BCD3EDB5A4705FBCA /* Inter-Regular.otf */; };
 		480961182C64E70C00B9E6D5 /* v2api.identify.com.tr.cer in Resources */ = {isa = PBXBuildFile; fileRef = 48BFF0D02BBAF3940088D67E /* v2api.identify.com.tr.cer */; };
 		480C1E4F2BDB8B8D0076D28B /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 480C1E4E2BDB8B8D0076D28B /* PrivacyInfo.xcprivacy */; };
 		480E76A9297A868E0071B049 /* GERMAN.json in Resources */ = {isa = PBXBuildFile; fileRef = 48CD8D0429792E26008573F8 /* GERMAN.json */; };
@@ -118,6 +119,9 @@
 		48DE1485290A7D3A00057EAD /* UIViewController+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DE1484290A7D3A00057EAD /* UIViewController+.swift */; };
 		48E8E43129266B8A0045C3F8 /* SDKSpeechRecViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E8E42F29266B8A0045C3F8 /* SDKSpeechRecViewController.swift */; };
 		48F0867829F7CA4E00FCA4BF /* QKMRZScanner in Frameworks */ = {isa = PBXBuildFile; productRef = 48F0867729F7CA4E00FCA4BF /* QKMRZScanner */; };
+		550AE9107083A6A29912D89A /* InterDisplay-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = 4BD9858D6CD105DE3D390E82 /* InterDisplay-Medium.otf */; };
+		5EF5FCE08E7A1B091C76F8CB /* Inter-SemiBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 86E8075DD493887BE5B89DE3 /* Inter-SemiBold.otf */; };
+		73E70933C4B006794A8CAEE5 /* InterDisplay-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 0DEE8510B1495089CB181277 /* InterDisplay-Bold.otf */; };
 		8AACA69D2F749FE800613630 /* IdentifySDK-v3.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8AACA69B2F749FDF00613630 /* IdentifySDK-v3.xcframework */; };
 		8AACA69E2F749FE800613630 /* IdentifySDK-v3.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 8AACA69B2F749FDF00613630 /* IdentifySDK-v3.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		8AB276B52F749CE100A764F1 /* BaseModuleViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB276B42F749CE100A764F1 /* BaseModuleViewModel.swift */; };
@@ -151,7 +155,13 @@
 		8AB276ED2F749DA300A764F1 /* ThankYouView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB276EC2F749DA300A764F1 /* ThankYouView.swift */; };
 		8AB276EF2F749DB600A764F1 /* IdentifyRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB276EE2F749DB600A764F1 /* IdentifyRootView.swift */; };
 		8AB276F12F749DC600A764F1 /* IdentifySwiftUIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB276F02F749DC600A764F1 /* IdentifySwiftUIApp.swift */; };
+		8D20F8C92FC8FE0F008F7DCF /* SDKDesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D20F8C82FC8FE0F008F7DCF /* SDKDesignTokens.swift */; };
+		A3685880DB672112C8813187 /* Inter-ExtraBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 38048F44665FE13EEA336ECC /* Inter-ExtraBold.otf */; };
+		A64CBB010C60D1F3F19BDA41 /* Inter-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = BB04BC2A7F7C84F720B6EC49 /* Inter-Medium.otf */; };
+		AC88C1958129FFD344225CFD /* Inter-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 39346948B312B0D65EA4C0B6 /* Inter-Bold.otf */; };
+		B7B9503E0800731F3F8D1192 /* InterDisplay-SemiBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = EA2FA4E71ABC96456B2A13CD /* InterDisplay-SemiBold.otf */; };
 		DF7BC16A2D4A279600372CAB /* Env.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = DF7BC1682D4A279600372CAB /* Env.xcdatamodeld */; };
+		FE39D6DF3CC5372FBB4B5AC0 /* InterDisplay-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 60D574F2790155383D39C1C0 /* InterDisplay-Regular.otf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -169,9 +179,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0DEE8510B1495089CB181277 /* InterDisplay-Bold.otf */ = {isa = PBXFileReference; includeInIndex = 1; path = "InterDisplay-Bold.otf"; sourceTree = "<group>"; };
 		36692AAD2F11120500A67DAB /* apiqa.identify.com.tr.cer */ = {isa = PBXFileReference; lastKnownFileType = file; path = apiqa.identify.com.tr.cer; sourceTree = "<group>"; };
 		36BF334F2E572348007F92CE /* SDKReachabilityHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKReachabilityHelper.swift; sourceTree = "<group>"; };
 		36E1B3BE2EAA42FB004F791C /* SDKOVDViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKOVDViewController.swift; sourceTree = "<group>"; };
+		38048F44665FE13EEA336ECC /* Inter-ExtraBold.otf */ = {isa = PBXFileReference; includeInIndex = 1; path = "Inter-ExtraBold.otf"; sourceTree = "<group>"; };
+		39346948B312B0D65EA4C0B6 /* Inter-Bold.otf */ = {isa = PBXFileReference; includeInIndex = 1; path = "Inter-Bold.otf"; sourceTree = "<group>"; };
 		480C1E4E2BDB8B8D0076D28B /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		481065972922646600053004 /* SDKLivenessViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKLivenessViewController.swift; sourceTree = "<group>"; };
 		4813037C29221E1300E66D73 /* SDKVideoRecorderViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKVideoRecorderViewController.swift; sourceTree = "<group>"; };
@@ -289,6 +302,9 @@
 		48DE147C290A6C3E00057EAD /* SDKButtonExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKButtonExtension.swift; sourceTree = "<group>"; };
 		48DE1484290A7D3A00057EAD /* UIViewController+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+.swift"; sourceTree = "<group>"; };
 		48E8E42F29266B8A0045C3F8 /* SDKSpeechRecViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKSpeechRecViewController.swift; sourceTree = "<group>"; };
+		4BD9858D6CD105DE3D390E82 /* InterDisplay-Medium.otf */ = {isa = PBXFileReference; includeInIndex = 1; path = "InterDisplay-Medium.otf"; sourceTree = "<group>"; };
+		60D574F2790155383D39C1C0 /* InterDisplay-Regular.otf */ = {isa = PBXFileReference; includeInIndex = 1; path = "InterDisplay-Regular.otf"; sourceTree = "<group>"; };
+		86E8075DD493887BE5B89DE3 /* Inter-SemiBold.otf */ = {isa = PBXFileReference; includeInIndex = 1; path = "Inter-SemiBold.otf"; sourceTree = "<group>"; };
 		8AACA69B2F749FDF00613630 /* IdentifySDK-v3.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = "IdentifySDK-v3.xcframework"; sourceTree = "<group>"; };
 		8AB276B42F749CE100A764F1 /* BaseModuleViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseModuleViewModel.swift; sourceTree = "<group>"; };
 		8AB276B62F749CEF00A764F1 /* SDKModuleHostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKModuleHostView.swift; sourceTree = "<group>"; };
@@ -321,7 +337,11 @@
 		8AB276EC2F749DA300A764F1 /* ThankYouView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThankYouView.swift; sourceTree = "<group>"; };
 		8AB276EE2F749DB600A764F1 /* IdentifyRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifyRootView.swift; sourceTree = "<group>"; };
 		8AB276F02F749DC600A764F1 /* IdentifySwiftUIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifySwiftUIApp.swift; sourceTree = "<group>"; };
+		8D20F8C82FC8FE0F008F7DCF /* SDKDesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKDesignTokens.swift; sourceTree = "<group>"; };
+		B2B1C42BCD3EDB5A4705FBCA /* Inter-Regular.otf */ = {isa = PBXFileReference; includeInIndex = 1; path = "Inter-Regular.otf"; sourceTree = "<group>"; };
+		BB04BC2A7F7C84F720B6EC49 /* Inter-Medium.otf */ = {isa = PBXFileReference; includeInIndex = 1; path = "Inter-Medium.otf"; sourceTree = "<group>"; };
 		DF7BC1692D4A279600372CAB /* Env.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Env.xcdatamodel; sourceTree = "<group>"; };
+		EA2FA4E71ABC96456B2A13CD /* InterDisplay-SemiBold.otf */ = {isa = PBXFileReference; includeInIndex = 1; path = "InterDisplay-SemiBold.otf"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -601,6 +621,7 @@
 			children = (
 				48DE147A290A6C1900057EAD /* SDKColorManager.swift */,
 				48CD8CFE29792C8F008573F8 /* SDKIdentifyColorTheme.swift */,
+				8D20F8C82FC8FE0F008F7DCF /* SDKDesignTokens.swift */,
 			);
 			path = Theme;
 			sourceTree = "<group>";
@@ -862,6 +883,7 @@
 			isa = PBXGroup;
 			children = (
 				8ABF20322F6A04CE0010FABD /* Languages */,
+				8D20F8CA2FC8FF79008F7DCF /* Fonts */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -895,6 +917,22 @@
 				36692AAD2F11120500A67DAB /* apiqa.identify.com.tr.cer */,
 			);
 			path = SupportingFiles;
+			sourceTree = "<group>";
+		};
+		8D20F8CA2FC8FF79008F7DCF /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				BB04BC2A7F7C84F720B6EC49 /* Inter-Medium.otf */,
+				86E8075DD493887BE5B89DE3 /* Inter-SemiBold.otf */,
+				39346948B312B0D65EA4C0B6 /* Inter-Bold.otf */,
+				38048F44665FE13EEA336ECC /* Inter-ExtraBold.otf */,
+				60D574F2790155383D39C1C0 /* InterDisplay-Regular.otf */,
+				4BD9858D6CD105DE3D390E82 /* InterDisplay-Medium.otf */,
+				EA2FA4E71ABC96456B2A13CD /* InterDisplay-SemiBold.otf */,
+				0DEE8510B1495089CB181277 /* InterDisplay-Bold.otf */,
+				B2B1C42BCD3EDB5A4705FBCA /* Inter-Regular.otf */,
+			);
+			path = Fonts;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -1027,6 +1065,15 @@
 				36692AAE2F11120500A67DAB /* apiqa.identify.com.tr.cer in Resources */,
 				482D2BBD2A547AC000F1344F /* enhance@3x.png in Resources */,
 				482D2BB92A547AC000F1344F /* flashUnavailable@2x.png in Resources */,
+				A64CBB010C60D1F3F19BDA41 /* Inter-Medium.otf in Resources */,
+				5EF5FCE08E7A1B091C76F8CB /* Inter-SemiBold.otf in Resources */,
+				AC88C1958129FFD344225CFD /* Inter-Bold.otf in Resources */,
+				A3685880DB672112C8813187 /* Inter-ExtraBold.otf in Resources */,
+				FE39D6DF3CC5372FBB4B5AC0 /* InterDisplay-Regular.otf in Resources */,
+				550AE9107083A6A29912D89A /* InterDisplay-Medium.otf in Resources */,
+				B7B9503E0800731F3F8D1192 /* InterDisplay-SemiBold.otf in Resources */,
+				73E70933C4B006794A8CAEE5 /* InterDisplay-Bold.otf in Resources */,
+				3AECA5C6A6447C54A8EF3935 /* Inter-Regular.otf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1067,6 +1114,7 @@
 				482D2BC62A547AC000F1344F /* AVCaptureVideoOrientation+Utils.swift in Sources */,
 				482D2BC52A547AC000F1344F /* ScannerViewController.swift in Sources */,
 				482D2BD62A547AC000F1344F /* VisionRectangleDetector.swift in Sources */,
+				8D20F8C92FC8FE0F008F7DCF /* SDKDesignTokens.swift in Sources */,
 				482D2BD82A547AC000F1344F /* QuadrilateralView.swift in Sources */,
 				48C0381A2B5542F500AF690B /* CallStatusEnum.swift in Sources */,
 				482D2BD42A547AC000F1344F /* EditScanCornerView.swift in Sources */,

@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "ic_identify_logo_text.pdf",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

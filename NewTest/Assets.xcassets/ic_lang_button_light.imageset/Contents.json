@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "ic_lang_button_light.pdf",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
