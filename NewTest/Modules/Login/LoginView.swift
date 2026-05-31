@@ -2,128 +2,87 @@
 //  LoginView.swift
 //  NewTest
 //
-//  Login ekrani - TASARIM KULLANICI TARAFINDAN DOLDURULACAK.
-//
-//  --- KULLANIM REHBERI ---
-//
-//  BAGLANTI:
-//    appState.setupSDK(
-//        identId: viewModel.resolveIdentId(),
-//        apiUrl: viewModel.selectedServer.apiUrl,
-//        idLang: viewModel.selectedIdLang,
-//        signLangSupport: viewModel.useSignLang,
-//        bigCustomerCam: viewModel.useBigCustomerCam,
-//        useSSLPinning: viewModel.useSSLPinning,
-//        useNewLiveness: viewModel.useNewLiveness,
-//        selectedModules: viewModel.selectedModules
-//    )
-//
-//  DİL SEÇİMİ:
-//    viewModel.setSDKLanguage(.tr)   // .eng / .tr / .de / .ru / .az
-//
-//  SUNUCU SEÇİMİ:
-//    viewModel.serverList            -> [ServerOption]
-//    viewModel.selectServer(server)  -> selectedServer günceller
-//    viewModel.loadSavedServers()    -> Core Data'dan yeniden yükler
-//
-//  MODUL LİSTESİ:
-//    viewModel.availableModules      -> [SdkModules] tam liste
-//    viewModel.selectedModules       -> secilen moduller (bos = SDK varsayilani)
-//    viewModel.updateModules([...])  -> listeyi guncelle
-//
-//  TOGGLE'LAR:
-//    $viewModel.useBigCustomerCam
-//    $viewModel.useSignLang
-//    $viewModel.useNewLiveness
-//    $viewModel.useSSLPinning
-//
-//  DURUM:
-//    appState.isLoading    -> baglanti devam ediyor
-//    appState.sdkError     -> hata mesaji (nil degilse goster)
-//    viewModel.isJailbroken -> jailbreak uyarisi
-//    viewModel.buildNumber  -> build no etiketi
-//
 
 import SwiftUI
 import IdentifySDK
+
+// MARK: - LoginMode
+
+enum LoginMode: CaseIterable {
+    case yeniMusteri, identId
+
+    var title: String {
+        switch self {
+        case .yeniMusteri: return "Yeni Müşteri"
+        case .identId:     return "Ident ID"
+        }
+    }
+}
+
+// MARK: - LoginView
 
 struct LoginView: View {
 
     @StateObject private var viewModel = LoginViewModel()
     @EnvironmentObject private var appState: AppStateViewModel
+    @Environment(\.colorScheme) private var colorScheme
 
-    // MARK: - Alt sheet/navigation state'leri
-
-    @State private var showModuleList = false
+    @State private var loginMode: LoginMode = .identId
+    @State private var showOptions = false
     @State private var showServerList = false
+    @State private var showModuleList = false
 
     var body: some View {
-        // TODO: Tasarimi buraya yaz.
-        // Asagidaki VStack yerine kendi layoutunu kullan.
-        VStack(spacing: 16) {
+        ZStack {
+            IDColor.adaptiveBackground(for: colorScheme)
+                .ignoresSafeArea()
 
-            // Build no
-            Text("Build: \(viewModel.buildNumber)")
-                .font(.caption)
-                .foregroundColor(.secondary)
-
-            // Jailbreak uyarisi
-            if viewModel.isJailbroken {
-                Text("Cihazda jailbreak tespit edildi")
-                    .foregroundColor(.red)
-                    .font(.caption)
-            }
-
-            // Ident ID girisi
-            TextField("Ident ID", text: $viewModel.identId)
-                .textFieldStyle(.roundedBorder)
-                .autocapitalization(.none)
-                .disableAutocorrection(true)
-
-            // Secili sunucu
-            Text("Sunucu: \(viewModel.selectedServer.title)")
-                .font(.subheadline)
-
-            // Ayarlar / modul listesi butonlari
-            HStack {
-                Button("Sunucu Sec") { showServerList = true }
-                Spacer()
-                Button("Modul Sec") { showModuleList = true }
-            }
-            .font(.subheadline)
-
-            // Toggle'lar
-            Toggle("Buyuk Kamera", isOn: $viewModel.useBigCustomerCam)
-            Toggle("Isaret Dili", isOn: $viewModel.useSignLang)
-            Toggle("Yeni Liveness", isOn: $viewModel.useNewLiveness)
-            Toggle("SSL Pinning", isOn: $viewModel.useSSLPinning)
-
-            // Baglan butonu
-            Button("Baglan") {
-                appState.setupSDK(
-                    identId: viewModel.resolveIdentId(),
-                    apiUrl: viewModel.selectedServer.apiUrl,
-                    idLang: viewModel.selectedIdLang,
-                    signLangSupport: viewModel.useSignLang,
-                    bigCustomerCam: viewModel.useBigCustomerCam,
-                    useSSLPinning: viewModel.useSSLPinning,
-                    useNewLiveness: viewModel.useNewLiveness,
-                    selectedModules: viewModel.selectedModules
+            VStack(spacing: 0) {
+                LoginTopBar(
+                    onMenu: { showServerList = true },
+                    onFlag: {}
                 )
+
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: IDSpacing.xl) {
+                        LoginHeroSection()
+
+                        LoginTabSelector(selected: $loginMode)
+
+                        if loginMode == .identId {
+                            IdentIdFormView(identId: $viewModel.identId)
+                        } else {
+                            YeniMusteriFormView(viewModel: viewModel)
+                        }
+
+                        OptionsExpandButton { showOptions = true }
+                    }
+                    .padding(.horizontal, IDSpacing.lg)
+                    .padding(.top, IDSpacing.xl)
+                    .padding(.bottom, IDSpacing.lg)
+                }
+
+                VStack(spacing: IDSpacing.sm) {
+                    ConnectButton(
+                        isLoading: appState.isLoading,
+                        isDisabled: isConnectDisabled,
+                        action: connect
+                    )
+                    Text("Build No: \(viewModel.buildNumber)")
+                        .font(IDFont.caption())
+                        .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
+                }
+                .padding(.horizontal, IDSpacing.lg)
+                .padding(.vertical, IDSpacing.lg)
             }
-            .disabled(viewModel.identId.isEmpty || appState.isLoading)
         }
-        .padding()
-        // Yukleme overlay'i
+        .navigationBarHidden(true)
         .overlay {
             if appState.isLoading {
-                Color.black.opacity(0.35).ignoresSafeArea()
-                ProgressView()
-                    .scaleEffect(1.5)
-                    .tint(.white)
+                Color.black.opacity(0.45).ignoresSafeArea()
+                ProgressView().scaleEffect(1.5).tint(.white)
             }
         }
-        // Hata alert'i
         .alert("Hata", isPresented: Binding(
             get: { appState.sdkError != nil },
             set: { if !$0 { appState.sdkError = nil } }
@@ -132,90 +91,693 @@ struct LoginView: View {
         } message: {
             Text(appState.sdkError ?? "")
         }
-        // Sunucu secim sheet'i
+        .sheet(isPresented: $showOptions) {
+            if #available(iOS 16.0, *) {
+                OptionsBottomSheet(viewModel: viewModel)
+                    .presentationDetents([.medium])
+                    .presentationDragIndicator(.visible)
+            } else {
+                OptionsBottomSheet(viewModel: viewModel)
+            }
+        }
         .sheet(isPresented: $showServerList, onDismiss: { viewModel.loadSavedServers() }) {
             ServerListView(viewModel: viewModel)
         }
-        // Modul listesi sheet'i
         .sheet(isPresented: $showModuleList) {
             ModuleListView(viewModel: viewModel)
         }
-        .navigationBarHidden(true)
+    }
+
+    private var isConnectDisabled: Bool {
+        appState.isLoading || (loginMode == .identId ? viewModel.identId.isEmpty : viewModel.firstName.isEmpty)
+    }
+
+    private func connect() {
+        appState.setupSDK(
+            identId: viewModel.resolveIdentId(),
+            apiUrl: viewModel.selectedServer.apiUrl,
+            idLang: viewModel.selectedIdLang,
+            signLangSupport: viewModel.useSignLang,
+            bigCustomerCam: viewModel.useBigCustomerCam,
+            useSSLPinning: viewModel.useSSLPinning,
+            useNewLiveness: viewModel.useNewLiveness,
+            selectedModules: viewModel.selectedModules
+        )
     }
 }
 
-// MARK: - ServerListView (sunucu secimi - CoreData + sabit liste)
+// MARK: - LoginTopBar
+
+private struct LoginTopBar: View {
+    let onMenu: () -> Void
+    let onFlag: () -> Void
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        HStack {
+            Button(action: onMenu) {
+                Image(systemName: "line.3.horizontal")
+                    .font(.system(size: 20, weight: .medium))
+                    .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
+                    .frame(width: 44, height: 44)
+            }
+
+            Spacer()
+
+            Text("identify")
+                .font(.custom("InterDisplay-Bold", size: 22))
+                .italic()
+                .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
+
+            Spacer()
+
+            Button(action: onFlag) {
+                Text("🇹🇷")
+                    .font(.system(size: 18))
+                    .frame(width: 36, height: 36)
+                    .background(Circle().fill(IDColor.adaptiveSurface(for: colorScheme)))
+            }
+        }
+        .padding(.horizontal, IDSpacing.lg)
+        .frame(height: 56)
+    }
+}
+
+// MARK: - LoginHeroSection
+
+private struct LoginHeroSection: View {
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        VStack(spacing: IDSpacing.lg) {
+            Image(systemName: "person.fill.viewfinder")
+                .font(.system(size: 52))
+                .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
+
+            VStack(spacing: IDSpacing.sm) {
+                Text("Identify'a Hoş geldiniz!")
+                    .font(IDFont.displaySmall(.bold))
+                    .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
+                    .multilineTextAlignment(.center)
+
+                Text("Kimlik doğrulama süreci boyunca iyi bir ışığa sahip olmanız, kimliğinizin yanında olması ve tek başınıza olmanız gerekir.")
+                    .font(IDFont.bodySmall())
+                    .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(4)
+            }
+        }
+    }
+}
+
+// MARK: - LoginTabSelector
+
+private struct LoginTabSelector: View {
+    @Binding var selected: LoginMode
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(LoginMode.allCases, id: \.self) { mode in
+                Button {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                        selected = mode
+                    }
+                } label: {
+                    Text(mode.title)
+                        .font(IDFont.bodySmall(.semibold))
+                        .foregroundColor(selected == mode ? .white : IDColor.adaptiveSubtitle(for: colorScheme))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, IDSpacing.sm + 2)
+                        .background(
+                            Capsule()
+                                .fill(selected == mode ? IDColor.primary : Color.clear)
+                        )
+                }
+            }
+        }
+        .padding(4)
+        .background(Capsule().fill(IDColor.adaptiveSurface(for: colorScheme)))
+    }
+}
+
+// MARK: - StyledTextField
+
+private struct StyledTextField: View {
+    let placeholder: String
+    @Binding var text: String
+    var keyboardType: UIKeyboardType = .default
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        ZStack(alignment: .leading) {
+            if text.isEmpty {
+                Text(placeholder)
+                    .font(IDFont.bodySmall())
+                    .foregroundColor(IDColor.inkLight)
+                    .allowsHitTesting(false)
+            }
+            TextField("", text: $text)
+                .font(IDFont.bodySmall())
+                .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
+                .keyboardType(keyboardType)
+                .autocapitalization(.none)
+                .disableAutocorrection(true)
+        }
+        .padding(.horizontal, IDSpacing.lg)
+        .padding(.vertical, IDSpacing.md + 2)
+        .background(
+            RoundedRectangle(cornerRadius: IDRadius.md)
+                .fill(IDColor.adaptiveSurface(for: colorScheme))
+        )
+    }
+}
+
+// MARK: - IdentIdFormView
+
+private struct IdentIdFormView: View {
+    @Binding var identId: String
+
+    var body: some View {
+        StyledTextField(placeholder: "Ident ID", text: $identId)
+    }
+}
+
+// MARK: - YeniMusteriFormView
+
+private struct YeniMusteriFormView: View {
+    @ObservedObject var viewModel: LoginViewModel
+
+    var body: some View {
+        VStack(spacing: IDSpacing.sm) {
+            HStack(spacing: IDSpacing.sm) {
+                StyledTextField(placeholder: "Adınız", text: $viewModel.firstName)
+                StyledTextField(placeholder: "Soyadınız", text: $viewModel.lastName)
+            }
+
+            StyledTextField(
+                placeholder: "T.C. Kimlik Numaranız",
+                text: $viewModel.tcNo,
+                keyboardType: .numberPad
+            )
+
+            StyledTextField(placeholder: "Kimlik Seri Numarası", text: $viewModel.serialNo)
+
+            HStack(spacing: IDSpacing.sm) {
+                StyledTextField(
+                    placeholder: "Doğum Tarihi",
+                    text: $viewModel.birthDate,
+                    keyboardType: .numbersAndPunctuation
+                )
+                StyledTextField(
+                    placeholder: "Son Geçerlilik Tarihi",
+                    text: $viewModel.expiryDate,
+                    keyboardType: .numbersAndPunctuation
+                )
+            }
+
+            ProjectPickerField(selected: $viewModel.selectedProject)
+        }
+    }
+}
+
+// MARK: - ProjectPickerField
+
+private struct ProjectPickerField: View {
+    @Binding var selected: String
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        HStack {
+            Text(selected.isEmpty ? "Proje Seçimi" : selected)
+                .font(IDFont.bodySmall())
+                .foregroundColor(selected.isEmpty ? IDColor.inkLight : IDColor.adaptiveTitle(for: colorScheme))
+            Spacer()
+            Image(systemName: "chevron.down")
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(IDColor.inkLight)
+        }
+        .padding(.horizontal, IDSpacing.lg)
+        .padding(.vertical, IDSpacing.md + 2)
+        .background(
+            RoundedRectangle(cornerRadius: IDRadius.md)
+                .fill(IDColor.adaptiveSurface(for: colorScheme))
+        )
+    }
+}
+
+// MARK: - OptionsExpandButton
+
+private struct OptionsExpandButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: IDSpacing.xs) {
+                Text("Seçenekleri Göster")
+                    .font(IDFont.bodySmall(.semibold))
+                    .foregroundColor(IDColor.primary)
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(IDColor.primary)
+            }
+        }
+    }
+}
+
+// MARK: - ConnectButton
+
+private struct ConnectButton: View {
+    let isLoading: Bool
+    let isDisabled: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: IDSpacing.sm) {
+                if isLoading {
+                    ProgressView().tint(.white).scaleEffect(0.9)
+                }
+                Text("Hemen Bağlan")
+                    .font(IDFont.bodyMedium(.semibold))
+                    .foregroundColor(.white)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, IDSpacing.lg)
+            .background(
+                Capsule()
+                    .fill(isDisabled ? IDColor.darkMuted : IDColor.primary)
+            )
+        }
+        .disabled(isDisabled)
+    }
+}
+
+// MARK: - OptionsBottomSheet
+
+struct OptionsBottomSheet: View {
+    @ObservedObject var viewModel: LoginViewModel
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                Text("Seçenekleri Yönet")
+                    .font(IDFont.bodyLarge(.semibold))
+                    .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
+                Spacer()
+                Button { dismiss() } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
+                        .frame(width: 30, height: 30)
+                        .background(Circle().fill(IDColor.adaptiveSurface(for: colorScheme)))
+                }
+            }
+            .padding(.horizontal, IDSpacing.xl)
+            .padding(.top, IDSpacing.lg)
+            .padding(.bottom, IDSpacing.md)
+
+            Divider().opacity(0.4)
+
+            ToggleOptionRow(title: "Temsilci yayını büyük görünsün", isOn: $viewModel.useBigCustomerCam)
+            ToggleOptionRow(title: "İşaret dili seçeneği aktif olsun", isOn: $viewModel.useSignLang)
+            ToggleOptionRow(title: "Yeni canlılık testi ekranını dene", isOn: $viewModel.useNewLiveness)
+            ToggleOptionRow(title: "SSL Pinning", isOn: $viewModel.useSSLPinning)
+
+            Spacer()
+        }
+        .background(IDColor.adaptiveBackground(for: colorScheme).ignoresSafeArea())
+    }
+}
+
+// MARK: - ToggleOptionRow
+
+private struct ToggleOptionRow: View {
+    let title: String
+    @Binding var isOn: Bool
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack {
+                Text(title)
+                    .font(IDFont.body())
+                    .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
+                Spacer()
+                Toggle("", isOn: $isOn)
+                    .labelsHidden()
+                    .tint(IDColor.primary)
+            }
+            .padding(.horizontal, IDSpacing.xl)
+            .padding(.vertical, IDSpacing.lg)
+
+            Divider()
+                .padding(.leading, IDSpacing.xl)
+                .opacity(0.3)
+        }
+    }
+}
+
+// MARK: - ServerListView
 
 struct ServerListView: View {
     @ObservedObject var viewModel: LoginViewModel
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
-        NavigationView {
-            List(viewModel.serverList) { server in
-                Button {
-                    viewModel.selectServer(server)
-                    dismiss()
-                } label: {
-                    VStack(alignment: .leading) {
-                        Text(server.title).bold()
-                        Text(server.apiUrl).font(.caption).foregroundColor(.secondary)
+        ZStack {
+            IDColor.adaptiveBackground(for: colorScheme).ignoresSafeArea()
+
+            VStack(spacing: 0) {
+                SubScreenTopBar(
+                    title: "Sunucu Seçimi",
+                    subtitle: "Test etmek istediğiniz ortamı seçin",
+                    onBack: { dismiss() }
+                )
+
+                StepProgressBar(steps: 4, current: 0)
+                    .padding(.horizontal, IDSpacing.xl)
+                    .padding(.vertical, IDSpacing.sm)
+
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: IDSpacing.lg) {
+                        VStack(alignment: .leading, spacing: IDSpacing.sm) {
+                            Text("Sunucu Listesi")
+                                .font(IDFont.displaySmall(.bold))
+                                .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
+                            Text("Bağlanmak istediğiniz sunucuyu aşağıdan seçerek devam edebilirsiniz.")
+                                .font(IDFont.bodySmall())
+                                .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
+                                .lineSpacing(3)
+                        }
+
+                        VStack(spacing: IDSpacing.sm) {
+                            ForEach(viewModel.serverList) { server in
+                                ServerOptionRow(
+                                    server: server,
+                                    isSelected: viewModel.selectedServer.id == server.id,
+                                    onTap: { viewModel.selectServer(server) }
+                                )
+                            }
+                        }
                     }
+                    .padding(IDSpacing.xl)
                 }
-            }
-            .navigationTitle("Sunucu Sec")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Kapat") { dismiss() }
+
+                Button { dismiss() } label: {
+                    Text("Devam")
+                        .font(IDFont.bodyMedium(.semibold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, IDSpacing.lg)
+                        .background(Capsule().fill(IDColor.primary))
                 }
+                .padding(.horizontal, IDSpacing.xl)
+                .padding(.bottom, IDSpacing.xl)
             }
         }
     }
 }
 
-// MARK: - ModuleListView (manuel modul secimi)
+// MARK: - ServerOptionRow
+
+private struct ServerOptionRow: View {
+    let server: ServerOption
+    let isSelected: Bool
+    let onTap: () -> Void
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack {
+                Text(server.title)
+                    .font(IDFont.body(.semibold))
+                    .foregroundColor(isSelected ? .white : IDColor.adaptiveTitle(for: colorScheme))
+                Spacer()
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                    .font(.system(size: 22))
+                    .foregroundColor(isSelected ? .white : IDColor.adaptiveSubtitle(for: colorScheme))
+            }
+            .padding(.horizontal, IDSpacing.lg)
+            .padding(.vertical, IDSpacing.lg)
+            .background(
+                RoundedRectangle(cornerRadius: IDRadius.md)
+                    .fill(isSelected ? IDColor.primary : IDColor.adaptiveSurface(for: colorScheme))
+            )
+        }
+    }
+}
+
+// MARK: - ModuleListView
 
 struct ModuleListView: View {
     @ObservedObject var viewModel: LoginViewModel
     @Environment(\.dismiss) private var dismiss
-    @State private var selected: Set<SdkModules> = []
+    @Environment(\.colorScheme) private var colorScheme
+    @State private var isEditing = false
+    @State private var activeModules: [SdkModules] = []
 
     var body: some View {
-        NavigationView {
-            List(viewModel.availableModules, id: \.self) { module in
-                Button {
-                    if selected.contains(module) {
-                        selected.remove(module)
-                    } else {
-                        selected.insert(module)
-                    }
-                } label: {
-                    HStack {
-                        Text(module.rawValue)
-                        Spacer()
-                        if selected.contains(module) {
-                            Image(systemName: "checkmark")
-                                .foregroundColor(.blue)
+        ZStack {
+            IDColor.adaptiveBackground(for: colorScheme).ignoresSafeArea()
+
+            VStack(spacing: 0) {
+                SubScreenTopBar(
+                    title: "Modül Seçimi",
+                    subtitle: nil,
+                    onBack: { dismiss() },
+                    trailing: {
+                        Button {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                isEditing.toggle()
+                            }
+                        } label: {
+                            Text(isEditing ? "Bitti" : "Edit")
+                                .font(IDFont.bodySmall(.semibold))
+                                .foregroundColor(IDColor.primary)
+                                .padding(.horizontal, IDSpacing.md)
+                                .padding(.vertical, 6)
+                                .overlay(Capsule().strokeBorder(IDColor.primary, lineWidth: 1.5))
                         }
                     }
-                }
-                .foregroundColor(.primary)
-            }
-            .navigationTitle("Modul Sec")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Iptal") { dismiss() }
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Kaydet") {
-                        viewModel.updateModules(Array(selected))
-                        dismiss()
+                )
+
+                StepProgressBar(steps: 4, current: 1)
+                    .padding(.horizontal, IDSpacing.xl)
+                    .padding(.vertical, IDSpacing.sm)
+
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: IDSpacing.sm) {
+                        Text("Aktif Modüller")
+                            .font(IDFont.caption(.semibold))
+                            .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
+                            .padding(.horizontal, IDSpacing.lg)
+
+                        VStack(spacing: 0) {
+                            ForEach(Array(activeModules.enumerated()), id: \.element) { index, module in
+                                ModuleRow(
+                                    module: module,
+                                    isEditing: isEditing,
+                                    isLast: index == activeModules.count - 1,
+                                    onRemove: {
+                                        withAnimation { activeModules.removeSubrange(index...index) }
+                                    }
+                                )
+                            }
+                        }
+                        .background(
+                            RoundedRectangle(cornerRadius: IDRadius.md)
+                                .fill(IDColor.adaptiveSurface(for: colorScheme))
+                        )
+                        .padding(.horizontal, IDSpacing.lg)
+
+                        Text("Değişiklikler için kaydetmeyi unutmayın aksi halde web modül listesinden devam edilir.")
+                            .font(IDFont.caption())
+                            .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
+                            .padding(.horizontal, IDSpacing.lg)
+                            .padding(.top, IDSpacing.xs)
                     }
+                    .padding(.top, IDSpacing.sm)
+                    .padding(.bottom, IDSpacing.lg)
                 }
+
+                Button {
+                    viewModel.updateModules(activeModules)
+                    dismiss()
+                } label: {
+                    Text("Listeyi Kaydet")
+                        .font(IDFont.bodyMedium(.semibold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, IDSpacing.lg)
+                        .background(Capsule().fill(IDColor.primary))
+                }
+                .padding(.horizontal, IDSpacing.xl)
+                .padding(.bottom, IDSpacing.xl)
             }
         }
         .onAppear {
-            selected = Set(viewModel.selectedModules)
+            activeModules = viewModel.selectedModules.isEmpty ? viewModel.availableModules : viewModel.selectedModules
         }
     }
+}
+
+// MARK: - ModuleRow
+
+private struct ModuleRow: View {
+    let module: SdkModules
+    let isEditing: Bool
+    let isLast: Bool
+    let onRemove: () -> Void
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: IDSpacing.md) {
+                if isEditing {
+                    Button(action: onRemove) {
+                        Image(systemName: "minus.circle.fill")
+                            .font(.system(size: 22))
+                            .foregroundColor(IDColor.error)
+                    }
+                    .transition(.scale.combined(with: .opacity))
+                }
+
+                Text(module.displayName)
+                    .font(IDFont.body())
+                    .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
+
+                Spacer()
+            }
+            .padding(.horizontal, IDSpacing.lg)
+            .padding(.vertical, IDSpacing.md + 2)
+            .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isEditing)
+
+            if !isLast {
+                Divider()
+                    .padding(.leading, isEditing ? IDSpacing.lg + 22 + IDSpacing.md : IDSpacing.lg)
+                    .opacity(0.4)
+            }
+        }
+    }
+}
+
+// MARK: - SubScreenTopBar
+
+private struct SubScreenTopBar<Trailing: View>: View {
+    let title: String
+    let subtitle: String?
+    let onBack: () -> Void
+    let trailing: Trailing
+    @Environment(\.colorScheme) private var colorScheme
+
+    init(
+        title: String,
+        subtitle: String?,
+        onBack: @escaping () -> Void,
+        @ViewBuilder trailing: () -> Trailing
+    ) {
+        self.title = title
+        self.subtitle = subtitle
+        self.onBack = onBack
+        self.trailing = trailing()
+    }
+
+    var body: some View {
+        HStack(spacing: IDSpacing.sm) {
+            Button(action: onBack) {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
+                    .frame(width: 36, height: 36)
+            }
+
+            HStack(spacing: IDSpacing.sm) {
+                ZStack {
+                    Circle()
+                        .fill(IDColor.adaptiveSurface(for: colorScheme))
+                        .frame(width: 36, height: 36)
+                    Text("i")
+                        .font(.custom("InterDisplay-Bold", size: 17))
+                        .italic()
+                        .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
+                }
+
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(title)
+                        .font(IDFont.bodySmall(.semibold))
+                        .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
+                    if let subtitle {
+                        Text(subtitle)
+                            .font(IDFont.caption())
+                            .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
+                    }
+                }
+            }
+
+            Spacer()
+
+            trailing
+        }
+        .padding(.horizontal, IDSpacing.lg)
+        .frame(height: 56)
+    }
+}
+
+extension SubScreenTopBar where Trailing == EmptyView {
+    init(title: String, subtitle: String?, onBack: @escaping () -> Void) {
+        self.title = title
+        self.subtitle = subtitle
+        self.onBack = onBack
+        self.trailing = EmptyView()
+    }
+}
+
+// MARK: - StepProgressBar
+
+private struct StepProgressBar: View {
+    let steps: Int
+    let current: Int
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        HStack(spacing: IDSpacing.xs) {
+            ForEach(0..<steps, id: \.self) { index in
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(index <= current ? IDColor.primary : IDColor.adaptiveSurface(for: colorScheme))
+                    .frame(height: 4)
+            }
+        }
+    }
+}
+
+// MARK: - SdkModules display name
+
+extension SdkModules {
+    var displayName: String {
+        switch self {
+        case .prepare:           return "Prepare"
+        case .idCard:            return "ID Card"
+        case .idcard_w_ovd:      return "ID Card OVD"
+        case .nfc:               return "MRZ & NFC Screen"
+        case .livenessDetection: return "Liveness Detection"
+        case .speech:            return "Speech Recognition"
+        case .addressConf:       return "Address Confirm"
+        case .signature:         return "Signature"
+        case .videoRecord:       return "Video Recorder"
+        case .selfie:            return "Selfie"
+        case .waitScreen:        return "Call Wait Screen"
+        default:                 return rawValue
+        }
+    }
+}
+
+// MARK: - Preview
+
+#Preview {
+    LoginView()
+        .environmentObject(AppStateViewModel())
 }

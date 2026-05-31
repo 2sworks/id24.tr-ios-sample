@@ -2,20 +2,13 @@
 //  LoginViewModel.swift
 //  NewTest
 //
-//  Login ekraninin ViewModel'i.
-//  - Ident ID girisi
-//  - SDK dil secimi
-//  - Sunucu secimi (Core Data kayitli + sabit listeden)
-//  - Modul listesi yonetimi
-//  - Secenek toggle'lari (bigCam, signLang, newLiveness, sslPinning)
-//
 
 import Foundation
 import CoreData
 import UIKit
 import IdentifySDK
 
-// MARK: - Sunucu modeli
+// MARK: - ServerOption
 
 struct ServerOption: Identifiable, Hashable {
     let id = UUID()
@@ -29,46 +22,43 @@ struct ServerOption: Identifiable, Hashable {
 @MainActor
 final class LoginViewModel: BaseModuleViewModel {
 
-    // MARK: - Published State
+    // MARK: - Ident ID
 
-    /// Kullanicinin girdigi Ident ID
     @Published var identId: String = ""
 
-    /// Secili SDK dili
+    // MARK: - Yeni Müşteri Form
+
+    @Published var firstName: String = ""
+    @Published var lastName: String = ""
+    @Published var tcNo: String = ""
+    @Published var serialNo: String = ""
+    @Published var birthDate: String = ""
+    @Published var expiryDate: String = ""
+    @Published var selectedProject: String = ""
+
+    // MARK: - SDK Config
+
     @Published var selectedSDKLang: SDKLang = .eng
-
-    /// Kimlik karti OCR dili
     @Published var selectedIdLang: IDLang = .TR
-
-    /// Secili sunucu
     @Published var selectedServer: ServerOption = ServerOption(
         title: "V2",
         apiUrl: "https://v2api.identify.com.tr",
         wsUrl: "wss://v2ws.identify.com.tr"
     )
-
-    /// Sunucu listesi (sabit + Core Data'dan yuklenenler)
     @Published var serverList: [ServerOption] = []
-
-    /// Manuel modul secim listesi (bos = SDK varsayilani)
     @Published var selectedModules: [SdkModules] = []
 
-    /// Buyuk musteri kamerasi aktif mi
+    // MARK: - Toggles
+
     @Published var useBigCustomerCam: Bool = false
-
-    /// Isaret dili destegi aktif mi
     @Published var useSignLang: Bool = false
-
-    /// Yeni liveness tarayici aktif mi
     @Published var useNewLiveness: Bool = false
-
-    /// SSL Pinning aktif mi
     @Published var useSSLPinning: Bool = false
 
-    /// Cihazda jailbreak var mi
+    // MARK: - Device
+
     @Published private(set) var isJailbroken: Bool = false
 
-    /// Uygulama build numarasi
     var buildNumber: String {
         Bundle.main.buildVersionNumber ?? ""
     }
@@ -81,32 +71,31 @@ final class LoginViewModel: BaseModuleViewModel {
         loadSavedServers()
     }
 
-    // MARK: - SDK Dil Secimi
+    // MARK: - SDK Language
 
     func setSDKLanguage(_ lang: SDKLang) {
         selectedSDKLang = lang
         manager.setSDKLang(lang: lang)
     }
 
-    // MARK: - Modul Listesi (SDKManualModulDelegate karsiligi)
+    // MARK: - Modules
 
-    func updateModules(_ modules: [SdkModules]) {
-        selectedModules = modules
-    }
-
-    /// Tum SDK modullerinin listesi - ModuleListView'da gosterilir
     let availableModules: [SdkModules] = [
         .prepare, .idCard, .idcard_w_ovd, .nfc, .livenessDetection,
         .speech, .addressConf, .signature, .videoRecord, .selfie, .waitScreen
     ]
 
-    // MARK: - Sunucu Yonetimi
+    func updateModules(_ modules: [SdkModules]) {
+        selectedModules = modules
+    }
+
+    // MARK: - Servers
 
     private let sabitSunucular: [ServerOption] = [
-        ServerOption(title: "V2",   apiUrl: "https://v2api.identify.com.tr",    wsUrl: "wss://v2ws.identify.com.tr"),
         ServerOption(title: "Live", apiUrl: "https://api.identify.com.tr/",     wsUrl: "wss://ws.identify.com.tr"),
         ServerOption(title: "Test", apiUrl: "https://apitest.identify.com.tr/", wsUrl: "wss://wstest.identify.com.tr"),
         ServerOption(title: "Dev",  apiUrl: "https://apidev.identify.com.tr/",  wsUrl: "wss://wsdev.identify.com.tr"),
+        ServerOption(title: "V2",   apiUrl: "https://v2api.identify.com.tr",    wsUrl: "wss://v2ws.identify.com.tr"),
         ServerOption(title: "QA",   apiUrl: "https://apiqa.identify.com.tr",    wsUrl: "wss://wsqa.identify.com.tr")
     ]
 
@@ -120,8 +109,8 @@ final class LoginViewModel: BaseModuleViewModel {
         var customList: [ServerOption] = []
         if let results = try? context.fetch(fetchRequest) as? [NSManagedObject] {
             for item in results {
-                let title  = item.value(forKey: "envTitle") as? String ?? "Sunucu"
-                let apiUrl = item.value(forKey: "apiUrl")   as? String ?? ""
+                let title  = item.value(forKey: "envTitle")  as? String ?? "Sunucu"
+                let apiUrl = item.value(forKey: "apiUrl")    as? String ?? ""
                 let wsUrl  = item.value(forKey: "socketUrl") as? String ?? ""
                 customList.append(ServerOption(title: title, apiUrl: apiUrl, wsUrl: wsUrl))
             }
@@ -133,10 +122,8 @@ final class LoginViewModel: BaseModuleViewModel {
         selectedServer = server
     }
 
-    // MARK: - Hizli Ident ID Alias'lari (gelistirme kolayligi)
+    // MARK: - Ident ID Aliases
 
-    /// Geliştirme ortaminda kisaltma kullanimi:
-    /// "xxx" -> gercek ID'ye cevirir
     func resolveIdentId() -> String {
         let aliases: [String: String] = [
             "xxx":    "eaebe29505c8c27ab68a626f8c0a8bb61e61d3f9",

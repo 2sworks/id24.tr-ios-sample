@@ -7,8 +7,10 @@
 //
 
 import Foundation
-import AVFoundation
-import Speech
+import CameraPermission
+import MicrophonePermission
+import SpeechRecognizerPermission
+import PermissionsKit
 import IdentifySDK
 
 @MainActor
@@ -22,6 +24,10 @@ final class PrepareViewModel: BaseModuleViewModel {
     @Published private(set) var cameraAuthorized: Bool = false
     @Published private(set) var micAuthorized: Bool = false
     @Published private(set) var speechAuthorized: Bool = false
+
+    @Published var showSettingsAlert: Bool = false
+    var settingsAlertMessage: String = ""
+    var settingsOpenAction: (() -> Void)?
 
     var allPermissionsGranted: Bool {
         cameraAuthorized && micAuthorized && speechAuthorized
@@ -52,41 +58,53 @@ final class PrepareViewModel: BaseModuleViewModel {
     }
 
     func checkCamera() {
-        switch AVCaptureDevice.authorizationStatus(for: .video) {
-        case .authorized:
+        let perm = CameraPermission.camera
+        if perm.authorized {
             cameraAuthorized = true
-        case .notDetermined:
-            AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
-                Task { @MainActor in self?.cameraAuthorized = granted }
+        } else if perm.status == .denied {
+            settingsAlertMessage = "Kamera izni reddedildi. Devam etmek için ayarlardan izin verin."
+            settingsOpenAction = { perm.openSettingPage() }
+            showSettingsAlert = true
+        } else {
+            perm.request {
+                Task { @MainActor in
+                    self.cameraAuthorized = CameraPermission.camera.authorized
+                }
             }
-        default:
-            cameraAuthorized = false
         }
     }
 
     func checkMicrophone() {
-        switch AVAudioSession.sharedInstance().recordPermission {
-        case .granted:
+        let perm = MicrophonePermission.microphone
+        if perm.authorized {
             micAuthorized = true
-        case .undetermined:
-            AVAudioSession.sharedInstance().requestRecordPermission { [weak self] granted in
-                Task { @MainActor in self?.micAuthorized = granted }
+        } else if perm.status == .denied {
+            settingsAlertMessage = "Mikrofon izni reddedildi. Devam etmek için ayarlardan izin verin."
+            settingsOpenAction = { perm.openSettingPage() }
+            showSettingsAlert = true
+        } else {
+            perm.request {
+                Task { @MainActor in
+                    self.micAuthorized = MicrophonePermission.microphone.authorized
+                }
             }
-        default:
-            micAuthorized = false
         }
     }
 
     func checkSpeech() {
-        switch SFSpeechRecognizer.authorizationStatus() {
-        case .authorized:
+        let perm = SpeechPermission.speech
+        if perm.authorized {
             speechAuthorized = true
-        case .notDetermined:
-            SFSpeechRecognizer.requestAuthorization { [weak self] status in
-                Task { @MainActor in self?.speechAuthorized = status == .authorized }
+        } else if perm.status == .denied {
+            settingsAlertMessage = "Ses tanıma izni reddedildi. Devam etmek için ayarlardan izin verin."
+            settingsOpenAction = { perm.openSettingPage() }
+            showSettingsAlert = true
+        } else {
+            perm.request {
+                Task { @MainActor in
+                    self.speechAuthorized = SpeechPermission.speech.authorized
+                }
             }
-        default:
-            speechAuthorized = false
         }
     }
 

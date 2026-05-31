@@ -156,6 +156,8 @@
 		8AB276EF2F749DB600A764F1 /* IdentifyRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB276EE2F749DB600A764F1 /* IdentifyRootView.swift */; };
 		8AB276F12F749DC600A764F1 /* IdentifySwiftUIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB276F02F749DC600A764F1 /* IdentifySwiftUIApp.swift */; };
 		8D20F8C92FC8FE0F008F7DCF /* SDKDesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D20F8C82FC8FE0F008F7DCF /* SDKDesignTokens.swift */; };
+		8D58B84A2FC9A2B900EC0A5F /* IDSuccessBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D58B8492FC9A2B900EC0A5F /* IDSuccessBanner.swift */; };
+		8D58B84C2FC9A99500EC0A5F /* PreparePermissionRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D58B84B2FC9A99500EC0A5F /* PreparePermissionRow.swift */; };
 		A3685880DB672112C8813187 /* Inter-ExtraBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 38048F44665FE13EEA336ECC /* Inter-ExtraBold.otf */; };
 		A64CBB010C60D1F3F19BDA41 /* Inter-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = BB04BC2A7F7C84F720B6EC49 /* Inter-Medium.otf */; };
 		AC88C1958129FFD344225CFD /* Inter-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 39346948B312B0D65EA4C0B6 /* Inter-Bold.otf */; };
@@ -179,12 +181,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		0DEE8510B1495089CB181277 /* InterDisplay-Bold.otf */ = {isa = PBXFileReference; includeInIndex = 1; path = "InterDisplay-Bold.otf"; sourceTree = "<group>"; };
+		0DEE8510B1495089CB181277 /* InterDisplay-Bold.otf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; path = "InterDisplay-Bold.otf"; sourceTree = "<group>"; };
 		36692AAD2F11120500A67DAB /* apiqa.identify.com.tr.cer */ = {isa = PBXFileReference; lastKnownFileType = file; path = apiqa.identify.com.tr.cer; sourceTree = "<group>"; };
 		36BF334F2E572348007F92CE /* SDKReachabilityHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKReachabilityHelper.swift; sourceTree = "<group>"; };
 		36E1B3BE2EAA42FB004F791C /* SDKOVDViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKOVDViewController.swift; sourceTree = "<group>"; };
-		38048F44665FE13EEA336ECC /* Inter-ExtraBold.otf */ = {isa = PBXFileReference; includeInIndex = 1; path = "Inter-ExtraBold.otf"; sourceTree = "<group>"; };
-		39346948B312B0D65EA4C0B6 /* Inter-Bold.otf */ = {isa = PBXFileReference; includeInIndex = 1; path = "Inter-Bold.otf"; sourceTree = "<group>"; };
+		38048F44665FE13EEA336ECC /* Inter-ExtraBold.otf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; path = "Inter-ExtraBold.otf"; sourceTree = "<group>"; };
+		39346948B312B0D65EA4C0B6 /* Inter-Bold.otf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; path = "Inter-Bold.otf"; sourceTree = "<group>"; };
 		480C1E4E2BDB8B8D0076D28B /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		481065972922646600053004 /* SDKLivenessViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKLivenessViewController.swift; sourceTree = "<group>"; };
 		4813037C29221E1300E66D73 /* SDKVideoRecorderViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKVideoRecorderViewController.swift; sourceTree = "<group>"; };
@@ -302,9 +304,9 @@
 		48DE147C290A6C3E00057EAD /* SDKButtonExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKButtonExtension.swift; sourceTree = "<group>"; };
 		48DE1484290A7D3A00057EAD /* UIViewController+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+.swift"; sourceTree = "<group>"; };
 		48E8E42F29266B8A0045C3F8 /* SDKSpeechRecViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKSpeechRecViewController.swift; sourceTree = "<group>"; };
-		4BD9858D6CD105DE3D390E82 /* InterDisplay-Medium.otf */ = {isa = PBXFileReference; includeInIndex = 1; path = "InterDisplay-Medium.otf"; sourceTree = "<group>"; };
-		60D574F2790155383D39C1C0 /* InterDisplay-Regular.otf */ = {isa = PBXFileReference; includeInIndex = 1; path = "InterDisplay-Regular.otf"; sourceTree = "<group>"; };
-		86E8075DD493887BE5B89DE3 /* Inter-SemiBold.otf */ = {isa = PBXFileReference; includeInIndex = 1; path = "Inter-SemiBold.otf"; sourceTree = "<group>"; };
+		4BD9858D6CD105DE3D390E82 /* InterDisplay-Medium.otf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; path = "InterDisplay-Medium.otf"; sourceTree = "<group>"; };
+		60D574F2790155383D39C1C0 /* InterDisplay-Regular.otf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; path = "InterDisplay-Regular.otf"; sourceTree = "<group>"; };
+		86E8075DD493887BE5B89DE3 /* Inter-SemiBold.otf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; path = "Inter-SemiBold.otf"; sourceTree = "<group>"; };
 		8AACA69B2F749FDF00613630 /* IdentifySDK-v3.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = "IdentifySDK-v3.xcframework"; sourceTree = "<group>"; };
 		8AB276B42F749CE100A764F1 /* BaseModuleViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseModuleViewModel.swift; sourceTree = "<group>"; };
 		8AB276B62F749CEF00A764F1 /* SDKModuleHostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKModuleHostView.swift; sourceTree = "<group>"; };
@@ -338,10 +340,12 @@
 		8AB276EE2F749DB600A764F1 /* IdentifyRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifyRootView.swift; sourceTree = "<group>"; };
 		8AB276F02F749DC600A764F1 /* IdentifySwiftUIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifySwiftUIApp.swift; sourceTree = "<group>"; };
 		8D20F8C82FC8FE0F008F7DCF /* SDKDesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKDesignTokens.swift; sourceTree = "<group>"; };
-		B2B1C42BCD3EDB5A4705FBCA /* Inter-Regular.otf */ = {isa = PBXFileReference; includeInIndex = 1; path = "Inter-Regular.otf"; sourceTree = "<group>"; };
-		BB04BC2A7F7C84F720B6EC49 /* Inter-Medium.otf */ = {isa = PBXFileReference; includeInIndex = 1; path = "Inter-Medium.otf"; sourceTree = "<group>"; };
+		8D58B8492FC9A2B900EC0A5F /* IDSuccessBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IDSuccessBanner.swift; sourceTree = "<group>"; };
+		8D58B84B2FC9A99500EC0A5F /* PreparePermissionRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreparePermissionRow.swift; sourceTree = "<group>"; };
+		B2B1C42BCD3EDB5A4705FBCA /* Inter-Regular.otf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; path = "Inter-Regular.otf"; sourceTree = "<group>"; };
+		BB04BC2A7F7C84F720B6EC49 /* Inter-Medium.otf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; path = "Inter-Medium.otf"; sourceTree = "<group>"; };
 		DF7BC1692D4A279600372CAB /* Env.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Env.xcdatamodel; sourceTree = "<group>"; };
-		EA2FA4E71ABC96456B2A13CD /* InterDisplay-SemiBold.otf */ = {isa = PBXFileReference; includeInIndex = 1; path = "InterDisplay-SemiBold.otf"; sourceTree = "<group>"; };
+		EA2FA4E71ABC96456B2A13CD /* InterDisplay-SemiBold.otf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; path = "InterDisplay-SemiBold.otf"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -656,6 +660,7 @@
 			isa = PBXGroup;
 			children = (
 				485C15382907D3CF007B9ED0 /* SDKViewOptionsController.swift */,
+				8D58B8492FC9A2B900EC0A5F /* IDSuccessBanner.swift */,
 			);
 			path = Base;
 			sourceTree = "<group>";
@@ -723,6 +728,7 @@
 				4825316A2B02632900B0472C /* SDKPrepareViewController.swift */,
 				8AB276D62F749D9700A764F1 /* PrepareView.swift */,
 				8AB276BC2F749D5100A764F1 /* PrepareViewModel.swift */,
+				8D58B84B2FC9A99500EC0A5F /* PreparePermissionRow.swift */,
 			);
 			path = Prepare;
 			sourceTree = "<group>";
@@ -1133,6 +1139,8 @@
 				482D2BC42A547AC000F1344F /* FocusRectangleView.swift in Sources */,
 				482D2BDB2A547AC000F1344F /* CaptureDevice.swift in Sources */,
 				485C155A2907F3A7007B9ED0 /* SDKUITableViewCell+.swift in Sources */,
+				8D58B84C2FC9A99500EC0A5F /* PreparePermissionRow.swift in Sources */,
+				8D58B84A2FC9A2B900EC0A5F /* IDSuccessBanner.swift in Sources */,
 				482D2BC82A547AC000F1344F /* CGSize+Utils.swift in Sources */,
 				482D2BCA2A547AC000F1344F /* CIImage+Utils.swift in Sources */,
 				482D2BB22A547AC000F1344F /* ImageScannerController.swift in Sources */,
