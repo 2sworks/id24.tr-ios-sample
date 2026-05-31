@@ -13,80 +13,19 @@ import IdentifySDK
 // MARK: - LivenessConfig
 
 private struct LivenessConfig {
-    // Yüzün hareketsiz tutulması gereken süre (saniye).
-    // Artırılırsa doğrulama için daha uzun süre beklenir.
-    let requiredHoldDuration: TimeInterval = 1.0
+    let requiredHoldDuration: TimeInterval = 1.0  // Hareketsiz tutma süresi (sn) — 0.5–2.0
+    let okFrameThreshold:  Int = 5                // Holding'e geçmek için OK frame sayısı — 3–10
+    let badFrameThreshold: Int = 3                // Holding'den çıkmak için kötü frame sayısı — 2–5
+    let warmupFrameCount:  Int = 30               // Başlangıç ısınma frame sayısı — 20–60
 
-    // Yüz "iyi konumda" sayılmadan önce kaç ardışık frame bekleneceği.
-    // Küçük değer → daha hızlı tepki, büyük değer → daha kararlı algılama.
-    let okFrameThreshold: Int = 5
+    let closeEnterDepth: Double = 0.31  // Bu mesafeden yakınsa "geri git" başlar (m) — 0.20–0.35
+    let closeExitDepth:  Double = 0.32  // Bu mesafeyi geçince "geri git" kalkar (m) — 0.22–0.37
+    let farEnterDepth:   Double = 0.34  // Bu mesafeden uzaksa "öne gel" başlar (m) — 0.30–0.50
+    let farExitDepth:    Double = 0.36  // Bu mesafenin altında "öne gel" kalkar (m) — 0.32–0.55
 
-    // Yüz bozuk konuma geçince mevcut ilerlemenin iptal edilmesi için
-    // kaç ardışık kötü frame görülmesi gerektiği.
-    // Büyük değer → küçük anlık bozulmaları tolere eder.
-    let badFrameThreshold: Int = 3
-
-    // Kamera açıldıktan sonra algılamaya başlamadan önce beklenen frame sayısı.
-    // Bu süre içinde yüz takibi başlatılmaz, kameranın oturması beklenir.
-    let warmupFrameCount: Int = 30
-
-    // Parlaklık ölçümünün ne kadar yumuşatılacağı (0–1 arası).
-    // Küçük değer → ani değişimlere daha az duyarlı, daha kararlı ölçüm.
-    let brightnessAlpha: CGFloat = 0.2
-
-    // Bu parlaklık değerinin altında "çok karanlık" uyarısı verilir.
-    let darkEnterThreshold: CGFloat = 500
-
-    // "Çok karanlık" uyarısının bitmesi için gereken parlaklık değeri.
-    // Giriş eşiğinden biraz yüksek tutularak uyarının titremesi önlenir.
-    let darkExitThreshold: CGFloat = 600
-
-    // Bu parlaklık değerinin üstünde "çok aydınlık" uyarısı verilir.
-    let brightEnterThreshold: CGFloat = 3000
-
-    // "Çok aydınlık" uyarısının bitmesi için gereken parlaklık değeri.
-    // Giriş eşiğinden biraz düşük tutularak uyarının titremesi önlenir.
-    let brightExitThreshold: CGFloat = 2800
-
-    // Başın ne kadar öne/arkaya eğilince uyarı verileceği.
-    // Küçük değer → daha az eğimde uyarı verir.
-    let tiltEnterThreshold: CGFloat = 0.50
-
-    // Eğim uyarısının bitmesi için gereken eşik.
-    // Giriş eşiğinden düşük tutularak uyarının titremesi önlenir.
-    let tiltExitThreshold: CGFloat = 0.40
-
-    // Yüz oval genişliğinin bu oranını aşınca "çok yakın" uyarısı verilir.
-    // 1.0'a yakın değer → yüz neredeyse ovali doldurunca uyarı verir.
-    let closeEnterFraction: CGFloat = 0.98
-
-    // "Çok yakın" uyarısının bitmesi için gereken oran.
-    // Giriş oranından düşük tutularak uyarının titremesi önlenir.
-    let closeExitFraction: CGFloat = 0.93
-
-    // Yüz oval genişliğinin bu oranının altında kalınca "çok uzak" uyarısı verilir.
-    // Büyük değer → daha yakına gelmesi beklenir.
-    let farEnterFraction: CGFloat = 0.60
-
-    // "Çok uzak" uyarısının bitmesi için gereken oran.
-    // Giriş oranından büyük tutularak uyarının titremesi önlenir.
-    let farExitFraction: CGFloat = 0.65
-
-    // Yüz merkezinin ovalden ne kadar saptığında yön uyarısı verileceği.
-    // Küçük değer → oval ortasına daha yakın durulması gerekir.
-    let positionEnterFraction: CGFloat = 0.20
-
-    // Yön uyarısının bitmesi için gereken sapma miktarı.
-    // Giriş değerinden küçük tutularak uyarının titremesi önlenir.
-    let positionExitFraction: CGFloat = 0.14
-
-    // Mesafe hesabında kullanılan ortalama yüz genişliği (metre).
-    // Farklı kişilere göre ince ayar gerekirse bu değer değiştirilebilir.
-    let faceWidthMeters: CGFloat = 0.076
-
-    // Mesafe hesabında kullanılan ortalama yüz yüksekliği (metre).
-    // Oval içine sığma kontrolünü de etkiler.
-    let faceHeightMeters: CGFloat = 0.092
+    let fwdMinThreshold:   Float = 0.95  // Kameraya diklik (0–1, 1=tam dik) — 0.90–0.99
+    let yawMaxThreshold:   Float = 0.10  // Yatay dönüş toleransı (sola/sağa) — 0.08–0.20
+    let pitchMaxThreshold: Float = 0.15  // Dikey eğim toleransı (yukarı/aşağı) — 0.10–0.25
 }
 
 // MARK: - SDKSelfieWithLivenessViewController
@@ -102,13 +41,7 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
     // MARK: - Face Condition
 
     private enum FaceCondition: Equatable {
-        case tooDark, tooBright
-        case tiltedUp, tiltedDown
-        case tooClose, tooFar
-        case tooHigh, tooLow
-        case tooLeft, tooRight
-        case notFitting
-        case ok
+        case tooClose, tooFar, notFitting, ok
     }
 
     // MARK: - Properties
@@ -118,6 +51,7 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
     private var overlayMask: FaceOvalMaskView!
     private var faceProgressLoader: FaceProgressLoader!
     private var instructionLabel: UILabel!
+    private var debugLabel: UILabel!
 
     private let configuration = ARFaceTrackingConfiguration()
     private let config = LivenessConfig()
@@ -134,18 +68,8 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
     private var conditionInstructionPending: String = ""
     private var conditionInstructionFrames: Int = 0
 
-    private var smoothedIntensity: CGFloat?
-
-    private var hyst_tooDark    = false
-    private var hyst_tooBright  = false
-    private var hyst_tiltedUp   = false
-    private var hyst_tiltedDown = false
-    private var hyst_tooClose   = false
-    private var hyst_tooFar     = false
-    private var hyst_tooHigh    = false
-    private var hyst_tooLow     = false
-    private var hyst_tooLeft    = false
-    private var hyst_tooRight   = false
+    private var hyst_tooClose = false
+    private var hyst_tooFar   = false
 
     // MARK: - Lifecycle
 
@@ -195,6 +119,7 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
         view.addSubview(faceProgressLoader)
 
         setupInstructionLabel()
+        setupDebugLabel()
         pinToEdges(arView)
         pinToEdges(overlayMask)
         pinToEdges(faceProgressLoader)
@@ -231,6 +156,88 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
         ])
     }
 
+    private func setupDebugLabel() {
+        debugLabel = UILabel()
+        debugLabel.text = ""
+        debugLabel.textColor = .yellow
+        debugLabel.backgroundColor = UIColor.black.withAlphaComponent(0.6)
+        debugLabel.textAlignment = .left
+        debugLabel.numberOfLines = 0
+        debugLabel.font = .monospacedSystemFont(ofSize: 10, weight: .regular)
+        debugLabel.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(debugLabel)
+
+        NSLayoutConstraint.activate([
+            debugLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
+            debugLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 8),
+            debugLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8)
+        ])
+    }
+
+    private func updateDebugInfo(faceAnchor: ARFaceAnchor) {
+        let col     = faceAnchor.transform.columns.3
+        let depth   = Double(abs(col.z))
+        let depthCm = depth * 100
+
+        let oval = ovalRect(in: view.bounds)
+        let proj = arView.projectPoint(SCNVector3(col.x, col.y, col.z))
+        let px   = CGFloat(proj.x)
+        let py   = CGFloat(proj.y)
+
+        let dx      = (px - oval.midX) / (oval.width  / 2)
+        let dy      = (py - oval.midY) / (oval.height / 2)
+        let ellipse = dx * dx + dy * dy
+
+        let depthZone: String
+        if depth < config.closeEnterDepth    { depthZone = "YAKINDA ⚠️  (<\(Int(config.closeEnterDepth * 100))cm)" }
+        else if depth > config.farEnterDepth { depthZone = "UZAKTA  ⚠️  (>\(Int(config.farEnterDepth * 100))cm)" }
+        else                                 { depthZone = "OK ✓  (\(Int(config.closeEnterDepth * 100))-\(Int(config.farEnterDepth * 100))cm)" }
+
+        var camZ: Float = 0
+        var camX: Float = 0
+        var camY: Float = 0
+        if let frame = arView.session.currentFrame {
+            let cs = simd_mul(simd_inverse(frame.camera.transform), faceAnchor.transform)
+            camZ = cs.columns.2.z
+            camX = cs.columns.2.x
+            camY = cs.columns.2.y
+        }
+
+        let centerOk = ellipse < 0.36
+        let fwdOk    = camZ > config.fwdMinThreshold
+        let yawOk    = abs(camX) < config.yawMaxThreshold
+        let pitchOk  = abs(camY) < config.pitchMaxThreshold
+
+        var failReasons: [String] = []
+        if !centerOk { failReasons.append("merkez") }
+        if !fwdOk    { failReasons.append("fwd(\(String(format: "%.3f", camZ)))>\(String(format: "%.2f", config.fwdMinThreshold))") }
+        if !yawOk    { failReasons.append("yaw(\(String(format: "%.3f", camX)))<\(String(format: "%.2f", config.yawMaxThreshold))") }
+        if !pitchOk  { failReasons.append("pitch(\(String(format: "%.3f", camY)))<\(String(format: "%.2f", config.pitchMaxThreshold))") }
+        let fitStr = failReasons.isEmpty ? "OK ✓" : "REDDEDİLDİ: \(failReasons.joined(separator: ","))"
+
+        let stateStr: String
+        switch state {
+        case .warmingUp:    stateStr = "warmingUp(\(warmupFrameCounter)/\(config.warmupFrameCount))"
+        case .idle:         stateStr = "idle"
+        case .faceDetected: stateStr = "faceDetected"
+        case .holding:      stateStr = "holding"
+        case .verified:     stateStr = "verified"
+        }
+
+        debugLabel.text = """
+        — MESAFE — \(String(format: "%.1f", depthCm)) cm   \(depthZone)
+          close: enter<\(Int(config.closeEnterDepth*100))cm  exit>\(Int(config.closeExitDepth*100))cm  hyst:\(hyst_tooClose)
+          far:   enter>\(Int(config.farEnterDepth*100))cm  exit<\(Int(config.farExitDepth*100))cm  hyst:\(hyst_tooFar)
+        — FIT (kamera uzayı) — \(fitStr)
+          merkez=\(String(format: "%.3f", ellipse))<0.36
+          fwd(col2.z)=\(String(format: "%.3f", camZ))>\(String(format: "%.2f", config.fwdMinThreshold))
+          yaw(col2.x)=\(String(format: "%.3f", camX))<\(String(format: "%.2f", config.yawMaxThreshold))
+          pitch(col2.y)=\(String(format: "%.3f", camY))<\(String(format: "%.2f", config.pitchMaxThreshold))
+        — STATE — \(stateStr)
+          ok:\(okFrameCounter)/\(config.okFrameThreshold)  bad:\(badFrameCounter)/\(config.badFrameThreshold)
+        """
+    }
+
     // MARK: - Session
 
     private func startSession() {
@@ -247,17 +254,8 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
         badFrameCounter = 0
         conditionInstructionPending = ""
         conditionInstructionFrames  = 0
-        smoothedIntensity = nil
-        hyst_tooDark    = false
-        hyst_tooBright  = false
-        hyst_tiltedUp   = false
-        hyst_tiltedDown = false
-        hyst_tooClose   = false
-        hyst_tooFar     = false
-        hyst_tooHigh    = false
-        hyst_tooLow     = false
-        hyst_tooLeft    = false
-        hyst_tooRight   = false
+        hyst_tooClose = false
+        hyst_tooFar   = false
         faceProgressLoader.isHidden = true
         overlayMask.isHidden = false
         setInstruction("Hazırlanıyor...")
@@ -267,151 +265,58 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
     // MARK: - Condition Checks
 
     private func evaluateConditions(faceAnchor: ARFaceAnchor) -> FaceCondition {
-        if let c = checkBrightness()             { return c }
-        if let c = checkTilt(faceAnchor)         { return c }
-        if let c = checkFacePosition(faceAnchor) { return c }
+        if let c = checkFaceDistance(faceAnchor) { return c }
         if !isFaceFittingOval(faceAnchor)        { return .notFitting }
         return .ok
     }
 
-    private func checkBrightness() -> FaceCondition? {
-        guard let raw = arView.session.currentFrame?.lightEstimate?.ambientIntensity else { return nil }
-        let intensity = CGFloat(raw)
-        if smoothedIntensity == nil { smoothedIntensity = intensity }
-        smoothedIntensity = config.brightnessAlpha * intensity + (1 - config.brightnessAlpha) * smoothedIntensity!
-        let s = smoothedIntensity!
-
-        if hyst_tooDark {
-            if s > config.darkExitThreshold { hyst_tooDark = false } else { return .tooDark }
-        } else if s < config.darkEnterThreshold {
-            hyst_tooDark = true; return .tooDark
-        }
-
-        if hyst_tooBright {
-            if s < config.brightExitThreshold { hyst_tooBright = false } else { return .tooBright }
-        } else if s > config.brightEnterThreshold {
-            hyst_tooBright = true; return .tooBright
-        }
-
-        return nil
-    }
-
-    private func checkTilt(_ faceAnchor: ARFaceAnchor) -> FaceCondition? {
-        let pitchY = CGFloat(faceAnchor.transform.columns.2.y)
-
-        if hyst_tiltedDown {
-            if pitchY <  config.tiltExitThreshold  { hyst_tiltedDown = false } else { return .tiltedDown }
-        } else if pitchY >  config.tiltEnterThreshold {
-            hyst_tiltedDown = true; return .tiltedDown
-        }
-
-        if hyst_tiltedUp {
-            if pitchY > -config.tiltExitThreshold  { hyst_tiltedUp = false } else { return .tiltedUp }
-        } else if pitchY < -config.tiltEnterThreshold {
-            hyst_tiltedUp = true; return .tiltedUp
-        }
-
-        return nil
-    }
-
-    private func checkFacePosition(_ faceAnchor: ARFaceAnchor) -> FaceCondition? {
-        let oval = ovalRect(in: view.bounds)
-        let col  = faceAnchor.transform.columns.3
-        let proj = arView.projectPoint(SCNVector3(col.x, col.y, col.z))
-        let centerPt = CGPoint(x: CGFloat(proj.x), y: CGFloat(proj.y))
-
-        let depth = abs(col.z)
-        guard depth > 0, let frame = arView.session.currentFrame else { return nil }
-        let focalX = CGFloat(frame.camera.intrinsics.columns.0.x)
-        let projectedW = focalX * config.faceWidthMeters / CGFloat(depth)
+    // Yüz merkezinin kameraya olan z-mesafesini (metre) kullanır.
+    // Camera intrinsics'e veya ekran çözünürlüğüne bağımlılık yoktur.
+    private func checkFaceDistance(_ faceAnchor: ARFaceAnchor) -> FaceCondition? {
+        let depth = Double(abs(faceAnchor.transform.columns.3.z))
+        guard depth > 0 else { return nil }
 
         if hyst_tooClose {
-            if projectedW < oval.width * config.closeExitFraction  { hyst_tooClose = false } else { return .tooClose }
-        } else if projectedW > oval.width * config.closeEnterFraction {
+            if depth > config.closeExitDepth { hyst_tooClose = false } else { return .tooClose }
+        } else if depth < config.closeEnterDepth {
             hyst_tooClose = true; return .tooClose
         }
 
         if hyst_tooFar {
-            if projectedW > oval.width * config.farExitFraction    { hyst_tooFar = false }   else { return .tooFar }
-        } else if projectedW < oval.width * config.farEnterFraction {
+            if depth < config.farExitDepth { hyst_tooFar = false } else { return .tooFar }
+        } else if depth > config.farEnterDepth {
             hyst_tooFar = true; return .tooFar
-        }
-
-        let dy = centerPt.y - oval.midY
-        let dx = centerPt.x - oval.midX
-
-        if hyst_tooHigh {
-            if dy > -(oval.height * config.positionExitFraction)   { hyst_tooHigh = false } else { return .tooHigh }
-        } else if dy < -(oval.height * config.positionEnterFraction) {
-            hyst_tooHigh = true; return .tooHigh
-        }
-
-        if hyst_tooLow {
-            if dy <  oval.height * config.positionExitFraction     { hyst_tooLow = false }  else { return .tooLow }
-        } else if dy >  oval.height * config.positionEnterFraction {
-            hyst_tooLow = true; return .tooLow
-        }
-
-        if hyst_tooRight {
-            if dx > -(oval.width * config.positionExitFraction)    { hyst_tooRight = false } else { return .tooRight }
-        } else if dx < -(oval.width * config.positionEnterFraction) {
-            hyst_tooRight = true; return .tooRight
-        }
-
-        if hyst_tooLeft {
-            if dx <  oval.width * config.positionExitFraction      { hyst_tooLeft = false }  else { return .tooLeft }
-        } else if dx >  oval.width * config.positionEnterFraction {
-            hyst_tooLeft = true; return .tooLeft
         }
 
         return nil
     }
 
+    // Yüzün oval içinde doğru konumda ve dik bakışta olup olmadığını kontrol eder.
     private func isFaceFittingOval(_ faceAnchor: ARFaceAnchor) -> Bool {
         let oval = ovalRect(in: view.bounds)
-        let col  = faceAnchor.transform.columns.3
+        let t    = faceAnchor.transform
+        let col  = t.columns.3
+
         let proj = arView.projectPoint(SCNVector3(col.x, col.y, col.z))
-        let centerPt = CGPoint(x: CGFloat(proj.x), y: CGFloat(proj.y))
+        let nx = (CGFloat(proj.x) - oval.midX) / (oval.width  / 2)
+        let ny = (CGFloat(proj.y) - oval.midY) / (oval.height / 2)
+        guard nx * nx + ny * ny < 0.36 else { return false }
 
-        let cx = (centerPt.x - oval.midX) / (oval.width  / 2)
-        let cy = (centerPt.y - oval.midY) / (oval.height / 2)
-        guard cx * cx + cy * cy < 0.25 else { return false }
-
-        let depth = abs(col.z)
         guard let frame = arView.session.currentFrame else { return false }
-        let intrinsics = frame.camera.intrinsics
-        let focalX = CGFloat(intrinsics.columns.0.x)
-        let focalY = CGFloat(intrinsics.columns.1.y)
-        let projectedW = focalX * config.faceWidthMeters  / CGFloat(depth)
-        let projectedH = focalY * config.faceHeightMeters / CGFloat(depth)
+        let cameraSpace = simd_mul(simd_inverse(frame.camera.transform), faceAnchor.transform)
 
-        let points: [CGPoint] = [
-            CGPoint(x: centerPt.x - projectedW / 2, y: centerPt.y),
-            CGPoint(x: centerPt.x + projectedW / 2, y: centerPt.y),
-            CGPoint(x: centerPt.x,                  y: centerPt.y - projectedH * 0.55),
-            CGPoint(x: centerPt.x,                  y: centerPt.y + projectedH * 0.45),
-        ]
-        for pt in points {
-            let dx = (pt.x - oval.midX) / (oval.width  / 2)
-            let dy = (pt.y - oval.midY) / (oval.height / 2)
-            if dx * dx + dy * dy > 0.85 { return false }
-        }
+        guard cameraSpace.columns.2.z > config.fwdMinThreshold   else { return false }
+        guard abs(cameraSpace.columns.2.x) < config.yawMaxThreshold   else { return false }
+        guard abs(cameraSpace.columns.2.y) < config.pitchMaxThreshold else { return false }
+
         return true
     }
 
     private func instructionText(for condition: FaceCondition) -> String {
         switch condition {
-        case .tooDark:    return "Ortam çok karanlık, daha aydınlık bir yere geçin"
-        case .tooBright:  return "Ortam çok aydınlık, gölgeye geçin"
-        case .tiltedDown: return "Başınızı yukarı kaldırın"
-        case .tiltedUp:   return "Başınızı öne eğin"
-        case .tooClose:   return "Biraz geriye gidin"
-        case .tooFar:     return "Biraz öne gelin"
-        case .tooHigh:    return "Yüzünüzü biraz aşağı alın"
-        case .tooLow:     return "Yüzünüzü biraz yukarı alın"
-        case .tooLeft:    return "Yüzünüzü sola kaydırın"
-        case .tooRight:   return "Yüzünüzü sağa kaydırın"
-        case .notFitting: return "Yüzünüzü çerçeve içine yerleştirin"
+        case .tooClose:   return "Çok yakınsınız, lütfen geriye gidin"
+        case .tooFar:     return "Çok uzaktasınız, lütfen öne gelin"
+        case .notFitting: return "Yüzünüzü çerçeve içinde tutun"
         case .ok:         return "Hareketsiz kalın..."
         }
     }
@@ -419,6 +324,7 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
     // MARK: - Face Detection Logic
 
     private func handleFaceDetected(_ faceAnchor: ARFaceAnchor) {
+        updateDebugInfo(faceAnchor: faceAnchor)
         guard state != .verified, state != .warmingUp else { return }
 
         let condition = evaluateConditions(faceAnchor: faceAnchor)
@@ -475,7 +381,8 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
         conditionInstructionPending = ""
         conditionInstructionFrames  = 0
         faceProgressLoader.setProgress(0, animated: false)
-        setInstruction("Yüzünüzü çerçeve içine yerleştirin")
+        setInstruction("Yüzünüzü çerçeve içinde tutun")
+        debugLabel.text = "— YÜZ ALGILANMIYOR —"
     }
 
     private func handleWarmupFrame() {
@@ -484,7 +391,7 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
             state = .idle
             faceProgressLoader.isHidden = false
             faceProgressLoader.startDashAnimation()
-            setInstruction("Yüzünüzü çerçeve içine yerleştirin")
+            setInstruction("Yüzünüzü çerçeve içinde tutun")
         }
     }
 
@@ -500,8 +407,6 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
         setInstruction("Doğrulandı ✓")
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-            // Snapshot öncesi wireframe, loader ve oval mask gizlenir — temiz selfie.
-            // Upload boyunca gizli kalır; session yeniden başlayınca renderer yeni node oluşturur.
             self.faceNode?.isHidden = true
             self.faceProgressLoader.isHidden = true
             self.overlayMask.isHidden = true
@@ -519,18 +424,10 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
         badFrameCounter = 0
         conditionInstructionPending = ""
         conditionInstructionFrames  = 0
-        smoothedIntensity = nil
-        hyst_tooDark    = false
-        hyst_tooBright  = false
-        hyst_tiltedUp   = false
-        hyst_tiltedDown = false
-        hyst_tooClose   = false
-        hyst_tooFar     = false
-        hyst_tooHigh    = false
-        hyst_tooLow     = false
-        hyst_tooLeft    = false
-        hyst_tooRight   = false
+        hyst_tooClose = false
+        hyst_tooFar   = false
         overlayMask.isHidden = false
+        debugLabel.isHidden = false
         hideLoader()
         faceProgressLoader.setProgress(0, animated: false)
         faceProgressLoader.updateRingColors(
@@ -538,7 +435,7 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
             progress: .white
         )
         faceProgressLoader.startDashAnimation()
-        setInstruction("Yüzünüzü çerçeve içine yerleştirin")
+        setInstruction("Yüzünüzü çerçeve içinde tutun")
     }
 
     // MARK: - Upload
