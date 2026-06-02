@@ -6,6 +6,12 @@
 import SwiftUI
 import IdentifySDK
 
+// MARK: - HamburgerMenuItem
+
+private enum HamburgerMenuItem {
+    case serverList, moduleList
+}
+
 // MARK: - LoginMode
 
 enum LoginMode: CaseIterable {
@@ -31,6 +37,8 @@ struct LoginView: View {
     @State private var showOptions = false
     @State private var showServerList = false
     @State private var showModuleList = false
+    @State private var showHamburgerMenu = false
+    @State private var pendingNavigation: HamburgerMenuItem? = nil
 
     var body: some View {
         ZStack {
@@ -39,7 +47,7 @@ struct LoginView: View {
 
             VStack(spacing: 0) {
                 LoginTopBar(
-                    onMenu: { showServerList = true },
+                    onMenu: { showHamburgerMenu = true },
                     onFlag: {}
                 )
 
@@ -62,7 +70,7 @@ struct LoginView: View {
                     .padding(.bottom, IDSpacing.lg)
                 }
 
-                VStack(spacing: IDSpacing.sm) {
+                VStack(spacing: IDSpacing.lg) {
                     ConnectButton(
                         isLoading: appState.isLoading,
                         isDisabled: isConnectDisabled,
@@ -92,9 +100,14 @@ struct LoginView: View {
             Text(appState.sdkError ?? "")
         }
         .sheet(isPresented: $showOptions) {
-            if #available(iOS 16.0, *) {
+            if #available(iOS 16.4, *) {
                 OptionsBottomSheet(viewModel: viewModel)
-                    .presentationDetents([.medium])
+                    .presentationDetents([.height(300)])
+                    .presentationDragIndicator(.visible)
+                    .presentationBackground(.ultraThinMaterial)
+            } else if #available(iOS 16.0, *) {
+                OptionsBottomSheet(viewModel: viewModel)
+                    .presentationDetents([.height(300)])
                     .presentationDragIndicator(.visible)
             } else {
                 OptionsBottomSheet(viewModel: viewModel)
@@ -106,6 +119,36 @@ struct LoginView: View {
         .sheet(isPresented: $showModuleList) {
             ModuleListView(viewModel: viewModel)
         }
+        .sheet(isPresented: $showHamburgerMenu, onDismiss: {
+            switch pendingNavigation {
+            case .serverList: showServerList = true
+            case .moduleList: showModuleList = true
+            case nil: break
+            }
+            pendingNavigation = nil
+        }) {
+            if #available(iOS 16.4, *) {
+                HamburgerMenuSheet { item in
+                    pendingNavigation = item
+                    showHamburgerMenu = false
+                }
+                .presentationDetents([.height(200)])
+                .presentationDragIndicator(.visible)
+                .presentationBackground(.ultraThinMaterial)
+            } else if #available(iOS 16.0, *) {
+                HamburgerMenuSheet { item in
+                    pendingNavigation = item
+                    showHamburgerMenu = false
+                }
+                .presentationDetents([.height(200)])
+                .presentationDragIndicator(.visible)
+            } else {
+                HamburgerMenuSheet { item in
+                    pendingNavigation = item
+                    showHamburgerMenu = false
+                }
+            }
+        }
     }
 
     private var isConnectDisabled: Bool {
@@ -113,49 +156,53 @@ struct LoginView: View {
     }
 
     private func connect() {
-        appState.setupSDK(
-            identId: viewModel.resolveIdentId(),
-            apiUrl: viewModel.selectedServer.apiUrl,
-            idLang: viewModel.selectedIdLang,
-            signLangSupport: viewModel.useSignLang,
-            bigCustomerCam: viewModel.useBigCustomerCam,
-            useSSLPinning: viewModel.useSSLPinning,
-            useNewLiveness: viewModel.useNewLiveness,
-            selectedModules: viewModel.selectedModules
-        )
+        viewModel.connect(appState: appState)
     }
 }
 
 // MARK: - LoginTopBar
 
 private struct LoginTopBar: View {
+    
     let onMenu: () -> Void
     let onFlag: () -> Void
+    
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         HStack {
             Button(action: onMenu) {
-                Image(systemName: "line.3.horizontal")
-                    .font(.system(size: 20, weight: .medium))
-                    .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
-                    .frame(width: 44, height: 44)
+                ZStack {
+                    
+                    Circle()
+                        .fill(Color.white)
+                        .overlay(
+                            Circle()
+                                .stroke(Color(.systemGray5), lineWidth: 1)
+                        )
+                    
+                    Image(.hamburger)
+                }
             }
 
             Spacer()
 
-            Text("identify")
-                .font(.custom("InterDisplay-Bold", size: 22))
-                .italic()
-                .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
+            Image(.icIdentifyLogoText)
 
             Spacer()
 
             Button(action: onFlag) {
-                Text("🇹🇷")
-                    .font(.system(size: 18))
-                    .frame(width: 36, height: 36)
-                    .background(Circle().fill(IDColor.adaptiveSurface(for: colorScheme)))
+                ZStack {
+                    
+                    Circle()
+                        .fill(Color.white)
+                        .overlay(
+                            Circle()
+                                .stroke(Color(.systemGray5), lineWidth: 1)
+                        )
+                    
+                    Image(.tr)
+                }
             }
         }
         .padding(.horizontal, IDSpacing.lg)
@@ -170,7 +217,7 @@ private struct LoginHeroSection: View {
 
     var body: some View {
         VStack(spacing: IDSpacing.lg) {
-            Image(systemName: "person.fill.viewfinder")
+            Image(.icAppLogo)
                 .font(.system(size: 52))
                 .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
 
@@ -195,6 +242,7 @@ private struct LoginHeroSection: View {
 private struct LoginTabSelector: View {
     @Binding var selected: LoginMode
     @Environment(\.colorScheme) private var colorScheme
+    @Namespace private var animation
 
     var body: some View {
         HStack(spacing: 0) {
@@ -207,17 +255,27 @@ private struct LoginTabSelector: View {
                     Text(mode.title)
                         .font(IDFont.bodySmall(.semibold))
                         .foregroundColor(selected == mode ? .white : IDColor.adaptiveSubtitle(for: colorScheme))
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, IDSpacing.sm + 2)
+                        .frame(width: 104, height: 30)
                         .background(
-                            Capsule()
-                                .fill(selected == mode ? IDColor.primary : Color.clear)
+                            ZStack {
+                                if selected == mode {
+                                    Capsule()
+                                        .fill(IDColor.primary)
+                                        .matchedGeometryEffect(id: "tab", in: animation)
+                                }
+                            }
                         )
                 }
+                .buttonStyle(.plain)
             }
         }
-        .padding(4)
+        .frame(width: 201, height: 46)
+        .padding(.horizontal, 10)
         .background(Capsule().fill(IDColor.adaptiveSurface(for: colorScheme)))
+        .overlay(
+            Capsule()
+                .stroke(IDColor.inkBorder, lineWidth: 1)
+        )
     }
 }
 
@@ -249,6 +307,10 @@ private struct StyledTextField: View {
         .background(
             RoundedRectangle(cornerRadius: IDRadius.md)
                 .fill(IDColor.adaptiveSurface(for: colorScheme))
+                .overlay(
+                    RoundedRectangle(cornerRadius: IDRadius.md)
+                        .stroke(IDColor.inkBorder, lineWidth: 1)
+                )
         )
     }
 }
@@ -322,6 +384,10 @@ private struct ProjectPickerField: View {
         .background(
             RoundedRectangle(cornerRadius: IDRadius.md)
                 .fill(IDColor.adaptiveSurface(for: colorScheme))
+                .overlay(
+                    RoundedRectangle(cornerRadius: IDRadius.md)
+                        .stroke(IDColor.inkBorder, lineWidth: 1)
+                )
         )
     }
 }
@@ -366,7 +432,7 @@ private struct ConnectButton: View {
             .padding(.vertical, IDSpacing.lg)
             .background(
                 Capsule()
-                    .fill(isDisabled ? IDColor.darkMuted : IDColor.primary)
+                    .fill(isDisabled ? IDColor.primary : IDColor.darkMuted)
             )
         }
         .disabled(isDisabled)
@@ -389,22 +455,29 @@ struct OptionsBottomSheet: View {
                 Spacer()
                 Button { dismiss() } label: {
                     Image(systemName: "xmark")
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.system(size: 20, weight: .medium))
                         .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
                         .frame(width: 30, height: 30)
-                        .background(Circle().fill(IDColor.adaptiveSurface(for: colorScheme)))
                 }
             }
             .padding(.horizontal, IDSpacing.xl)
             .padding(.top, IDSpacing.lg)
             .padding(.bottom, IDSpacing.md)
 
-            Divider().opacity(0.4)
-
-            ToggleOptionRow(title: "Temsilci yayını büyük görünsün", isOn: $viewModel.useBigCustomerCam)
-            ToggleOptionRow(title: "İşaret dili seçeneği aktif olsun", isOn: $viewModel.useSignLang)
-            ToggleOptionRow(title: "Yeni canlılık testi ekranını dene", isOn: $viewModel.useNewLiveness)
-            ToggleOptionRow(title: "SSL Pinning", isOn: $viewModel.useSSLPinning)
+            VStack {
+                ToggleOptionRow(title: "Temsilci yayını büyük görünsün", isOn: $viewModel.useBigCustomerCam)
+                Divider()
+                ToggleOptionRow(title: "İşaret dili seçeneği aktif olsun", isOn: $viewModel.useSignLang)
+                Divider()
+                ToggleOptionRow(title: "Yeni canlılık testi ekranını dene", isOn: $viewModel.useNewLiveness)
+                Divider()
+                ToggleOptionRow(title: "SSL Pinning", isOn: $viewModel.useSSLPinning)
+            }
+            .background(
+                RoundedRectangle(cornerRadius: IDRadius.md)
+                    .fill(IDColor.adaptiveSurface(for: colorScheme))
+            )
+            .padding(.horizontal, IDSpacing.xl)
 
             Spacer()
         }
@@ -431,12 +504,87 @@ private struct ToggleOptionRow: View {
                     .tint(IDColor.primary)
             }
             .padding(.horizontal, IDSpacing.xl)
-            .padding(.vertical, IDSpacing.lg)
+            .padding(.vertical, IDSpacing.sm)
 
             Divider()
                 .padding(.leading, IDSpacing.xl)
                 .opacity(0.3)
         }
+    }
+}
+
+// MARK: - HamburgerMenuSheet
+
+private struct HamburgerMenuSheet: View {
+    let onSelect: (HamburgerMenuItem) -> Void
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                Text("Ayarlar")
+                    .font(IDFont.bodyLarge(.semibold))
+                    .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
+                Spacer()
+                Button { dismiss() } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 20, weight: .medium))
+                        .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
+                        .frame(width: 30, height: 30)
+                }
+            }
+            .padding(.horizontal, IDSpacing.xl)
+            .padding(.top, IDSpacing.lg)
+            .padding(.bottom, IDSpacing.md)
+
+            VStack(spacing: IDSpacing.sm) {
+                MenuOptionRow(icon: .init(.icCubeFocus), title: "Modül Seçme Ekranı") {
+                    onSelect(.moduleList)
+                }
+                MenuOptionRow(icon: .init(.icBugBeetle), title: "Sunucu Ayarları") {
+                    onSelect(.serverList)
+                }
+            }
+            .padding(.horizontal, IDSpacing.xl)
+
+            Spacer()
+        }
+        .background(IDColor.adaptiveBackground(for: colorScheme).ignoresSafeArea())
+    }
+}
+
+// MARK: - MenuOptionRow
+
+private struct MenuOptionRow: View {
+    let icon: Image
+    let title: String
+    let onTap: () -> Void
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: IDSpacing.md) {
+                icon
+                    .font(.system(size: 18, weight: .regular))
+                    .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
+                    .frame(width: 24)
+                Text(title)
+                    .font(IDFont.body())
+                    .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(IDColor.inkLight)
+            }
+            .padding(.horizontal, IDSpacing.lg)
+            .padding(.vertical, IDSpacing.lg)
+            .background(
+                RoundedRectangle(cornerRadius: IDRadius.md)
+                    .fill(IDColor.adaptiveSurface(for: colorScheme))
+            )
+        }
+        .buttonStyle(.plain)
     }
 }
 
@@ -457,10 +605,6 @@ struct ServerListView: View {
                     subtitle: "Test etmek istediğiniz ortamı seçin",
                     onBack: { dismiss() }
                 )
-
-                StepProgressBar(steps: 4, current: 0)
-                    .padding(.horizontal, IDSpacing.xl)
-                    .padding(.vertical, IDSpacing.sm)
 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: IDSpacing.lg) {
@@ -534,11 +678,13 @@ private struct ServerOptionRow: View {
 // MARK: - ModuleListView
 
 struct ModuleListView: View {
+    
     @ObservedObject var viewModel: LoginViewModel
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
     @State private var isEditing = false
     @State private var activeModules: [SdkModules] = []
+    @State private var passiveModules: [SdkModules] = []
 
     var body: some View {
         ZStack {
@@ -547,7 +693,7 @@ struct ModuleListView: View {
             VStack(spacing: 0) {
                 SubScreenTopBar(
                     title: "Modül Seçimi",
-                    subtitle: nil,
+                    subtitle: "Modül listesi aşağıdaki gibidir",
                     onBack: { dismiss() },
                     trailing: {
                         Button {
@@ -555,19 +701,25 @@ struct ModuleListView: View {
                                 isEditing.toggle()
                             }
                         } label: {
-                            Text(isEditing ? "Bitti" : "Edit")
-                                .font(IDFont.bodySmall(.semibold))
-                                .foregroundColor(IDColor.primary)
-                                .padding(.horizontal, IDSpacing.md)
-                                .padding(.vertical, 6)
-                                .overlay(Capsule().strokeBorder(IDColor.primary, lineWidth: 1.5))
+                            HStack {
+                                Image(.icPencilLine)
+                                    .renderingMode(.template)
+                                    .foregroundColor(IDColor.inkBackground)
+                                
+                                Text(isEditing ? "Bitti" : "Edit")
+                                    .font(IDFont.bodySmall(.semibold))
+                                    .foregroundColor(IDColor.inkBackground)
+                            }
+                            .padding(.horizontal, IDSpacing.md)
+                            .padding(.vertical, 6)
+                            .background(
+                                RoundedRectangle(cornerRadius: IDRadius.pill)
+                                    .foregroundStyle(IDColor.primary)
+                                    
+                            )
                         }
                     }
                 )
-
-                StepProgressBar(steps: 4, current: 1)
-                    .padding(.horizontal, IDSpacing.xl)
-                    .padding(.vertical, IDSpacing.sm)
 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: IDSpacing.sm) {
@@ -583,7 +735,11 @@ struct ModuleListView: View {
                                     isEditing: isEditing,
                                     isLast: index == activeModules.count - 1,
                                     onRemove: {
-                                        withAnimation { activeModules.removeSubrange(index...index) }
+                                        withAnimation {
+                                            let removed = activeModules[index]
+                                            activeModules.removeSubrange(index...index)
+                                            passiveModules.append(removed)
+                                        }
                                     }
                                 )
                             }
@@ -599,6 +755,35 @@ struct ModuleListView: View {
                             .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
                             .padding(.horizontal, IDSpacing.lg)
                             .padding(.top, IDSpacing.xs)
+
+                        if !passiveModules.isEmpty {
+                            Text("Pasif Modüller")
+                                .font(IDFont.caption(.semibold))
+                                .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
+                                .padding(.horizontal, IDSpacing.lg)
+                                .padding(.top, IDSpacing.sm)
+
+                            VStack(spacing: 0) {
+                                ForEach(Array(passiveModules.enumerated()), id: \.element) { index, module in
+                                    PassiveModuleRow(
+                                        module: module,
+                                        isEditing: isEditing,
+                                        isLast: index == passiveModules.count - 1,
+                                        onAdd: {
+                                            withAnimation {
+                                                passiveModules.removeSubrange(index...index)
+                                                activeModules.append(module)
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+                            .background(
+                                RoundedRectangle(cornerRadius: IDRadius.md)
+                                    .fill(IDColor.adaptiveSurface(for: colorScheme))
+                            )
+                            .padding(.horizontal, IDSpacing.lg)
+                        }
                     }
                     .padding(.top, IDSpacing.sm)
                     .padding(.bottom, IDSpacing.lg)
@@ -621,6 +806,8 @@ struct ModuleListView: View {
         }
         .onAppear {
             activeModules = viewModel.selectedModules.isEmpty ? viewModel.availableModules : viewModel.selectedModules
+            let activeSet = Set(activeModules)
+            passiveModules = viewModel.availableModules.filter { !activeSet.contains($0) }
         }
     }
 }
@@ -665,6 +852,46 @@ private struct ModuleRow: View {
     }
 }
 
+// MARK: - PassiveModuleRow
+
+private struct PassiveModuleRow: View {
+    let module: SdkModules
+    let isEditing: Bool
+    let isLast: Bool
+    let onAdd: () -> Void
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: IDSpacing.md) {
+                if isEditing {
+                    Button(action: onAdd) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.system(size: 22))
+                            .foregroundColor(IDColor.primary)
+                    }
+                    .transition(.scale.combined(with: .opacity))
+                }
+
+                Text(module.displayName)
+                    .font(IDFont.body())
+                    .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
+
+                Spacer()
+            }
+            .padding(.horizontal, IDSpacing.lg)
+            .padding(.vertical, IDSpacing.md + 2)
+            .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isEditing)
+
+            if !isLast {
+                Divider()
+                    .padding(.leading, isEditing ? IDSpacing.lg + 22 + IDSpacing.md : IDSpacing.lg)
+                    .opacity(0.4)
+            }
+        }
+    }
+}
+
 // MARK: - SubScreenTopBar
 
 private struct SubScreenTopBar<Trailing: View>: View {
@@ -689,31 +916,29 @@ private struct SubScreenTopBar<Trailing: View>: View {
     var body: some View {
         HStack(spacing: IDSpacing.sm) {
             Button(action: onBack) {
-                Image(systemName: "chevron.left")
+                Image(.icCaretLeft)
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
                     .frame(width: 36, height: 36)
             }
 
             HStack(spacing: IDSpacing.sm) {
-                ZStack {
-                    Circle()
-                        .fill(IDColor.adaptiveSurface(for: colorScheme))
-                        .frame(width: 36, height: 36)
-                    Text("i")
-                        .font(.custom("InterDisplay-Bold", size: 17))
-                        .italic()
-                        .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
-                }
+                Image(.icLangButtonLight)
+                    .resizable()
+                    .frame(width: 40, height: 40)
 
                 VStack(alignment: .leading, spacing: 1) {
                     Text(title)
                         .font(IDFont.bodySmall(.semibold))
                         .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
+                        .multilineTextAlignment(.center)
+                        .lineLimit(1)
                     if let subtitle {
                         Text(subtitle)
                             .font(IDFont.caption())
                             .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
+                            .multilineTextAlignment(.center)
+                            .lineLimit(1)
                     }
                 }
             }
@@ -780,4 +1005,12 @@ extension SdkModules {
 #Preview {
     LoginView()
         .environmentObject(AppStateViewModel())
+}
+
+#Preview("Modül Seçimi") {
+    ModuleListView(viewModel: LoginViewModel())
+}
+
+#Preview("Sunucu Seçimi") {
+    ServerListView(viewModel: LoginViewModel())
 }

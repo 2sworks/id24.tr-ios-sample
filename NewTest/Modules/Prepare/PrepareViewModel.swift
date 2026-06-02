@@ -20,7 +20,7 @@ final class PrepareViewModel: BaseModuleViewModel {
 
     @Published private(set) var speedCheckDone: Bool = false
     @Published private(set) var measuredSpeed: CGFloat = 0
-    @Published private(set) var connectionQuality: SDKNetworkStatus = .good
+    @Published private(set) var connectionQuality: SDKNetworkStatus = .disConnected
     @Published private(set) var cameraAuthorized: Bool = false
     @Published private(set) var micAuthorized: Bool = false
     @Published private(set) var speechAuthorized: Bool = false

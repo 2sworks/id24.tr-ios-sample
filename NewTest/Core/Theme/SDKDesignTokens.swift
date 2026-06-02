@@ -165,3 +165,73 @@ extension Color {
         )
     }
 }
+
+// MARK: - Preview
+
+#Preview("Design Tokens") {
+    ScrollView {
+        VStack(alignment: .leading, spacing: IDSpacing.xl) {
+
+            // MARK: Colors
+            Group {
+                Text("Colors")
+                    .font(IDFont.displaySmall())
+
+                colorRow("primary", IDColor.primary)
+                colorRow("primaryDark", IDColor.primaryDark)
+                colorRow("primaryLight", IDColor.primaryLight)
+                colorRow("success", IDColor.success)
+                colorRow("successAlt", IDColor.successAlt)
+                colorRow("successBright", IDColor.successBright)
+                colorRow("error", IDColor.error)
+                colorRow("inkDarkest", IDColor.inkDarkest)
+                colorRow("inkDark", IDColor.inkDark)
+                colorRow("inkMid", IDColor.inkMid)
+                colorRow("inkLight", IDColor.inkLight)
+                colorRow("inkBorder", IDColor.inkBorder)
+                colorRow("inkBackground", IDColor.inkBackground)
+                colorRow("inkSurface", IDColor.inkSurface)
+                colorRow("darkBg", IDColor.darkBg)
+                colorRow("darkBgSecondary", IDColor.darkBgSecondary)
+                colorRow("darkMuted", IDColor.darkMuted)
+                colorRow("divider", IDColor.divider)
+            }
+
+            Divider()
+
+            // MARK: Typography
+            Group {
+                Text("Typography")
+                    .font(IDFont.displaySmall())
+
+                Text("displayLarge").font(IDFont.displayLarge())
+                Text("displayMedium").font(IDFont.displayMedium())
+                Text("displaySmall").font(IDFont.displaySmall())
+                Text("bodyLarge").font(IDFont.bodyLarge())
+                Text("bodyMediumLg").font(IDFont.bodyMediumLg())
+                Text("bodyMedium").font(IDFont.bodyMedium())
+                Text("body").font(IDFont.body())
+                Text("bodySmall").font(IDFont.bodySmall())
+                Text("caption").font(IDFont.caption())
+            }
+        }
+        .padding(IDSpacing.lg)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+@ViewBuilder
+private func colorRow(_ name: String, _ color: Color) -> some View {
+    HStack(spacing: IDSpacing.md) {
+        RoundedRectangle(cornerRadius: IDRadius.sm)
+            .fill(color)
+            .frame(width: 44, height: 44)
+            .overlay(
+                RoundedRectangle(cornerRadius: IDRadius.sm)
+                    .stroke(IDColor.inkBorder, lineWidth: 1)
+            )
+        Text(name)
+            .font(IDFont.body())
+        Spacer()
+    }
+}

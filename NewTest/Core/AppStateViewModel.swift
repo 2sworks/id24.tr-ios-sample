@@ -4,6 +4,7 @@
 //
 //  Ana uygulama state'ini yöneten ViewModel.
 //  SDK kurulumu, modül geçişleri ve modulePublisher aboneliğini yönetir.
+//  Navigasyon AppNavigationCoordinator üzerinden yapılır.
 //
 
 import Foundation
@@ -16,34 +17,34 @@ final class AppStateViewModel: ObservableObject {
 
     // MARK: - Published State
 
-    /// Şu an aktif olan SDK modülü (modulePublisher'dan gelir)
     @Published private(set) var activeModule: SdkModules? = nil
-
-    /// Gösterilecek bir sonraki UIKit VC (SDKModuleHostView tarafından kullanılır)
-    @Published var nextModuleVC: UIViewController? = nil
-
-    /// SDK bağlantısı devam ediyor mu
     @Published private(set) var isLoading: Bool = false
-
-    /// SDK veya ağ hatası mesajı
     @Published var sdkError: String? = nil
+
+    /// Odada başka bir abone varsa true olur; modül geçişini engeller
+    @Published private(set) var subRejected: Bool = false
 
     // MARK: - Private
 
     let manager = IdentifyManager.shared
     private var modulePublisherCancellable: AnyCancellable?
+    private weak var coordinator: AppNavigationCoordinator?
 
     // MARK: - Init
 
-    init() {
+    init(coordinator: AppNavigationCoordinator? = nil) {
+        self.coordinator = coordinator
         subscribeToModulePublisher()
     }
 
     // MARK: - modulePublisher Aboneliği
 
-    /// Her setupSDK çağrısı öncesinde yeniden abone olunur.
-    /// closeSDK sonrası send(completion: .finished) geldiğinde stream kapandığından
-    /// yeni oturum için abonelik yenilenmesi gerekir.
+    /// Yalnızca activeModule state'ini günceller — navigasyon yapmaz.
+    ///
+    /// Navigasyonu publisher yerine getNextModule callback'ine taşıdık çünkü
+    /// SDK closeSDK() çağrısında PassthroughSubject'e .finished gönderiyor.
+    /// Tamamlanan bir subject'e yeni abone olmak hiç değer almadan biter,
+    /// bu da ikinci oturumda navigasyonu sessizce kırıyordu.
     func subscribeToModulePublisher() {
         modulePublisherCancellable?.cancel()
         modulePublisherCancellable = manager.modulePublisher
@@ -70,11 +71,7 @@ final class AppStateViewModel: ObservableObject {
     ) {
         isLoading = true
         sdkError = nil
-
-        // Her yeni oturum için aboneliği yenile
         subscribeToModulePublisher()
-
-        // Modül controller eşleşmelerini kaydet
         registerModuleControllers()
 
         manager.setupSDK(
@@ -89,10 +86,18 @@ final class AppStateViewModel: ObservableObject {
             identCardType: [.idCard, .passport, .oldSchool],
             signLangSupport: signLangSupport,
             nfcMaxErrorCount: 3,
-            logLevel: .all,
+            logLevel: .online,
+            logOnlineSecretKey: "dGhpc19pc19qdXN0X2R1bW15X3NlY3JldF9mb3JfZGVtbw==",
             bigCustomerCam: bigCustomerCam,
             selectedModules: selectedModules,
-            turnKey: ""
+            idCardLang: idLang,
+            turnKey: "AEdHh9OZu1kg+nSBSd2UNMu9y4Kc3xVfgTsvw+PTAic=",
+            wsSecretKey: "tgdRmdAABrWf9TCRJZIWoW3Bz0iPJpig5jtOkBN4pvU=",
+            showThankYouPage: true,
+            showNFCNotFoundPage: true,
+            supportU18: true,
+            AESKey: "SEATSJ8kk0v8+A1LeQsAMbOgL+fSj9pOaUKI5cDMITU=",
+            enableAutoRotateOCR: true
         ) { [weak self] socketStats, apiResp, webErr in
             guard let self else { return }
             self.isLoading = false
@@ -104,7 +109,10 @@ final class AppStateViewModel: ObservableObject {
 
             if socketStats?.isConnected == true && (apiResp.result ?? false) {
                 self.manager.moduleStepOrder = 0
-                self.advanceToNextModule()
+                if !self.subRejected {
+                    self.advanceToNextModule()
+                }
+                self.subRejected = false
             } else if socketStats?.isConnected == false {
                 self.sdkError = "Socket bağlantısı kurulamadı"
             }
@@ -113,10 +121,27 @@ final class AppStateViewModel: ObservableObject {
 
     // MARK: - Modül Geçişi
 
+    /// Bir sonraki modüle geçer ve koordinatöre route push eder.
+    ///
+    /// UIKit'te moduleStepOrder, SDKViewOptionsController.didMove(toParent:) ile
+    /// VC navigation stack'e push edildiğinde otomatik artıyordu.
+    /// SwiftUI'da didMove hiç tetiklenmediğinden artırımı callback içinde yapıyoruz.
+    ///
+    /// Navigasyon da callback'te merkezi olarak yapılır:
+    ///  - Normal modüller → sdkModule(for:) VC kimliğini SdkModules'a çevirir
+    ///  - Tüm modüller bitti → SDK thankYouViewController döndürür, biz .thankYou push ederiz
+    ///    (done branch'te modulePublisher emit etmediğinden publisher yerine callback kullanılır)
     func advanceToNextModule() {
         manager.getNextModule { [weak self] nextVC in
-            DispatchQueue.main.async {
-                self?.nextModuleVC = nextVC
+            guard let self else { return }
+            Task { @MainActor in
+                self.manager.moduleStepOrder += 1
+                if let module = self.sdkModule(for: nextVC) {
+                    self.activeModule = module
+                    self.coordinator?.push(module.navigationFlow)
+                } else if nextVC === self.manager.thankYouViewController {
+                    self.coordinator?.push(.thankYou)
+                }
             }
         }
     }
@@ -126,29 +151,52 @@ final class AppStateViewModel: ObservableObject {
         advanceToNextModule()
     }
 
-    /// Ana ekrana dön - oturumu sıfırla
     func resetFlow() {
-        nextModuleVC = nil
         activeModule = nil
         sdkError = nil
         isLoading = false
+        coordinator?.popToRoot()
     }
 
     // MARK: - Private
 
+    /// getNextModule callback'inden dönen VC'yi SdkModules enum'una eşler.
+    /// SDK içindeki sendCurrentScreen switch'iyle birebir örtüşür.
+    /// registerModuleControllers() ile atanan placeholder VC'lerin
+    /// kimlik (===) karşılaştırması güvenilirdir: her oturumda yeni instance oluşturulur.
+    private func sdkModule(for vc: UIViewController) -> SdkModules? {
+        switch vc {
+        case manager.prepareViewController:          return .prepare
+        case manager.idCardModuleController:         return .idCard
+        case manager.idCardOVDModuleController:      return .idcard_w_ovd
+        case manager.nfcModuleController:            return .nfc
+        case manager.livenessModuleController:       return .livenessDetection
+        case manager.selfieModuleController:         return .selfie
+        case manager.videoRecorderModuleController:  return .videoRecord
+        case manager.signatureModuleController:      return .signature
+        case manager.speechModuleController:         return .speech
+        case manager.addressModuleController:        return .addressConf
+        case manager.callWaitModuleController:       return .waitScreen
+        default:                                     return nil
+        }
+    }
+
+    /// Her oturumda yeni placeholder VC'ler oluşturulur ve SDK'ya kaydedilir.
+    /// SDK modulesControllersArray'i bu referansları tutar; getNextModule bunları döndürür.
     private func registerModuleControllers() {
-        manager.selfieModuleController        = UIHostingController(rootView: SelfieView().environmentObject(self))
-        manager.idCardModuleController        = UIHostingController(rootView: IdCardView().environmentObject(self))
-        manager.idCardOVDModuleController     = UIHostingController(rootView: OVDView().environmentObject(self))
-        manager.nfcModuleController           = UIHostingController(rootView: NFCView().environmentObject(self))
-        manager.signatureModuleController     = UIHostingController(rootView: SignatureView().environmentObject(self))
-        manager.videoRecorderModuleController = UIHostingController(rootView: VideoRecorderView().environmentObject(self))
-        manager.livenessModuleController      = UIHostingController(rootView: LivenessView().environmentObject(self))
-        manager.addressModuleController       = UIHostingController(rootView: AddressConfirmView().environmentObject(self))
-        manager.callWaitModuleController      = UIHostingController(rootView: CallScreenView().environmentObject(self))
-        manager.speechModuleController        = UIHostingController(rootView: SpeechRecView().environmentObject(self))
-        manager.thankYouViewController        = UIHostingController(rootView: ThankYouView().environmentObject(self))
-        manager.prepareViewController         = UIHostingController(rootView: PrepareView().environmentObject(self))
+        let dummy = { UIViewController() }
+        manager.prepareViewController         = dummy()
+        manager.idCardModuleController        = dummy()
+        manager.idCardOVDModuleController     = dummy()
+        manager.nfcModuleController           = dummy()
+        manager.selfieModuleController        = dummy()
+        manager.livenessModuleController      = dummy()
+        manager.videoRecorderModuleController = dummy()
+        manager.signatureModuleController     = dummy()
+        manager.speechModuleController        = dummy()
+        manager.addressModuleController       = dummy()
+        manager.callWaitModuleController      = dummy()
+        manager.thankYouViewController        = dummy()
         manager.socketMessageListener         = self
     }
 }
@@ -157,11 +205,11 @@ final class AppStateViewModel: ObservableObject {
 
 extension AppStateViewModel: SDKSocketListener {
     func listenSocketMessage(message: SDKCallActions) {
-        // Genel socket mesajları burada işlenir.
-        // CallScreen aktifken bu delegate CallScreenViewModel'e devredilir.
         switch message {
         case .wrongSocketActionErr(let error):
             sdkError = error
+        case .subrejectedDismiss:
+            subRejected = true
         default:
             break
         }

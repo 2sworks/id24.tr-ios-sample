@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 import IdentifySDK
 
-enum IdCardSide {
+enum IdCardSide: Hashable {
     case front, back, passport
 }
 
@@ -33,6 +33,12 @@ final class IdCardViewModel: BaseModuleViewModel {
         manager.tryedNfcComparisonCount >= 2
     }
 
+    // MARK: - Kart Tipi Seçimi
+
+    func selectCardType(_ type: CardType) {
+        manager.selectedCardType = type
+    }
+
     // MARK: - OCR - On Yuz
 
     func scanFront(image: UIImage, appState: AppStateViewModel) {
@@ -46,10 +52,16 @@ final class IdCardViewModel: BaseModuleViewModel {
                     self.errorMessage = err.errorMessages ?? "OCR hatasi"
                 } else {
                     self.frontPhoto = image
-                    // resp: FrontIdInfo (non-optional) – SDK property is also non-optional
-                    // Assign only if resp is a valid object (always true here)
-                    self.resultText = "On yuz okundu"
-                    self.currentSide = .back
+                    if self.manager.selectedCardType == .passport {
+                        // Pasaport: startFrontIdOcr sdkFrontInfo'yu doldurur,
+                        // ardından MRZ key extraction zinciri başlatılır.
+                        self.scanPassport(image: image,
+                                          comingData: self.manager.sdkFrontInfo,
+                                          appState: appState)
+                    } else {
+                        self.resultText = "On yuz okundu"
+                        self.currentSide = .back
+                    }
                 }
             }
         }

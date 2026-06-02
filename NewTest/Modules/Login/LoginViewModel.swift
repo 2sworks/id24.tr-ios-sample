@@ -63,12 +63,22 @@ final class LoginViewModel: BaseModuleViewModel {
         Bundle.main.buildVersionNumber ?? ""
     }
 
+    // MARK: - UserDefaults Keys
+
+    private enum UDKey {
+        static let selectedServerTitle  = "selected_server_title"
+        static let selectedServerApiUrl = "selected_server_api_url"
+        static let selectedServerWsUrl  = "selected_server_ws_url"
+    }
+
     // MARK: - Init
 
     override init() {
         super.init()
+        manager.setSDKLang(lang: selectedSDKLang)
         checkJailbreak()
         loadSavedServers()
+        loadSelectedServer()
     }
 
     // MARK: - SDK Language
@@ -120,6 +130,7 @@ final class LoginViewModel: BaseModuleViewModel {
 
     func selectServer(_ server: ServerOption) {
         selectedServer = server
+        saveSelectedServer(server)
     }
 
     // MARK: - Ident ID Aliases
@@ -140,9 +151,41 @@ final class LoginViewModel: BaseModuleViewModel {
         return aliases[identId] ?? identId
     }
 
+    // MARK: - Connect
+
+    func connect(appState: AppStateViewModel) {
+        appState.setupSDK(
+            identId: resolveIdentId(),
+            apiUrl: selectedServer.apiUrl,
+            idLang: selectedIdLang,
+            signLangSupport: useSignLang,
+            bigCustomerCam: useBigCustomerCam,
+            useSSLPinning: useSSLPinning,
+            useNewLiveness: useNewLiveness,
+            selectedModules: selectedModules
+        )
+    }
+
     // MARK: - Private
 
     private func checkJailbreak() {
         isJailbroken = manager.jailBreakStatus
+    }
+
+    private func saveSelectedServer(_ server: ServerOption) {
+        let ud = UserDefaults.standard
+        ud.set(server.title,  forKey: UDKey.selectedServerTitle)
+        ud.set(server.apiUrl, forKey: UDKey.selectedServerApiUrl)
+        ud.set(server.wsUrl,  forKey: UDKey.selectedServerWsUrl)
+    }
+
+    private func loadSelectedServer() {
+        let ud = UserDefaults.standard
+        guard
+            let title  = ud.string(forKey: UDKey.selectedServerTitle),
+            let apiUrl = ud.string(forKey: UDKey.selectedServerApiUrl),
+            let wsUrl  = ud.string(forKey: UDKey.selectedServerWsUrl)
+        else { return }
+        selectedServer = ServerOption(title: title, apiUrl: apiUrl, wsUrl: wsUrl)
     }
 }

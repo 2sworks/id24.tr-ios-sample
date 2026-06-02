@@ -1,6 +1,79 @@
 # Identify SDK Sample App
 Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.com.tr/docs/ios/first-setup/ adresinden ulaşabilirsiniz.
 
+---
+
+## Navigasyon Mimarisi — Coordinator Pattern
+
+Sample App, **UIPilot** benzeri tip-güvenli bir koordinatör pattern kullanır. iOS 14+ uyumlu olup `NavigationView` + recursive `NavigationLink` zinciriyle uygulanmıştır.
+
+### Temel Dosyalar
+
+| Dosya | Konum | Açıklama |
+|---|---|---|
+| `IdentifyNavigationFlow.swift` | `Navigation/` | Tüm ekran rotalarını tanımlayan `enum` |
+| `AppNavigationCoordinator.swift` | `Navigation/` | `push / pop / popToRoot` metodları + recursive `IdentifyNavContent` |
+| `IdentifyNavigationCoordinatorView.swift` | `Navigation/` | Uygulamanın navigasyon kökü (`AppDelegate` buradan başlar) |
+| `AppStateViewModel.swift` | `Core/` | SDK modüllerini koordinatöre yönlendirir |
+
+### Navigasyon Akışı
+
+```
+AppDelegate
+  └─ UIHostingController<IdentifyNavigationCoordinatorView>
+       └─ NavigationView
+            └─ IdentifyNavContent(depth: 0)   ← Login (sabit kök)
+                 └─ NavigationLink → IdentifyNavContent(depth: 1)   ← Modül 1
+                      └─ NavigationLink → IdentifyNavContent(depth: 2)   ← Modül 2
+                           └─ ...
+```
+
+### SDK Modülünden Ekrana Geçiş
+
+```
+advanceToNextModule()
+  → manager.getNextModule { _ in }       // SDK sayacını ilerlet
+  → modulePublisher.send(module)         // SDK yayını tetiklenir
+  → coordinator.push(module.navigationFlow)  // Otomatik push
+  → IdentifyNavContent NavigationLink aktifleşir
+  → SwiftUI ekran animasyonla gösterilir
+```
+
+### Yeni Ekran / Rota Ekleme
+
+1. `IdentifyNavigationFlow` enum'una yeni `case` ekle
+2. `AppNavigationCoordinator.swift` içindeki `screenFor()` switch'ine karşılık gelen view'ı ekle
+3. Gerekirse `SdkModules.navigationFlow` extension'ını güncelle
+
+### Hibrit Kullanım (SwiftUI + UIKit)
+
+UIKit `UIViewController`'ları da aynı stack içinde gösterilebilir:
+
+```swift
+// UIViewController'ı Hashable yapmak için wrapper
+final class ViewControllerBox: Hashable {
+    let viewController: UIViewController
+    init(_ vc: UIViewController) { self.viewController = vc }
+    static func == (lhs: ViewControllerBox, rhs: ViewControllerBox) -> Bool { lhs === rhs }
+    func hash(into hasher: inout Hasher) { hasher.combine(ObjectIdentifier(self)) }
+}
+
+// Route enum'una UIKit case eklenir
+enum IdentifyNavigationFlow: Hashable {
+    // ...mevcut case'ler...
+    case uiKit(ViewControllerBox)
+}
+
+// screenFor() içinde
+case .uiKit(let box):
+    SDKModuleHostView(viewController: box.viewController).ignoresSafeArea()
+
+// Kullanım
+coordinator.push(.uiKit(ViewControllerBox(myViewController)))
+```
+
+---
+
 # Son Güncellemeler
 
 ### SDK 2.5.4:

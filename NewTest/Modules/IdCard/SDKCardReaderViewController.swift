@@ -199,15 +199,9 @@ class SDKCardReaderViewController: SDKBaseViewController {
     }
     
     func takeCardPhoto() {
-        let scannerViewController = ImageScannerController(enabledAutoCapture: true, scannerMode: .idCard)
-        scannerViewController.imageScannerDelegate = self
-        scannerViewController.navigationBar.backgroundColor = IdentifyTheme.blueColor
-        scannerViewController.navigationBar.tintColor = IdentifyTheme.whiteColor
-        scannerViewController.toolbar.backgroundColor = IdentifyTheme.grayColor
-        scannerViewController.toolbar.tintColor = IdentifyTheme.grayColor
-        
+        let scannerViewController = VNDocumentCameraViewController()
+        scannerViewController.delegate = self
         DispatchQueue.main.async {
-            scannerViewController.view.backgroundColor = IdentifyTheme.blackBack
             scannerViewController.modalPresentationStyle = .fullScreen
             scannerViewController.isModalInPresentation = true
             self.present(scannerViewController, animated: true)
@@ -390,38 +384,41 @@ class SDKCardReaderViewController: SDKBaseViewController {
 
 }
 
-extension SDKCardReaderViewController: ImageScannerControllerDelegate {
-    
-    func imageScannerController(_ scanner: ImageScannerController, didFinishScanningWithResults results: ImageScannerResults) {
-        scanner.dismiss(animated: true) {
+extension SDKCardReaderViewController: VNDocumentCameraViewControllerDelegate {
+
+    func documentCameraViewController(
+        _ controller: VNDocumentCameraViewController,
+        didFinishWith scan: VNDocumentCameraScan
+    ) {
+        guard scan.pageCount > 0 else { return }
+        let image = scan.imageOfPage(at: 0)
+        controller.dismiss(animated: true) {
             switch self.cardSide {
                 case .frontId:
-                    self.frontIdPhoto.image = results.croppedScan.image
+                    self.frontIdPhoto.image = image
                 case .backId:
-                    self.backIdPhoto.image = results.croppedScan.image
+                    self.backIdPhoto.image = image
                 case .passport:
-                    self.frontIdPhoto.image = results.croppedScan.image
+                    self.frontIdPhoto.image = image
                 default:
                     return
             }
             DispatchQueue.main.async {
                 self.startOCR()
             }
-            
         }
-        
     }
-    
-    func imageScannerControllerDidCancel(_ scanner: ImageScannerController) {
-        scanner.dismiss(animated: true)
-        print("canceled")
+
+    func documentCameraViewControllerDidCancel(_ controller: VNDocumentCameraViewController) {
+        controller.dismiss(animated: true)
     }
-    
-    func imageScannerController(_ scanner: ImageScannerController, didFailWithError error: Error) {
+
+    func documentCameraViewController(
+        _ controller: VNDocumentCameraViewController,
+        didFailWithError error: Error
+    ) {
         print(error.localizedDescription)
     }
-    
-    
 }
 
 extension SDKCardReaderViewController: SDKPassportReaderDelegate {

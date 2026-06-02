@@ -18,7 +18,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.        
         UIApplication.shared.isIdleTimerDisabled = true
         IQKeyboardManager.shared.enable = true
         IQKeyboardManager.shared.enableAutoToolbar = true
@@ -32,15 +31,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func startSwiftUIScreen() {
         self.window = UIWindow(frame: UIScreen.main.bounds)
-        let rootView = IdentifyRootView()
+        // Coordinator + AppState IdentifyNavigationCoordinatorView içinde @StateObject olarak yaşar.
+        let rootView = IdentifyNavigationCoordinatorView()
         let hostingVC = UIHostingController(rootView: rootView)
-        let nc = UINavigationController(rootViewController: hostingVC)
-        UINavigationBar.appearance().tintColor = .white
-        self.window?.rootViewController = nc
+        self.window?.rootViewController = hostingVC
         self.window?.makeKeyAndVisible()
     }
 
-    
+    // MARK: - Core Data Stack
+
     lazy var persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "Env")
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
@@ -51,8 +50,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return container
     }()
 
-    // MARK: - Core Data Saving support
-    func saveContext () {
+    func saveContext() {
         let context = persistentContainer.viewContext
         if context.hasChanges {
             do {
@@ -64,6 +62,3 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
     }
 }
-
-
-

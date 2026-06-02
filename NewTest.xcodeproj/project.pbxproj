@@ -153,11 +153,13 @@
 		8AB276E92F749DA100A764F1 /* AddressConfirmView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB276E82F749DA100A764F1 /* AddressConfirmView.swift */; };
 		8AB276EB2F749DA200A764F1 /* CallScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB276EA2F749DA200A764F1 /* CallScreenView.swift */; };
 		8AB276ED2F749DA300A764F1 /* ThankYouView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB276EC2F749DA300A764F1 /* ThankYouView.swift */; };
-		8AB276EF2F749DB600A764F1 /* IdentifyRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB276EE2F749DB600A764F1 /* IdentifyRootView.swift */; };
 		8AB276F12F749DC600A764F1 /* IdentifySwiftUIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB276F02F749DC600A764F1 /* IdentifySwiftUIApp.swift */; };
+		8D16EAAA2FCEDC2F00C7152E /* IdCardScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D16EAA92FCEDC2F00C7152E /* IdCardScannerView.swift */; };
 		8D20F8C92FC8FE0F008F7DCF /* SDKDesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D20F8C82FC8FE0F008F7DCF /* SDKDesignTokens.swift */; };
 		8D58B84A2FC9A2B900EC0A5F /* IDSuccessBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D58B8492FC9A2B900EC0A5F /* IDSuccessBanner.swift */; };
-		8D58B84C2FC9A99500EC0A5F /* PreparePermissionRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D58B84B2FC9A99500EC0A5F /* PreparePermissionRow.swift */; };
+		8D91F2002FCE34C1000B56ED /* IdentifyNavigationFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D91F1FF2FCE34C1000B56ED /* IdentifyNavigationFlow.swift */; };
+		8D91F2022FCE34D3000B56ED /* AppNavigationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D91F2012FCE34D3000B56ED /* AppNavigationCoordinator.swift */; };
+		8D91F2042FCE34DB000B56ED /* IdentifyNavigationCoordinatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D91F2032FCE34DB000B56ED /* IdentifyNavigationCoordinatorView.swift */; };
 		A3685880DB672112C8813187 /* Inter-ExtraBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 38048F44665FE13EEA336ECC /* Inter-ExtraBold.otf */; };
 		A64CBB010C60D1F3F19BDA41 /* Inter-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = BB04BC2A7F7C84F720B6EC49 /* Inter-Medium.otf */; };
 		AC88C1958129FFD344225CFD /* Inter-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 39346948B312B0D65EA4C0B6 /* Inter-Bold.otf */; };
@@ -337,11 +339,13 @@
 		8AB276E82F749DA100A764F1 /* AddressConfirmView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddressConfirmView.swift; sourceTree = "<group>"; };
 		8AB276EA2F749DA200A764F1 /* CallScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallScreenView.swift; sourceTree = "<group>"; };
 		8AB276EC2F749DA300A764F1 /* ThankYouView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThankYouView.swift; sourceTree = "<group>"; };
-		8AB276EE2F749DB600A764F1 /* IdentifyRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifyRootView.swift; sourceTree = "<group>"; };
 		8AB276F02F749DC600A764F1 /* IdentifySwiftUIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifySwiftUIApp.swift; sourceTree = "<group>"; };
+		8D16EAA92FCEDC2F00C7152E /* IdCardScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdCardScannerView.swift; sourceTree = "<group>"; };
 		8D20F8C82FC8FE0F008F7DCF /* SDKDesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKDesignTokens.swift; sourceTree = "<group>"; };
 		8D58B8492FC9A2B900EC0A5F /* IDSuccessBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IDSuccessBanner.swift; sourceTree = "<group>"; };
-		8D58B84B2FC9A99500EC0A5F /* PreparePermissionRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreparePermissionRow.swift; sourceTree = "<group>"; };
+		8D91F1FF2FCE34C1000B56ED /* IdentifyNavigationFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifyNavigationFlow.swift; sourceTree = "<group>"; };
+		8D91F2012FCE34D3000B56ED /* AppNavigationCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppNavigationCoordinator.swift; sourceTree = "<group>"; };
+		8D91F2032FCE34DB000B56ED /* IdentifyNavigationCoordinatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifyNavigationCoordinatorView.swift; sourceTree = "<group>"; };
 		B2B1C42BCD3EDB5A4705FBCA /* Inter-Regular.otf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; path = "Inter-Regular.otf"; sourceTree = "<group>"; };
 		BB04BC2A7F7C84F720B6EC49 /* Inter-Medium.otf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; path = "Inter-Medium.otf"; sourceTree = "<group>"; };
 		DF7BC1692D4A279600372CAB /* Env.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Env.xcdatamodel; sourceTree = "<group>"; };
@@ -543,6 +547,7 @@
 				8ABF20312F6A04CA0010FABD /* Resources */,
 				8ABF20332F6A04E30010FABD /* Frameworks */,
 				8ABF20342F6A04F30010FABD /* SupportingFiles */,
+				8AACA69F2F74A94900613630 /* Navigation */,
 				4820A4A12924CDAC004DB388 /* sample.mp4 */,
 				489CBB1A28F586D500D22CC1 /* NewTest.entitlements */,
 				DF7BC1682D4A279600372CAB /* Env.xcdatamodeld */,
@@ -551,7 +556,6 @@
 				485C15632907F3FA007B9ED0 /* Colors.xcassets */,
 				483BDB1928F459CC00635BCC /* LaunchScreen.storyboard */,
 				483BDB1C28F459CC00635BCC /* Info.plist */,
-				8AACA69F2F74A94900613630 /* Navigation */,
 			);
 			path = NewTest;
 			sourceTree = "<group>";
@@ -574,7 +578,9 @@
 		8AACA69F2F74A94900613630 /* Navigation */ = {
 			isa = PBXGroup;
 			children = (
-				8AB276EE2F749DB600A764F1 /* IdentifyRootView.swift */,
+				8D91F1FF2FCE34C1000B56ED /* IdentifyNavigationFlow.swift */,
+				8D91F2012FCE34D3000B56ED /* AppNavigationCoordinator.swift */,
+				8D91F2032FCE34DB000B56ED /* IdentifyNavigationCoordinatorView.swift */,
 			);
 			path = Navigation;
 			sourceTree = "<group>";
@@ -728,7 +734,6 @@
 				4825316A2B02632900B0472C /* SDKPrepareViewController.swift */,
 				8AB276D62F749D9700A764F1 /* PrepareView.swift */,
 				8AB276BC2F749D5100A764F1 /* PrepareViewModel.swift */,
-				8D58B84B2FC9A99500EC0A5F /* PreparePermissionRow.swift */,
 			);
 			path = Prepare;
 			sourceTree = "<group>";
@@ -737,9 +742,10 @@
 			isa = PBXGroup;
 			children = (
 				485C15662907FC69007B9ED0 /* SDKCardReaderViewController.swift */,
-				8ABF202E2F6A045C0010FABD /* Passport */,
 				8AB276D82F749D9900A764F1 /* IdCardView.swift */,
+				48171420294734FA0095A64F /* SDKPassportReaderViewController.swift */,
 				8AB276BE2F749D5100A764F1 /* IdCardViewModel.swift */,
+				8D16EAA92FCEDC2F00C7152E /* IdCardScannerView.swift */,
 			);
 			path = IdCard;
 			sourceTree = "<group>";
@@ -859,14 +865,6 @@
 				48870098292CDA3500961218 /* SDKListenSocketViewController.swift */,
 			);
 			path = SocketStatus;
-			sourceTree = "<group>";
-		};
-		8ABF202E2F6A045C0010FABD /* Passport */ = {
-			isa = PBXGroup;
-			children = (
-				48171420294734FA0095A64F /* SDKPassportReaderViewController.swift */,
-			);
-			path = Passport;
 			sourceTree = "<group>";
 		};
 		8ABF202F2F6A046F0010FABD /* NewScanner */ = {
@@ -1109,6 +1107,7 @@
 				8AB276C32F749D5200A764F1 /* NFCViewModel.swift in Sources */,
 				482D2BD02A547AC000F1344F /* UIImage+SFSymbol.swift in Sources */,
 				485C15392907D3CF007B9ED0 /* SDKViewOptionsController.swift in Sources */,
+				8D91F2002FCE34C1000B56ED /* IdentifyNavigationFlow.swift in Sources */,
 				485C155B2907F3A7007B9ED0 /* SDKUIApplication+.swift in Sources */,
 				485C155F2907F3A7007B9ED0 /* SDKString+.swift in Sources */,
 				DF7BC16A2D4A279600372CAB /* Env.xcdatamodeld in Sources */,
@@ -1130,16 +1129,17 @@
 				482D2BE02A547AC000F1344F /* CaptureSession+Focus.swift in Sources */,
 				8AB276B72F749CEF00A764F1 /* SDKModuleHostView.swift in Sources */,
 				48BFE3CB2AEA994200980684 /* ExternalViewController.swift in Sources */,
+				8D91F2022FCE34D3000B56ED /* AppNavigationCoordinator.swift in Sources */,
 				482D2BD92A547AC000F1344F /* Quadrilateral.swift in Sources */,
 				48263C10292789C7005200A1 /* SDKThankYouViewController.swift in Sources */,
 				485C15622907F3A7007B9ED0 /* SDKCgRect+.swift in Sources */,
 				48AB73FB291A75E200F591A4 /* SDKSignatureViewController.swift in Sources */,
+				8D16EAAA2FCEDC2F00C7152E /* IdCardScannerView.swift in Sources */,
 				4881A80B2923BEF400EB4072 /* SDKCallScreenViewController.swift in Sources */,
 				4887009A292CDA3500961218 /* SDKListenSocketViewController.swift in Sources */,
 				482D2BC42A547AC000F1344F /* FocusRectangleView.swift in Sources */,
 				482D2BDB2A547AC000F1344F /* CaptureDevice.swift in Sources */,
 				485C155A2907F3A7007B9ED0 /* SDKUITableViewCell+.swift in Sources */,
-				8D58B84C2FC9A99500EC0A5F /* PreparePermissionRow.swift in Sources */,
 				8D58B84A2FC9A2B900EC0A5F /* IDSuccessBanner.swift in Sources */,
 				482D2BC82A547AC000F1344F /* CGSize+Utils.swift in Sources */,
 				482D2BCA2A547AC000F1344F /* CIImage+Utils.swift in Sources */,
@@ -1170,6 +1170,7 @@
 				483BDB0F28F459CC00635BCC /* AppDelegate.swift in Sources */,
 				48DD2F2D2B8DD57D0091FCCE /* SDKNewLivenessViewController.swift in Sources */,
 				48CD8D0129792D5A008573F8 /* SDKLangManager.swift in Sources */,
+				8D91F2042FCE34DB000B56ED /* IdentifyNavigationCoordinatorView.swift in Sources */,
 				488B29FB2E05BFDC00D1B6A0 /* Env.xcdatamodeld in Sources */,
 				48E8E43129266B8A0045C3F8 /* SDKSpeechRecViewController.swift in Sources */,
 				36BF33502E572348007F92CE /* SDKReachabilityHelper.swift in Sources */,
@@ -1196,7 +1197,6 @@
 				36E1B3BF2EAA42FB004F791C /* SDKOVDViewController.swift in Sources */,
 				485C155D2907F3A7007B9ED0 /* SDKUIImageView+.swift in Sources */,
 				485C157C2908190D007B9ED0 /* SDKNfcViewController.swift in Sources */,
-				8AB276EF2F749DB600A764F1 /* IdentifyRootView.swift in Sources */,
 				8AB276D92F749D9900A764F1 /* IdCardView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

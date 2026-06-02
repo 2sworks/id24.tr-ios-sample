@@ -8,6 +8,7 @@
 import UIKit
 import MobileCoreServices
 import PDFKit
+import VisionKit
 
 class SDKAddressConfirmViewController: SDKBaseViewController {
 
@@ -122,12 +123,8 @@ class SDKAddressConfirmViewController: SDKBaseViewController {
     
     private func openScanner() {
         DispatchQueue.main.async {
-            let scannerViewController = ImageScannerController(enabledAutoCapture: false, scannerMode: .addressScan)
-            scannerViewController.imageScannerDelegate = self
-            scannerViewController.navigationBar.backgroundColor = IdentifyTheme.grayColor
-            scannerViewController.navigationBar.tintColor = IdentifyTheme.whiteColor
-            scannerViewController.toolbar.backgroundColor = IdentifyTheme.grayColor
-            scannerViewController.toolbar.tintColor = IdentifyTheme.grayColor
+            let scannerViewController = VNDocumentCameraViewController()
+            scannerViewController.delegate = self
             scannerViewController.modalPresentationStyle = .fullScreen
             scannerViewController.isModalInPresentation = true
             self.present(scannerViewController, animated: true)
@@ -273,23 +270,31 @@ extension SDKAddressConfirmViewController: UIDocumentPickerDelegate, UINavigatio
 }
 
 
-extension SDKAddressConfirmViewController: ImageScannerControllerDelegate {
-    func imageScannerController(_ scanner: ImageScannerController, didFinishScanningWithResults results: ImageScannerResults) {
-        docPhoto.image = results.croppedScan.image
-        docImg = results.croppedScan.image
-        self.idPhoto = results.croppedScan.image.jpegData(compressionQuality: 0.9)?.base64EncodedString() ?? ""
+extension SDKAddressConfirmViewController: VNDocumentCameraViewControllerDelegate {
+
+    func documentCameraViewController(
+        _ controller: VNDocumentCameraViewController,
+        didFinishWith scan: VNDocumentCameraScan
+    ) {
+        guard scan.pageCount > 0 else { return }
+        let image = scan.imageOfPage(at: 0)
+        docPhoto.image = image
+        docImg = image
+        self.idPhoto = image.jpegData(compressionQuality: 0.9)?.base64EncodedString() ?? ""
         checkSubmitAvailablity()
-        scanner.dismiss(animated: true)
+        controller.dismiss(animated: true)
     }
-    
-    func imageScannerControllerDidCancel(_ scanner: ImageScannerController) {
-        scanner.dismiss(animated: true)
+
+    func documentCameraViewControllerDidCancel(_ controller: VNDocumentCameraViewController) {
+        controller.dismiss(animated: true)
     }
-    
-    func imageScannerController(_ scanner: ImageScannerController, didFailWithError error: Error) {
+
+    func documentCameraViewController(
+        _ controller: VNDocumentCameraViewController,
+        didFailWithError error: Error
+    ) {
         print(error.localizedDescription)
     }
-    
 }
 
 extension SDKAddressConfirmViewController: UITextViewDelegate {
