@@ -122,8 +122,6 @@
 		550AE9107083A6A29912D89A /* InterDisplay-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = 4BD9858D6CD105DE3D390E82 /* InterDisplay-Medium.otf */; };
 		5EF5FCE08E7A1B091C76F8CB /* Inter-SemiBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 86E8075DD493887BE5B89DE3 /* Inter-SemiBold.otf */; };
 		73E70933C4B006794A8CAEE5 /* InterDisplay-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 0DEE8510B1495089CB181277 /* InterDisplay-Bold.otf */; };
-		8AACA69D2F749FE800613630 /* IdentifySDK-v3.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8AACA69B2F749FDF00613630 /* IdentifySDK-v3.xcframework */; };
-		8AACA69E2F749FE800613630 /* IdentifySDK-v3.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 8AACA69B2F749FDF00613630 /* IdentifySDK-v3.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		8AB276B52F749CE100A764F1 /* BaseModuleViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB276B42F749CE100A764F1 /* BaseModuleViewModel.swift */; };
 		8AB276B72F749CEF00A764F1 /* SDKModuleHostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB276B62F749CEF00A764F1 /* SDKModuleHostView.swift */; };
 		8AB276B92F749D1900A764F1 /* AppStateViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB276B82F749D1900A764F1 /* AppStateViewModel.swift */; };
@@ -160,6 +158,8 @@
 		8D91F2002FCE34C1000B56ED /* IdentifyNavigationFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D91F1FF2FCE34C1000B56ED /* IdentifyNavigationFlow.swift */; };
 		8D91F2022FCE34D3000B56ED /* AppNavigationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D91F2012FCE34D3000B56ED /* AppNavigationCoordinator.swift */; };
 		8D91F2042FCE34DB000B56ED /* IdentifyNavigationCoordinatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D91F2032FCE34DB000B56ED /* IdentifyNavigationCoordinatorView.swift */; };
+		8DB74A7A2FCF9AAD00C204AA /* IdentifySDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8DB74A792FCF9AAD00C204AA /* IdentifySDK.framework */; };
+		8DB74A7B2FCF9AAD00C204AA /* IdentifySDK.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 8DB74A792FCF9AAD00C204AA /* IdentifySDK.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		A3685880DB672112C8813187 /* Inter-ExtraBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 38048F44665FE13EEA336ECC /* Inter-ExtraBold.otf */; };
 		A64CBB010C60D1F3F19BDA41 /* Inter-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = BB04BC2A7F7C84F720B6EC49 /* Inter-Medium.otf */; };
 		AC88C1958129FFD344225CFD /* Inter-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 39346948B312B0D65EA4C0B6 /* Inter-Bold.otf */; };
@@ -169,13 +169,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		481000332AFA7D9200EBA869 /* Embed Frameworks */ = {
+		8DB74A7C2FCF9AAD00C204AA /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				8AACA69E2F749FE800613630 /* IdentifySDK-v3.xcframework in Embed Frameworks */,
+				8DB74A7B2FCF9AAD00C204AA /* IdentifySDK.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -346,6 +346,7 @@
 		8D91F1FF2FCE34C1000B56ED /* IdentifyNavigationFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifyNavigationFlow.swift; sourceTree = "<group>"; };
 		8D91F2012FCE34D3000B56ED /* AppNavigationCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppNavigationCoordinator.swift; sourceTree = "<group>"; };
 		8D91F2032FCE34DB000B56ED /* IdentifyNavigationCoordinatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifyNavigationCoordinatorView.swift; sourceTree = "<group>"; };
+		8DB74A792FCF9AAD00C204AA /* IdentifySDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = IdentifySDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B2B1C42BCD3EDB5A4705FBCA /* Inter-Regular.otf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; path = "Inter-Regular.otf"; sourceTree = "<group>"; };
 		BB04BC2A7F7C84F720B6EC49 /* Inter-Medium.otf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; path = "Inter-Medium.otf"; sourceTree = "<group>"; };
 		DF7BC1692D4A279600372CAB /* Env.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Env.xcdatamodel; sourceTree = "<group>"; };
@@ -365,11 +366,11 @@
 				48420BA72A8B61840005250F /* WebRTC in Frameworks */,
 				4857BFF82902D621001FE850 /* OpenSSL in Frameworks */,
 				4831E1F32B69284400B67891 /* IQKeyboardManagerSwift in Frameworks */,
-				8AACA69D2F749FE800613630 /* IdentifySDK-v3.xcframework in Frameworks */,
 				48171405294716830095A64F /* netfox in Frameworks */,
 				48F0867829F7CA4E00FCA4BF /* QKMRZScanner in Frameworks */,
 				4857BFFB2902D636001FE850 /* Starscream in Frameworks */,
 				48D802292924F6B000B9BB83 /* CHIOTPField in Frameworks */,
+				8DB74A7A2FCF9AAD00C204AA /* IdentifySDK.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -571,6 +572,7 @@
 		8A6DA0202F55B9C30070041C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				8DB74A792FCF9AAD00C204AA /* IdentifySDK.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -949,7 +951,7 @@
 				483BDB0728F459CC00635BCC /* Sources */,
 				483BDB0828F459CC00635BCC /* Frameworks */,
 				483BDB0928F459CC00635BCC /* Resources */,
-				481000332AFA7D9200EBA869 /* Embed Frameworks */,
+				8DB74A7C2FCF9AAD00C204AA /* Embed Frameworks */,
 			);
 			buildRules = (
 			);

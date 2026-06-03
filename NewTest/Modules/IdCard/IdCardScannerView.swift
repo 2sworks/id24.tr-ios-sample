@@ -2,13 +2,13 @@
 //  IdCardScannerView.swift
 //  NewTest
 //
-//  VisionKit (VNDocumentCameraViewController) tabanlı belge tarayıcı.
-//  OpenScanner projesindeki DocumentCameraWrapper yaklaşımı adapte edilmiştir.
-//  Coordinator push ile açılır; tarama bitince callback çağrılıp pop yapılır.
+//  Gerçek zamanlı kimlik tarayıcı. SDK'daki IdentityScannerView (otomatik
+//  yakalama: dikdörtgen tespiti + kalite + kararlılık) kullanılır. Yakalanan
+//  kart görüntüsü coordinator.onScanComplete ile geri verilir ve pop edilir.
 //
 
 import SwiftUI
-import VisionKit
+import IdentifySDK
 
 // MARK: - IdCardScannerView
 
@@ -18,74 +18,55 @@ struct IdCardScannerView: View {
     @EnvironmentObject private var coordinator: AppNavigationCoordinator
 
     var body: some View {
-        DocumentCameraView(
-            onScan: { image in
-                coordinator.onScanComplete?(image)
-                coordinator.onScanComplete = nil
-                coordinator.pop()
-            },
-            onCancel: {
-                coordinator.onScanComplete = nil
-                coordinator.pop()
+        ZStack(alignment: .topLeading) {
+            IdentityScannerView(config: scannerConfig) { result in
+                finish(with: result.cardImage)
             }
-        )
-        .ignoresSafeArea()
+            .ignoresSafeArea()
+
+            closeButton
+                .padding(.leading, IDSpacing.lg)
+                .padding(.top, IDSpacing.lg)
+        }
         .navigationBarHidden(true)
         .navigationBarBackButtonHidden(true)
     }
-}
 
-// MARK: - DocumentCameraView (UIViewControllerRepresentable)
+    // MARK: - Config
 
-private struct DocumentCameraView: UIViewControllerRepresentable {
-
-    let onScan: (UIImage) -> Void
-    let onCancel: () -> Void
-
-    func makeUIViewController(context: Context) -> VNDocumentCameraViewController {
-        let vc = VNDocumentCameraViewController()
-        vc.delegate = context.coordinator
-        return vc
+    private var scannerConfig: IdentityScannerConfig {
+        var config = IdentityScannerConfig()
+        // Arka yüzde TR anahtar kelimeleri (TÜRKİYE CUMHURİYETİ) bulunmaz; MRZ
+        // tarafında metin teyidini zorunlu tutma.
+        if side == .back {
+            config.requireTurkishKeyword = false
+        }
+        return config
     }
 
-    func updateUIViewController(_ uiViewController: VNDocumentCameraViewController, context: Context) {}
+    // MARK: - Actions
 
-    func makeCoordinator() -> Coordinator {
-        Coordinator(onScan: onScan, onCancel: onCancel)
+    private func finish(with image: UIImage?) {
+        guard let image = image else { return }   // yakalama başarısız: ekranda kal
+        coordinator.onScanComplete?(image)
+        coordinator.onScanComplete = nil
+        coordinator.pop()
     }
 
-    // MARK: - Coordinator / VNDocumentCameraViewControllerDelegate
+    private func cancel() {
+        coordinator.onScanComplete = nil
+        coordinator.pop()
+    }
 
-    final class Coordinator: NSObject, VNDocumentCameraViewControllerDelegate {
+    // MARK: - UI
 
-        let onScan: (UIImage) -> Void
-        let onCancel: () -> Void
-
-        init(onScan: @escaping (UIImage) -> Void, onCancel: @escaping () -> Void) {
-            self.onScan = onScan
-            self.onCancel = onCancel
-        }
-
-        func documentCameraViewController(
-            _ controller: VNDocumentCameraViewController,
-            didFinishWith scan: VNDocumentCameraScan
-        ) {
-            guard scan.pageCount > 0 else { onCancel(); return }
-            let image = scan.imageOfPage(at: 0)
-            controller.dismiss(animated: true) { [weak self] in
-                self?.onScan(image)
-            }
-        }
-
-        func documentCameraViewControllerDidCancel(_ controller: VNDocumentCameraViewController) {
-            onCancel()
-        }
-
-        func documentCameraViewController(
-            _ controller: VNDocumentCameraViewController,
-            didFailWithError error: Error
-        ) {
-            onCancel()
+    private var closeButton: some View {
+        Button(action: cancel) {
+            Image(systemName: "chevron.left")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(.white)
+                .frame(width: 40, height: 40)
+                .background(Circle().fill(Color.black.opacity(0.45)))
         }
     }
 }

@@ -32,7 +32,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func startSwiftUIScreen() {
         self.window = UIWindow(frame: UIScreen.main.bounds)
         // Coordinator + AppState IdentifyNavigationCoordinatorView içinde @StateObject olarak yaşar.
-        let rootView = IdentifyNavigationCoordinatorView()
+        let rootView = IdCardScannerView(side: .front)
         let hostingVC = UIHostingController(rootView: rootView)
         self.window?.rootViewController = hostingVC
         self.window?.makeKeyAndVisible()
