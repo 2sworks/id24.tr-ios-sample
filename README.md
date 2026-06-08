@@ -3,6 +3,19 @@ Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.
 
 # Son Güncellemeler
 
+### SDK 2.5.6:
+- `selfieWithLiveness` modülü eklendi,
+- `uploadIdPhoto` fonksiyonuna `withLiveness: Bool = false` parametresi eklendi; `true` gönderildiğinde socket mesajı `uploadSelfieWithLiveness` olarak iletiliyor.
+- `sendLivenessReport(metrics:detectedActions:)` yeni public fonksiyon — canlılık ölçümlerini socket üzerinden `liveness_report` action'ıyla gönderiyor.
+- Backend'den `liveness_report` ve `liveness_report_interval` alanları okunarak `livenessReportEnabled` ve `livenessReportInterval` property'leri set ediliyor.
+- `selfieWithLiveness` modülünde,`selfieComparisonCount` bazlı retry/exit akışı: karşılaştırma başarısız olduğunda sayaca göre yeniden deneme veya çıkış tetikleniyor.
+- `WebRTCClient` — liveness için kamera alan/space yönetimi güncellendi, crash fix uygulandı.
+
+### Build 200:
+- `SDKSelfieWithLivenessViewController` yeni modül ekranı eklendi (modül akışına dahil, `.xib` destekli).
+- `SDKModuleListViewController` — modül listesine `.selfieWithLiveness` eklendi.
+- `SDKCallScreenViewController` — görüntülü görüşme başladığında `setupLiveness` / `startLiveness`, bitişte ve bağlantı koptuğunda `stopLiveness` eklendi.
+
 ### SDK 2.5.5:
 - NFC okuma anahtarları (seri no, doğum tarihi, geçerlilik tarihi) backend'e AES-256-CBC ile şifreli olarak gönderilebilir hale getirildi (`updateReadNFCKeys`).
 - OCR'da TCKN doğruluğu artırıldı: harf/rakam karışmaları (örn. O→0, I→1) düzeltilerek Luhn algoritmasıyla kontrol eklendi.
