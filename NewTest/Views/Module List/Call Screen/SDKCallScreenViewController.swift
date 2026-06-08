@@ -54,11 +54,13 @@ class SDKCallScreenViewController: SDKBaseViewController {
         self.manager.socketMessageListener = self
         navigationItem.rightBarButtonItem = nil
         self.navigationItem.hidesBackButton = true
+        setupLiveness()
     }
     
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         self.confStarted = false
+        stopLiveness()
     }
     
     
@@ -126,13 +128,12 @@ class SDKCallScreenViewController: SDKBaseViewController {
     }
     
     private func start2SideTransfer() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4, execute: {
-            self.setupCameras()
-            self.hideLoader()
-        })
+        setupCameras()
+        startLiveness()
     }
     
     private func callIsDone(doneStatus: CallStatus) {
+        stopLiveness()
         self.manager.forceQuitSDK()
         let x  = SDKThankYouViewController()
         x.completeStatus = doneStatus
@@ -152,6 +153,7 @@ class SDKCallScreenViewController: SDKBaseViewController {
     }
     
     func closeByUser() {
+        stopLiveness()
         self.manager.terminateCallByUser { resp in
             if resp {
                 let x = SDKThankYouViewController()
@@ -166,6 +168,7 @@ class SDKCallScreenViewController: SDKBaseViewController {
     override func reconnectCompletedWithStatus(isWaitingRoom: Bool, statusType: String?) {
         if isWaitingRoom {
             print("reconnect: Waiting Room'a dönülüyor")
+            stopLiveness()
             DispatchQueue.main.async {
                 self.setupCallScreen(inCall: false)
             }
@@ -186,12 +189,6 @@ extension SDKCallScreenViewController: CallScreenDelegate {
             if let _ = connected, !connected! {
                 self.showToast(title: self.translate(text: .coreError), subTitle: errMsg?.errorMessages ?? "", attachTo: self.view) {
                     return
-                }
-            } else {
-                if sdpConnOk! { // sdp bağlantısı kuruldu
-                    DispatchQueue.main.async {
-                        self.showLoader()
-                    }
                 }
             }
         }
@@ -217,6 +214,7 @@ extension SDKCallScreenViewController: SDKSocketListener {
             self.openSMS()
             print("sms geliyor")
         case .endCall:
+            stopLiveness()
             manager.socket.disconnect()
             print("görüşme tamamlandı, sonraki modüle geçebiliriz")
             
@@ -271,6 +269,7 @@ extension SDKCallScreenViewController: SDKSocketListener {
         case .imOffline:
             print("bağlantı kopartıldı - panelde sayfa yenilendi - browser kapatıldı")
             confStarted = false
+            stopLiveness()
             setupCallScreen(inCall: false)
         case .updateQueue(let order, let min):
             
@@ -300,10 +299,7 @@ extension SDKCallScreenViewController: SDKSocketListener {
             self.present(editVC, animated: true)
             
         case .startTransfer:
-            self.showToast(title: "Kameranız ayarlanıyor, lütfen bekleyin", attachTo: self.view) {
-                self.start2SideTransfer()
-                return
-            }
+            DispatchQueue.main.async { [weak self] in self?.start2SideTransfer() }
             print("yüz yüze görüşme başlıyor")
         case .disableEndCallButton:
             if topMostController().isKind(of: UIAlertController.self) {
@@ -334,6 +330,7 @@ extension SDKCallScreenViewController: SDKSocketListener {
                 }
             }
         case .missedCall: // belirli süre boyunca telefon çaldı fakat müşteri açmadı veya temsilci aradı fakat telefon açılmadan aramayı sonlandırdı
+            stopLiveness()
             self.listenToSocketConnection(callCompleted: true)
             setupCallScreen(inCall: false)
             self.dismiss(animated: true) {

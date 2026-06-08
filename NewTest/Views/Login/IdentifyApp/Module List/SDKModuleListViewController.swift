@@ -18,7 +18,7 @@ class SDKModuleListViewController: SDKBaseViewController {
     @IBOutlet weak var saveBtn: IdentifyButton!
     weak var updateDelegate: SDKManualModulDelegate?
     
-    var identifyModules:[SdkModules]? = [.prepare, .idCard, .idcard_w_ovd, .nfc, .livenessDetection, .speech, .addressConf, .signature, .videoRecord, .selfie, .waitScreen]
+    var identifyModules:[SdkModules]? = [.prepare, .idCard, .idcard_w_ovd, .nfc, .livenessDetection, .speech, .addressConf, .signature, .videoRecord, .selfie, .waitScreen, .selfieWithLiveness]
     var list = [SdkModules]()
 
     override func viewDidLoad() {
@@ -51,7 +51,7 @@ class SDKModuleListViewController: SDKBaseViewController {
     }
     
     private func appendAllModules() {
-        self.identifyModules = [.prepare, .idCard, .idcard_w_ovd, .nfc, .livenessDetection, .speech, .addressConf, .signature, .videoRecord, .selfie, .waitScreen]
+        self.identifyModules = [.prepare, .idCard, .idcard_w_ovd, .nfc, .livenessDetection, .speech, .addressConf, .signature, .videoRecord, .selfie, .waitScreen, .selfieWithLiveness]
     }
     
     private func removeAllModules() {
