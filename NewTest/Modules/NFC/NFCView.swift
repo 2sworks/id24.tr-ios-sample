@@ -107,3 +107,7 @@ struct NFCEditView: View {
         }
     }
 }
+
+#Preview {
+    NFCView()
+}

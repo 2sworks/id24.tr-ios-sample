@@ -83,3 +83,7 @@ struct SelfieView: View {
         }
     }
 }
+
+#Preview {
+    SelfieView()
+}
