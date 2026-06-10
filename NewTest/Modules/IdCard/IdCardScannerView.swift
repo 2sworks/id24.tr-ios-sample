@@ -5,8 +5,13 @@
 //  Gerçek zamanlı kimlik tarayıcı. SDK'daki IdentityScannerView kullanılır.
 //
 //  Tarayıcı pipeline:
-//    Kamera → Dikdörtgen tespiti (Quadrilateral) → Kalite analizi
-//    → Güven/Kararlılık → Türkçe doğrulama → OCR → IdentityResult
+//    Kamera → Dikdörtgen tespiti (Quadrilateral) → Kararlılık analizi
+//    → Profil stratejisi (MRZ / imageOnly) → RecognizedDocument
+//
+//  Kart tipi → DocumentProfile eşlemesi:
+//    .idCard    → .turkishID   (TC Kimlik, MRZ tabanlı)
+//    .passport  → .passport    (ICAO MRZ)
+//    .oldSchool → .generic     (eski kimlik, sadece görüntü)
 //
 //  Yakalanan kart görüntüsü coordinator.onScanComplete ile geri verilir.
 //
@@ -24,10 +29,15 @@ struct IdCardScannerView: View {
     var body: some View {
         ZStack(alignment: .topLeading) {
             IdentityScannerView(
-                config: scannerConfig,
-                uiConfig: scannerUIConfig
+                profile: documentProfile,
+                style: quadStyle
             ) { result in
-                finish(with: result.cardImage)
+                switch result {
+                case .success(let doc):
+                    finish(with: doc.croppedImage)
+                case .failure:
+                    cancel()
+                }
             }
             .ignoresSafeArea()
 
@@ -39,64 +49,32 @@ struct IdCardScannerView: View {
         .navigationBarBackButtonHidden(true)
     }
 
-    // MARK: - Pipeline config
+    // MARK: - Document Profile
 
-    private var scannerConfig: IdentityScannerConfig {
-        var config = IdentityScannerConfig()
-        config.documentType = side == .back ? TurkishIDBackSpec() : TurkishIDFrontSpec()
-        return config
+    private var documentProfile: DocumentProfile {
+        switch IdentifyManager.shared.selectedCardType {
+        case .passport:
+            return .passport
+        case .oldSchool:
+            return .generic
+        default:
+            return side == .back ? .turkishIDBack : .turkishIDFront
+        }
     }
 
-    // MARK: - UI config
-    //
-    // IdentityScannerUIConfig ile tarayıcının tüm görsel ve metin özellikleri
-    // bu katmandan özelleştirilebilir. Quadrilateral overlay, hint banner,
-    // sonuç paneli ve renk teması burada tanımlanır.
-    //
-    // Özelleştirilebilir tüm alanlar:
-    //   - idleGuideColor / activeGuideColor     → kart çerçevesi renkleri
-    //   - guideLineWidth / activeGuideLineWidth  → çizgi kalınlığı
-    //   - guideCornerRadius                     → statik rehber köşe yuvarlama
-    //   - hintSearching / hintDetected / …      → banner metinleri
-    //   - showsResultPanel                      → yerleşik sonuç paneli açık/kapalı
-    //   - resultPanelTitle / rescanButtonTitle   → panel başlık/buton metinleri
+    // MARK: - Quad Style
 
-    private var scannerUIConfig: IdentityScannerUIConfig {
-        var ui = IdentityScannerUIConfig()
-
-        // Quadrilateral overlay renkleri — uygulama ana rengine uyarla
-        ui.idleGuideColor       = IDColor.primary.opacity(0.55)
-        ui.activeGuideColor     = IDColor.primary
-        ui.guideLineWidth       = 2
-        ui.activeGuideLineWidth = 3.5
-
-        // Hint metinleri — uygulamanın dil sistemine göre güncellenebilir
-        let lang = IdentifyManager.shared.sdkLang ?? .tr
-        switch lang {
-        case .eng:
-            ui.hintSearching  = "Place your ID card in the frame"
-            ui.hintDetected   = "Hold still…"
-            ui.hintBlurry     = "Move closer / hold steady"
-            ui.hintGlare      = "Tilt to reduce glare"
-            ui.hintTooDark    = "More light needed"
-            ui.hintTooBright  = "Too bright"
-            ui.hintCapturing  = "Capturing…"
-            ui.hintProcessing = "Processing…"
-            ui.hintDone       = "Done"
-        default: // Türkçe varsayılan
-            break  // IdentityScannerUIConfig zaten Türkçe varsayılanlarla gelir
-        }
-
-        // Sonuç panelini gösterme — sonuç coordinator üzerinden işleniyor
-        ui.showsResultPanel = false
-
-        return ui
+    private var quadStyle: QuadrilateralStyle {
+        QuadrilateralStyle(
+            strokeColor: IDColor.primary.opacity(0.55),
+            lockedStrokeColor: IDColor.primary,
+            lineWidth: 2.5
+        )
     }
 
     // MARK: - Actions
 
-    private func finish(with image: UIImage?) {
-        guard let image = image else { return }
+    private func finish(with image: UIImage) {
         coordinator.onScanComplete?(image)
         coordinator.onScanComplete = nil
         coordinator.pop()

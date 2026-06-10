@@ -84,6 +84,7 @@ struct LoginView: View {
                 .padding(.vertical, IDSpacing.lg)
             }
         }
+        .ignoresSafeArea(.keyboard)
         .navigationBarHidden(true)
         .overlay {
             if appState.isLoading {
@@ -289,12 +290,11 @@ private struct StyledTextField: View {
 
     var body: some View {
         ZStack(alignment: .leading) {
-            if text.isEmpty {
-                Text(placeholder)
-                    .font(IDFont.bodySmall())
-                    .foregroundColor(IDColor.inkLight)
-                    .allowsHitTesting(false)
-            }
+            Text(placeholder)
+                .font(IDFont.bodySmall())
+                .foregroundColor(IDColor.inkLight)
+                .allowsHitTesting(false)
+                .opacity(text.isEmpty ? 1 : 0)
             TextField("", text: $text)
                 .font(IDFont.bodySmall())
                 .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
@@ -303,7 +303,7 @@ private struct StyledTextField: View {
                 .disableAutocorrection(true)
         }
         .padding(.horizontal, IDSpacing.lg)
-        .padding(.vertical, IDSpacing.md + 2)
+        .frame(height: 50)
         .background(
             RoundedRectangle(cornerRadius: IDRadius.md)
                 .fill(IDColor.adaptiveSurface(for: colorScheme))
@@ -319,9 +319,33 @@ private struct StyledTextField: View {
 
 private struct IdentIdFormView: View {
     @Binding var identId: String
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
-        StyledTextField(placeholder: "Ident ID", text: $identId)
+        HStack(spacing: IDSpacing.sm) {
+            StyledTextField(placeholder: "Ident ID", text: $identId)
+
+            Button {
+                if let copied = UIPasteboard.general.string {
+                    identId = copied
+                }
+            } label: {
+                Image(systemName: "doc.on.clipboard")
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundColor(IDColor.primary)
+                    .frame(width: 44)
+                    .frame(maxHeight: .infinity)
+                    .background(
+                        RoundedRectangle(cornerRadius: IDRadius.md)
+                            .fill(IDColor.adaptiveSurface(for: colorScheme))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: IDRadius.md)
+                                    .stroke(IDColor.inkBorder, lineWidth: 1)
+                            )
+                    )
+            }
+            .buttonStyle(.plain)
+        }
     }
 }
 
@@ -380,7 +404,7 @@ private struct ProjectPickerField: View {
                 .foregroundColor(IDColor.inkLight)
         }
         .padding(.horizontal, IDSpacing.lg)
-        .padding(.vertical, IDSpacing.md + 2)
+        .frame(height: 50)
         .background(
             RoundedRectangle(cornerRadius: IDRadius.md)
                 .fill(IDColor.adaptiveSurface(for: colorScheme))

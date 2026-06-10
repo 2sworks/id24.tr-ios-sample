@@ -44,9 +44,10 @@ extension SdkModules {
         case .addressConf:       return .addressConfirm
         case .signature:         return .signature
         case .videoRecord:       return .videoRecorder
-        case .selfie:            return .selfie
-        case .waitScreen:        return .callScreen
-        case .thankU:            return .thankYou
+        case .selfie:                return .selfie
+        case .selfieWithLiveness:    return .selfie
+        case .waitScreen:            return .callScreen
+        case .thankU:                return .thankYou
         }
     }
 }

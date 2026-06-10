@@ -53,14 +53,15 @@ final class IdCardViewModel: BaseModuleViewModel {
                 } else {
                     self.frontPhoto = image
                     if self.manager.selectedCardType == .passport {
-                        // Pasaport: startFrontIdOcr sdkFrontInfo'yu doldurur,
-                        // ardından MRZ key extraction zinciri başlatılır.
                         self.scanPassport(image: image,
                                           comingData: self.manager.sdkFrontInfo,
                                           appState: appState)
                     } else {
                         self.resultText = "On yuz okundu"
                         self.currentSide = .back
+                        // Ön yüzü sunucuya gönder; canContinue arka yüzde set edilir.
+                        self.uploadPhoto(image: image, type: .frontId,
+                                         completesFlow: false, appState: appState)
                     }
                 }
             }
@@ -89,7 +90,8 @@ final class IdCardViewModel: BaseModuleViewModel {
 
     // MARK: - Upload
 
-    func uploadPhoto(image: UIImage, type: OCRType, appState: AppStateViewModel) {
+    /// `completesFlow`: arka yüz gibi akışı tamamlayan upload'larda `true`, ön yüzde `false`.
+    func uploadPhoto(image: UIImage, type: OCRType, completesFlow: Bool = true, appState: AppStateViewModel) {
         isLoading = true
         manager.uploadIdPhoto(idPhoto: image, selfieType: type) { [weak self] webResp in
             Task { @MainActor in
@@ -97,7 +99,7 @@ final class IdCardViewModel: BaseModuleViewModel {
                 self.isLoading = false
                 if webResp.result == true {
                     self.resultText = "Yukleme basarili"
-                    self.canContinue = true
+                    if completesFlow { self.canContinue = true }
                 } else {
                     self.manager.tryedOcrComparisonCount += 1
                     if self.manager.tryedOcrComparisonCount >= self.manager.ocrComparisonCount {

@@ -9,6 +9,17 @@ import UIKit
 import ARKit
 import IdentifySDK
 
+// IdentifyProgressBar was removed from the SDK; minimal stub to keep this file compiling.
+fileprivate class IdentifyProgressBar: UIView {
+    var trackColor: UIColor = .darkGray
+    var gradients: [UIColor] = []
+    var lineDashPattern: [NSNumber] = []
+    var font: UIFont = .systemFont(ofSize: 14)
+    var textColor: UIColor = .white
+    var lineHeight: CGFloat = 4
+    var progress: Double = 0
+}
+
 class SDKNewLivenessViewController: SDKBaseViewController {
 
     @IBOutlet weak var myCam: ARSCNView!
@@ -24,7 +35,7 @@ class SDKNewLivenessViewController: SDKBaseViewController {
     var currentLivenessType: OCRType? = .selfie
     @IBOutlet weak var pauseView: UIView!
     @IBOutlet weak var resetCamBtn: IdentifyButton!
-    let progressBar = IdentifyProgressBar()
+    fileprivate let progressBar = IdentifyProgressBar()
     let maskedView = MaskedView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height))
     var currentBackColor = UIColor.black.withAlphaComponent(0.8)
     var counter: Double = 0
