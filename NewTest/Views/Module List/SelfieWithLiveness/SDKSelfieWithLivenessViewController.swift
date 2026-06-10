@@ -158,15 +158,9 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
 
     private func setupDebugLabel() {
         debugLabel = UILabel()
-        debugLabel.text = ""
-        debugLabel.textColor = .yellow
-        debugLabel.backgroundColor = UIColor.black.withAlphaComponent(0.6)
-        debugLabel.textAlignment = .left
-        debugLabel.numberOfLines = 0
-        debugLabel.font = .monospacedSystemFont(ofSize: 10, weight: .regular)
+        debugLabel.isHidden = true
         debugLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(debugLabel)
-
         NSLayoutConstraint.activate([
             debugLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
             debugLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 8),
@@ -427,7 +421,6 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
         hyst_tooClose = false
         hyst_tooFar   = false
         overlayMask.isHidden = false
-        debugLabel.isHidden = false
         hideLoader()
         faceProgressLoader.setProgress(0, animated: false)
         faceProgressLoader.updateRingColors(
