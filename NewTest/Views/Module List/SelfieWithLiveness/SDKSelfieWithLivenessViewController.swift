@@ -51,7 +51,6 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
     private var overlayMask: FaceOvalMaskView!
     private var faceProgressLoader: FaceProgressLoader!
     private var instructionLabel: UILabel!
-    private var debugLabel: UILabel!
 
     private let configuration = ARFaceTrackingConfiguration()
     private let config = SelfieDepthConfig()
@@ -119,7 +118,6 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
         view.addSubview(faceProgressLoader)
 
         setupInstructionLabel()
-        setupDebugLabel()
         pinToEdges(arView)
         pinToEdges(overlayMask)
         pinToEdges(faceProgressLoader)
@@ -154,82 +152,6 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
             instructionLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
             instructionLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24)
         ])
-    }
-
-    private func setupDebugLabel() {
-        debugLabel = UILabel()
-        debugLabel.isHidden = true
-        debugLabel.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(debugLabel)
-        NSLayoutConstraint.activate([
-            debugLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
-            debugLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 8),
-            debugLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8)
-        ])
-    }
-
-    private func updateDebugInfo(faceAnchor: ARFaceAnchor) {
-        let col     = faceAnchor.transform.columns.3
-        let depth   = Double(abs(col.z))
-        let depthCm = depth * 100
-
-        let oval = ovalRect(in: view.bounds)
-        let proj = arView.projectPoint(SCNVector3(col.x, col.y, col.z))
-        let px   = CGFloat(proj.x)
-        let py   = CGFloat(proj.y)
-
-        let dx      = (px - oval.midX) / (oval.width  / 2)
-        let dy      = (py - oval.midY) / (oval.height / 2)
-        let ellipse = dx * dx + dy * dy
-
-        let depthZone: String
-        if depth < config.closeEnterDepth    { depthZone = "YAKINDA ⚠️  (<\(Int(config.closeEnterDepth * 100))cm)" }
-        else if depth > config.farEnterDepth { depthZone = "UZAKTA  ⚠️  (>\(Int(config.farEnterDepth * 100))cm)" }
-        else                                 { depthZone = "OK ✓  (\(Int(config.closeEnterDepth * 100))-\(Int(config.farEnterDepth * 100))cm)" }
-
-        var camZ: Float = 0
-        var camX: Float = 0
-        var camY: Float = 0
-        if let frame = arView.session.currentFrame {
-            let cs = simd_mul(simd_inverse(frame.camera.transform), faceAnchor.transform)
-            camZ = cs.columns.2.z
-            camX = cs.columns.2.x
-            camY = cs.columns.2.y
-        }
-
-        let centerOk = ellipse < 0.36
-        let fwdOk    = camZ > config.fwdMinThreshold
-        let yawOk    = abs(camX) < config.yawMaxThreshold
-        let pitchOk  = abs(camY) < config.pitchMaxThreshold
-
-        var failReasons: [String] = []
-        if !centerOk { failReasons.append("merkez") }
-        if !fwdOk    { failReasons.append("fwd(\(String(format: "%.3f", camZ)))>\(String(format: "%.2f", config.fwdMinThreshold))") }
-        if !yawOk    { failReasons.append("yaw(\(String(format: "%.3f", camX)))<\(String(format: "%.2f", config.yawMaxThreshold))") }
-        if !pitchOk  { failReasons.append("pitch(\(String(format: "%.3f", camY)))<\(String(format: "%.2f", config.pitchMaxThreshold))") }
-        let fitStr = failReasons.isEmpty ? "OK ✓" : "REDDEDİLDİ: \(failReasons.joined(separator: ","))"
-
-        let stateStr: String
-        switch state {
-        case .warmingUp:    stateStr = "warmingUp(\(warmupFrameCounter)/\(config.warmupFrameCount))"
-        case .idle:         stateStr = "idle"
-        case .faceDetected: stateStr = "faceDetected"
-        case .holding:      stateStr = "holding"
-        case .verified:     stateStr = "verified"
-        }
-
-        debugLabel.text = """
-        — MESAFE — \(String(format: "%.1f", depthCm)) cm   \(depthZone)
-          close: enter<\(Int(config.closeEnterDepth*100))cm  exit>\(Int(config.closeExitDepth*100))cm  hyst:\(hyst_tooClose)
-          far:   enter>\(Int(config.farEnterDepth*100))cm  exit<\(Int(config.farExitDepth*100))cm  hyst:\(hyst_tooFar)
-        — FIT (kamera uzayı) — \(fitStr)
-          merkez=\(String(format: "%.3f", ellipse))<0.36
-          fwd(col2.z)=\(String(format: "%.3f", camZ))>\(String(format: "%.2f", config.fwdMinThreshold))
-          yaw(col2.x)=\(String(format: "%.3f", camX))<\(String(format: "%.2f", config.yawMaxThreshold))
-          pitch(col2.y)=\(String(format: "%.3f", camY))<\(String(format: "%.2f", config.pitchMaxThreshold))
-        — STATE — \(stateStr)
-          ok:\(okFrameCounter)/\(config.okFrameThreshold)  bad:\(badFrameCounter)/\(config.badFrameThreshold)
-        """
     }
 
     // MARK: - Session
@@ -318,7 +240,6 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
     // MARK: - Face Detection Logic
 
     private func handleFaceDetected(_ faceAnchor: ARFaceAnchor) {
-        updateDebugInfo(faceAnchor: faceAnchor)
         guard state != .verified, state != .warmingUp else { return }
 
         let condition = evaluateConditions(faceAnchor: faceAnchor)
@@ -376,7 +297,6 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
         conditionInstructionFrames  = 0
         faceProgressLoader.setProgress(0, animated: false)
         setInstruction("Yüzünüzü çerçeve içinde tutun")
-        debugLabel.text = "— YÜZ ALGILANMIYOR —"
     }
 
     private func handleWarmupFrame() {
