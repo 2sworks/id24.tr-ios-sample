@@ -129,6 +129,7 @@
   "WaitingDesc2Live": ". sıradasınız, tahmini bekleme süreniz ",
   "WaitingDesc3Live": " dakika",
   "CallScreenWaitRepresentative": "Müşteri temsilcimiz sizi aramak için son hazırlıkları yapıyor. Lütfen uygulamayı kapatmadan bekleyin.",
+  "CallScreenCheckingAvailability": "Müşteri temsilcilerimizin uygunluk durumu kontrol ediliyor. Lütfen bekleyiniz...",
   "DocType": "Döküman tipi seç",
   "LivenessLookCam": "Lütfen ekrana bakın",
   "NfcKeyErrTitle" : "Eksik veya hatalı bilgi bulundu!",

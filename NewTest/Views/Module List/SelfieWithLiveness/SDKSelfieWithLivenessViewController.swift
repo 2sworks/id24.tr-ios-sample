@@ -10,9 +10,9 @@ import ARKit
 import SwiftUI
 import IdentifySDK
 
-// MARK: - LivenessConfig
+// MARK: - SelfieDepthConfig
 
-private struct LivenessConfig {
+private struct SelfieDepthConfig {
     let requiredHoldDuration: TimeInterval = 1.0  // Hareketsiz tutma süresi (sn) — 0.5–2.0
     let okFrameThreshold:  Int = 5                // Holding'e geçmek için OK frame sayısı — 3–10
     let badFrameThreshold: Int = 3                // Holding'den çıkmak için kötü frame sayısı — 2–5
@@ -54,7 +54,7 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
     private var debugLabel: UILabel!
 
     private let configuration = ARFaceTrackingConfiguration()
-    private let config = LivenessConfig()
+    private let config = SelfieDepthConfig()
 
     private var state: VerifyState = .warmingUp
     private var holdStartDate: Date?

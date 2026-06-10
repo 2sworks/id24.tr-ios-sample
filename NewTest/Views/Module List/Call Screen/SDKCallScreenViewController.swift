@@ -52,6 +52,7 @@ class SDKCallScreenViewController: SDKBaseViewController {
         self.setupUI()
         setupCallScreen(inCall: false)
         self.manager.socketMessageListener = self
+        self.manager.replayPendingQueueStats()
         navigationItem.rightBarButtonItem = nil
         self.navigationItem.hidesBackButton = true
         setupLiveness()
@@ -64,12 +65,21 @@ class SDKCallScreenViewController: SDKBaseViewController {
     }
     
     
+    private func applyQueueLabel(order: String, min: String) {
+        if order == "0" || min == "0" {
+            self.timeInfoLbl.text = self.translate(text: .callScreenWaitRepresentative)
+        } else {
+            self.timeInfoLbl.text = "\(self.translate(text: .waitingDesc1Live))\(order)\(self.translate(text: .waitingDesc2Live))\(min)\(self.translate(text: .waitingDesc3Live))"
+        }
+    }
+
     private func setupUI() {
         UIApplication.shared.isIdleTimerDisabled = true // görüşürken veya beklerken ekran kapanmaması için
         self.waitDesc1.text = self.translate(text: .waitingDesc1)
         self.waitDesc2.text = self.translate(text: .waitingDesc2)
         self.smsLblDesc.text = self.translate(text: .enterSmsCode)
         self.plsWaitLbl.text = self.translate(text: .corePlsWait)
+        self.timeInfoLbl.text = self.translate(text: .callScreenCheckingAvailability)
         self.endCallButton.isUserInteractionEnabled = true
         self.endCallButton.isEnabled = true
         self.endCallButton.alpha = 1.0
@@ -272,13 +282,7 @@ extension SDKCallScreenViewController: SDKSocketListener {
             stopLiveness()
             setupCallScreen(inCall: false)
         case .updateQueue(let order, let min):
-            
-            if order == "0" || min == "0" {
-                print("🔔 [QUEUE] Sıra bilgisi yok veya geçersiz, default text gösteriliyor")
-                self.timeInfoLbl.text = self.translate(text: .callScreenWaitRepresentative)
-            } else {
-                self.timeInfoLbl.text = "\(self.translate(text: .waitingDesc1Live))\(order)\(self.translate(text: .waitingDesc2Live))\(min)\(self.translate(text: .waitingDesc3Live))"
-            }
+            applyQueueLabel(order: order, min: min)
         case .photoTaken(let msg):
             print("temsilci ekran fotoğrafı çekti \(msg)")
             self.showToast(title: msg, subTitle: "", attachTo: self.view) {
