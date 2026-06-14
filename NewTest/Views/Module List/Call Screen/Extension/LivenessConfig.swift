@@ -3,61 +3,61 @@ import Foundation
 
 // MARK: - LivenessConfig
 
-/// [CallLivenessAnalyzer] yapılandırma parametreleri.
+/// Configuration parameters for [CallLivenessAnalyzer].
 ///
-/// Eşikler "doğal konuşma" davranışına göre ayarlanmıştır:
-/// kişiden bir şey yapması istenmez, normal video görüşme davranışı yeterlidir.
+/// Thresholds are tuned for "natural conversation" behaviour:
+/// no deliberate action is required from the user — normal video call behaviour is sufficient.
 internal struct LivenessConfig {
 
-    // MARK: Doğrulama Koşulları
+    // MARK: Verification Requirements
 
-    /// Canlılık doğrulaması için gereken farklı aksiyon sayısı
+    /// Number of distinct actions required to pass liveness verification.
     var requiredActionCount: Int = 3
-    /// Kesintisiz yüz takibi için gereken süre (ms)
+    /// Duration of uninterrupted face tracking required (seconds).
     var requiredContinuousMs: TimeInterval = 8.0
 
-    // MARK: Zamanlama
+    // MARK: Timing
 
-    /// İki frame analizi arasındaki minimum süre (saniye)
+    /// Minimum interval between two frame analyses (seconds).
     var processIntervalSeconds: TimeInterval = 1.0
-    /// Aynı aksiyonun tekrar tetiklenmesi için bekleme süresi (saniye)
+    /// Cooldown before the same action can be fired again (seconds).
     var actionCooldownSeconds: TimeInterval = 3.0
-    /// Geçici yüz kaybında kesintisiz sayacı sıfırlamadan bekleme (saniye)
+    /// Grace period after face loss before resetting the continuous tracking counter (seconds).
     var faceLostToleranceSeconds: TimeInterval = 1.0
 
-    // MARK: Ekrana Bakma
+    // MARK: Looking at Screen
 
-    /// "Ekrana bakıyor" sayılmak için max yaw açısı (derece). ±15° içinde → kişi kameraya bakıyor.
+    /// Maximum yaw angle (degrees) for "looking at screen". ±15° → person is facing the camera.
     var lookingAtScreenYawDeg: Float = 15.0
-    /// "Ekrana bakıyor" sayılmak için max pitch açısı (derece).
+    /// Maximum pitch angle (degrees) for "looking at screen".
     var lookingAtScreenPitchDeg: Float = 15.0
 
-    // MARK: Göz Durumu
+    // MARK: Eye State
 
-    /// Göz "açık" sayılmak için max blink değeri.
-    /// eyeBlinkLeft/Right < eyeOpenMaxBlink → göz açık.
+    /// Maximum blink value for an eye to be considered "open".
+    /// eyeBlinkLeft/Right < eyeOpenMaxBlink → eye is open.
     var eyeOpenMaxBlink: Float = 0.25
-    /// Doğal göz kırpma için min blink değeri (kısa anlık kapanma).
+    /// Minimum blink value for a natural blink (brief closure).
     var naturalBlinkMinThreshold: Float = 0.55
-    /// Göz kısma (squint) eşiği
+    /// Squint detection threshold.
     var squintThreshold: Float = 0.45
 
-    // MARK: Konuşma
+    // MARK: Speaking
 
-    /// Konuşma tespiti için min jawOpen değeri.
-    /// Düşük eşik: tam ağız açma gerekmez, sadece hareket yeterli.
+    /// Minimum jawOpen value for speech detection.
+    /// Low threshold: a full mouth opening is not required — any jaw movement is sufficient.
     var speakingJawThreshold: Float = 0.06
 
-    // MARK: Baş Hareketleri
+    // MARK: Head Movement
 
     var headTurnYawDeg: Float  = 18.0
     var headNodPitchDeg: Float = 15.0
     var headTiltRollDeg: Float = 20.0
 
-    // MARK: Kaş Hareketleri
+    // MARK: Brow Movement
 
-    /// browInnerUp veya browOuterUp eşiği
+    /// browInnerUp or browOuterUp threshold.
     var browRaiseThreshold: Float  = 0.35
-    /// browDownLeft + browDownRight eşiği
+    /// browDownLeft + browDownRight threshold.
     var browFurrowThreshold: Float = 0.38
 }

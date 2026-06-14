@@ -3,73 +3,73 @@ import Foundation
 
 // MARK: - FaceMetrics
 
-/// Tek bir ARKit frame'inden çıkarılan yüz metrikleri.
+/// Face metrics extracted from a single ARKit frame.
 ///
-/// Tüm blendshape değerleri [0.0, 1.0] arasındadır (0 = yok, 1 = maksimum).
-/// Kafa açıları derece cinsindendir (° [-180, 180]).
+/// All blendshape values are in the range [0.0, 1.0] (0 = absent, 1 = maximum).
+/// Head angles are in degrees (° [-180, 180]).
 internal struct FaceMetrics {
 
-    // MARK: Ekrana Dikkat
+    // MARK: Attention
 
-    /// Yüz kameraya dönük mü? (|yaw| < eşik AND |pitch| < eşik)
+    /// Is the face turned toward the camera? (|yaw| < threshold AND |pitch| < threshold)
     var isLookingAtScreen: Bool = false
 
-    // MARK: Göz Durumu
+    // MARK: Eye State
 
-    /// Sol göz kırpma değeri (yüksek = kapalı)
+    /// Left eye blink value (higher = more closed).
     var eyeBlinkLeft: Float  = 0
-    /// Sağ göz kırpma değeri (yüksek = kapalı)
+    /// Right eye blink value (higher = more closed).
     var eyeBlinkRight: Float = 0
-    /// Sol göz açılması
+    /// Left eye wide open.
     var eyeWideLeft: Float   = 0
-    /// Sağ göz açılması
+    /// Right eye wide open.
     var eyeWideRight: Float  = 0
-    /// Sol göz kısma
+    /// Left eye squint.
     var squintLeft: Float    = 0
-    /// Sağ göz kısma
+    /// Right eye squint.
     var squintRight: Float   = 0
 
-    // MARK: Ağız / Konuşma
+    // MARK: Mouth / Speech
 
-    /// Çene açıklığı — konuşma tespiti için birincil metrik
+    /// Jaw openness — primary metric for speech detection.
     var jawOpen: Float       = 0
-    /// Dudak büzme
+    /// Lip pucker.
     var mouthPucker: Float   = 0
-    /// Ağız genişletme
+    /// Mouth stretch.
     var mouthStretch: Float  = 0
-    /// Sol gülümseme
+    /// Left smile.
     var smileLeft: Float     = 0
-    /// Sağ gülümseme
+    /// Right smile.
     var smileRight: Float    = 0
 
-    // MARK: Kaş Hareketleri
+    // MARK: Brow Movement
 
-    /// İç kaş kaldırma
+    /// Inner brow raise.
     var browInnerUp: Float      = 0
-    /// Sol dış kaş kaldırma
+    /// Left outer brow raise.
     var browOuterUpLeft: Float  = 0
-    /// Sağ dış kaş kaldırma
+    /// Right outer brow raise.
     var browOuterUpRight: Float = 0
-    /// Sol kaş indirme
+    /// Left brow lower.
     var browDownLeft: Float     = 0
-    /// Sağ kaş indirme
+    /// Right brow lower.
     var browDownRight: Float    = 0
 
-    // MARK: Diğer
+    // MARK: Other
 
-    /// Yanak şişirme
+    /// Cheek puff.
     var cheekPuff: Float  = 0
-    /// Çene sola kayma
+    /// Jaw slide left.
     var jawLeft: Float    = 0
-    /// Çene sağa kayma
+    /// Jaw slide right.
     var jawRight: Float   = 0
 
-    // MARK: Kafa Hareketi (Head Pose)
+    // MARK: Head Pose
 
-    /// Yaw: sağa (+) / sola (−) bakma (derece)
+    /// Yaw: turn right (+) / left (−) (degrees).
     var yawDegrees: Float   = 0
-    /// Pitch: yukarı (+) / aşağı (−) bakma (derece)
+    /// Pitch: tilt up (+) / down (−) (degrees).
     var pitchDegrees: Float = 0
-    /// Roll: sağa (+) / sola (−) eğme (derece)
+    /// Roll: tilt right (+) / left (−) (degrees).
     var rollDegrees: Float  = 0
 }

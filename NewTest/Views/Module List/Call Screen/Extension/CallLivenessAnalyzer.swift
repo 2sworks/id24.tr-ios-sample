@@ -5,68 +5,68 @@ import IdentifySDK
 
 // MARK: - CallLivenessAnalyzer
 
-/// WebRTC görüşmesi sırasında arka planda ARKit ile yüz analizi yapan sınıf.
+/// Performs background face analysis with ARKit during a WebRTC call.
 ///
-/// ## Doğrulama koşulları (ikisi birden sağlanmalı)
-/// 1. En az `config.requiredActionCount` **farklı** aksiyon algılanmalı
-/// 2. Yüz `config.requiredContinuousMs` saniye kesintisiz takip edilmeli
+/// ## Verification conditions (both must be satisfied)
+/// 1. At least `config.requiredActionCount` **distinct** actions detected.
+/// 2. Face tracked continuously for `config.requiredContinuousMs` seconds.
 ///
-/// ## Kullanım
+/// ## Usage
 /// ```swift
-/// // Görüşme başlamadan önce:
+/// // Before the call starts:
 /// CallLivenessAnalyzer.shared.config   = LivenessConfig()
 /// CallLivenessAnalyzer.shared.listener = self
 /// CallLivenessAnalyzer.shared.start()
 ///
-/// // Görüşme bitince:
+/// // When the call ends:
 /// CallLivenessAnalyzer.shared.stop()
 /// ```
 ///
-/// Tüm callback'ler arka plan thread'inden gelir.
+/// All callbacks are delivered on a background thread.
 internal final class CallLivenessAnalyzer: NSObject {
 
     // MARK: Shared
 
     static let shared = CallLivenessAnalyzer()
 
-    // MARK: Yapılandırma & Listener
+    // MARK: Configuration & Listener
 
     var config: LivenessConfig = LivenessConfig()
     weak var listener: LivenessListener?
 
-    /// Her ARKit frame'ini WebRTC'ye ileten köprü. `startLiveness()` çağrısında atanır.
+    /// Bridge that forwards each ARKit frame to WebRTC. Assigned on `startLiveness()`.
     var frameHandler: ((CVPixelBuffer) -> Void)?
 
-    // MARK: Yaşam Durumu
+    // MARK: Running State
 
     private(set) var isRunning: Bool = false
 
-    // MARK: İç Durum
+    // MARK: Internal State
 
     private let session   = ARSession()
     private let lock      = NSLock()
     private let sendQueue = DispatchQueue(label: "com.liveness.send", qos: .background)
 
-    private var isSessionActive: Bool          = false
-    private var lastProcessTime: TimeInterval   = 0
+    private var isSessionActive: Bool             = false
+    private var lastProcessTime: TimeInterval      = 0
     private var lastFrameForwardTime: TimeInterval = 0
     private let frameForwardInterval: TimeInterval = 1.0 / 24.0
-    private var detectedActions                 = Set<LivenessActionType>()
-    private var lastActionTimeMap               = [LivenessActionType: TimeInterval]()
-    private var actionActiveStartTime           = [LivenessActionType: TimeInterval]()
+    private var detectedActions                    = Set<LivenessActionType>()
+    private var lastActionTimeMap                  = [LivenessActionType: TimeInterval]()
+    private var actionActiveStartTime              = [LivenessActionType: TimeInterval]()
     private var lastRawBlendShapes: [ARFaceAnchor.BlendShapeLocation: NSNumber] = [:]
     private var livenessReportTimer: Timer?
-    private var lastSentTime: TimeInterval      = 0
-    private let sendCooldown: TimeInterval      = 1.0
+    private var lastSentTime: TimeInterval         = 0
+    private let sendCooldown: TimeInterval         = 1.0
 
-    private var continuousStartTime: TimeInterval = 0
-    private var faceLostStartTime: TimeInterval   = 0
-    private var consecutiveMisses: Int            = 0
-    private var isFacePresent: Bool               = false
-    private var lastReportedSec: Int              = -1
-    private var isVerified: Bool                  = false
+    private var continuousStartTime: TimeInterval  = 0
+    private var faceLostStartTime: TimeInterval    = 0
+    private var consecutiveMisses: Int             = 0
+    private var isFacePresent: Bool                = false
+    private var lastReportedSec: Int               = -1
+    private var isVerified: Bool                   = false
 
-    /// Kaç ardışık frame'de yüz bulunamazsa "yüz kayboldu" sayılır.
+    /// Number of consecutive frames without a face before "face lost" is declared.
     private let missToleranceFrames = 3
 
     // MARK: Init
@@ -76,10 +76,10 @@ internal final class CallLivenessAnalyzer: NSObject {
         session.delegate = self
     }
 
-    // MARK: Yaşam Döngüsü
+    // MARK: Lifecycle
 
-    /// ARKit modelini arka planda yükler, kamerayı hemen serbest bırakır.
-    /// Görüşme bekleme ekranında çağrılır; model hazır olur, WebRTC ile çakışma olmaz.
+    /// Preloads the ARKit model in the background and immediately releases the camera.
+    /// Call this on the call waiting screen so the model is ready without conflicting with WebRTC.
     func prewarm() {
         guard ARFaceTrackingConfiguration.isSupported, !isSessionActive else { return }
         let configuration = ARFaceTrackingConfiguration()
@@ -91,11 +91,11 @@ internal final class CallLivenessAnalyzer: NSObject {
             Thread.sleep(forTimeInterval: 0.2)
             session.pause()
             isSessionActive = false
-            print("[CallLivenessAnalyzer] Prewarm tamamlandı")
+            print("[CallLivenessAnalyzer] Prewarm complete")
         }
     }
 
-    /// ARKit session'ını başlatır. Tekrar çağrılırsa sessizce yoksayılır.
+    /// Starts the ARKit session. Subsequent calls are silently ignored.
     func startSession() {
         guard ARFaceTrackingConfiguration.isSupported, !isSessionActive else { return }
         isSessionActive = true
@@ -103,15 +103,15 @@ internal final class CallLivenessAnalyzer: NSObject {
         configuration.isLightEstimationEnabled = false
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             self?.session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
-            print("[CallLivenessAnalyzer] ARKit session başlatıldı")
+            print("[CallLivenessAnalyzer] ARKit session started")
         }
     }
 
-    /// Veri toplama ve sunucuya gönderimi başlatır.
-    /// Session zaten çalışıyorsa tekrar run() çağrılmaz — freeze olmaz.
+    /// Begins data collection and server reporting.
+    /// If the session is already running, `run()` is not called again — no freeze.
     func start() {
         guard ARFaceTrackingConfiguration.isSupported else {
-            print("[CallLivenessAnalyzer] ARFaceTracking bu cihazda desteklenmiyor")
+            print("[CallLivenessAnalyzer] ARFaceTracking is not supported on this device")
             return
         }
         resetState()
@@ -123,10 +123,10 @@ internal final class CallLivenessAnalyzer: NSObject {
         }
         RunLoop.main.add(timer, forMode: .common)
         livenessReportTimer = timer
-        print("[CallLivenessAnalyzer] Liveness analizi başladı | config=\(config)")
+        print("[CallLivenessAnalyzer] Liveness analysis started | config=\(config)")
     }
 
-    /// Timer'ı durdurur ve session'ı kapatır.
+    /// Stops the timer and pauses the session.
     func stop() {
         isRunning = false
         isSessionActive = false
@@ -134,22 +134,22 @@ internal final class CallLivenessAnalyzer: NSObject {
         livenessReportTimer?.invalidate()
         livenessReportTimer = nil
         session.pause()
-        print("[CallLivenessAnalyzer] Liveness durdu | skor=\(computeScore()) aksiyonlar=\(detectedActions)")
+        print("[CallLivenessAnalyzer] Liveness stopped | score=\(computeScore()) actions=\(detectedActions)")
     }
 
-    /// Tüm kaynakları serbest bırakır. Tekrar kullanmak için `start()` yeterli.
+    /// Releases all resources. Call `start()` to reuse.
     func release() {
         stop()
         listener = nil
         resetState()
-        print("[CallLivenessAnalyzer] Serbest bırakıldı")
+        print("[CallLivenessAnalyzer] Released")
     }
 
-    // MARK: Skor
+    // MARK: Score
 
-    /// Anlık liveness skoru (0–100).
+    /// Current liveness score (0–100).
     ///
-    /// = (algılanan / gereken aksiyon) × 50  +  (geçen sn / gereken sn) × 50
+    /// = (detected / required actions) × 50  +  (elapsed s / required s) × 50
     func computeScore() -> Int {
         let cfg = config
         let actionScore = min(Float(detectedActions.count) / Float(cfg.requiredActionCount), 1.0) * 50.0
@@ -162,7 +162,7 @@ internal final class CallLivenessAnalyzer: NSObject {
         return detectedActions
     }
 
-    // MARK: Yüz Varlığı Takibi
+    // MARK: Face Presence Tracking
 
     private func handleFacePresence(faceFound: Bool, now: TimeInterval) {
         let cfg = config
@@ -177,7 +177,7 @@ internal final class CallLivenessAnalyzer: NSObject {
                 if lostDuration > cfg.faceLostToleranceSeconds {
                     continuousStartTime = now
                     lastReportedSec     = -1
-                    print("[CallLivenessAnalyzer] Uzun kayıp (\(lostDuration)sn) → takip sıfırlandı")
+                    print("[CallLivenessAnalyzer] Long loss (\(lostDuration)s) → tracking reset")
                 }
             }
 
@@ -208,7 +208,7 @@ internal final class CallLivenessAnalyzer: NSObject {
         }
     }
 
-    // MARK: Blendshape Aksiyon Tespiti
+    // MARK: Blendshape Action Detection
 
     private func detectBlendshapeActions(metrics: FaceMetrics, now: TimeInterval) -> Bool {
         let cfg = config
@@ -239,7 +239,7 @@ internal final class CallLivenessAnalyzer: NSObject {
             || checkAction(.browFurrow,   isActive: browFurrow,   metrics: metrics, now: now)
     }
 
-    // MARK: Head Pose Aksiyon Tespiti
+    // MARK: Head Pose Action Detection
 
     private func detectHeadPoseActions(metrics: FaceMetrics, now: TimeInterval) -> Bool {
         let cfg   = config
@@ -250,7 +250,7 @@ internal final class CallLivenessAnalyzer: NSObject {
         let lookingAtScreen = abs(yaw)   < cfg.lookingAtScreenYawDeg &&
                               abs(pitch) < cfg.lookingAtScreenPitchDeg
 
-        return checkAction(.lookingAtScreen, isActive: lookingAtScreen,          metrics: metrics, now: now)
+        return checkAction(.lookingAtScreen, isActive: lookingAtScreen,              metrics: metrics, now: now)
             || checkAction(.headTurnRight,   isActive: yaw   >  cfg.headTurnYawDeg,  metrics: metrics, now: now)
             || checkAction(.headTurnLeft,    isActive: yaw   < -cfg.headTurnYawDeg,  metrics: metrics, now: now)
             || checkAction(.headUp,          isActive: pitch >  cfg.headNodPitchDeg, metrics: metrics, now: now)
@@ -258,9 +258,9 @@ internal final class CallLivenessAnalyzer: NSObject {
             || checkAction(.headTilt,        isActive: abs(roll) > cfg.headTiltRollDeg, metrics: metrics, now: now)
     }
 
-    // MARK: Aksiyon Kontrol
+    // MARK: Action Check
 
-    /// Bir aksiyonun aktif/pasif durumunu işler ve süreyi takip eder.
+    /// Tracks the active/inactive state of an action and its hold duration.
     @discardableResult
     private func checkAction(
         _ action: LivenessActionType,
@@ -279,7 +279,7 @@ internal final class CallLivenessAnalyzer: NSObject {
         return fire(action: action, metrics: metrics, holdDuration: holdDuration, now: now)
     }
 
-    // MARK: Aksiyon Tetikleme
+    // MARK: Action Firing
 
     @discardableResult
     private func fire(
@@ -298,7 +298,7 @@ internal final class CallLivenessAnalyzer: NSObject {
         let detectedCount = detectedActions.count
         let requiredCount = config.requiredActionCount
 
-        print("[CallLivenessAnalyzer] ↑ Aksiyon: \(action) | hold=\(String(format: "%.2f", holdDuration))sn | \(detectedCount)/\(requiredCount) | skor=\(score) yaw=\(Int(metrics.yawDegrees))° pitch=\(Int(metrics.pitchDegrees))°")
+        print("[CallLivenessAnalyzer] ↑ Action: \(action) | hold=\(String(format: "%.2f", holdDuration))s | \(detectedCount)/\(requiredCount) | score=\(score) yaw=\(Int(metrics.yawDegrees))° pitch=\(Int(metrics.pitchDegrees))°")
 
         listener?.onActionDetected(
             action: action,
@@ -311,7 +311,7 @@ internal final class CallLivenessAnalyzer: NSObject {
         return true
     }
 
-    // MARK: Doğrulama
+    // MARK: Verification
 
     private func checkVerification(now: TimeInterval) {
         let cfg          = config
@@ -321,11 +321,11 @@ internal final class CallLivenessAnalyzer: NSObject {
 
         guard enoughAction && enoughTime else { return }
         isVerified = true
-        print("[CallLivenessAnalyzer] ✓ Liveness doğrulandı! aksiyonlar=\(detectedActions) süre=\(String(format: "%.1f", elapsed))sn")
+        print("[CallLivenessAnalyzer] ✓ Liveness verified! actions=\(detectedActions) duration=\(String(format: "%.1f", elapsed))s")
         listener?.onLivenessVerified(score: 100)
     }
 
-    // MARK: FaceMetrics Oluşturma
+    // MARK: FaceMetrics Construction
 
     private func buildFaceMetrics(
         blendShapes: [ARFaceAnchor.BlendShapeLocation: NSNumber],
@@ -373,7 +373,7 @@ internal final class CallLivenessAnalyzer: NSObject {
 
     // MARK: Head Pose
 
-    /// ARFaceAnchor transform matrisinden yaw/pitch/roll açılarını çıkarır (derece).
+    /// Extracts yaw/pitch/roll angles (in degrees) from an ARFaceAnchor transform matrix.
     private func headPoseFromTransform(_ transform: simd_float4x4) -> (yaw: Float, pitch: Float, roll: Float) {
         let pitch = asin(-transform.columns.2.y)
         let yaw   = atan2(transform.columns.2.x, transform.columns.2.z)
@@ -383,7 +383,7 @@ internal final class CallLivenessAnalyzer: NSObject {
         return (yaw * toDeg, pitch * toDeg, roll * toDeg)
     }
 
-    // MARK: Sıfırlama
+    // MARK: Reset
 
     private func resetState() {
         detectedActions.removeAll()
@@ -452,7 +452,7 @@ extension CallLivenessAnalyzer: ARSessionDelegate {
         if !isVerified { checkVerification(now: now) }
     }
 
-    /// Her ARKit frame'ini 24fps'e throttle ederek WebRTC'ye iletir.
+    /// Forwards each ARKit frame to WebRTC throttled to 24 fps.
     func session(_ session: ARSession, didUpdate frame: ARFrame) {
         guard isRunning, frameHandler != nil else { return }
         let now = frame.timestamp
@@ -462,6 +462,6 @@ extension CallLivenessAnalyzer: ARSessionDelegate {
     }
 
     func session(_ session: ARSession, didFailWithError error: Error) {
-        print("[CallLivenessAnalyzer] ARSession hatası: \(error.localizedDescription)")
+        print("[CallLivenessAnalyzer] ARSession error: \(error.localizedDescription)")
     }
 }

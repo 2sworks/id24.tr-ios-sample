@@ -3,7 +3,7 @@ import Foundation
 
 // MARK: - LivenessActionType
 
-/// Algılanabilen yüz aksiyon türleri
+/// Detectable face action types.
 internal enum LivenessActionType {
     case eyesOpen
     case naturalBlink
@@ -21,21 +21,21 @@ internal enum LivenessActionType {
 
 // MARK: - LivenessListener
 
-/// [CallLivenessAnalyzer] olay dinleyicisi.
+/// Event listener for [CallLivenessAnalyzer].
 ///
-/// Tüm callback'ler **arka plan thread'inden** gelir.
-/// UI güncellemesi gerekiyorsa `DispatchQueue.main.async` kullan.
+/// All callbacks are delivered on a **background thread**.
+/// Dispatch to `DispatchQueue.main.async` for any UI updates.
 internal protocol LivenessListener: AnyObject {
 
-    /// Bir yüz aksiyonu algılandığında çağrılır.
+    /// Called when a face action is detected.
     ///
     /// - Parameters:
-    ///   - action: Algılanan aksiyon türü
-    ///   - metrics: O frame'deki tüm blendshape + head pose değerleri
-    ///   - holdDuration: Bu aksiyonun eşiği sürekli aşarak ekranda kaldığı süre (saniye)
-    ///   - detectedCount: Şimdiye kadar algılanan farklı aksiyon sayısı
-    ///   - requiredCount: Doğrulama için gereken aksiyon sayısı
-    ///   - score: Anlık liveness skoru (0–100)
+    ///   - action: The detected action type.
+    ///   - metrics: All blendshape and head pose values for that frame.
+    ///   - holdDuration: How long this action has continuously exceeded its threshold (seconds).
+    ///   - detectedCount: Number of distinct actions detected so far.
+    ///   - requiredCount: Number of actions required to pass verification.
+    ///   - score: Current liveness score (0–100).
     func onActionDetected(
         action: LivenessActionType,
         metrics: FaceMetrics,
@@ -45,20 +45,20 @@ internal protocol LivenessListener: AnyObject {
         score: Int
     )
 
-    /// Yüz varlığı değiştiğinde çağrılır.
+    /// Called when face presence changes.
     ///
-    /// - Parameter isPresent: `true` → yüz tekrar algılandı, `false` → yüz kaybedildi
+    /// - Parameter isPresent: `true` → face detected again, `false` → face lost.
     func onFacePresenceChanged(isPresent: Bool)
 
-    /// Kesintisiz yüz takibi ilerlemesi; saniye değişiminde tetiklenir.
+    /// Called each second as continuous face tracking progresses.
     ///
     /// - Parameters:
-    ///   - elapsedSeconds: Kesintisiz geçen süre (saniye)
-    ///   - requiredSeconds: Doğrulama için gereken toplam süre
+    ///   - elapsedSeconds: Seconds of uninterrupted tracking so far.
+    ///   - requiredSeconds: Total seconds required for verification.
     func onContinuousTrackingProgress(elapsedSeconds: Int, requiredSeconds: Int)
 
-    /// Tüm doğrulama koşulları sağlandığında **yalnızca bir kez** çağrılır.
+    /// Called **exactly once** when all verification conditions are met.
     ///
-    /// - Parameter score: Son skor (100)
+    /// - Parameter score: Final score (100).
     func onLivenessVerified(score: Int)
 }
