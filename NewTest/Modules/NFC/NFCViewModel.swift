@@ -107,11 +107,11 @@ final class NFCViewModel: BaseModuleViewModel {
 
     // MARK: - Manuel Tarih Duzeltme
 
-    func saveManualDates() {
-        // sdkBackInfo is non-optional, set fields directly
+    func saveManualDates(appState: AppStateViewModel) {
         manager.sdkBackInfo.idDocumentNumberMRZ = serialNo
         manager.sdkBackInfo.idBirthDateMRZ = birthDate
         manager.sdkBackInfo.idValidDateMRZ = validDate
         showEditScreen = false
+        startNFC(appState: appState)
     }
 }

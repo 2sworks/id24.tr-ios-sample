@@ -1,4 +1,0 @@
-framework module IdentifySDK {
-  header "IdentifySDK-Swift.h"
-  requires objc
-}

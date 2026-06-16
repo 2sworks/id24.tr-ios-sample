@@ -193,7 +193,6 @@
 		4BD9858D6CD105DE3D390E82 /* InterDisplay-Medium.otf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; path = "InterDisplay-Medium.otf"; sourceTree = "<group>"; };
 		60D574F2790155383D39C1C0 /* InterDisplay-Regular.otf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; path = "InterDisplay-Regular.otf"; sourceTree = "<group>"; };
 		86E8075DD493887BE5B89DE3 /* Inter-SemiBold.otf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; path = "Inter-SemiBold.otf"; sourceTree = "<group>"; };
-		8AACA69B2F749FDF00613630 /* IdentifySDK-v3.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = "IdentifySDK-v3.xcframework"; sourceTree = "<group>"; };
 		8AB276B42F749CE100A764F1 /* BaseModuleViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseModuleViewModel.swift; sourceTree = "<group>"; };
 		8AB276B62F749CEF00A764F1 /* SDKModuleHostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKModuleHostView.swift; sourceTree = "<group>"; };
 		8AB276B82F749D1900A764F1 /* AppStateViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateViewModel.swift; sourceTree = "<group>"; };
@@ -286,7 +285,6 @@
 				8ABF20112F6A03C50010FABD /* Shared */,
 				8ABF20152F6A03DB0010FABD /* Modules */,
 				8ABF20312F6A04CA0010FABD /* Resources */,
-				8ABF20332F6A04E30010FABD /* Frameworks */,
 				8ABF20342F6A04F30010FABD /* SupportingFiles */,
 				8AACA69F2F74A94900613630 /* Navigation */,
 				4820A4A12924CDAC004DB388 /* sample.mp4 */,
@@ -636,14 +634,6 @@
 				48CD8D0329792E26008573F8 /* TURKISH.json */,
 			);
 			path = Languages;
-			sourceTree = "<group>";
-		};
-		8ABF20332F6A04E30010FABD /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				8AACA69B2F749FDF00613630 /* IdentifySDK-v3.xcframework */,
-			);
-			path = Frameworks;
 			sourceTree = "<group>";
 		};
 		8ABF20342F6A04F30010FABD /* SupportingFiles */ = {
