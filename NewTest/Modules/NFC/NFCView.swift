@@ -102,7 +102,7 @@ struct NFCView: View {
                 .padding(.horizontal, IDSpacing.lg)
                 .padding(.bottom, IDSpacing.xxl)
         }
-        .background(IDColor.primary)
+        .background(colorScheme == .dark ? IDColor.darkBg : IDColor.primary)
         .clipShape(RoundedRectangle(cornerRadius: IDRadius.card))
         .ignoresSafeArea(edges: .bottom)
     }
@@ -111,7 +111,7 @@ struct NFCView: View {
 
     private var cardIllustration: some View {
         ZStack {
-            Image("nfc_back")
+            Image(.nfcBack)
                 .resizable()
                 .scaledToFill()
                 .frame(width: 200, height: 300)
@@ -122,7 +122,7 @@ struct NFCView: View {
                     value: pulseActive
                 )
 
-            Image("nfc_front")
+            Image(.nfcFront)
                 .resizable()
                 .scaledToFill()
                 .frame(width: 200, height: 300)

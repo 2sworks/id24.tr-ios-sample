@@ -47,7 +47,7 @@ final class LivenessViewModel: BaseModuleViewModel {
                 guard let self else { return }
                 if completed == true {
                     self.allStepsCompleted = true
-                    self.stepInstruction = "Canlilik testi tamamlandi"
+                    self.stepInstruction = "Canlılık testi tamamlandı"
                 } else {
                     self.currentStep = nextStep
                     self.updateStepFlags(nextStep)
@@ -66,10 +66,10 @@ final class LivenessViewModel: BaseModuleViewModel {
 
     private func updateInstruction(_ step: LivenessTestStep?) {
         switch step {
-        case .blinkEyes:  stepInstruction = "Gozlerinizi kirpin"
-        case .smile:      stepInstruction = "Gumseyiniz"
-        case .turnLeft:   stepInstruction = "Basini sola cevirin"
-        case .turnRight:  stepInstruction = "Basini saga cevirin"
+        case .blinkEyes:  stepInstruction = "Gözlerinizi kırpın"
+        case .smile:      stepInstruction = "Gülümseyin"
+        case .turnLeft:   stepInstruction = "Başınızı hafifçe sola çevirin"
+        case .turnRight:  stepInstruction = "Başınızı hafifçe sağa çevirin"
         default:          stepInstruction = ""
         }
     }

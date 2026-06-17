@@ -64,4 +64,35 @@ final class SelfieViewModel: BaseModuleViewModel {
             }
         }
     }
+
+    func reset() {
+        selfieImage = nil
+        errorMessage = nil
+        faceDetected = false
+        canContinue = false
+        resultText = ""
+    }
 }
+
+// MARK: - Preview Helpers
+
+#if DEBUG
+extension SelfieViewModel {
+    @MainActor
+    static func makePreview(
+        selfieImage: UIImage? = nil,
+        isLoading: Bool = false,
+        errorMessage: String? = nil,
+        canContinue: Bool = false,
+        faceDetected: Bool = false
+    ) -> SelfieViewModel {
+        let vm = SelfieViewModel()
+        vm.selfieImage = selfieImage
+        vm.isLoading = isLoading
+        vm.errorMessage = errorMessage
+        vm.canContinue = canContinue
+        vm.faceDetected = faceDetected
+        return vm
+    }
+}
+#endif

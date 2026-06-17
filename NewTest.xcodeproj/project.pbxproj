@@ -106,11 +106,13 @@
 		8D16EAAA2FCEDC2F00C7152E /* IdCardScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D16EAA92FCEDC2F00C7152E /* IdCardScannerView.swift */; };
 		8D20F8C92FC8FE0F008F7DCF /* SDKDesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D20F8C82FC8FE0F008F7DCF /* SDKDesignTokens.swift */; };
 		8D58B84A2FC9A2B900EC0A5F /* IDSuccessBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D58B8492FC9A2B900EC0A5F /* IDSuccessBanner.swift */; };
+		8D8153CB2FE2152A0065BFE6 /* VideoCameraController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D8153CA2FE2152A0065BFE6 /* VideoCameraController.swift */; };
 		8D91F2002FCE34C1000B56ED /* IdentifyNavigationFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D91F1FF2FCE34C1000B56ED /* IdentifyNavigationFlow.swift */; };
 		8D91F2022FCE34D3000B56ED /* AppNavigationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D91F2012FCE34D3000B56ED /* AppNavigationCoordinator.swift */; };
 		8D91F2042FCE34DB000B56ED /* IdentifyNavigationCoordinatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D91F2032FCE34DB000B56ED /* IdentifyNavigationCoordinatorView.swift */; };
 		8DB74A7A2FCF9AAD00C204AA /* IdentifySDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8DB74A792FCF9AAD00C204AA /* IdentifySDK.framework */; };
 		8DB74A7B2FCF9AAD00C204AA /* IdentifySDK.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 8DB74A792FCF9AAD00C204AA /* IdentifySDK.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		8DF844B62FE18B130066D35A /* SelfieCameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DF844B52FE18B120066D35A /* SelfieCameraView.swift */; };
 		A3685880DB672112C8813187 /* Inter-ExtraBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 38048F44665FE13EEA336ECC /* Inter-ExtraBold.otf */; };
 		A64CBB010C60D1F3F19BDA41 /* Inter-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = BB04BC2A7F7C84F720B6EC49 /* Inter-Medium.otf */; };
 		AC88C1958129FFD344225CFD /* Inter-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 39346948B312B0D65EA4C0B6 /* Inter-Bold.otf */; };
@@ -226,10 +228,12 @@
 		8D16EAA92FCEDC2F00C7152E /* IdCardScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdCardScannerView.swift; sourceTree = "<group>"; };
 		8D20F8C82FC8FE0F008F7DCF /* SDKDesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKDesignTokens.swift; sourceTree = "<group>"; };
 		8D58B8492FC9A2B900EC0A5F /* IDSuccessBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IDSuccessBanner.swift; sourceTree = "<group>"; };
+		8D8153CA2FE2152A0065BFE6 /* VideoCameraController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCameraController.swift; sourceTree = "<group>"; };
 		8D91F1FF2FCE34C1000B56ED /* IdentifyNavigationFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifyNavigationFlow.swift; sourceTree = "<group>"; };
 		8D91F2012FCE34D3000B56ED /* AppNavigationCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppNavigationCoordinator.swift; sourceTree = "<group>"; };
 		8D91F2032FCE34DB000B56ED /* IdentifyNavigationCoordinatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifyNavigationCoordinatorView.swift; sourceTree = "<group>"; };
 		8DB74A792FCF9AAD00C204AA /* IdentifySDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = IdentifySDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		8DF844B52FE18B120066D35A /* SelfieCameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelfieCameraView.swift; sourceTree = "<group>"; };
 		B2B1C42BCD3EDB5A4705FBCA /* Inter-Regular.otf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; path = "Inter-Regular.otf"; sourceTree = "<group>"; };
 		BB04BC2A7F7C84F720B6EC49 /* Inter-Medium.otf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; path = "Inter-Medium.otf"; sourceTree = "<group>"; };
 		DF7BC1692D4A279600372CAB /* Env.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Env.xcdatamodel; sourceTree = "<group>"; };
@@ -488,6 +492,7 @@
 				485C154C2907DC19007B9ED0 /* SDKSelfieViewController.swift */,
 				8AB276E02F749D9D00A764F1 /* SelfieView.swift */,
 				8AB276C62F749D5300A764F1 /* SelfieViewModel.swift */,
+				8DF844B52FE18B120066D35A /* SelfieCameraView.swift */,
 			);
 			path = Selfie;
 			sourceTree = "<group>";
@@ -529,6 +534,7 @@
 				4813037C29221E1300E66D73 /* SDKVideoRecorderViewController.swift */,
 				8AB276E42F749DA000A764F1 /* VideoRecorderView.swift */,
 				8AB276CA2F749D5500A764F1 /* VideoRecorderViewModel.swift */,
+				8D8153CA2FE2152A0065BFE6 /* VideoCameraController.swift */,
 			);
 			path = VideoRecorder;
 			sourceTree = "<group>";
@@ -798,6 +804,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				48DE147D290A6C3E00057EAD /* SDKButtonExtension.swift in Sources */,
+				8DF844B62FE18B130066D35A /* SelfieCameraView.swift in Sources */,
 				4881A7FF29238CB400EB4072 /* SDKAddressConfirmViewController.swift in Sources */,
 				8AB276B92F749D1900A764F1 /* AppStateViewModel.swift in Sources */,
 				8AB276C12F749D5200A764F1 /* OVDViewModel.swift in Sources */,
@@ -807,6 +814,7 @@
 				8AB276C52F749D5200A764F1 /* LivenessViewModel.swift in Sources */,
 				8AB276D72F749D9700A764F1 /* PrepareView.swift in Sources */,
 				8AB276D52F749D9600A764F1 /* LoginView.swift in Sources */,
+				8D8153CB2FE2152A0065BFE6 /* VideoCameraController.swift in Sources */,
 				8AB276E92F749DA100A764F1 /* AddressConfirmView.swift in Sources */,
 				481065992922646600053004 /* SDKLivenessViewController.swift in Sources */,
 				8AB276D32F749D5A00A764F1 /* ThankYouViewModel.swift in Sources */,

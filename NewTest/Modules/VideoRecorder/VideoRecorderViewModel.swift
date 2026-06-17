@@ -36,6 +36,18 @@ final class VideoRecorderViewModel: BaseModuleViewModel {
         errorMessage = nil
     }
 
+    // MARK: - Delete
+
+    func deleteVideo() {
+        if let url = videoURL {
+            try? FileManager.default.removeItem(at: url)
+        }
+        videoURL = nil
+        videoData = nil
+        uploadCompleted = false
+        errorMessage = nil
+    }
+
     // MARK: - Upload
 
     func uploadVideo(appState: AppStateViewModel) {
