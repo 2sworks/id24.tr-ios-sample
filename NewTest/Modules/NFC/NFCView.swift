@@ -92,6 +92,18 @@ struct NFCView: View {
                 VStack(alignment: .leading, spacing: IDSpacing.xl) {
                     titleBlock
                     cardIllustration
+                        .frame(maxWidth: .infinity, alignment: .center)
+                    VStack(alignment: .center, spacing: IDSpacing.sm) {
+                        Text("NFC Tarama")
+                            .font(IDFont.displayMedium(.semibold))
+                            .foregroundColor(.white)
+                        Text("NFC Okutma işlemi için lütfen kimlik kartınızı telefonunuzun önüne tutunuz.")
+                            .font(IDFont.body(.regular))
+                            .foregroundColor(.white.opacity(0.75))
+                            .multilineTextAlignment(.center)
+                            .lineSpacing(4)
+                    }
+                    .frame(maxWidth: .infinity)
                     statusBlock
                 }
                 .padding(.top, IDSpacing.xxl)

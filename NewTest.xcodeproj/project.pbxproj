@@ -103,6 +103,11 @@
 		8AB276EB2F749DA200A764F1 /* CallScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB276EA2F749DA200A764F1 /* CallScreenView.swift */; };
 		8AB276ED2F749DA300A764F1 /* ThankYouView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB276EC2F749DA300A764F1 /* ThankYouView.swift */; };
 		8AB276F12F749DC600A764F1 /* IdentifySwiftUIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB276F02F749DC600A764F1 /* IdentifySwiftUIApp.swift */; };
+		8D0D25F02FE4915400DE3B73 /* LostConnectionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D0D25EF2FE4915400DE3B73 /* LostConnectionViewModel.swift */; };
+		8D0D25F22FE4915500DE3B73 /* LostConnectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D0D25F12FE4915500DE3B73 /* LostConnectionView.swift */; };
+		8D0D25F42FE4958B00DE3B73 /* ExternalViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D0D25F32FE4958B00DE3B73 /* ExternalViewModel.swift */; };
+		8D0D25F62FE4958B00DE3B73 /* ExternalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D0D25F52FE4958B00DE3B73 /* ExternalView.swift */; };
+		8D0D25F82FE495E100DE3B73 /* ExternalScreen_KnowHow.md in Resources */ = {isa = PBXBuildFile; fileRef = 8D0D25F72FE495E100DE3B73 /* ExternalScreen_KnowHow.md */; };
 		8D16EAAA2FCEDC2F00C7152E /* IdCardScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D16EAA92FCEDC2F00C7152E /* IdCardScannerView.swift */; };
 		8D20F8C92FC8FE0F008F7DCF /* SDKDesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D20F8C82FC8FE0F008F7DCF /* SDKDesignTokens.swift */; };
 		8D58B84A2FC9A2B900EC0A5F /* IDSuccessBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D58B8492FC9A2B900EC0A5F /* IDSuccessBanner.swift */; };
@@ -197,7 +202,7 @@
 		48E8E42F29266B8A0045C3F8 /* SDKSpeechRecViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKSpeechRecViewController.swift; sourceTree = "<group>"; };
 		4BD9858D6CD105DE3D390E82 /* InterDisplay-Medium.otf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; path = "InterDisplay-Medium.otf"; sourceTree = "<group>"; };
 		60D574F2790155383D39C1C0 /* InterDisplay-Regular.otf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; path = "InterDisplay-Regular.otf"; sourceTree = "<group>"; };
-		86E8075DD493887BE5B89DE3 /* Inter-SemiBold.otf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; path = "Inter-SemiBold.otf"; sourceTree = "<group>"; };
+		86E8075DD493887BE5B89DE3 /* Inter-SemiBold.otf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Inter-SemiBold.otf"; sourceTree = "<group>"; };
 		8AB276B42F749CE100A764F1 /* BaseModuleViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseModuleViewModel.swift; sourceTree = "<group>"; };
 		8AB276B62F749CEF00A764F1 /* SDKModuleHostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKModuleHostView.swift; sourceTree = "<group>"; };
 		8AB276B82F749D1900A764F1 /* AppStateViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateViewModel.swift; sourceTree = "<group>"; };
@@ -228,6 +233,11 @@
 		8AB276EA2F749DA200A764F1 /* CallScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallScreenView.swift; sourceTree = "<group>"; };
 		8AB276EC2F749DA300A764F1 /* ThankYouView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThankYouView.swift; sourceTree = "<group>"; };
 		8AB276F02F749DC600A764F1 /* IdentifySwiftUIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifySwiftUIApp.swift; sourceTree = "<group>"; };
+		8D0D25EF2FE4915400DE3B73 /* LostConnectionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LostConnectionViewModel.swift; sourceTree = "<group>"; };
+		8D0D25F12FE4915500DE3B73 /* LostConnectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LostConnectionView.swift; sourceTree = "<group>"; };
+		8D0D25F32FE4958B00DE3B73 /* ExternalViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalViewModel.swift; sourceTree = "<group>"; };
+		8D0D25F52FE4958B00DE3B73 /* ExternalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalView.swift; sourceTree = "<group>"; };
+		8D0D25F72FE495E100DE3B73 /* ExternalScreen_KnowHow.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ExternalScreen_KnowHow.md; sourceTree = "<group>"; };
 		8D16EAA92FCEDC2F00C7152E /* IdCardScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdCardScannerView.swift; sourceTree = "<group>"; };
 		8D20F8C82FC8FE0F008F7DCF /* SDKDesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKDesignTokens.swift; sourceTree = "<group>"; };
 		8D58B8492FC9A2B900EC0A5F /* IDSuccessBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IDSuccessBanner.swift; sourceTree = "<group>"; };
@@ -602,6 +612,9 @@
 			isa = PBXGroup;
 			children = (
 				4887EEED2A6E99B600D51461 /* ExternalViewController.swift */,
+				8D0D25F32FE4958B00DE3B73 /* ExternalViewModel.swift */,
+				8D0D25F52FE4958B00DE3B73 /* ExternalView.swift */,
+				8D0D25F72FE495E100DE3B73 /* ExternalScreen_KnowHow.md */,
 			);
 			path = ExternalView;
 			sourceTree = "<group>";
@@ -610,6 +623,8 @@
 			isa = PBXGroup;
 			children = (
 				48870098292CDA3500961218 /* SDKListenSocketViewController.swift */,
+				8D0D25EF2FE4915400DE3B73 /* LostConnectionViewModel.swift */,
+				8D0D25F12FE4915500DE3B73 /* LostConnectionView.swift */,
 			);
 			path = SocketStatus;
 			sourceTree = "<group>";
@@ -794,6 +809,7 @@
 				480E76A9297A868E0071B049 /* GERMAN.json in Resources */,
 				36692AAE2F11120500A67DAB /* apiqa.identify.com.tr.cer in Resources */,
 				A64CBB010C60D1F3F19BDA41 /* Inter-Medium.otf in Resources */,
+				8D0D25F82FE495E100DE3B73 /* ExternalScreen_KnowHow.md in Resources */,
 				5EF5FCE08E7A1B091C76F8CB /* Inter-SemiBold.otf in Resources */,
 				AC88C1958129FFD344225CFD /* Inter-Bold.otf in Resources */,
 				A3685880DB672112C8813187 /* Inter-ExtraBold.otf in Resources */,
@@ -819,6 +835,7 @@
 				8AB276C12F749D5200A764F1 /* OVDViewModel.swift in Sources */,
 				485C155C2907F3A7007B9ED0 /* SDKBundle+.swift in Sources */,
 				8AB276F12F749DC600A764F1 /* IdentifySwiftUIApp.swift in Sources */,
+				8D0D25F62FE4958B00DE3B73 /* ExternalView.swift in Sources */,
 				4825316C2B02632900B0472C /* SDKPrepareViewController.swift in Sources */,
 				8DB4B18B2FE3413300BA4C67 /* AddressConfirmPickerRepresentables.swift in Sources */,
 				8AB276C52F749D5200A764F1 /* LivenessViewModel.swift in Sources */,
@@ -863,6 +880,7 @@
 				485C15322907D2E8007B9ED0 /* SDKLoginViewController.swift in Sources */,
 				8AB276B52F749CE100A764F1 /* BaseModuleViewModel.swift in Sources */,
 				8AB276CD2F749D5600A764F1 /* SpeechRecViewModel.swift in Sources */,
+				8D0D25F02FE4915400DE3B73 /* LostConnectionViewModel.swift in Sources */,
 				8AB276CB2F749D5500A764F1 /* VideoRecorderViewModel.swift in Sources */,
 				8AB276CF2F749D5800A764F1 /* AddressConfirmViewModel.swift in Sources */,
 				8AB276BD2F749D5100A764F1 /* PrepareViewModel.swift in Sources */,
@@ -887,9 +905,11 @@
 				485C15602907F3A7007B9ED0 /* SDKUIImage+.swift in Sources */,
 				48CD8CFF29792C8F008573F8 /* SDKIdentifyColorTheme.swift in Sources */,
 				485C15682907FC69007B9ED0 /* SDKCardReaderViewController.swift in Sources */,
+				8D0D25F22FE4915500DE3B73 /* LostConnectionView.swift in Sources */,
 				36E1B3BF2EAA42FB004F791C /* SDKOVDViewController.swift in Sources */,
 				8DB4B1892FE2E4FB00BA4C67 /* SwiftSignatureViewRepresentable.swift in Sources */,
 				485C155D2907F3A7007B9ED0 /* SDKUIImageView+.swift in Sources */,
+				8D0D25F42FE4958B00DE3B73 /* ExternalViewModel.swift in Sources */,
 				485C157C2908190D007B9ED0 /* SDKNfcViewController.swift in Sources */,
 				8AB276D92F749D9900A764F1 /* IdCardView.swift in Sources */,
 			);

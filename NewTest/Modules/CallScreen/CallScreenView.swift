@@ -7,12 +7,24 @@ import SwiftUI
 
 struct CallScreenView: View {
 
-    @StateObject private var viewModel = CallScreenViewModel()
+    @StateObject private var viewModel: CallScreenViewModel
     @EnvironmentObject private var appState: AppStateViewModel
     @Environment(\.colorScheme) private var colorScheme
 
     @State private var showEndCallAlert = false
-    @State private var pulseActive = false
+    @State private var nfcPulseActive = false
+
+    @MainActor
+    init() {
+        _viewModel = StateObject(wrappedValue: CallScreenViewModel())
+    }
+
+    #if DEBUG
+    @MainActor
+    init(viewModel: CallScreenViewModel) {
+        _viewModel = StateObject(wrappedValue: viewModel)
+    }
+    #endif
 
     var body: some View {
         ZStack {
@@ -27,6 +39,9 @@ struct CallScreenView: View {
                 case .smsVerification:
                     connectedScreen
                         .overlay(smsOverlay)
+                case .nfcReading:
+                    connectedScreen
+                        .overlay(nfcOverlay)
                 case .ended:
                     endedScreen
                 }
@@ -37,13 +52,16 @@ struct CallScreenView: View {
         }
         .onAppear {
             appState.manager.socketMessageListener = viewModel
-            pulseActive = true
             UIApplication.shared.isIdleTimerDisabled = true
         }
         .onDisappear {
             appState.manager.socketMessageListener = appState
-            pulseActive = false
             UIApplication.shared.isIdleTimerDisabled = false
+        }
+        .onChange(of: viewModel.socketThankYouStatus) { status in
+            guard let status else { return }
+            appState.pendingThankYouStatus = status
+            appState.advanceToNextModule()
         }
         .alert("Görüşmeyi bitir", isPresented: $showEndCallAlert) {
             Button("İptal", role: .cancel) {}
@@ -58,108 +76,68 @@ struct CallScreenView: View {
     // MARK: - Waiting
 
     private var waitingScreen: some View {
-        ZStack(alignment: .top) {
-            (colorScheme == .dark ? IDColor.darkBg : IDColor.primary).ignoresSafeArea()
+        ZStack {
+            IDColor.adaptiveBackground(for: colorScheme).ignoresSafeArea()
+
             VStack(spacing: 0) {
-                waitingHeader
-                waitingCard
+                Spacer()
+
+                waitingIllustration
+                    .padding(.bottom, IDSpacing.xl)
+
+                VStack(spacing: IDSpacing.sm) {
+                    Text("Lütfen bekleyin...")
+                        .font(IDFont.displayMedium(.semibold))
+                        .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
+
+                    Text("Görüntülü görüşme yapmak üzere müşteri hizmetlerine bağlanmak üzeresiniz.")
+                        .font(IDFont.body(.regular))
+                        .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(4)
+                }
+                .padding(.horizontal, IDSpacing.lg)
+                .padding(.bottom, IDSpacing.xl)
+
+                queueInfoCard
+                    .padding(.horizontal, IDSpacing.lg)
+
+                Spacer()
             }
         }
         .overlay { loadingOverlay }
     }
 
-    private var waitingHeader: some View {
-        VStack(spacing: 12) {
-            ZStack(alignment: .leading) {
-                HStack(spacing: 10) {
-                    Image(colorScheme == .dark ? "ic_lang_button_dark" : "ic_lang_button_light")
-                        .frame(width: 44, height: 44)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Görüntülü Görüşme")
-                            .font(IDFont.bodyMedium(.semibold))
-                            .foregroundColor(.white)
-                        Text("Temsilcimiz bağlanıyor")
-                            .font(IDFont.caption(.regular))
-                            .foregroundColor(.white.opacity(0.75))
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .center)
-            }
-            .padding(.horizontal, IDSpacing.lg)
+    private var waitingIllustration: some View {
+        ZStack {
+            Circle()
+                .fill(Color(red: 0.941, green: 0.961, blue: 1.0))
+                .overlay(
+                    Circle()
+                        .stroke(Color(red: 0.898, green: 0.910, blue: 0.922).opacity(0.5), lineWidth: 1)
+                )
+                .frame(width: 144, height: 144)
 
-            HStack(spacing: IDSpacing.xs) {
-                ForEach(0..<4) { i in
-                    Capsule()
-                        .fill(i < 3 ? Color.white : Color.white.opacity(0.35))
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 6)
-                }
-            }
-            .padding(.horizontal, IDSpacing.lg)
+            Image(.icIdentifyLogoText)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 96)
         }
-        .padding(.top, IDSpacing.sm)
-        .padding(.bottom, IDSpacing.lg)
-    }
-
-    private var waitingCard: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            VStack(alignment: .leading, spacing: IDSpacing.xl) {
-                VStack(alignment: .leading, spacing: IDSpacing.sm) {
-                    Text("Lütfen bekleyin")
-                        .font(IDFont.displayMedium(.semibold))
-                        .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
-
-                    Text(.waitingDesc1)
-                        .font(IDFont.body(.regular))
-                        .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
-                        .lineSpacing(4)
-                }
-
-                queueInfoCard
-
-                HStack(spacing: IDSpacing.sm) {
-                    ProgressView()
-                        .tint(IDColor.primary)
-                    Text("Bağlantı bekleniyor")
-                        .font(IDFont.bodySmall(.medium))
-                        .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
-                }
-            }
-            .padding(.top, IDSpacing.xl)
-            .padding(.horizontal, IDSpacing.lg)
-
-            Spacer()
-
-            cancelButton
-                .padding(.horizontal, IDSpacing.lg)
-                .padding(.bottom, IDSpacing.xxl)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(IDColor.adaptiveSurface(for: colorScheme))
-        .clipShape(RoundedRectangle(cornerRadius: IDRadius.card))
-        .ignoresSafeArea(edges: .bottom)
     }
 
     private var queueInfoCard: some View {
         Group {
             if !viewModel.queuePosition.isEmpty && viewModel.queuePosition != "0" {
-                HStack(spacing: IDSpacing.md) {
-                    Image(systemName: "person.2.fill")
-                        .font(.system(size: 18))
-                        .foregroundColor(IDColor.primary)
-
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("\(viewModel.queuePosition). sıradasınız")
-                            .font(IDFont.bodySmall(.semibold))
-                            .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
-                        if !viewModel.estimatedWait.isEmpty && viewModel.estimatedWait != "0" {
-                            Text("Tahmini ~\(viewModel.estimatedWait) dakika")
-                                .font(IDFont.caption(.regular))
-                                .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
-                        }
-                    }
-                    Spacer()
+                VStack(spacing: 4) {
+                    Text("Bekleyenler arasında \(viewModel.queuePosition). sıradasınız")
+                        .font(IDFont.bodySmall(.semibold))
+                        .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
+                        .multilineTextAlignment(.center)
+                    Text("tahmini bekleme süreniz \(viewModel.estimatedWait) dakika")
+                        .font(IDFont.caption(.regular))
+                        .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
                 }
+                .frame(maxWidth: .infinity)
                 .padding(IDSpacing.lg)
                 .background(
                     RoundedRectangle(cornerRadius: IDRadius.lg)
@@ -170,37 +148,21 @@ struct CallScreenView: View {
                         )
                 )
             } else {
-                HStack(spacing: IDSpacing.md) {
-                    Image(systemName: "clock.fill")
-                        .font(.system(size: 18))
-                        .foregroundColor(IDColor.primary)
-                    Text(.callScreenWaitRepresentative)
-                        .font(IDFont.bodySmall(.medium))
-                        .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
-                    Spacer()
-                }
-                .padding(IDSpacing.lg)
-                .background(
-                    RoundedRectangle(cornerRadius: IDRadius.lg)
-                        .fill(IDColor.inkBackground)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: IDRadius.lg)
-                                .stroke(IDColor.inkBorder, lineWidth: 1)
-                        )
-                )
+                Text(.callScreenWaitRepresentative)
+                    .font(IDFont.bodySmall(.medium))
+                    .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
+                    .padding(IDSpacing.lg)
+                    .background(
+                        RoundedRectangle(cornerRadius: IDRadius.lg)
+                            .fill(IDColor.inkBackground)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: IDRadius.lg)
+                                    .stroke(IDColor.inkBorder, lineWidth: 1)
+                            )
+                    )
             }
-        }
-    }
-
-    private var cancelButton: some View {
-        Button(action: { showEndCallAlert = true }) {
-            Text("Görüşmeyi İptal Et")
-                .font(IDFont.body(.semibold))
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 50)
-                .background(IDColor.primary)
-                .clipShape(Capsule())
         }
     }
 
@@ -213,114 +175,38 @@ struct CallScreenView: View {
             VStack(spacing: 0) {
                 Spacer()
 
-                avatarSection
+                Image(.incomingCall)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 144, height: 144)
                     .padding(.bottom, IDSpacing.xl)
 
                 VStack(spacing: IDSpacing.sm) {
-                    Text("Çağrı Geliyor")
+                    Text("Müşteri temsilcimiz arıyor...")
                         .font(IDFont.displayMedium(.semibold))
                         .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
 
-                    Text("Temsilci sizinle görüşmek istiyor")
+                    Text("Video görüşmeyi başlatmak için lütfen cevaplayınız.")
                         .font(IDFont.body(.regular))
                         .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, IDSpacing.lg)
                 }
-                .padding(.bottom, IDSpacing.xl)
-
-                callerInfoCard
-                    .padding(.horizontal, IDSpacing.lg)
-                    .padding(.bottom, IDSpacing.xxl)
+                .padding(.bottom, IDSpacing.xxl)
 
                 Spacer()
 
-                callActionButtons
-                    .padding(.bottom, 60)
-            }
-        }
-    }
-
-    private var avatarSection: some View {
-        ZStack {
-            Circle()
-                .fill(IDColor.primary.opacity(0.12))
-                .frame(width: 160, height: 160)
-                .scaleEffect(pulseActive ? 1.15 : 0.95)
-                .animation(
-                    .easeInOut(duration: 1.5).repeatForever(autoreverses: true),
-                    value: pulseActive
-                )
-
-            Circle()
-                .fill(IDColor.primary.opacity(0.2))
-                .frame(width: 130, height: 130)
-
-            Circle()
-                .fill(IDColor.primary)
-                .frame(width: 100, height: 100)
-                .overlay(
-                    Image(systemName: "person.fill")
-                        .font(.system(size: 44, weight: .medium))
-                        .foregroundColor(.white)
-                )
-        }
-    }
-
-    private var callerInfoCard: some View {
-        HStack(spacing: IDSpacing.md) {
-            Image(systemName: "shield.checkered")
-                .font(.system(size: 20))
-                .foregroundColor(IDColor.primary)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Identify Temsilcisi")
-                    .font(IDFont.bodySmall(.semibold))
-                    .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
-                Text("Kimlik doğrulama görüşmesi")
-                    .font(IDFont.caption(.regular))
-                    .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
-            }
-            Spacer()
-
-            Image(systemName: "lock.fill")
-                .font(.system(size: 14))
-                .foregroundColor(IDColor.success)
-        }
-        .padding(IDSpacing.lg)
-        .background(
-            RoundedRectangle(cornerRadius: IDRadius.lg)
-                .fill(IDColor.inkBackground)
-                .overlay(
-                    RoundedRectangle(cornerRadius: IDRadius.lg)
-                        .stroke(IDColor.inkBorder, lineWidth: 1)
-                )
-        )
-    }
-
-    private var callActionButtons: some View {
-        HStack(spacing: 60) {
-            Button(action: { viewModel.terminateCall(appState: appState) }) {
-                ZStack {
-                    Circle()
-                        .fill(IDColor.error)
-                        .frame(width: 72, height: 72)
-                    Image(systemName: "phone.down.fill")
-                        .font(.system(size: 26))
-                        .foregroundColor(.white)
+                Button(action: { viewModel.acceptCall() }) {
+                    Image(.incomingCallButton)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 78, height: 78)
                 }
-            }
-
-            Button(action: { viewModel.acceptCall() }) {
-                ZStack {
-                    Circle()
-                        .fill(IDColor.successBright)
-                        .frame(width: 72, height: 72)
-                    Image(systemName: "phone.fill")
-                        .font(.system(size: 26))
-                        .foregroundColor(.white)
-                }
+                .padding(.bottom, 60)
             }
         }
     }
+
 
     // MARK: - Connected
 
@@ -329,14 +215,18 @@ struct CallScreenView: View {
             VideoFeedRepresentable(videoView: viewModel.remoteVideoView)
                 .ignoresSafeArea()
 
+            LinearGradient(
+                colors: [Color.black.opacity(0.55), Color.clear],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .frame(height: 180)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            .ignoresSafeArea()
+
             VStack {
-                HStack(alignment: .top) {
-                    networkQualityView
-                        .padding(.top, IDSpacing.lg)
-                        .padding(.leading, IDSpacing.lg)
-
+                HStack {
                     Spacer()
-
                     localCameraView
                 }
 
@@ -348,38 +238,11 @@ struct CallScreenView: View {
         .ignoresSafeArea(edges: .bottom)
     }
 
-    private var networkQualityView: some View {
-        HStack(spacing: 4) {
-            Image(systemName: networkQualityIcon)
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(networkQualityColor)
-        }
-        .padding(.horizontal, IDSpacing.sm)
-        .padding(.vertical, IDSpacing.xs)
-        .background(.ultraThinMaterial)
-        .clipShape(Capsule())
-    }
-
-    private var networkQualityIcon: String {
-        switch viewModel.networkQualityText {
-        case "good":   return "wifi"
-        case "medium": return "wifi.exclamationmark"
-        default:       return "wifi.slash"
-        }
-    }
-
-    private var networkQualityColor: Color {
-        switch viewModel.networkQualityText {
-        case "good":   return IDColor.successBright
-        case "medium": return Color.orange
-        default:       return IDColor.error
-        }
-    }
-
     private var localCameraView: some View {
         VideoFeedRepresentable(videoView: viewModel.localVideoView)
-            .frame(width: 112, height: 150)
-            .clipShape(RoundedRectangle(cornerRadius: IDRadius.md))
+            .frame(width: 126, height: 155)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.white, lineWidth: 2))
             .shadow(color: .black.opacity(0.35), radius: 12, x: 0, y: 6)
             .padding(.top, IDSpacing.xl)
             .padding(.trailing, IDSpacing.lg)
@@ -425,7 +288,63 @@ struct CallScreenView: View {
                 }
             }
         )
-        .clipShape(TopRoundedShape(radius: IDRadius.card))
+        .clipShape(TopRoundedShape(radius: IDRadius.lg))
+    }
+
+    // MARK: - NFC Overlay
+
+    private var nfcOverlay: some View {
+        ZStack {
+            Color.black.opacity(0.55).ignoresSafeArea()
+
+            VStack(spacing: IDSpacing.lg) {
+                nfcCardIllustration
+
+                VStack(spacing: IDSpacing.sm) {
+                    Text("NFC Tarama")
+                        .font(IDFont.displayMedium(.semibold))
+                        .foregroundColor(.white)
+
+                    Text("NFC Okutma işlemi için lütfen kimlik kartınızı telefonunuzun önüne tutunuz.")
+                        .font(IDFont.body(.regular))
+                        .foregroundColor(.white.opacity(0.75))
+                        .multilineTextAlignment(.center)
+                }
+
+                if !viewModel.nfcStatusMessage.isEmpty {
+                    Text(viewModel.nfcStatusMessage)
+                        .font(IDFont.bodySmall(.medium))
+                        .foregroundColor(.white.opacity(0.75))
+                        .multilineTextAlignment(.center)
+                }
+            }
+            .padding(IDSpacing.xl)
+        }
+        .onAppear { nfcPulseActive = true }
+        .onDisappear { nfcPulseActive = false }
+    }
+
+    private var nfcCardIllustration: some View {
+        ZStack {
+            Image(.nfcBack)
+                .resizable()
+                .scaledToFill()
+                .frame(width: 200, height: 300)
+                .scaleEffect(nfcPulseActive ? 1.08 : 0.96)
+                .opacity(nfcPulseActive ? 0.55 : 0.95)
+                .animation(
+                    .easeInOut(duration: 1.4).repeatForever(autoreverses: true),
+                    value: nfcPulseActive
+                )
+
+            Image(.nfcFront)
+                .resizable()
+                .scaledToFill()
+                .frame(width: 200, height: 300)
+                .shadow(color: Color.black.opacity(0.18), radius: 18, x: 0, y: 10)
+                .padding(.trailing, IDSpacing.lg)
+        }
+        .frame(width: 300, height: 300)
     }
 
     // MARK: - SMS Overlay
@@ -583,9 +502,34 @@ private struct TopRoundedShape: Shape {
     }
 }
 
-// MARK: - Preview
+// MARK: - Previews
 
-#Preview {
-    CallScreenView()
+#Preview("Bekleme") {
+    CallScreenView(viewModel: CallScreenViewModel(previewState: .waiting))
+        .environmentObject(AppStateViewModel())
+}
+
+#Preview("Bekleme — Sıra Var") {
+    CallScreenView(viewModel: CallScreenViewModel(previewState: .waiting, queuePosition: "1", estimatedWait: "5"))
+        .environmentObject(AppStateViewModel())
+}
+
+#Preview("Çağrı Geliyor") {
+    CallScreenView(viewModel: CallScreenViewModel(previewState: .ringing))
+        .environmentObject(AppStateViewModel())
+}
+
+#Preview("Görüşme Devam Ediyor") {
+    CallScreenView(viewModel: CallScreenViewModel(previewState: .connected))
+        .environmentObject(AppStateViewModel())
+}
+
+#Preview("NFC Okuma") {
+    CallScreenView(viewModel: CallScreenViewModel(previewState: .nfcReading))
+        .environmentObject(AppStateViewModel())
+}
+
+#Preview("Görüşme Tamamlandı") {
+    CallScreenView(viewModel: CallScreenViewModel(previewState: .ended))
         .environmentObject(AppStateViewModel())
 }

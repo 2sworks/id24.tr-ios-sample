@@ -24,8 +24,12 @@ enum IdentifyNavigationFlow: Hashable {
     case signature
     case videoRecorder
     case callScreen
-    case thankYou
+    case thankYou(ThankYouStatus)
     case idCardScanner(IdCardSide)
+    /// ÖRNEK AMAÇLIDIR — SDK modülleri arasına özel ekran eklemeyi gösterir.
+    /// Gerçek projede bu case kaldırılıp kendi route'unuz tanımlanır.
+    /// Bkz. ExternalScreen_KnowHow.md
+    case externalScreen(title: String, subtitle: String, icon: String)
 }
 
 // MARK: - SdkModules → IdentifyNavigationFlow
@@ -47,7 +51,7 @@ extension SdkModules {
         case .selfie:                return .selfie
         case .selfieWithLiveness:    return .selfie
         case .waitScreen:            return .callScreen
-        case .thankU:                return .thankYou
+        case .thankU:                return .thankYou(.completed)
         }
     }
 }

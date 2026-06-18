@@ -24,6 +24,11 @@ final class AppStateViewModel: ObservableObject {
     /// Odada başka bir abone varsa true olur; modül geçişini engeller
     @Published private(set) var subRejected: Bool = false
 
+    // MARK: - Internal
+
+    /// CallScreen'den taşınan ThankYou durumu; advanceToNextModule tüketir.
+    var pendingThankYouStatus: ThankYouStatus = .completed
+
     // MARK: - Private
 
     let manager = IdentifyManager.shared
@@ -140,7 +145,8 @@ final class AppStateViewModel: ObservableObject {
                     self.activeModule = module
                     self.coordinator?.push(module.navigationFlow)
                 } else if nextVC === self.manager.thankYouViewController {
-                    self.coordinator?.push(.thankYou)
+                    self.coordinator?.push(.thankYou(self.pendingThankYouStatus))
+                    self.pendingThankYouStatus = .completed
                 }
             }
         }
@@ -149,6 +155,16 @@ final class AppStateViewModel: ObservableObject {
     func skipCurrentModule() {
         manager.skipModule()
         advanceToNextModule()
+    }
+
+    /// SDK modül akışını kesmeden önce özel bir ekran gösterir.
+    /// moduleStepOrder değişmez — ExternalView'daki "Devam Et" advanceToNextModule() çağırır.
+    func showExternalScreen(
+        title: String,
+        subtitle: String = "Devam etmeden önce lütfen bilgileri okuyun.",
+        icon: String = "info.circle.fill"
+    ) {
+        coordinator?.push(.externalScreen(title: title, subtitle: subtitle, icon: icon))
     }
 
     func resetFlow() {

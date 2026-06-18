@@ -21,7 +21,7 @@ import IdentifySDK
 // MARK: - Gorusme Durumu
 
 enum CallState {
-    case waiting, ringing, connected, smsVerification, ended
+    case waiting, ringing, connected, smsVerification, nfcReading, ended
 }
 
 // MARK: - CallScreenViewModel
@@ -38,6 +38,9 @@ final class CallScreenViewModel: BaseModuleViewModel {
     @Published var smsCode: String = ""
     @Published private(set) var endCallEnabled: Bool = true
     @Published private(set) var callCompleted: Bool = false
+    @Published private(set) var nfcStatusMessage: String = ""
+    /// Socket kaynaklı görüşme bitişlerinde ThankYou statüsünü view'a iletir.
+    @Published private(set) var socketThankYouStatus: ThankYouStatus? = nil
 
     var isSMSCodeValid: Bool { smsCode.count == 6 }
 
@@ -51,6 +54,15 @@ final class CallScreenViewModel: BaseModuleViewModel {
     override init() {
         super.init()
     }
+
+    #if DEBUG
+    convenience init(previewState: CallState, queuePosition: String = "", estimatedWait: String = "") {
+        self.init()
+        callState = previewState
+        self.queuePosition = queuePosition
+        self.estimatedWait = estimatedWait
+    }
+    #endif
 
     // MARK: - Cagriyi Kabul Et
 
@@ -74,6 +86,7 @@ final class CallScreenViewModel: BaseModuleViewModel {
             Task { @MainActor in
                 guard let self else { return }
                 self.callState = .ended
+                appState.pendingThankYouStatus = .notCompleted
                 appState.advanceToNextModule()
             }
         }
@@ -100,6 +113,48 @@ final class CallScreenViewModel: BaseModuleViewModel {
     // MARK: - Uzaktan NFC
 
     func startRemoteNFC(birthDate: String, validDate: String, docNo: String) {
+        callState = .nfcReading
+        nfcStatusMessage = "Kimliğinizi okutunuz"
+
+        // nfcMsgHandler NFC okuma thread'inden çağrılır; UI güncellemeleri MainActor'a taşınır.
+        // WebRTC PeerConnection bu süre boyunca açık kalır — hiçbir şey kapatılmaz.
+        manager.nfcMsgHandler = { [weak self] displayMessage in
+            let msg: String
+            let isTerminal: Bool
+
+            switch displayMessage {
+            case .requestPresentPassport:
+                msg = "Kimliğinizi okutunuz"
+                isTerminal = false
+            case .authenticatingWithPassport(let progress):
+                msg = "Doğrulanıyor... %\(progress)"
+                isTerminal = false
+            case .readingDataGroupProgress(_, let progress):
+                msg = "Okunuyor... %\(progress)"
+                isTerminal = false
+            case .successfulRead:
+                msg = "Okuma tamamlandı"
+                isTerminal = true
+            case .error:
+                msg = "Okuma başarısız, lütfen tekrar deneyin"
+                isTerminal = true
+            default:
+                msg = ""
+                isTerminal = false
+            }
+
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                if !msg.isEmpty { self.nfcStatusMessage = msg }
+                if isTerminal {
+                    self.callState = .connected
+                    self.nfcStatusMessage = ""
+                }
+            }
+
+            return msg
+        }
+
         manager.startRemoteNFC(birthDate: birthDate, validDate: validDate, docNo: docNo)
     }
 }
@@ -121,13 +176,12 @@ extension CallScreenViewModel: SDKSocketListener {
                 callState = .ended
 
             case .approveSms(let tan):
-                // SDK Bool donduruyor, tan kodu AppState'den alinmali
-                // tan parametresi burada Bool tipindedir
                 _ = tan
 
             case .terminateCall(_, _):
                 callState = .ended
                 callCompleted = true
+                socketThankYouStatus = .completed
 
             case .imOffline:
                 errorMessage = "Temsilci cevrimdisi"
@@ -144,7 +198,7 @@ extension CallScreenViewModel: SDKSocketListener {
 
             case .missedCall:
                 callState = .ended
-                errorMessage = "Cagri cevapsiz kaldi"
+                socketThankYouStatus = .missedCall
 
             case .connectionErr:
                 errorMessage = "Baglanti hatasi"

@@ -117,10 +117,12 @@ struct IdentifyNavContent: View {
                 VideoRecorderView()
             case .callScreen:
                 CallScreenView()
-            case .thankYou:
-                ThankYouView()
+            case .thankYou(let status):
+                ThankYouView(status: status)
             case .idCardScanner(let side):
                 IdCardScannerView(side: side)
+            case .externalScreen(let title, let subtitle, let icon):
+                ExternalView(title: title, subtitle: subtitle, icon: icon)
             }
         }
         .environmentObject(appState)
