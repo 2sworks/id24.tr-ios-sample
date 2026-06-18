@@ -2,12 +2,12 @@
 //  AddressConfirmViewModel.swift
 //  NewTest
 //
-//  Adres dogrulama ekraninin ViewModel'i.
 //  SDK: uploadAddressInfo, uploadAddressInfoWithPdf, maxAddressPDFFileSize
 //
 
 import Foundation
 import UIKit
+import PDFKit
 import IdentifySDK
 
 @MainActor
@@ -17,8 +17,13 @@ final class AddressConfirmViewModel: BaseModuleViewModel {
 
     @Published var addressText: String = ""
     @Published var docPhoto: UIImage? = nil
-    @Published var showPDFOption: Bool = false
     @Published var pdfData: Data? = nil
+
+    // Picker / sheet triggers
+    @Published var showDocumentOptions: Bool = false
+    @Published var showScanner: Bool = false
+    @Published var showGallery: Bool = false
+    @Published var showPDFPicker: Bool = false
 
     var isAddressValid: Bool { addressText.count >= 10 }
 
@@ -28,6 +33,23 @@ final class AddressConfirmViewModel: BaseModuleViewModel {
 
     var maxPDFSizeMB: Int { manager.maxAddressPDFFileSize }
 
+    // MARK: - Document Options
+
+    func openScanner() {
+        showDocumentOptions = false
+        showScanner = true
+    }
+
+    func openGallery() {
+        showDocumentOptions = false
+        showGallery = true
+    }
+
+    func openPDFPicker() {
+        showDocumentOptions = false
+        showPDFPicker = true
+    }
+
     // MARK: - Dokuman Secildi
 
     func photoSelected(_ image: UIImage) {
@@ -36,10 +58,19 @@ final class AddressConfirmViewModel: BaseModuleViewModel {
         errorMessage = nil
     }
 
+    func pdfSelectedFromURL(_ url: URL) {
+        guard let data = try? Data(contentsOf: url) else {
+            errorMessage = "Dosya okunamadı"
+            return
+        }
+        pdfSelected(data, preview: renderPDFFirstPage(url))
+    }
+
     func pdfSelected(_ data: Data, preview: UIImage? = nil) {
-        let sizeMB = data.count / (1024 * 1024)
-        if sizeMB > maxPDFSizeMB {
-            errorMessage = "PDF max \(maxPDFSizeMB) MB olabilir (\(sizeMB) MB secildi)"
+        let maxBytes = maxPDFSizeMB * 1024 * 1024
+        if data.count > maxBytes {
+            let sizeMB = data.count / (1024 * 1024)
+            errorMessage = "PDF maksimum \(maxPDFSizeMB) MB olabilir (\(sizeMB) MB seçildi)"
             return
         }
         pdfData = data
@@ -63,7 +94,7 @@ final class AddressConfirmViewModel: BaseModuleViewModel {
                     } else if success {
                         appState.advanceToNextModule()
                     } else {
-                        self.errorMessage = "PDF yukleme basarisiz"
+                        self.errorMessage = "PDF yükleme başarısız"
                     }
                 }
             }
@@ -77,10 +108,26 @@ final class AddressConfirmViewModel: BaseModuleViewModel {
                     } else if success {
                         appState.advanceToNextModule()
                     } else {
-                        self.errorMessage = "Yukleme basarisiz"
+                        self.errorMessage = "Yükleme başarısız"
                     }
                 }
             }
+        }
+    }
+
+    // MARK: - PDF Preview
+
+    private func renderPDFFirstPage(_ url: URL) -> UIImage? {
+        guard let doc = PDFDocument(url: url),
+              let page = doc.page(at: 0) else { return nil }
+        let bounds = page.bounds(for: .mediaBox)
+        let renderer = UIGraphicsImageRenderer(size: bounds.size)
+        return renderer.image { ctx in
+            UIColor.white.set()
+            ctx.fill(CGRect(origin: .zero, size: bounds.size))
+            ctx.cgContext.translateBy(x: 0, y: bounds.size.height)
+            ctx.cgContext.scaleBy(x: 1, y: -1)
+            page.draw(with: .mediaBox, to: ctx.cgContext)
         }
     }
 }

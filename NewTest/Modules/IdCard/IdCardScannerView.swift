@@ -30,7 +30,8 @@ struct IdCardScannerView: View {
         ZStack(alignment: .topLeading) {
             IdentityScannerView(
                 profile: documentProfile,
-                style: quadStyle
+                style: quadStyle,
+                configuration: .default
             ) { result in
                 switch result {
                 case .success(let doc):

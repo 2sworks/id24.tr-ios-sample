@@ -53,12 +53,22 @@ final class SpeechRecViewModel: BaseModuleViewModel {
         guard !isRecording else { return }
         recognizedText = ""
         speechSuccess = false
+        errorMessage = nil
+
+        // 1. Önce audio session'ı aktif et — format sorgusu ve engine start buna bağlı.
+        // .defaultToSpeaker sadece .playAndRecord ile geçerlidir; .record ile -50 verir.
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playAndRecord, mode: .default, options: .defaultToSpeaker)
+            try AVAudioSession.sharedInstance().setActive(true, options: .notifyOthersOnDeactivation)
+        } catch {
+            errorMessage = error.localizedDescription
+            return
+        }
+
         isRecording = true
 
         let request = SFSpeechAudioBufferRecognitionRequest()
         recognitionRequest = request
-
-        let inputNode = audioEngine.inputNode
         request.shouldReportPartialResults = true
 
         recognitionTask = speechRecognizer?.recognitionTask(with: request) { [weak self] result, error in
@@ -67,22 +77,29 @@ final class SpeechRecViewModel: BaseModuleViewModel {
                 if let result {
                     self.recognizedText = result.bestTranscription.formattedString
                 }
-                if error != nil || result?.isFinal == true {
-                    self.stopRecording()
+                if result?.isFinal == true {
+                    self.recognitionTask = nil
+                    self.recognitionRequest = nil
                     self.checkResult()
+                } else if error != nil {
+                    self.recognitionTask = nil
+                    self.recognitionRequest = nil
+                    if !self.recognizedText.isEmpty {
+                        self.checkResult()
+                    }
                 }
             }
         }
 
+        // 2. Session aktifken format al, tap kur, engine başlat.
+        let inputNode = audioEngine.inputNode
         let recordingFormat = inputNode.outputFormat(forBus: 0)
         inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { buffer, _ in
             request.append(buffer)
         }
 
+        audioEngine.prepare()
         do {
-            try AVAudioSession.sharedInstance().setCategory(.record, mode: .default, options: [.defaultToSpeaker])
-            try AVAudioSession.sharedInstance().setActive(true, options: .notifyOthersOnDeactivation)
-            audioEngine.prepare()
             try audioEngine.start()
         } catch {
             errorMessage = error.localizedDescription
@@ -91,13 +108,14 @@ final class SpeechRecViewModel: BaseModuleViewModel {
     }
 
     func stopRecording() {
+        // guard: çift çağrıyı önle (tap zaten kaldırılmışsa "operation error" verir)
+        guard isRecording else { return }
+        isRecording = false
         audioEngine.stop()
         audioEngine.inputNode.removeTap(onBus: 0)
+        // endAudio: kalan ses tamponunu tanıyıcıya gönderir, isFinal ile tamamlanır.
+        // cancel() çağrılmıyor — legacy SDKSpeechRecViewController ile aynı yaklaşım.
         recognitionRequest?.endAudio()
-        recognitionTask?.cancel()
-        recognitionTask = nil
-        recognitionRequest = nil
-        isRecording = false
     }
 
     // MARK: - Sonuc Kontrolu
