@@ -108,7 +108,7 @@ struct SignatureView: View {
                 .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
 
             Text("Kimlik tespiti için lütfen belirtilen alana imzanızı atın")
-                .font(IDFont.body(.regular))
+                .font(IDFont.bodyRegular(.regular))
                 .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
                 .lineSpacing(4)
         }
@@ -171,7 +171,7 @@ struct SignatureView: View {
             viewModel.uploadSignature(image: image, appState: appState)
         }) {
             Text("Devam")
-                .font(IDFont.body(.semibold))
+                .font(IDFont.bodyRegular(.semibold))
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .frame(height: 50)

@@ -64,13 +64,13 @@ struct ThankYouView: View {
                 .multilineTextAlignment(.center)
             VStack(spacing: IDSpacing.sm) {
                 Text(subtitleText)
-                    .font(IDFont.body(.regular))
+                    .font(IDFont.bodyRegular(.regular))
                     .foregroundColor(IDColor.inkMid)
                     .multilineTextAlignment(.center)
                     .lineSpacing(4)
                 if !subtitle2Text.isEmpty {
                     Text(subtitle2Text)
-                        .font(IDFont.body(.regular))
+                        .font(IDFont.bodyRegular(.regular))
                         .foregroundColor(IDColor.inkMid)
                         .multilineTextAlignment(.center)
                         .lineSpacing(4)
@@ -145,7 +145,7 @@ struct ThankYouView: View {
             appState.resetFlow()
         } label: {
             Text(SDKKeywords.coreOk.localized)
-                .font(IDFont.body(.semibold))
+                .font(IDFont.bodyRegular(.semibold))
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .frame(height: 50)

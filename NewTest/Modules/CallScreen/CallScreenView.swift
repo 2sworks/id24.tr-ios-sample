@@ -91,7 +91,7 @@ struct CallScreenView: View {
                         .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
 
                     Text("Görüntülü görüşme yapmak üzere müşteri hizmetlerine bağlanmak üzeresiniz.")
-                        .font(IDFont.body(.regular))
+                        .font(IDFont.bodyRegular(.regular))
                         .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
                         .multilineTextAlignment(.center)
                         .lineSpacing(4)
@@ -187,7 +187,7 @@ struct CallScreenView: View {
                         .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
 
                     Text("Video görüşmeyi başlatmak için lütfen cevaplayınız.")
-                        .font(IDFont.body(.regular))
+                        .font(IDFont.bodyRegular(.regular))
                         .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, IDSpacing.lg)
@@ -306,7 +306,7 @@ struct CallScreenView: View {
                         .foregroundColor(.white)
 
                     Text("NFC Okutma işlemi için lütfen kimlik kartınızı telefonunuzun önüne tutunuz.")
-                        .font(IDFont.body(.regular))
+                        .font(IDFont.bodyRegular(.regular))
                         .foregroundColor(.white.opacity(0.75))
                         .multilineTextAlignment(.center)
                 }
@@ -364,7 +364,7 @@ struct CallScreenView: View {
                         .foregroundColor(.white)
 
                     Text("Telefonunuza gelen 6 haneli kodu girin")
-                        .font(IDFont.body(.regular))
+                        .font(IDFont.bodyRegular(.regular))
                         .foregroundColor(.white.opacity(0.75))
                         .multilineTextAlignment(.center)
                 }
@@ -387,7 +387,7 @@ struct CallScreenView: View {
 
                 Button(action: { viewModel.verifySMS(appState: appState) }) {
                     Text("Doğrula")
-                        .font(IDFont.body(.semibold))
+                        .font(IDFont.bodyRegular(.semibold))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
@@ -426,7 +426,7 @@ struct CallScreenView: View {
                         .font(IDFont.displayMedium(.semibold))
                         .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
                     Text("İşleminiz tamamlanıyor...")
-                        .font(IDFont.body(.regular))
+                        .font(IDFont.bodyRegular(.regular))
                         .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
                 }
 
@@ -504,6 +504,7 @@ private struct TopRoundedShape: Shape {
 
 // MARK: - Previews
 
+#if DEBUG
 #Preview("Bekleme") {
     CallScreenView(viewModel: CallScreenViewModel(previewState: .waiting))
         .environmentObject(AppStateViewModel())
@@ -533,3 +534,4 @@ private struct TopRoundedShape: Shape {
     CallScreenView(viewModel: CallScreenViewModel(previewState: .ended))
         .environmentObject(AppStateViewModel())
 }
+#endif

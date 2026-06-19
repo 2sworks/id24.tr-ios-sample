@@ -143,7 +143,7 @@ struct AddressConfirmView: View {
                 .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
 
             Text("Kimlik tespiti için adresinizi ve bir belge fotoğrafını paylaşın")
-                .font(IDFont.body(.regular))
+                .font(IDFont.bodyRegular(.regular))
                 .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
                 .lineSpacing(4)
         }
@@ -155,7 +155,7 @@ struct AddressConfirmView: View {
         ZStack(alignment: .topLeading) {
             if viewModel.addressText.isEmpty {
                 Text("Adresinizi buraya yazın...")
-                    .font(IDFont.body(.regular))
+                    .font(IDFont.bodyRegular(.regular))
                     .foregroundColor(IDColor.inkMid.opacity(0.6))
                     .padding(.top, 9)
                     .padding(.leading, 5)
@@ -179,14 +179,14 @@ struct AddressConfirmView: View {
     private var addressTextEditor: some View {
         if #available(iOS 16.0, *) {
             TextEditor(text: $viewModel.addressText)
-                .font(IDFont.body(.regular))
+                .font(IDFont.bodyRegular(.regular))
                 .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
                 .frame(height: 93)
                 .scrollContentBackground(.hidden)
                 .background(Color.clear)
         } else {
             TextEditor(text: $viewModel.addressText)
-                .font(IDFont.body(.regular))
+                .font(IDFont.bodyRegular(.regular))
                 .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
                 .frame(height: 93)
                 .background(Color.clear)
@@ -203,7 +203,7 @@ struct AddressConfirmView: View {
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(viewModel.docPhoto != nil ? "Belge eklendi" : "Belge Yükle")
-                        .font(IDFont.body(.semibold))
+                        .font(IDFont.bodyRegular(.semibold))
                         .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
                     Text(viewModel.docPhoto != nil ? "Değiştirmek için dokunun" : "Fotoğraf, galeri veya PDF")
                         .font(IDFont.caption(.regular))
@@ -271,7 +271,7 @@ struct AddressConfirmView: View {
     private var continueButton: some View {
         Button(action: { viewModel.submit(appState: appState) }) {
             Text("Devam")
-                .font(IDFont.body(.semibold))
+                .font(IDFont.bodyRegular(.semibold))
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .frame(height: 50)
@@ -329,7 +329,7 @@ struct AddressConfirmView: View {
                     withAnimation { viewModel.showDocumentOptions = false }
                 }) {
                     Text("Vazgeç")
-                        .font(IDFont.body(.semibold))
+                        .font(IDFont.bodyRegular(.semibold))
                         .foregroundColor(IDColor.primary)
                         .frame(maxWidth: .infinity)
                         .frame(height: 57)
@@ -353,7 +353,7 @@ struct AddressConfirmView: View {
                     .foregroundColor(IDColor.primary)
                     .frame(width: 28)
                 Text(title)
-                    .font(IDFont.body(.regular))
+                    .font(IDFont.bodyRegular(.regular))
                     .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
                 Spacer()
             }

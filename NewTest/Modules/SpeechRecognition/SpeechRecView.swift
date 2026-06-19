@@ -114,7 +114,7 @@ struct SpeechRecView: View {
                 .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
 
             Text("Lütfen mikrofona basılı tutarak aşağıdaki kelimeyi okuyun")
-                .font(IDFont.body(.regular))
+                .font(IDFont.bodyRegular(.regular))
                 .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
                 .lineSpacing(4)
         }
@@ -220,7 +220,7 @@ struct SpeechRecView: View {
             viewModel.confirmSpeech(appState: appState)
         }) {
             Text("Devam")
-                .font(IDFont.body(.semibold))
+                .font(IDFont.bodyRegular(.semibold))
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .frame(height: 50)

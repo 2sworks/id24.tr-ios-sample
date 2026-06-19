@@ -30,7 +30,7 @@ struct IDSuccessBanner: View {
             }
             VStack(alignment: .leading, spacing: 2) {
                 Text("Başarılı")
-                    .font(IDFont.body(.semibold))
+                    .font(IDFont.bodyRegular(.semibold))
                     .foregroundColor(IDColor.success)
                 Text(message)
                     .font(IDFont.caption(.regular))

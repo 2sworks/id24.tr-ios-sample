@@ -204,7 +204,7 @@ struct IdCardView: View {
     private var continueButton: some View {
         Button(action: handleContinue) {
             Text("Devam")
-                .font(IDFont.body(.semibold))
+                .font(IDFont.bodyRegular(.semibold))
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .frame(height: 50)
@@ -249,7 +249,7 @@ struct IdCardView: View {
                 .font(IDFont.displayMedium(.semibold))
                 .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
             Text(subtitle)
-                .font(IDFont.body(.regular))
+                .font(IDFont.bodyRegular(.regular))
                 .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
                 .lineSpacing(4)
         }
@@ -280,7 +280,7 @@ private struct CardTypeOptionRow: View {
                     .frame(width: 28, height: 28)
 
                 Text(title)
-                    .font(IDFont.body(.medium))
+                    .font(IDFont.bodyRegular(.medium))
                     .foregroundColor(isSelected
                                      ? IDColor.adaptiveTitle(for: colorScheme)
                                      : IDColor.adaptiveSubtitle(for: colorScheme))
@@ -343,7 +343,7 @@ private struct CardScanSlotView: View {
 
             Button(action: action) {
                 Text(buttonTitle)
-                    .font(IDFont.body(.semibold))
+                    .font(IDFont.bodyRegular(.semibold))
                     .foregroundColor(.white)
                     .padding(.horizontal, IDSpacing.xl)
                     .frame(height: 44)

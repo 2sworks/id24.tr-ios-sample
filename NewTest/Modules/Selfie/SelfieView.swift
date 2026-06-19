@@ -31,12 +31,24 @@ import SwiftUI
 
 struct SelfieView: View {
 
-    @StateObject private var viewModel = SelfieViewModel()
+    @StateObject private var viewModel: SelfieViewModel
     @StateObject private var camera = SelfieCameraController()
     @EnvironmentObject private var appState: AppStateViewModel
 
     @State private var isCameraActive = true
     @State private var showSuccessCheckmark = false
+
+    @MainActor
+    init() {
+        _viewModel = StateObject(wrappedValue: SelfieViewModel())
+    }
+
+    #if DEBUG
+    @MainActor
+    init(previewModel: SelfieViewModel) {
+        _viewModel = StateObject(wrappedValue: previewModel)
+    }
+    #endif
 
     var body: some View {
         ZStack {
@@ -308,6 +320,7 @@ extension SelfieView {
 
 // MARK: - Previews
 
+#if DEBUG
 #Preview("Kamera Aktif") {
     SelfieView()
         .environmentObject(AppStateViewModel())
@@ -344,3 +357,4 @@ extension SelfieView {
     ))
     .environmentObject(AppStateViewModel())
 }
+#endif

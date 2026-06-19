@@ -135,7 +135,7 @@ struct PrepareView: View {
             Text(isSpeedTestDone
                  ? "Adınızı ve mevcut adresinizi gösteren bir belge kullanın. Nerede yaşadığınızı doğrulamak için yükleyin."
                  : "Lütfen kimlik doğrulama sürecine başlamadan önce aşağıdaki izinleri verdiğinizden emin olun.")
-                .font(IDFont.body(.regular))
+                .font(IDFont.bodyRegular(.regular))
                 .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
                 .lineSpacing(4)
         }
@@ -190,7 +190,7 @@ struct PrepareView: View {
             viewModel.completePrepare(appState: appState)
         }) {
             Text(isSpeedTestDone ? "Devam Et" : "Bağlantı Kalitemi Ölç ve Devam Et")
-                .font(IDFont.body(.semibold))
+                .font(IDFont.bodyRegular(.semibold))
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .frame(height: 50)
@@ -241,7 +241,7 @@ struct PreparePermissionRow: View {
                     .frame(width: 24, height: 24)
 
                 Text(title)
-                    .font(IDFont.body(.regular))
+                    .font(IDFont.bodyRegular(.regular))
                     .foregroundColor(isChecked ? .white : IDColor.inkLight)
                     .multilineTextAlignment(.leading)
 

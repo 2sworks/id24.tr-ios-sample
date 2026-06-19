@@ -108,7 +108,7 @@ struct ExternalView: View {
                 .multilineTextAlignment(.center)
 
             Text(viewModel.subtitle)
-                .font(IDFont.body(.regular))
+                .font(IDFont.bodyRegular(.regular))
                 .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
                 .multilineTextAlignment(.center)
                 .lineSpacing(4)
@@ -122,7 +122,7 @@ struct ExternalView: View {
             viewModel.proceed(appState: appState)
         } label: {
             Text("Devam Et")
-                .font(IDFont.body(.semibold))
+                .font(IDFont.bodyRegular(.semibold))
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .frame(height: 50)

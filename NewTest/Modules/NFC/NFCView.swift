@@ -98,7 +98,7 @@ struct NFCView: View {
                             .font(IDFont.displayMedium(.semibold))
                             .foregroundColor(.white)
                         Text("NFC Okutma işlemi için lütfen kimlik kartınızı telefonunuzun önüne tutunuz.")
-                            .font(IDFont.body(.regular))
+                            .font(IDFont.bodyRegular(.regular))
                             .foregroundColor(.white.opacity(0.75))
                             .multilineTextAlignment(.center)
                             .lineSpacing(4)
@@ -152,7 +152,7 @@ struct NFCView: View {
                 .font(IDFont.displayMedium(.semibold))
                 .foregroundColor(.white)
             Text(.nfcInfoDesc)
-                .font(IDFont.body(.regular))
+                .font(IDFont.bodyRegular(.regular))
                 .foregroundColor(.white.opacity(0.75))
                 .lineSpacing(4)
         }
@@ -185,7 +185,7 @@ struct NFCView: View {
     private var primaryButton: some View {
         Button(action: { viewModel.startNFC(appState: appState) }) {
             Text(.nfcStart)
-                .font(IDFont.body(.semibold))
+                .font(IDFont.bodyRegular(.semibold))
                 .foregroundColor(IDColor.primary)
                 .frame(maxWidth: .infinity)
                 .frame(height: 50)
@@ -275,7 +275,7 @@ struct NFCEditView: View {
                 .font(IDFont.bodyMedium(.semibold))
                 .foregroundColor(IDColor.error)
             Text(.nfcKeyErrSubTitle)
-                .font(IDFont.body(.regular))
+                .font(IDFont.bodyRegular(.regular))
                 .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
                 .lineSpacing(4)
         }
@@ -341,7 +341,7 @@ struct NFCEditView: View {
     private var saveButton: some View {
         Button(action: { save() }) {
             Text("Güncelle")
-                .font(IDFont.body(.semibold))
+                .font(IDFont.bodyRegular(.semibold))
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .frame(height: 50)

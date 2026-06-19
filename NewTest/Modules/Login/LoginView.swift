@@ -224,12 +224,12 @@ private struct LoginHeroSection: View {
 
             VStack(spacing: IDSpacing.sm) {
                 Text("Identify'a Hoş geldiniz!")
-                    .font(IDFont.displaySmall(.bold))
+                    .font(IDFont.displayMedium())
                     .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
                     .multilineTextAlignment(.center)
 
                 Text("Kimlik doğrulama süreci boyunca iyi bir ışığa sahip olmanız, kimliğinizin yanında olması ve tek başınıza olmanız gerekir.")
-                    .font(IDFont.bodySmall())
+                    .font(IDFont.bodySmall(.regular))
                     .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
                     .multilineTextAlignment(.center)
                     .lineSpacing(4)
@@ -520,7 +520,7 @@ private struct ToggleOptionRow: View {
         VStack(spacing: 0) {
             HStack {
                 Text(title)
-                    .font(IDFont.body())
+                    .font(IDFont.bodyRegular())
                     .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
                 Spacer()
                 Toggle("", isOn: $isOn)
@@ -594,7 +594,7 @@ private struct MenuOptionRow: View {
                     .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
                     .frame(width: 24)
                 Text(title)
-                    .font(IDFont.body())
+                    .font(IDFont.bodyRegular())
                     .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
                 Spacer()
                 Image(systemName: "chevron.right")
@@ -682,7 +682,7 @@ private struct ServerOptionRow: View {
         Button(action: onTap) {
             HStack {
                 Text(server.title)
-                    .font(IDFont.body(.semibold))
+                    .font(IDFont.bodyRegular(.semibold))
                     .foregroundColor(isSelected ? .white : IDColor.adaptiveTitle(for: colorScheme))
                 Spacer()
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
@@ -858,7 +858,7 @@ private struct ModuleRow: View {
                 }
 
                 Text(module.displayName)
-                    .font(IDFont.body())
+                    .font(IDFont.bodyRegular())
                     .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
 
                 Spacer()
@@ -898,7 +898,7 @@ private struct PassiveModuleRow: View {
                 }
 
                 Text(module.displayName)
-                    .font(IDFont.body())
+                    .font(IDFont.bodyRegular())
                     .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
 
                 Spacer()

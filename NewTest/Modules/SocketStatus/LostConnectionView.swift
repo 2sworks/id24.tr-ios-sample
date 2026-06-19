@@ -61,7 +61,7 @@ struct LostConnectionView: View {
                 .multilineTextAlignment(.center)
 
             Text("Canlı görüşme sırasında bağlantınız koptu lütfen bağlantınızı kontrol edin.")
-                .font(IDFont.body(.regular))
+                .font(IDFont.bodyRegular(.regular))
                 .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
                 .multilineTextAlignment(.center)
                 .lineSpacing(4)
@@ -80,7 +80,7 @@ struct LostConnectionView: View {
                         .scaleEffect(0.85)
                 }
                 Text(buttonTitle)
-                    .font(IDFont.body(.semibold))
+                    .font(IDFont.bodyRegular(.semibold))
                     .foregroundColor(.white)
             }
             .frame(maxWidth: .infinity)
