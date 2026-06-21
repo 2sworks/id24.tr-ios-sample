@@ -34,7 +34,25 @@ struct PrepareView: View {
         ZStack(alignment: .top) {
             (colorScheme == .dark ? IDColor.darkBg : IDColor.primary).ignoresSafeArea()
             VStack(spacing: 0) {
-                headerArea
+                SDKNavigationBar(
+                    style: .progress(steps: 4, current: 2),
+                    title: "Kimlik Doğrulama",
+                    subtitle: "Test etmek istediğiniz ortamı seçin",
+                    onBack: {}
+                )
+
+                if viewModel.isLoading {
+                    HStack(spacing: 8) {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            .scaleEffect(0.8)
+                        Text("Bağlantı hızı ölçülüyor...")
+                            .font(IDFont.caption(.regular))
+                            .foregroundColor(.white.opacity(0.85))
+                    }
+                    .padding(.bottom, IDSpacing.sm)
+                }
+
                 cardArea
             }
         }
@@ -45,58 +63,6 @@ struct PrepareView: View {
         } message: {
             Text(viewModel.settingsAlertMessage)
         }
-    }
-
-    // MARK: - Header
-
-    private var headerArea: some View {
-        VStack(spacing: 12) {
-            ZStack(alignment: .leading) {
-                HStack(spacing: 10) {
-                    identifyLogoView
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Kimlik Doğrulama")
-                            .font(IDFont.bodyMedium(.semibold))
-                            .foregroundColor(.white)
-                        Text("Test etmek istediğiniz ortamı seçin")
-                            .font(IDFont.caption(.regular))
-                            .foregroundColor(.white.opacity(0.75))
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .center)
-
-                Button(action: {}) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.white)
-                        .frame(width: 32, height: 32)
-                }
-            }
-            .padding(.horizontal, IDSpacing.lg)
-
-            HStack(spacing: 6) {
-                ForEach(0..<4) { i in
-                    Capsule()
-                        .fill(i < 2 ? Color.white : Color.white.opacity(0.35))
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 6)
-                }
-            }
-            .padding(.horizontal, IDSpacing.lg)
-
-            if viewModel.isLoading {
-                HStack(spacing: 8) {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                        .scaleEffect(0.8)
-                    Text("Bağlantı hızı ölçülüyor...")
-                        .font(IDFont.caption(.regular))
-                        .foregroundColor(.white.opacity(0.85))
-                }
-            }
-        }
-        .padding(.top, IDSpacing.sm)
-        .padding(.bottom, IDSpacing.lg)
     }
 
     // MARK: - Kart Alan
@@ -136,7 +102,7 @@ struct PrepareView: View {
                  ? "Adınızı ve mevcut adresinizi gösteren bir belge kullanın. Nerede yaşadığınızı doğrulamak için yükleyin."
                  : "Lütfen kimlik doğrulama sürecine başlamadan önce aşağıdaki izinleri verdiğinizden emin olun.")
                 .font(IDFont.bodyRegular(.regular))
-                .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
+                .foregroundColor(IDColor.adaptiveSubtitleContent(for: colorScheme))
                 .lineSpacing(4)
         }
     }
@@ -186,27 +152,11 @@ struct PrepareView: View {
     // MARK: - Devam Butonu
 
     private var continueButton: some View {
-        Button(action: {
+        SDKButton(
+            title: isSpeedTestDone ? "Devam Et" : "Bağlantı Kalitemi Ölç ve Devam Et",
+            isDisabled: !canProceedFull
+        ) {
             viewModel.completePrepare(appState: appState)
-        }) {
-            Text(isSpeedTestDone ? "Devam Et" : "Bağlantı Kalitemi Ölç ve Devam Et")
-                .font(IDFont.bodyRegular(.semibold))
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 50)
-                .background(canProceedFull ? IDColor.primary : IDColor.primary.opacity(0.35))
-                .clipShape(Capsule())
-        }
-        .disabled(!canProceedFull)
-        .animation(.easeInOut(duration: 0.2), value: canProceedFull)
-    }
-
-    // MARK: - Identify Logo
-
-    private var identifyLogoView: some View {
-        ZStack {
-            Image(colorScheme == .dark ? "ic_lang_button_dark" : "ic_lang_button_light")
-                .frame(width: 44, height: 44)
         }
     }
 }
@@ -221,7 +171,7 @@ struct PreparePermissionRow: View {
     let action: () -> Void
 
     private var uncheckedCheckboxColor: Color {
-        colorScheme == .dark ? Color(hex: "#3A3A5C") : Color(hex: "#D9D9D9")
+        colorScheme == .dark ? IDColor.darkMuted : IDColor.divider
     }
 
     private var rowIcon: AnyView {
@@ -237,19 +187,23 @@ struct PreparePermissionRow: View {
             HStack(spacing: 12) {
                 rowIcon
                     .font(.system(size: 16))
-                    .foregroundColor(isChecked ? .white : IDColor.inkLight)
+                    .foregroundColor(
+                        isChecked ? IDColor.primaryLight : colorScheme == .dark ? IDColor.primaryLight : IDColor.darkMuted
+                    )
                     .frame(width: 24, height: 24)
 
                 Text(title)
                     .font(IDFont.bodyRegular(.regular))
-                    .foregroundColor(isChecked ? .white : IDColor.inkLight)
+                    .foregroundColor(
+                        isChecked ? IDColor.primaryLight : colorScheme == .dark ? IDColor.primaryLight : IDColor.darkMuted
+                    )
                     .multilineTextAlignment(.leading)
 
                 Spacer()
 
                 ZStack {
                     RoundedRectangle(cornerRadius: 6)
-                        .fill(isChecked ? Color.white : uncheckedCheckboxColor)
+                        .fill(isChecked ? IDColor.primaryLight : uncheckedCheckboxColor)
                         .frame(width: 20, height: 20)
                     if isChecked {
                         Image(systemName: "checkmark")
@@ -262,7 +216,7 @@ struct PreparePermissionRow: View {
             .frame(minHeight: 48)
             .background(
                 RoundedRectangle(cornerRadius: IDRadius.md)
-                    .fill(isChecked ? IDColor.primary : uncheckedCheckboxColor.opacity(0.6))
+                    .fill(isChecked ? IDColor.primary : uncheckedCheckboxColor.opacity(0.2))
             )
         }
         .buttonStyle(.plain)
@@ -272,26 +226,4 @@ struct PreparePermissionRow: View {
 #Preview {
     PrepareView()
         .environmentObject(AppStateViewModel())
-}
-
-#Preview("Permission Row") {
-    VStack(spacing: 12) {
-        PreparePermissionRow(
-            icon: "ic_camera", sf: "camera",
-            title: "Canlı görüşme için kamera izni",
-            isChecked: false
-        ) {}
-        PreparePermissionRow(
-            icon: "ic_microphone", sf: "mic",
-            title: "Mikrofon izni",
-            isChecked: true
-        ) {}
-        PreparePermissionRow(
-            icon: "ic_id_card", sf: "menucard",
-            title: "Kimliğim yanımda",
-            isChecked: false
-        ) {}
-    }
-    .padding()
-    .background(Color(.systemGroupedBackground))
 }

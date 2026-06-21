@@ -23,7 +23,11 @@ struct NFCView: View {
         ZStack(alignment: .top) {
             (colorScheme == .dark ? IDColor.darkBg : IDColor.primary).ignoresSafeArea()
             VStack(spacing: 0) {
-                headerArea
+                SDKNavigationBar(
+                    style: .overlay,
+                    onBack: { appState.popBack() },
+                    onHelp: {}
+                )
                 cardArea
             }
         }
@@ -40,48 +44,6 @@ struct NFCView: View {
         }
         .onAppear { pulseActive = true }
         .onDisappear { pulseActive = false }
-    }
-
-    // MARK: - Header
-
-    private var headerArea: some View {
-        VStack(spacing: 12) {
-            ZStack(alignment: .leading) {
-                HStack(spacing: 10) {
-                    Image(colorScheme == .dark ? "ic_lang_button_dark" : "ic_lang_button_light")
-                        .frame(width: 44, height: 44)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Kimlik Doğrulama")
-                            .font(IDFont.bodyMedium(.semibold))
-                            .foregroundColor(.white)
-                        Text(.popNFC)
-                            .font(IDFont.caption(.regular))
-                            .foregroundColor(.white.opacity(0.75))
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .center)
-
-                Button(action: { dismiss() }) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.white)
-                        .frame(width: 32, height: 32)
-                }
-            }
-            .padding(.horizontal, IDSpacing.lg)
-
-            HStack(spacing: 6) {
-                ForEach(0..<4) { i in
-                    Capsule()
-                        .fill(i < 3 ? Color.white : Color.white.opacity(0.35))
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 6)
-                }
-            }
-            .padding(.horizontal, IDSpacing.lg)
-        }
-        .padding(.top, IDSpacing.sm)
-        .padding(.bottom, IDSpacing.lg)
     }
 
     // MARK: - Card Area
@@ -110,9 +72,15 @@ struct NFCView: View {
                 .padding(.bottom, IDSpacing.xl)
                 .padding(.horizontal, IDSpacing.lg)
             }
-            primaryButton
-                .padding(.horizontal, IDSpacing.lg)
-                .padding(.bottom, IDSpacing.xxl)
+            SDKButton(
+                title: SDKLangManager.shared.translate(.nfcStart),
+                style: .secondary,
+                isLoading: viewModel.isLoading
+            ) {
+                viewModel.startNFC(appState: appState)
+            }
+            .padding(.horizontal, IDSpacing.lg)
+            .padding(.bottom, IDSpacing.xxl)
         }
         .background(colorScheme == .dark ? IDColor.darkBg : IDColor.primary)
         .clipShape(RoundedRectangle(cornerRadius: IDRadius.card))
@@ -178,26 +146,6 @@ struct NFCView: View {
                 .foregroundColor(IDColor.error)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
-    }
-
-    // MARK: - Primary Button
-
-    private var primaryButton: some View {
-        Button(action: { viewModel.startNFC(appState: appState) }) {
-            Text(.nfcStart)
-                .font(IDFont.bodyRegular(.semibold))
-                .foregroundColor(IDColor.primary)
-                .frame(maxWidth: .infinity)
-                .frame(height: 50)
-                .background(
-                    viewModel.isLoading
-                        ? Color.white.opacity(0.35)
-                        : Color.white
-                )
-                .clipShape(Capsule())
-        }
-        .disabled(viewModel.isLoading)
-        .animation(.easeInOut(duration: 0.2), value: viewModel.isLoading)
     }
 
     // MARK: - Loading Overlay

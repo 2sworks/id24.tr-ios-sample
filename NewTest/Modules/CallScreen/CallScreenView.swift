@@ -43,7 +43,7 @@ struct CallScreenView: View {
                     connectedScreen
                         .overlay(nfcOverlay)
                 case .ended:
-                    endedScreen
+                    waitingScreen
                 }
             }
             .animation(.easeInOut(duration: 0.3), value: viewModel.callState)
@@ -53,10 +53,12 @@ struct CallScreenView: View {
         .onAppear {
             appState.manager.socketMessageListener = viewModel
             UIApplication.shared.isIdleTimerDisabled = true
+            viewModel.checkSignLangIfNeeded(appState: appState)
         }
         .onDisappear {
             appState.manager.socketMessageListener = appState
             UIApplication.shared.isIdleTimerDisabled = false
+            viewModel.cleanup()
         }
         .onChange(of: viewModel.socketThankYouStatus) { status in
             guard let status else { return }
@@ -70,6 +72,29 @@ struct CallScreenView: View {
             }
         } message: {
             Text("Görüşmeyi kapatırsanız tüm işlemler iptal edilecektir.")
+        }
+        .successBanner(viewModel.photoTakenToast ?? "", isVisible: viewModel.photoTakenToast != nil)
+        .sheet(isPresented: $viewModel.showNFCEdit) {
+            CallNFCEditSheet(viewModel: viewModel)
+        }
+        .fullScreenCover(isPresented: $viewModel.showSignLangGate) {
+            SignLangView {
+                viewModel.signLangCompleted()
+            }
+        }
+        .fullScreenCover(isPresented: $viewModel.showLostConnection) {
+            LostConnectionView(
+                onReconnectCompleted: {
+                    viewModel.handleReconnectCompleted()
+                },
+                onReconnectCompletedWithStatus: { isWaitingRoom, statusType in
+                    viewModel.handleReconnectCompletedWithStatus(
+                        isWaitingRoom: isWaitingRoom,
+                        statusType: statusType,
+                        appState: appState
+                    )
+                }
+            )
         }
     }
 
@@ -111,17 +136,15 @@ struct CallScreenView: View {
     private var waitingIllustration: some View {
         ZStack {
             Circle()
-                .fill(Color(red: 0.941, green: 0.961, blue: 1.0))
-                .overlay(
-                    Circle()
-                        .stroke(Color(red: 0.898, green: 0.910, blue: 0.922).opacity(0.5), lineWidth: 1)
-                )
+                .fill(colorScheme == .dark ? Color.white.opacity(0.1) : IDColor.primary.opacity(0.1))
                 .frame(width: 144, height: 144)
 
             Image(.icIdentifyLogoText)
                 .resizable()
+                .renderingMode(.template)
                 .scaledToFit()
                 .frame(width: 96)
+                .foregroundColor(colorScheme == .dark ? .white : IDColor.primary)
         }
     }
 
@@ -130,7 +153,7 @@ struct CallScreenView: View {
             if !viewModel.queuePosition.isEmpty && viewModel.queuePosition != "0" {
                 VStack(spacing: 4) {
                     Text("Bekleyenler arasında \(viewModel.queuePosition). sıradasınız")
-                        .font(IDFont.bodySmall(.semibold))
+                        .font(IDFont.bodyMediumPlus(.semibold))
                         .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
                         .multilineTextAlignment(.center)
                     Text("tahmini bekleme süreniz \(viewModel.estimatedWait) dakika")
@@ -141,10 +164,10 @@ struct CallScreenView: View {
                 .padding(IDSpacing.lg)
                 .background(
                     RoundedRectangle(cornerRadius: IDRadius.lg)
-                        .fill(IDColor.inkBackground)
+                        .fill(IDColor.adaptiveSurface(for: colorScheme))
                         .overlay(
                             RoundedRectangle(cornerRadius: IDRadius.lg)
-                                .stroke(IDColor.inkBorder, lineWidth: 1)
+                                .stroke(IDColor.adaptiveBorder(for: colorScheme), lineWidth: 1)
                         )
                 )
             } else {
@@ -156,10 +179,10 @@ struct CallScreenView: View {
                     .padding(IDSpacing.lg)
                     .background(
                         RoundedRectangle(cornerRadius: IDRadius.lg)
-                            .fill(IDColor.inkBackground)
+                            .fill(IDColor.adaptiveSurface(for: colorScheme))
                             .overlay(
                                 RoundedRectangle(cornerRadius: IDRadius.lg)
-                                    .stroke(IDColor.inkBorder, lineWidth: 1)
+                                    .stroke(IDColor.adaptiveBorder(for: colorScheme), lineWidth: 1)
                             )
                     )
             }
@@ -207,7 +230,6 @@ struct CallScreenView: View {
         }
     }
 
-
     // MARK: - Connected
 
     private var connectedScreen: some View {
@@ -225,7 +247,9 @@ struct CallScreenView: View {
             .ignoresSafeArea()
 
             VStack {
-                HStack {
+                HStack(alignment: .top) {
+                    networkQualityIndicator
+                        .padding(.top, IDSpacing.xl)
                     Spacer()
                     localCameraView
                 }
@@ -248,28 +272,57 @@ struct CallScreenView: View {
             .padding(.trailing, IDSpacing.lg)
     }
 
+    // MARK: - Network Quality Indicator
+
+    @ViewBuilder
+    private var networkQualityIndicator: some View {
+        switch viewModel.networkQuality {
+        case .none:
+            EmptyView()
+        case .bad:
+            qualityIcon(name: "wifi.exclamationmark", color: .red)
+                .padding(.leading, IDSpacing.lg)
+        case .medium:
+            qualityIcon(name: "wifi", color: .yellow)
+                .padding(.leading, IDSpacing.lg)
+        case .good:
+            qualityIcon(name: "wifi", color: .green)
+                .padding(.leading, IDSpacing.lg)
+        }
+    }
+
+    private func qualityIcon(name: String, color: Color) -> some View {
+        Image(systemName: name)
+            .font(.system(size: 18, weight: .semibold))
+            .foregroundColor(color)
+            .padding(8)
+            .background(.ultraThinMaterial, in: Circle())
+    }
+
     private var bottomCallPanel: some View {
         VStack(spacing: IDSpacing.lg) {
             Capsule()
                 .fill(Color.white.opacity(0.4))
                 .frame(width: 44, height: 5)
 
-            Text("Görüşme devam ediyor")
-                .font(IDFont.bodySmall(.medium))
-                .foregroundColor(.white.opacity(0.85))
-
             Button(action: {
                 if viewModel.endCallEnabled {
                     showEndCallAlert = true
                 }
             }) {
-                ZStack {
-                    Circle()
-                        .fill(IDColor.error)
-                        .frame(width: 72, height: 72)
-                        .opacity(viewModel.endCallEnabled ? 1 : 0.35)
-                    Image(systemName: "xmark")
-                        .font(.system(size: 26, weight: .semibold))
+                VStack {
+                    ZStack {
+                        Circle()
+                            .fill(IDColor.error)
+                            .frame(width: 72, height: 72)
+                            .opacity(viewModel.endCallEnabled ? 1 : 0.35)
+                        Image(systemName: "xmark")
+                            .font(.system(size: 26, weight: .semibold))
+                            .foregroundColor(.white)
+                    }
+
+                    Text("Görüşmeyi sonlandır")
+                        .font(IDFont.bodySmall(.medium))
                         .foregroundColor(.white)
                 }
             }
@@ -410,36 +463,6 @@ struct CallScreenView: View {
         }
     }
 
-    // MARK: - Ended
-
-    private var endedScreen: some View {
-        ZStack {
-            IDColor.adaptiveBackground(for: colorScheme).ignoresSafeArea()
-
-            VStack(spacing: IDSpacing.xl) {
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 64))
-                    .foregroundColor(IDColor.successBright)
-
-                VStack(spacing: IDSpacing.sm) {
-                    Text("Görüşme Tamamlandı")
-                        .font(IDFont.displayMedium(.semibold))
-                        .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
-                    Text("İşleminiz tamamlanıyor...")
-                        .font(IDFont.bodyRegular(.regular))
-                        .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
-                }
-
-                ProgressView().tint(IDColor.primary)
-            }
-        }
-        .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                appState.advanceToNextModule()
-            }
-        }
-    }
-
     // MARK: - Error Toast
 
     @ViewBuilder
@@ -469,6 +492,131 @@ struct CallScreenView: View {
             Color.black.opacity(0.35).ignoresSafeArea()
             ProgressView().tint(.white).scaleEffect(1.3)
         }
+    }
+}
+
+// MARK: - NFC Edit Sheet (Remote NFC — panel .editNfcProcess ile tetiklenir)
+
+private struct CallNFCEditSheet: View {
+
+    @ObservedObject var viewModel: CallScreenViewModel
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var serial: String = ""
+    @State private var birth: String = ""
+    @State private var valid: String = ""
+
+    private var canSave: Bool {
+        !serial.isEmpty && !birth.isEmpty && !valid.isEmpty
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            sheetHeader
+            VStack(alignment: .leading, spacing: IDSpacing.xl) {
+                VStack(alignment: .leading, spacing: IDSpacing.sm) {
+                    Text("MRZ Bilgilerini Düzeltin")
+                        .font(IDFont.bodyMedium(.semibold))
+                        .foregroundColor(IDColor.error)
+                    Text("Kimlik bilgilerinde hata tespit edildi. Lütfen aşağıdaki alanları kontrol edip güncelleyin.")
+                        .font(IDFont.bodyRegular(.regular))
+                        .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
+                        .lineSpacing(4)
+                }
+                fieldGroup(title: "Seri No") {
+                    editTextField(placeholder: "A32R17869", text: $serial, keyboard: .asciiCapable)
+                        .autocapitalization(.allCharacters)
+                        .disableAutocorrection(true)
+                }
+                fieldGroup(title: "Doğum Tarihi") {
+                    editTextField(placeholder: "dd.MM.yyyy", text: $birth, keyboard: .numbersAndPunctuation)
+                }
+                fieldGroup(title: "Son Geçerlilik") {
+                    editTextField(placeholder: "dd.MM.yyyy", text: $valid, keyboard: .numbersAndPunctuation)
+                }
+            }
+            .padding(.top, IDSpacing.xl)
+            .padding(.horizontal, IDSpacing.lg)
+            Spacer()
+            Button(action: {
+                viewModel.saveAndRestartRemoteNFC(serial: serial, birth: birth, valid: valid)
+            }) {
+                Text("Güncelle")
+                    .font(IDFont.bodyRegular(.semibold))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 50)
+                    .background(canSave ? IDColor.inkDarkest : IDColor.inkDarkest.opacity(0.35))
+                    .clipShape(Capsule())
+            }
+            .disabled(!canSave)
+            .animation(.easeInOut(duration: 0.2), value: canSave)
+            .padding(.horizontal, IDSpacing.lg)
+            .padding(.bottom, IDSpacing.xxl)
+        }
+        .background(IDColor.adaptiveBackground(for: colorScheme).ignoresSafeArea())
+        .onAppear {
+            serial = viewModel.nfcEditSerial
+            birth = viewModel.nfcEditBirth
+            valid = viewModel.nfcEditValid
+        }
+    }
+
+    private var sheetHeader: some View {
+        HStack {
+            Spacer().frame(width: 32)
+            Spacer()
+            Text("MRZ Düzeltme")
+                .font(IDFont.bodyMedium(.semibold))
+                .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
+            Spacer()
+            Button(action: { dismiss() }) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
+                    .frame(width: 32, height: 32)
+                    .background(Circle().fill(IDColor.adaptiveSurface(for: colorScheme)))
+            }
+        }
+        .padding(.horizontal, IDSpacing.lg)
+        .padding(.top, IDSpacing.lg)
+        .padding(.bottom, IDSpacing.md)
+    }
+
+    @ViewBuilder
+    private func fieldGroup<Content: View>(title: String, @ViewBuilder _ content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: IDSpacing.sm) {
+            Text(title)
+                .font(IDFont.bodySmall(.medium))
+                .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
+            content()
+        }
+    }
+
+    private func editTextField(placeholder: String, text: Binding<String>, keyboard: UIKeyboardType) -> some View {
+        ZStack(alignment: .leading) {
+            Text(placeholder)
+                .font(IDFont.bodySmall())
+                .foregroundColor(IDColor.inkLight)
+                .allowsHitTesting(false)
+                .opacity(text.wrappedValue.isEmpty ? 1 : 0)
+            TextField("", text: text)
+                .font(IDFont.bodySmall())
+                .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
+                .keyboardType(keyboard)
+                .disableAutocorrection(true)
+        }
+        .padding(.horizontal, IDSpacing.lg)
+        .frame(height: 50)
+        .background(
+            RoundedRectangle(cornerRadius: IDRadius.md)
+                .fill(IDColor.adaptiveSurface(for: colorScheme))
+                .overlay(
+                    RoundedRectangle(cornerRadius: IDRadius.md)
+                        .stroke(IDColor.inkBorder, lineWidth: 1)
+                )
+        )
     }
 }
 
@@ -530,8 +678,28 @@ private struct TopRoundedShape: Shape {
         .environmentObject(AppStateViewModel())
 }
 
-#Preview("Görüşme Tamamlandı") {
-    CallScreenView(viewModel: CallScreenViewModel(previewState: .ended))
-        .environmentObject(AppStateViewModel())
+#Preview("Photo Toast") {
+    CallScreenView(viewModel: CallScreenViewModel(
+        previewState: .connected,
+        photoTakenToast: "Temsilci ekran görüntüsü aldı"
+    ))
+    .environmentObject(AppStateViewModel())
 }
+
+#Preview("Bağlantı Kalitesi — Kötü") {
+    CallScreenView(viewModel: CallScreenViewModel(
+        previewState: .connected,
+        networkQuality: .bad
+    ))
+    .environmentObject(AppStateViewModel())
+}
+
+#Preview("Bağlantı Kalitesi — İyi") {
+    CallScreenView(viewModel: CallScreenViewModel(
+        previewState: .connected,
+        networkQuality: .good
+    ))
+    .environmentObject(AppStateViewModel())
+}
+
 #endif

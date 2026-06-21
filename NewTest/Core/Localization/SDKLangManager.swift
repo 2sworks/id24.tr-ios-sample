@@ -227,6 +227,10 @@ final class SDKLangManager {
         return dict[key.rawValue] ?? key.rawValue
     }
 
+    func clearCache() {
+        cache = [:]
+    }
+
     /// Eski UIKit çağrı stiliyle uyumluluk (translate(key: .xxx))
     func translate(key: SDKKeywords) -> String {
         return translate(key)

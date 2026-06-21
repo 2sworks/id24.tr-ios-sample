@@ -101,6 +101,8 @@ struct IdentifyNavContent: View {
                 SelfieView()
             case .idCard:
                 IdCardView()
+            case .idCardScanning(let cardType):
+                IdCardScanningView(cardType: cardType)
             case .idCardOVD:
                 OVDView()
             case .nfc:

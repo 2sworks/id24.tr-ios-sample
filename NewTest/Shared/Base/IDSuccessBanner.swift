@@ -18,6 +18,7 @@ import SwiftUI
 struct IDSuccessBanner: View {
     @Environment(\.colorScheme) private var colorScheme
     let message: String
+    var onDismiss: (() -> Void)? = nil
 
     var body: some View {
         HStack(spacing: 12) {
@@ -38,6 +39,14 @@ struct IDSuccessBanner: View {
                     .foregroundColor(IDColor.success)
             }
             Spacer()
+            if let onDismiss {
+                Button(action: onDismiss) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(IDColor.success.opacity(0.7))
+                        .padding(8)
+                }
+            }
         }
         .padding(10)
         .background(
@@ -64,17 +73,32 @@ private struct SuccessBannerModifier: ViewModifier {
     let message: String
     let isVisible: Bool
 
+    @State private var isDismissed: Bool = false
+
+    private var shouldShow: Bool { isVisible && !isDismissed }
+
     func body(content: Content) -> some View {
         ZStack(alignment: .top) {
             content
-            if isVisible {
-                IDSuccessBanner(message: message)
+            if shouldShow {
+                IDSuccessBanner(message: message, onDismiss: dismiss)
                     .padding(.horizontal, IDSpacing.lg)
                     .padding(.top, IDSpacing.sm)
                     .transition(.move(edge: .top).combined(with: .opacity))
+                    .task {
+                        try? await Task.sleep(nanoseconds: 2_000_000_000)
+                        dismiss()
+                    }
             }
         }
-        .animation(.easeInOut(duration: 0.3), value: isVisible)
+        .animation(.easeInOut(duration: 0.3), value: shouldShow)
+        .onChange(of: isVisible) { newValue in
+            if newValue { isDismissed = false }
+        }
+    }
+
+    private func dismiss() {
+        isDismissed = true
     }
 }
 

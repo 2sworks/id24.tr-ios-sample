@@ -65,13 +65,11 @@ struct SDKNavigationBar: View {
 
     private var loginLayout: some View {
         HStack {
-            circleButton(systemName: "line.horizontal.3") { onMenu?() }
+            circleButton(image: Image(.hamburger)) { onMenu?() }
 
             Spacer()
 
             Image(.icIdentifyLogoText)
-                .renderingMode(.template)
-                .foregroundColor(colorScheme == .dark ? .white : IDColor.inkDark)
 
             Spacer()
 
@@ -84,11 +82,17 @@ struct SDKNavigationBar: View {
     }
 
     // MARK: - Module Layout
-    // ← back | [logo circle + title + subtitle] | trailing
+    // ← back (bare) | [logo circle + title + subtitle] | trailing
 
     private var moduleLayout: some View {
         HStack(spacing: IDSpacing.md) {
-            circleButton(systemName: "chevron.left") { onBack?() }
+            Button { onBack?() } label: {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
+                    .frame(width: 32, height: 32)
+            }
+            .buttonStyle(.plain)
 
             HStack(spacing: IDSpacing.sm) {
                 logoCircle
@@ -124,12 +128,19 @@ struct SDKNavigationBar: View {
             progressStrip(steps: steps, current: current, forceWhite: forceWhite)
                 .padding(.horizontal, IDSpacing.lg)
         }
-        .padding(.bottom, IDSpacing.sm)
+        .padding(.bottom, IDSpacing.lg)
     }
 
     private func progressHeaderRow(forceWhite: Bool) -> some View {
-        ZStack(alignment: .leading) {
-            // Centre: logo circle + title + subtitle
+        HStack(spacing: IDSpacing.md) {
+            Button { onBack?() } label: {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(forceWhite ? .white : IDColor.adaptiveTitle(for: colorScheme))
+                    .frame(width: 32, height: 32)
+            }
+            .buttonStyle(.plain)
+
             HStack(spacing: IDSpacing.sm) {
                 logoCircle
                 VStack(alignment: .leading, spacing: 2) {
@@ -145,16 +156,8 @@ struct SDKNavigationBar: View {
                     }
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .center)
 
-            // Left: bare chevron (no circle), always white on solid bg
-            Button { onBack?() } label: {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(forceWhite ? .white : IDColor.adaptiveTitle(for: colorScheme))
-                    .frame(width: 32, height: 32)
-            }
-            .buttonStyle(.plain)
+            Spacer()
         }
     }
 
@@ -221,6 +224,30 @@ struct SDKNavigationBar: View {
     // MARK: - Circle Button
 
     private func circleButton(
+        image: Image,
+        tint: Color? = nil,
+        fill: Color? = nil,
+        border: Color? = nil,
+        action: @escaping () -> Void
+    ) -> some View {
+        let resolvedTint   = tint   ?? (IDColor.adaptiveTitle(for: colorScheme))
+        let resolvedFill   = fill   ?? (IDColor.adaptiveSurface(for: colorScheme))
+        let resolvedBorder = border ?? (IDColor.adaptiveSurface(for: colorScheme))
+        return Button(action: action) {
+            ZStack {
+                Circle()
+                    .fill(resolvedFill)
+                    .overlay(Circle().stroke(resolvedBorder, lineWidth: 1))
+                image
+                    .renderingMode(.template)
+                    .foregroundColor(resolvedTint)
+            }
+            .frame(width: 48, height: 48)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func circleButton(
         systemName: String,
         tint: Color? = nil,
         fill: Color? = nil,
@@ -266,7 +293,11 @@ struct SDKNavigationBar: View {
                     ZStack {
                         Circle().fill(Color(.systemGray6))
                             .overlay(Circle().stroke(Color(.systemGray4), lineWidth: 1))
-                        Image(.tr)
+                        Image("turkey")
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 22, height: 22)
+                            .clipShape(Circle())
                     }
                     .frame(width: 36, height: 36)
                 }
@@ -275,30 +306,6 @@ struct SDKNavigationBar: View {
         )
         Spacer()
     }
-    .background(Color.white)
-}
-
-#Preview("Login — Dark") {
-    VStack(spacing: 0) {
-        SDKNavigationBar(
-            style: .login,
-            onMenu: {},
-            trailing: AnyView(
-                Button {} label: {
-                    ZStack {
-                        Circle().fill(Color.white.opacity(0.1))
-                            .overlay(Circle().stroke(Color.white.opacity(0.08), lineWidth: 1))
-                        Image(.tr)
-                    }
-                    .frame(width: 36, height: 36)
-                }
-                .buttonStyle(.plain)
-            )
-        )
-        Spacer()
-    }
-    .background(IDColor.darkBg)
-    .preferredColorScheme(.dark)
 }
 
 #Preview("Module — Light") {
@@ -326,35 +333,6 @@ struct SDKNavigationBar: View {
         )
         Spacer()
     }
-    .background(Color.white)
-}
-
-#Preview("Module — Dark") {
-    VStack(spacing: 0) {
-        SDKNavigationBar(
-            style: .module,
-            title: "Modül Seçimi",
-            subtitle: "Modül listesi aşağıdaki gibidir",
-            onBack: {}
-        )
-        Spacer()
-    }
-    .background(IDColor.darkBg)
-    .preferredColorScheme(.dark)
-}
-
-#Preview("Progress — Dark (solid bg)") {
-    VStack(spacing: 0) {
-        SDKNavigationBar(
-            style: .progress(steps: 4, current: 2),
-            title: "İkametgah Doğrulama",
-            subtitle: "Adresinizi doğrulamamıza yardımcı olun",
-            onBack: {}
-        )
-        Spacer()
-    }
-    .background(IDColor.darkBg)
-    .preferredColorScheme(.dark)
 }
 
 #Preview("Progress — Light (solid bg)") {
@@ -367,7 +345,6 @@ struct SDKNavigationBar: View {
         )
         Spacer()
     }
-    .background(IDColor.primary)
 }
 
 #Preview("ProgressClear — Light") {
@@ -380,21 +357,6 @@ struct SDKNavigationBar: View {
         )
         Spacer()
     }
-    .background(Color.white)
-}
-
-#Preview("ProgressClear — Dark") {
-    VStack(spacing: 0) {
-        SDKNavigationBar(
-            style: .progressClear(steps: 4, current: 1),
-            title: "Sunucu Seçimi",
-            subtitle: "Test etmek istediğiniz ortamı seçin",
-            onBack: {}
-        )
-        Spacer()
-    }
-    .background(IDColor.darkBgSecondary)
-    .preferredColorScheme(.dark)
 }
 
 #Preview("Overlay — No Help") {

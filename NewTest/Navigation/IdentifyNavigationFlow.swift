@@ -25,6 +25,7 @@ enum IdentifyNavigationFlow: Hashable {
     case videoRecorder
     case callScreen
     case thankYou(ThankYouStatus)
+    case idCardScanning(CardType)
     case idCardScanner(IdCardSide)
     /// ÖRNEK AMAÇLIDIR — SDK modülleri arasına özel ekran eklemeyi gösterir.
     /// Gerçek projede bu case kaldırılıp kendi route'unuz tanımlanır.

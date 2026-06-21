@@ -69,13 +69,17 @@ final class LoginViewModel: BaseModuleViewModel {
         static let selectedServerTitle  = "selected_server_title"
         static let selectedServerApiUrl = "selected_server_api_url"
         static let selectedServerWsUrl  = "selected_server_ws_url"
+        static let selectedSDKLang      = "selected_sdk_lang"
     }
 
     // MARK: - Init
 
     override init() {
+        let savedLangRaw = UserDefaults.standard.string(forKey: UDKey.selectedSDKLang)
+        let savedLang = savedLangRaw.flatMap(SDKLang.init) ?? .tr
         super.init()
-        manager.setSDKLang(lang: selectedSDKLang)
+        selectedSDKLang = savedLang
+        manager.setSDKLang(lang: savedLang)
         checkJailbreak()
         loadSavedServers()
         loadSelectedServer()
@@ -86,6 +90,8 @@ final class LoginViewModel: BaseModuleViewModel {
     func setSDKLanguage(_ lang: SDKLang) {
         selectedSDKLang = lang
         manager.setSDKLang(lang: lang)
+        SDKLangManager.shared.clearCache()
+        UserDefaults.standard.set(lang.rawValue, forKey: UDKey.selectedSDKLang)
     }
 
     // MARK: - Modules

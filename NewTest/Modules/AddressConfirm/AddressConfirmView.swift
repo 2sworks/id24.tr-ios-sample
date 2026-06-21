@@ -4,6 +4,7 @@
 //
 
 import SwiftUI
+import PhotosUI
 import IdentifySDK
 
 struct AddressConfirmView: View {
@@ -12,12 +13,18 @@ struct AddressConfirmView: View {
     @EnvironmentObject private var appState: AppStateViewModel
     @EnvironmentObject private var coordinator: AppNavigationCoordinator
     @Environment(\.colorScheme) private var colorScheme
+    @State private var showGallerySheet = false
 
     var body: some View {
         ZStack(alignment: .top) {
             (colorScheme == .dark ? IDColor.darkBg : IDColor.primary).ignoresSafeArea()
             VStack(spacing: 0) {
-                headerArea
+                SDKNavigationBar(
+                    style: .progress(steps: 4, current: 3),
+                    title: "Adres Doğrulama",
+                    subtitle: "Adresinizi doğrulamamıza yardımcı olun",
+                    onBack: { coordinator.pop() }
+                )
                 cardArea
             }
         }
@@ -27,79 +34,33 @@ struct AddressConfirmView: View {
                 ProgressView().tint(.white)
             }
         }
-        .overlay {
-            ZStack {
-                if viewModel.showDocumentOptions {
-                    documentOptionsOverlay
-                        .transition(.opacity.combined(with: .move(edge: .bottom)))
-                }
+        .confirmationDialog("Belge Ekle", isPresented: $viewModel.showDocumentOptions, titleVisibility: .visible) {
+            Button("Fotoğraf Çek") { viewModel.openScanner() }
+            Button("Fotoğraf Seç") { showGallerySheet = true }
+            Button("Dosya Seç") { viewModel.openPDFPicker() }
+            Button("Vazgeç", role: .cancel) {}
+        }
+        .sheet(isPresented: $showGallerySheet) {
+            PHPickerView { image in
+                viewModel.photoSelected(image)
+                showGallerySheet = false
             }
-            .animation(.spring(response: 0.3, dampingFraction: 0.85), value: viewModel.showDocumentOptions)
         }
         .documentScanner(isPresented: $viewModel.showScanner, profile: .generic, style: scannerStyle, configuration: .document) { result in
             if case .success(let doc) = result {
                 viewModel.photoSelected(doc.croppedImage)
             }
         }
-        .sheet(isPresented: $viewModel.showGallery) {
-            ImageGalleryPickerRepresentable(
-                onImage: { image in
-                    viewModel.photoSelected(image)
-                    viewModel.showGallery = false
-                },
-                onCancel: { viewModel.showGallery = false }
-            )
-        }
-        .sheet(isPresented: $viewModel.showPDFPicker) {
-            PDFDocumentPickerRepresentable(
-                onURL: { url in
-                    viewModel.pdfSelectedFromURL(url)
-                    viewModel.showPDFPicker = false
-                },
-                onCancel: { viewModel.showPDFPicker = false }
-            )
-        }
-    }
-
-    // MARK: - Header
-
-    private var headerArea: some View {
-        VStack(spacing: 12) {
-            ZStack(alignment: .leading) {
-                HStack(spacing: 10) {
-                    identifyLogoView
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Adres Doğrulama")
-                            .font(IDFont.bodyMedium(.semibold))
-                            .foregroundColor(.white)
-                        Text("Adresinizi doğrulamamıza yardımcı olun")
-                            .font(IDFont.caption(.regular))
-                            .foregroundColor(.white.opacity(0.75))
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .center)
-
-                Button(action: { coordinator.pop() }) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.white)
-                        .frame(width: 32, height: 32)
-                }
+        .fileImporter(
+            isPresented: $viewModel.showPDFPicker,
+            allowedContentTypes: [.pdf]
+        ) { result in
+            if case .success(let url) = result {
+                let accessing = url.startAccessingSecurityScopedResource()
+                viewModel.pdfSelectedFromURL(url)
+                if accessing { url.stopAccessingSecurityScopedResource() }
             }
-            .padding(.horizontal, IDSpacing.lg)
-
-            HStack(spacing: IDSpacing.xs) {
-                ForEach(0..<4) { i in
-                    Capsule()
-                        .fill(i < 3 ? Color.white : Color.white.opacity(0.35))
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 6)
-                }
-            }
-            .padding(.horizontal, IDSpacing.lg)
         }
-        .padding(.top, IDSpacing.sm)
-        .padding(.bottom, IDSpacing.lg)
     }
 
     // MARK: - Card
@@ -116,6 +77,13 @@ struct AddressConfirmView: View {
 
             documentUploadSection
                 .padding(.top, IDSpacing.lg)
+                .padding(.horizontal, IDSpacing.lg)
+
+            Text("PDF, JPG, JPEG, PNG, WEBP, TIFF 15MB'den az")
+                .font(IDFont.caption(.regular))
+                .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.top, IDSpacing.sm)
                 .padding(.horizontal, IDSpacing.lg)
 
             Spacer()
@@ -138,11 +106,11 @@ struct AddressConfirmView: View {
 
     private var titleSection: some View {
         VStack(alignment: .leading, spacing: IDSpacing.sm) {
-            Text("Adresinizi girin")
+            Text("İkmaetgah adresinizi yazın")
                 .font(IDFont.displayMedium(.semibold))
                 .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
 
-            Text("Kimlik tespiti için adresinizi ve bir belge fotoğrafını paylaşın")
+            Text("Adresinizi doğrulayabilmemiz için lütfen herhangi bir faturanızın fotoğrafını çekin veya seçin.")
                 .font(IDFont.bodyRegular(.regular))
                 .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
                 .lineSpacing(4)
@@ -154,7 +122,7 @@ struct AddressConfirmView: View {
     private var addressEditorSection: some View {
         ZStack(alignment: .topLeading) {
             if viewModel.addressText.isEmpty {
-                Text("Adresinizi buraya yazın...")
+                Text("Lütfen ikametgah adresinizi yazın..")
                     .font(IDFont.bodyRegular(.regular))
                     .foregroundColor(IDColor.inkMid.opacity(0.6))
                     .padding(.top, 9)
@@ -202,10 +170,10 @@ struct AddressConfirmView: View {
                 thumbnailView
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(viewModel.docPhoto != nil ? "Belge eklendi" : "Belge Yükle")
+                    Text(viewModel.docPhoto != nil ? "Belge eklendi" : "Dosya Yükle")
                         .font(IDFont.bodyRegular(.semibold))
                         .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
-                    Text(viewModel.docPhoto != nil ? "Değiştirmek için dokunun" : "Fotoğraf, galeri veya PDF")
+                    Text(viewModel.docPhoto != nil ? "Değiştirmek için dokunun" : "Cihazınızdan seçin")
                         .font(IDFont.caption(.regular))
                         .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
                 }
@@ -247,7 +215,7 @@ struct AddressConfirmView: View {
                 .fill(Color(uiColor: .systemGray5))
                 .frame(width: 60, height: 60)
                 .overlay(
-                    Image(systemName: "doc.viewfinder")
+                    Image(.uploadFile)
                         .font(.system(size: 22, weight: .light))
                         .foregroundColor(IDColor.inkMid)
                 )
@@ -269,98 +237,13 @@ struct AddressConfirmView: View {
     // MARK: - Continue Button
 
     private var continueButton: some View {
-        Button(action: { viewModel.submit(appState: appState) }) {
-            Text("Devam")
-                .font(IDFont.bodyRegular(.semibold))
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 50)
-                .background(
-                    viewModel.canSubmit
-                        ? IDColor.primary
-                        : IDColor.primary.opacity(0.35)
-                )
-                .clipShape(Capsule())
+        SDKButton(
+            title: "Devam",
+            isDisabled: !viewModel.canSubmit
+        ) {
+            viewModel.submit(appState: appState)
         }
-        .disabled(!viewModel.canSubmit)
         .animation(.easeInOut(duration: 0.2), value: viewModel.canSubmit)
-    }
-
-    // MARK: - Document Options Overlay
-
-    private var documentOptionsOverlay: some View {
-        ZStack(alignment: .bottom) {
-            Color.black.opacity(0.45)
-                .ignoresSafeArea()
-                .onTapGesture {
-                    withAnimation { viewModel.showDocumentOptions = false }
-                }
-
-            VStack(spacing: 8) {
-                VStack(spacing: 0) {
-                    actionRow(
-                        icon: "camera",
-                        title: "Fotoğraf Çek",
-                        action: viewModel.openScanner
-                    )
-                    Divider()
-                        .padding(.leading, IDSpacing.xxl + IDSpacing.lg)
-                    actionRow(
-                        icon: "photo.on.rectangle",
-                        title: "Fotoğraf Seç",
-                        action: viewModel.openGallery
-                    )
-                    Divider()
-                        .padding(.leading, IDSpacing.xxl + IDSpacing.lg)
-                    actionRow(
-                        icon: "folder",
-                        title: "Dosya Seç",
-                        action: viewModel.openPDFPicker
-                    )
-                }
-                .background(
-                    RoundedRectangle(cornerRadius: 14)
-                        .fill(Color(uiColor: .systemBackground).opacity(0.95))
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 14))
-                .padding(.horizontal, IDSpacing.lg)
-
-                Button(action: {
-                    withAnimation { viewModel.showDocumentOptions = false }
-                }) {
-                    Text("Vazgeç")
-                        .font(IDFont.bodyRegular(.semibold))
-                        .foregroundColor(IDColor.primary)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 57)
-                        .background(
-                            RoundedRectangle(cornerRadius: 14)
-                                .fill(Color(uiColor: .systemBackground).opacity(0.95))
-                        )
-                }
-                .padding(.horizontal, IDSpacing.lg)
-            }
-            .padding(.bottom, IDSpacing.xxl)
-        }
-        .ignoresSafeArea()
-    }
-
-    private func actionRow(icon: String, title: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: IDSpacing.lg) {
-                Image(systemName: icon)
-                    .font(.system(size: 20))
-                    .foregroundColor(IDColor.primary)
-                    .frame(width: 28)
-                Text(title)
-                    .font(IDFont.bodyRegular(.regular))
-                    .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
-                Spacer()
-            }
-            .padding(.horizontal, IDSpacing.lg)
-            .frame(height: 57)
-        }
-        .buttonStyle(.plain)
     }
 
     // MARK: - Scanner Style
@@ -372,12 +255,41 @@ struct AddressConfirmView: View {
             lineWidth: 2.5
         )
     }
+}
 
-    // MARK: - Logo
+// MARK: - PHPickerView
 
-    private var identifyLogoView: some View {
-        Image(colorScheme == .dark ? "ic_lang_button_dark" : "ic_lang_button_light")
-            .frame(width: 44, height: 44)
+private struct PHPickerView: UIViewControllerRepresentable {
+    let onImage: (UIImage) -> Void
+    @Environment(\.dismiss) private var dismiss
+
+    func makeUIViewController(context: Context) -> PHPickerViewController {
+        var config = PHPickerConfiguration()
+        config.filter = .images
+        config.selectionLimit = 1
+        let picker = PHPickerViewController(configuration: config)
+        picker.delegate = context.coordinator
+        return picker
+    }
+
+    func updateUIViewController(_ uiViewController: PHPickerViewController, context: Context) {}
+
+    func makeCoordinator() -> Coordinator { Coordinator(parent: self) }
+
+    final class Coordinator: NSObject, PHPickerViewControllerDelegate {
+        let parent: PHPickerView
+        init(parent: PHPickerView) { self.parent = parent }
+
+        func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+            parent.dismiss()
+            guard let result = results.first,
+                  result.itemProvider.canLoadObject(ofClass: UIImage.self) else { return }
+            result.itemProvider.loadObject(ofClass: UIImage.self) { obj, _ in
+                if let image = obj as? UIImage {
+                    DispatchQueue.main.async { self.parent.onImage(image) }
+                }
+            }
+        }
     }
 }
 

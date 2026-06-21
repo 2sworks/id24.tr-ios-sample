@@ -38,6 +38,7 @@ struct LoginView: View {
     @State private var showServerList = false
     @State private var showModuleList = false
     @State private var showHamburgerMenu = false
+    @State private var showLangPicker = false
     @State private var pendingNavigation: HamburgerMenuItem? = nil
 
     var body: some View {
@@ -46,9 +47,10 @@ struct LoginView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                LoginTopBar(
+                SDKNavigationBar(
+                    style: .login,
                     onMenu: { showHamburgerMenu = true },
-                    onFlag: {}
+                    trailing: AnyView(langFlagButton)
                 )
 
                 ScrollView(showsIndicators: false) {
@@ -71,7 +73,8 @@ struct LoginView: View {
                 }
 
                 VStack(spacing: IDSpacing.lg) {
-                    ConnectButton(
+                    SDKButton(
+                        title: "Hemen Bağlan",
                         isLoading: appState.isLoading,
                         isDisabled: isConnectDisabled,
                         action: connect
@@ -120,6 +123,26 @@ struct LoginView: View {
         .sheet(isPresented: $showModuleList) {
             ModuleListView(viewModel: viewModel)
         }
+        .sheet(isPresented: $showLangPicker) {
+            if #available(iOS 16.4, *) {
+                LanguagePickerSheet(current: viewModel.selectedSDKLang) { lang in
+                    viewModel.setSDKLanguage(lang)
+                }
+                .presentationDetents([.height(360)])
+                .presentationDragIndicator(.visible)
+                .presentationBackground(.ultraThinMaterial)
+            } else if #available(iOS 16.0, *) {
+                LanguagePickerSheet(current: viewModel.selectedSDKLang) { lang in
+                    viewModel.setSDKLanguage(lang)
+                }
+                .presentationDetents([.height(360)])
+                .presentationDragIndicator(.visible)
+            } else {
+                LanguagePickerSheet(current: viewModel.selectedSDKLang) { lang in
+                    viewModel.setSDKLanguage(lang)
+                }
+            }
+        }
         .sheet(isPresented: $showHamburgerMenu, onDismiss: {
             switch pendingNavigation {
             case .serverList: showServerList = true
@@ -152,6 +175,26 @@ struct LoginView: View {
         }
     }
 
+    private var langFlagButton: some View {
+        Button { showLangPicker = true } label: {
+            ZStack {
+                Circle()
+                    .fill(colorScheme == .dark ? Color.white.opacity(0.1) : Color(.systemGray6))
+                    .overlay(Circle().stroke(
+                        colorScheme == .dark ? Color.white.opacity(0.08) : Color(.systemGray4),
+                        lineWidth: 1
+                    ))
+                Image(viewModel.selectedSDKLang.flagImageName)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 24, height: 24)
+                    .clipShape(Circle())
+            }
+            .frame(width: 48, height: 48)
+        }
+        .buttonStyle(.plain)
+    }
+
     private var isConnectDisabled: Bool {
         appState.isLoading || (loginMode == .identId ? viewModel.identId.isEmpty : viewModel.firstName.isEmpty)
     }
@@ -161,53 +204,87 @@ struct LoginView: View {
     }
 }
 
-// MARK: - LoginTopBar
+// MARK: - LanguagePickerSheet
 
-private struct LoginTopBar: View {
-    
-    let onMenu: () -> Void
-    let onFlag: () -> Void
-    
+private struct LanguagePickerSheet: View {
+    let current: SDKLang
+    let onSelect: (SDKLang) -> Void
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
+
+    private static let languages: [SDKLang] = [.tr, .eng, .de, .az, .ru]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                Text("Dil Seçimi")
+                    .font(IDFont.bodyLarge(.semibold))
+                    .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
+                Spacer()
+                Button { dismiss() } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 20, weight: .medium))
+                        .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
+                        .frame(width: 30, height: 30)
+                }
+            }
+            .padding(.horizontal, IDSpacing.xl)
+            .padding(.top, IDSpacing.lg)
+            .padding(.bottom, IDSpacing.md)
+
+            VStack(spacing: IDSpacing.sm) {
+                ForEach(Self.languages, id: \.self) { lang in
+                    LangOptionRow(lang: lang, isSelected: current == lang) {
+                        onSelect(lang)
+                        dismiss()
+                    }
+                }
+            }
+            .padding(.horizontal, IDSpacing.xl)
+
+            Spacer()
+        }
+        .background(IDColor.adaptiveBackground(for: colorScheme).ignoresSafeArea())
+    }
+}
+
+// MARK: - LangOptionRow
+
+private struct LangOptionRow: View {
+    let lang: SDKLang
+    let isSelected: Bool
+    let onTap: () -> Void
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
-        HStack {
-            Button(action: onMenu) {
-                ZStack {
-                    
-                    Circle()
-                        .fill(Color.white)
-                        .overlay(
-                            Circle()
-                                .stroke(Color(.systemGray5), lineWidth: 1)
-                        )
-                    
-                    Image(.hamburger)
+        Button(action: onTap) {
+            HStack(spacing: IDSpacing.md) {
+                Image(lang.flagImageName)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 28, height: 28)
+                    .clipShape(Circle())
+
+                Text(lang.displayName)
+                    .font(IDFont.bodyRegular())
+                    .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
+
+                Spacer()
+
+                if isSelected {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(IDColor.primary)
                 }
             }
-
-            Spacer()
-
-            Image(.icIdentifyLogoText)
-
-            Spacer()
-
-            Button(action: onFlag) {
-                ZStack {
-                    
-                    Circle()
-                        .fill(Color.white)
-                        .overlay(
-                            Circle()
-                                .stroke(Color(.systemGray5), lineWidth: 1)
-                        )
-                    
-                    Image(.tr)
-                }
-            }
+            .padding(.horizontal, IDSpacing.lg)
+            .padding(.vertical, IDSpacing.md)
+            .background(
+                RoundedRectangle(cornerRadius: IDRadius.md)
+                    .fill(IDColor.adaptiveSurface(for: colorScheme))
+            )
         }
-        .padding(.horizontal, IDSpacing.lg)
-        .frame(height: 56)
+        .buttonStyle(.plain)
     }
 }
 
@@ -219,7 +296,7 @@ private struct LoginHeroSection: View {
     var body: some View {
         VStack(spacing: IDSpacing.lg) {
             Image(.icAppLogo)
-                .font(.system(size: 52))
+                .renderingMode(.template)
                 .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
 
             VStack(spacing: IDSpacing.sm) {
@@ -255,7 +332,7 @@ private struct LoginTabSelector: View {
                 } label: {
                     Text(mode.title)
                         .font(IDFont.bodySmall(.semibold))
-                        .foregroundColor(selected == mode ? .white : IDColor.adaptiveSubtitle(for: colorScheme))
+                        .foregroundColor(selected == mode ? .white : IDColor.adaptiveTitle(for: colorScheme))
                         .frame(width: 104, height: 30)
                         .background(
                             ZStack {
@@ -275,7 +352,7 @@ private struct LoginTabSelector: View {
         .background(Capsule().fill(IDColor.adaptiveSurface(for: colorScheme)))
         .overlay(
             Capsule()
-                .stroke(IDColor.inkBorder, lineWidth: 1)
+                .stroke(IDColor.inkBorder.opacity(0.15), lineWidth: 1)
         )
     }
 }
@@ -309,7 +386,7 @@ private struct StyledTextField: View {
                 .fill(IDColor.adaptiveSurface(for: colorScheme))
                 .overlay(
                     RoundedRectangle(cornerRadius: IDRadius.md)
-                        .stroke(IDColor.inkBorder, lineWidth: 1)
+                        .stroke(IDColor.inkBorder.opacity(0.15), lineWidth: 1)
                 )
         )
     }
@@ -340,7 +417,7 @@ private struct IdentIdFormView: View {
                             .fill(IDColor.adaptiveSurface(for: colorScheme))
                             .overlay(
                                 RoundedRectangle(cornerRadius: IDRadius.md)
-                                    .stroke(IDColor.inkBorder, lineWidth: 1)
+                                    .stroke(IDColor.inkBorder.opacity(0.15), lineWidth: 1)
                             )
                     )
             }
@@ -410,7 +487,7 @@ private struct ProjectPickerField: View {
                 .fill(IDColor.adaptiveSurface(for: colorScheme))
                 .overlay(
                     RoundedRectangle(cornerRadius: IDRadius.md)
-                        .stroke(IDColor.inkBorder, lineWidth: 1)
+                        .stroke(IDColor.inkBorder.opacity(0.15), lineWidth: 1)
                 )
         )
     }
@@ -432,34 +509,6 @@ private struct OptionsExpandButton: View {
                     .foregroundColor(IDColor.primary)
             }
         }
-    }
-}
-
-// MARK: - ConnectButton
-
-private struct ConnectButton: View {
-    let isLoading: Bool
-    let isDisabled: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: IDSpacing.sm) {
-                if isLoading {
-                    ProgressView().tint(.white).scaleEffect(0.9)
-                }
-                Text("Hemen Bağlan")
-                    .font(IDFont.bodyMedium(.semibold))
-                    .foregroundColor(.white)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, IDSpacing.lg)
-            .background(
-                Capsule()
-                    .fill(isDisabled ? IDColor.primary : IDColor.darkMuted)
-            )
-        }
-        .disabled(isDisabled)
     }
 }
 
@@ -655,16 +704,9 @@ struct ServerListView: View {
                     .padding(IDSpacing.xl)
                 }
 
-                Button { dismiss() } label: {
-                    Text("Devam")
-                        .font(IDFont.bodyMedium(.semibold))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, IDSpacing.lg)
-                        .background(Capsule().fill(IDColor.primary))
-                }
-                .padding(.horizontal, IDSpacing.xl)
-                .padding(.bottom, IDSpacing.xl)
+                SDKButton(title: "Devam") { dismiss() }
+                    .padding(.horizontal, IDSpacing.xl)
+                    .padding(.bottom, IDSpacing.xl)
             }
         }
     }
@@ -813,16 +855,9 @@ struct ModuleListView: View {
                     .padding(.bottom, IDSpacing.lg)
                 }
 
-                Button {
+                SDKButton(title: "Listeyi Kaydet") {
                     viewModel.updateModules(activeModules)
                     dismiss()
-                } label: {
-                    Text("Listeyi Kaydet")
-                        .font(IDFont.bodyMedium(.semibold))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, IDSpacing.lg)
-                        .background(Capsule().fill(IDColor.primary))
                 }
                 .padding(.horizontal, IDSpacing.xl)
                 .padding(.bottom, IDSpacing.xl)
@@ -947,7 +982,7 @@ private struct SubScreenTopBar<Trailing: View>: View {
             }
 
             HStack(spacing: IDSpacing.sm) {
-                Image(.icLangButtonLight)
+                Image(.icLangButtonDark)
                     .resizable()
                     .frame(width: 40, height: 40)
 
@@ -999,6 +1034,32 @@ private struct StepProgressBar: View {
                     .fill(index <= current ? IDColor.primary : IDColor.adaptiveSurface(for: colorScheme))
                     .frame(height: 4)
             }
+        }
+    }
+}
+
+// MARK: - SDKLang display helpers
+
+private extension SDKLang {
+    var flagImageName: String {
+        switch self {
+        case .tr:  return "turkey"
+        case .eng: return "united_kingdom"
+        case .de:  return "germany"
+        case .az:  return "azerbaijan"
+        case .ru:  return "russia"
+        @unknown default: return "turkey"
+        }
+    }
+
+    var displayName: String {
+        switch self {
+        case .tr:  return "Türkçe"
+        case .eng: return "English"
+        case .de:  return "Deutsch"
+        case .az:  return "Azərbaycan"
+        case .ru:  return "Русский"
+        @unknown default: return "Türkçe"
         }
     }
 }

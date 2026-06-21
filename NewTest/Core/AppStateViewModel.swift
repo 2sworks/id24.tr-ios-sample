@@ -157,6 +157,10 @@ final class AppStateViewModel: ObservableObject {
         advanceToNextModule()
     }
 
+    func popBack() {
+        coordinator?.pop()
+    }
+
     /// SDK modül akışını kesmeden önce özel bir ekran gösterir.
     /// moduleStepOrder değişmez — ExternalView'daki "Devam Et" advanceToNextModule() çağırır.
     func showExternalScreen(

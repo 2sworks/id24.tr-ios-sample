@@ -17,8 +17,13 @@ struct SpeechRecView: View {
     var body: some View {
         ZStack(alignment: .top) {
             (colorScheme == .dark ? IDColor.darkBg : IDColor.primary).ignoresSafeArea()
-            VStack(spacing: 0) {
-                headerArea
+            VStack(spacing: 10) {
+                SDKNavigationBar(
+                    style: .progress(steps: 4, current: 3),
+                    title: "Konuşma Testi",
+                    subtitle: "İmzanızı doğrulamamıza yardımcı olun",
+                    onBack: {}
+                )
                 cardArea
             }
         }
@@ -29,47 +34,6 @@ struct SpeechRecView: View {
                 ProgressView().tint(.white)
             }
         }
-    }
-
-    // MARK: - Header
-
-    private var headerArea: some View {
-        VStack(spacing: 12) {
-            ZStack(alignment: .leading) {
-                HStack(spacing: 10) {
-                    identifyLogoView
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Konuşma Testi")
-                            .font(IDFont.bodyMedium(.semibold))
-                            .foregroundColor(.white)
-                        Text("İmzanızı doğrulamamıza yardımcı olun")
-                            .font(IDFont.caption(.regular))
-                            .foregroundColor(.white.opacity(0.75))
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .center)
-
-                Button(action: {}) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.white)
-                        .frame(width: 32, height: 32)
-                }
-            }
-            .padding(.horizontal, IDSpacing.lg)
-
-            HStack(spacing: 6) {
-                ForEach(0..<4) { i in
-                    Capsule()
-                        .fill(i < 3 ? Color.white : Color.white.opacity(0.35))
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 6)
-                }
-            }
-            .padding(.horizontal, IDSpacing.lg)
-        }
-        .padding(.top, IDSpacing.sm)
-        .padding(.bottom, IDSpacing.lg)
     }
 
     // MARK: - Kart
@@ -216,31 +180,11 @@ struct SpeechRecView: View {
     // MARK: - Devam Butonu
 
     private var continueButton: some View {
-        Button(action: {
+        SDKButton(
+            title: "Devam",
+            isDisabled: !viewModel.speechSuccess
+        ) {
             viewModel.confirmSpeech(appState: appState)
-        }) {
-            Text("Devam")
-                .font(IDFont.bodyRegular(.semibold))
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 50)
-                .background(
-                    viewModel.speechSuccess
-                        ? IDColor.primary
-                        : IDColor.primary.opacity(0.35)
-                )
-                .clipShape(Capsule())
-        }
-        .disabled(!viewModel.speechSuccess)
-        .animation(.easeInOut(duration: 0.2), value: viewModel.speechSuccess)
-    }
-
-    // MARK: - Logo
-
-    private var identifyLogoView: some View {
-        ZStack {
-            Image(colorScheme == .dark ? "ic_lang_button_dark" : "ic_lang_button_light")
-                .frame(width: 44, height: 44)
         }
     }
 }

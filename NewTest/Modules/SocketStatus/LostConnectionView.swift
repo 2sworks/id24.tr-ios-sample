@@ -30,7 +30,6 @@ struct LostConnectionView: View {
 
                 reconnectButton
                     .padding(.horizontal, IDSpacing.lg)
-                    .padding(.bottom, IDSpacing.xxl)
             }
         }
         .navigationBarHidden(true)
@@ -85,7 +84,7 @@ struct LostConnectionView: View {
             }
             .frame(maxWidth: .infinity)
             .frame(height: 52)
-            .background(viewModel.canReconnect ? IDColor.primary : IDColor.primary.opacity(0.35))
+            .background(viewModel.canReconnect ? IDColor.successBright : IDColor.successBright.opacity(0.35))
             .clipShape(Capsule())
         }
         .disabled(!viewModel.canReconnect)

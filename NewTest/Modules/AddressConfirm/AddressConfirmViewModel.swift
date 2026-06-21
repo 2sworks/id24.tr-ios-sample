@@ -22,7 +22,6 @@ final class AddressConfirmViewModel: BaseModuleViewModel {
     // Picker / sheet triggers
     @Published var showDocumentOptions: Bool = false
     @Published var showScanner: Bool = false
-    @Published var showGallery: Bool = false
     @Published var showPDFPicker: Bool = false
 
     var isAddressValid: Bool { addressText.count >= 10 }
@@ -38,11 +37,6 @@ final class AddressConfirmViewModel: BaseModuleViewModel {
     func openScanner() {
         showDocumentOptions = false
         showScanner = true
-    }
-
-    func openGallery() {
-        showDocumentOptions = false
-        showGallery = true
     }
 
     func openPDFPicker() {

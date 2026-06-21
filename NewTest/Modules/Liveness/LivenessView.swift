@@ -42,51 +42,37 @@ struct LivenessView: View {
     @EnvironmentObject private var appState: AppStateViewModel
 
     var body: some View {
-        ZStack {
-            LivenessCameraView(viewModel: viewModel, appState: appState)
-                .ignoresSafeArea()
-            VStack(spacing: 0) {
-                headerBar
-                Spacer()
+        LivenessCameraView(viewModel: viewModel, appState: appState)
+            .overlay(alignment: .bottom) {
                 bottomInfoArea
             }
-            if viewModel.isLoading {
-                loadingOverlay
+            .ignoresSafeArea()
+            .overlay(alignment: .top) {
+                SDKNavigationBar(
+                    style: .overlay,
+                    onBack: { appState.popBack() },
+                    onHelp: {}
+                )
             }
-        }
-        .ignoresSafeArea()
-        .navigationBarHidden(true)
-        .navigationBarBackButtonHidden(true)
-        .onChange(of: viewModel.allStepsCompleted) { completed in
-            if completed {
-                viewModel.uploadVideo(videoData: Data(), appState: appState)
+            .overlay {
+                if viewModel.isLoading {
+                    loadingOverlay
+                }
             }
-        }
+            .navigationBarHidden(true)
+            .navigationBarBackButtonHidden(true)
+            .onChange(of: viewModel.allStepsCompleted) { completed in
+                if completed {
+                    viewModel.uploadVideo(videoData: Data(), appState: appState)
+                }
+            }
+            
     }
 }
 
 // MARK: - Subviews
 
 private extension LivenessView {
-
-    var headerBar: some View {
-        ZStack {
-            HStack {
-                CircleIconButton(systemName: "chevron.left") {
-                    appState.skipCurrentModule()
-                }
-                Spacer()
-                CircleIconButton(systemName: "questionmark") {}
-            }
-            Text("identify")
-                .font(.system(size: 22, weight: .semibold, design: .serif))
-                .italic()
-                .foregroundColor(.white)
-        }
-        .padding(.horizontal, 20)
-        .padding(.top, 60)
-        .padding(.bottom, 16)
-    }
 
     var bottomInfoArea: some View {
         HStack(spacing: 12) {
@@ -134,26 +120,6 @@ private extension LivenessView {
             ProgressView()
                 .progressViewStyle(CircularProgressViewStyle(tint: .white))
                 .scaleEffect(1.4)
-        }
-    }
-}
-
-// MARK: - CircleIconButton
-
-private struct CircleIconButton: View {
-    let systemName: String
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            ZStack {
-                Circle()
-                    .fill(Color.white.opacity(0.15))
-                    .frame(width: 40, height: 40)
-                Image(systemName: systemName)
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.white)
-            }
         }
     }
 }

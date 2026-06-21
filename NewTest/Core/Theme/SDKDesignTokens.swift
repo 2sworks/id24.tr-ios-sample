@@ -10,6 +10,7 @@ enum IDColor {
     static let primary          = Color(hex: "#446EF7")
     static let primaryDark      = Color(hex: "#2C5BF6")
     static let primaryLight     = Color(hex: "#F0F5FF")
+    static let primaryGradient  = Color(hex: "#446EF7")
 
     // MARK: Success
     static let success          = Color(hex: "#41D97F")
@@ -27,11 +28,15 @@ enum IDColor {
     static let inkBorder        = Color(hex: "#E5E7EB")
     static let inkBackground    = Color(hex: "#F9FAFB")
     static let inkSurface       = Color(hex: "#F6F7F8")
+    static let inkSubtitle      = Color(hex: "#9CA3AF")
+    static let inkSecondaryText = Color(hex: "#9DA1A1")
 
     // MARK: Dark Mode
     static let darkBg           = Color(hex: "#111827")
     static let darkBgSecondary  = Color(hex: "#1F2533")
     static let darkMuted        = Color(hex: "#57637F")
+    static let darkStepActive   = Color(hex: "#F0F5FF")
+    static let darkStepPassive  = Color(hex: "#D9D9D933")
 
     // MARK: Misc
     static let divider          = Color(hex: "#D1D5DB")
@@ -53,7 +58,13 @@ extension IDColor {
         scheme == .dark ? .white : inkDarkest
     }
     static func adaptiveSubtitle(for scheme: ColorScheme) -> Color {
-        scheme == .dark ? darkMuted : inkMid
+        scheme == .dark ? darkMuted : inkLight
+    }
+    static func adaptiveSubtitleContent(for scheme: ColorScheme) -> Color {
+        scheme == .dark ? primaryLight : inkSubtitle
+    }
+    static func adaptiveBorder(for scheme: ColorScheme) -> Color {
+        scheme == .dark ? Color.white.opacity(0.08) : inkBorder
     }
 }
 
@@ -144,6 +155,7 @@ private struct ColorsPreview: View {
         ("IDColor.primary",        "#446EF7", IDColor.primary),
         ("IDColor.primaryDark",    "#2C5BF6", IDColor.primaryDark),
         ("IDColor.primaryLight",   "#F0F5FF", IDColor.primaryLight),
+        ("IDColor.primaryGradient","#446EF7", IDColor.primaryGradient),
         ("IDColor.success",        "#41D97F", IDColor.success),
         ("IDColor.successAlt",     "#56DD8C", IDColor.successAlt),
         ("IDColor.successBright",  "#30D158", IDColor.successBright),
@@ -154,11 +166,15 @@ private struct ColorsPreview: View {
         ("IDColor.inkLight",       "#A7AAB2", IDColor.inkLight),
         ("IDColor.inkBorder",      "#E5E7EB", IDColor.inkBorder),
         ("IDColor.inkBackground",  "#F9FAFB", IDColor.inkBackground),
-        ("IDColor.inkSurface",     "#F6F7F8", IDColor.inkSurface),
-        ("IDColor.darkBg",         "#111827", IDColor.darkBg),
-        ("IDColor.darkBgSecondary","#1F2533", IDColor.darkBgSecondary),
-        ("IDColor.darkMuted",      "#57637F", IDColor.darkMuted),
-        ("IDColor.divider",        "#D1D5DB", IDColor.divider),
+        ("IDColor.inkSurface",      "#F6F7F8",   IDColor.inkSurface),
+        ("IDColor.inkSubtitle",     "#9CA3AF",   IDColor.inkSubtitle),
+        ("IDColor.inkSecondaryText","#9DA1A1",   IDColor.inkSecondaryText),
+        ("IDColor.darkBg",          "#111827",   IDColor.darkBg),
+        ("IDColor.darkBgSecondary", "#1F2533",   IDColor.darkBgSecondary),
+        ("IDColor.darkMuted",       "#57637F",   IDColor.darkMuted),
+        ("IDColor.darkStepActive",  "#F0F5FF",   IDColor.darkStepActive),
+        ("IDColor.darkStepPassive", "#D9D9D933", IDColor.darkStepPassive),
+        ("IDColor.divider",         "#D1D5DB",   IDColor.divider),
     ]
 
     private var filtered: [(call: String, hex: String, color: Color)] {
@@ -213,10 +229,6 @@ private struct ColorsPreview: View {
     }
 }
 
-#Preview("Colors") {
-    ColorsPreview()
-}
-
 // MARK: - Preview: Adaptive
 
 private struct AdaptiveColorsPreview: View {
@@ -227,7 +239,8 @@ private struct AdaptiveColorsPreview: View {
         ("IDColor.adaptiveBackground(for:)", "#FFFFFF", "#111827", IDColor.adaptiveBackground(for: .light), IDColor.adaptiveBackground(for: .dark)),
         ("IDColor.adaptiveSurface(for:)",    "#F6F7F8", "#1F2533", IDColor.adaptiveSurface(for: .light),    IDColor.adaptiveSurface(for: .dark)),
         ("IDColor.adaptiveTitle(for:)",      "#111827", "#FFFFFF", IDColor.adaptiveTitle(for: .light),      IDColor.adaptiveTitle(for: .dark)),
-        ("IDColor.adaptiveSubtitle(for:)",   "#5C616F", "#57637F", IDColor.adaptiveSubtitle(for: .light),   IDColor.adaptiveSubtitle(for: .dark)),
+        ("IDColor.adaptiveSubtitle(for:)",   "#A7AAB2", "#57637F", IDColor.adaptiveSubtitle(for: .light),   IDColor.adaptiveSubtitle(for: .dark)),
+        ("IDColor.adaptiveSubtitleContent(for:)", "#9CA3AF", "#F0F5FF", IDColor.adaptiveSubtitleContent(for: .light), IDColor.adaptiveSubtitleContent(for: .dark)),
     ]
 
     private var filtered: [(call: String, lightHex: String, darkHex: String, light: Color, dark: Color)] {
@@ -299,69 +312,88 @@ private struct AdaptiveColorsPreview: View {
     }
 }
 
-#Preview("Adaptive Colors") {
-    AdaptiveColorsPreview()
-}
-
 // MARK: - Preview: Spacing
 
-#Preview("Spacing") {
-    ScrollView {
-        VStack(alignment: .leading, spacing: IDSpacing.xl) {
-            previewSectionTitle("IDSpacing")
-            spacingRow("IDSpacing.xs",  IDSpacing.xs)
-            spacingRow("IDSpacing.sm",  IDSpacing.sm)
-            spacingRow("IDSpacing.md",  IDSpacing.md)
-            spacingRow("IDSpacing.lg",  IDSpacing.lg)
-            spacingRow("IDSpacing.xl",  IDSpacing.xl)
-            spacingRow("IDSpacing.xxl", IDSpacing.xxl)
+private struct SpacingPreview: View {
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: IDSpacing.xl) {
+                previewSectionTitle("IDSpacing")
+                spacingRow("IDSpacing.xs",  IDSpacing.xs)
+                spacingRow("IDSpacing.sm",  IDSpacing.sm)
+                spacingRow("IDSpacing.md",  IDSpacing.md)
+                spacingRow("IDSpacing.lg",  IDSpacing.lg)
+                spacingRow("IDSpacing.xl",  IDSpacing.xl)
+                spacingRow("IDSpacing.xxl", IDSpacing.xxl)
+            }
+            .padding(IDSpacing.lg)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(IDSpacing.lg)
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
 // MARK: - Preview: Corner Radius
 
-#Preview("Corner Radius") {
-    ScrollView {
-        VStack(alignment: .leading, spacing: IDSpacing.lg) {
-            previewSectionTitle("IDRadius")
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: IDSpacing.lg) {
-                radiusCell("IDRadius.sm",     IDRadius.sm)
-                radiusCell("IDRadius.md",     IDRadius.md)
-                radiusCell("IDRadius.lg",     IDRadius.lg)
-                radiusCell("IDRadius.xl",     IDRadius.xl)
-                radiusCell("IDRadius.card",   IDRadius.card)
-                radiusCell("IDRadius.pill",   IDRadius.pill)
-                radiusCell("IDRadius.circle", IDRadius.circle)
+private struct CornerRadiusPreview: View {
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: IDSpacing.lg) {
+                previewSectionTitle("IDRadius")
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: IDSpacing.lg) {
+                    radiusCell("IDRadius.sm",     IDRadius.sm)
+                    radiusCell("IDRadius.md",     IDRadius.md)
+                    radiusCell("IDRadius.lg",     IDRadius.lg)
+                    radiusCell("IDRadius.xl",     IDRadius.xl)
+                    radiusCell("IDRadius.card",   IDRadius.card)
+                    radiusCell("IDRadius.pill",   IDRadius.pill)
+                    radiusCell("IDRadius.circle", IDRadius.circle)
+                }
             }
+            .padding(IDSpacing.lg)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(IDSpacing.lg)
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
 // MARK: - Preview: Typography
 
-#Preview("Typography") {
-    ScrollView {
-        VStack(alignment: .leading, spacing: IDSpacing.sm) {
-            previewSectionTitle("IDFont")
-            typographyRow("IDFont.displayLarge()",   IDFont.displayLarge())
-            typographyRow("IDFont.displayMedium()",  IDFont.displayMedium())
-            typographyRow("IDFont.displaySmall()",   IDFont.displaySmall())
-            Divider().padding(.vertical, IDSpacing.xs)
-            typographyRow("IDFont.bodyLarge()",      IDFont.bodyLarge())
-            typographyRow("IDFont.bodyMediumPlus()", IDFont.bodyMediumPlus())
-            typographyRow("IDFont.bodyMedium()",     IDFont.bodyMedium())
-            typographyRow("IDFont.bodyRegular()",    IDFont.bodyRegular())
-            typographyRow("IDFont.bodySmall()",      IDFont.bodySmall())
-            Divider().padding(.vertical, IDSpacing.xs)
-            typographyRow("IDFont.caption()",        IDFont.caption())
+private struct TypographyPreview: View {
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: IDSpacing.sm) {
+                previewSectionTitle("IDFont")
+                typographyRow("IDFont.displayLarge()",   IDFont.displayLarge())
+                typographyRow("IDFont.displayMedium()",  IDFont.displayMedium())
+                typographyRow("IDFont.displaySmall()",   IDFont.displaySmall())
+                Divider().padding(.vertical, IDSpacing.xs)
+                typographyRow("IDFont.bodyLarge()",      IDFont.bodyLarge())
+                typographyRow("IDFont.bodyMediumPlus()", IDFont.bodyMediumPlus())
+                typographyRow("IDFont.bodyMedium()",     IDFont.bodyMedium())
+                typographyRow("IDFont.bodyRegular()",    IDFont.bodyRegular())
+                typographyRow("IDFont.bodySmall()",      IDFont.bodySmall())
+                Divider().padding(.vertical, IDSpacing.xs)
+                typographyRow("IDFont.caption()",        IDFont.caption())
+            }
+            .padding(IDSpacing.lg)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(IDSpacing.lg)
-        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+// MARK: - Combined Preview
+
+#Preview("Design Tokens") {
+    TabView {
+        ColorsPreview()
+            .tabItem { Label("Colors", systemImage: "paintpalette") }
+        AdaptiveColorsPreview()
+            .tabItem { Label("Adaptive", systemImage: "circle.lefthalf.filled") }
+        SpacingPreview()
+            .tabItem { Label("Spacing", systemImage: "arrow.left.and.right") }
+        CornerRadiusPreview()
+            .tabItem { Label("Radius", systemImage: "square.on.circle") }
+        TypographyPreview()
+            .tabItem { Label("Type", systemImage: "textformat") }
     }
 }
 

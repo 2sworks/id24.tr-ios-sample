@@ -24,6 +24,21 @@ enum CallState {
     case waiting, ringing, connected, smsVerification, nfcReading, ended
 }
 
+// MARK: - Baglanti Kalitesi
+
+enum NetworkQuality {
+    case none, bad, medium, good
+
+    init(raw: String) {
+        switch raw {
+        case "bad": self = .bad
+        case "medium": self = .medium
+        case "good": self = .good
+        default: self = .none
+        }
+    }
+}
+
 // MARK: - CallScreenViewModel
 
 @MainActor
@@ -34,13 +49,33 @@ final class CallScreenViewModel: BaseModuleViewModel {
     @Published private(set) var callState: CallState = .waiting
     @Published private(set) var queuePosition: String = ""
     @Published private(set) var estimatedWait: String = ""
-    @Published private(set) var networkQualityText: String = ""
+    @Published private(set) var networkQuality: NetworkQuality = .none
     @Published var smsCode: String = ""
     @Published private(set) var endCallEnabled: Bool = true
     @Published private(set) var callCompleted: Bool = false
     @Published private(set) var nfcStatusMessage: String = ""
     /// Socket kaynaklı görüşme bitişlerinde ThankYou statüsünü view'a iletir.
     @Published private(set) var socketThankYouStatus: ThankYouStatus? = nil
+
+    // NFC Remote Edit (panel .editNfcProcess komutuyla tetiklenir)
+    @Published var showNFCEdit: Bool = false
+    @Published var nfcEditSerial: String = ""
+    @Published var nfcEditBirth: String = ""
+    @Published var nfcEditValid: String = ""
+
+    // Photo Toast
+    @Published private(set) var photoTakenToast: String? = nil
+
+    // Sign Language Gate
+    @Published var showSignLangGate: Bool = false
+    private var checkedSignLang: Bool = false
+
+    // Lost Connection (bağlantı kopması / TURN_DISCONNECTED)
+    @Published var showLostConnection: Bool = false
+    @Published private(set) var lostConnectionCallCompleted: Bool = false
+
+    // terminateCall işlemi sürerinde gelen diğer socket mesajlarını bloke eder.
+    private var isTerminating: Bool = false
 
     var isSMSCodeValid: Bool { smsCode.count == 6 }
 
@@ -56,23 +91,47 @@ final class CallScreenViewModel: BaseModuleViewModel {
     }
 
     #if DEBUG
-    convenience init(previewState: CallState, queuePosition: String = "", estimatedWait: String = "") {
+    convenience init(
+        previewState: CallState,
+        queuePosition: String = "",
+        estimatedWait: String = "",
+        photoTakenToast: String? = nil,
+        networkQuality: NetworkQuality = .none
+    ) {
         self.init()
         callState = previewState
         self.queuePosition = queuePosition
         self.estimatedWait = estimatedWait
+        self.photoTakenToast = photoTakenToast
+        self.networkQuality = networkQuality
     }
     #endif
+
+    // MARK: - Sign Language Gate
+
+    func checkSignLangIfNeeded(appState: AppStateViewModel) {
+        guard appState.manager.connectToSignLang, !checkedSignLang else { return }
+        showSignLangGate = true
+    }
+
+    func signLangCompleted() {
+        checkedSignLang = true
+        showSignLangGate = false
+    }
 
     // MARK: - Cagriyi Kabul Et
 
     func acceptCall() {
+        isLoading = true
         manager.acceptCall { [weak self] connected, errMsg, sdpConnOk in
             Task { @MainActor in
                 guard let self else { return }
                 if connected == true {
-                    self.callState = .connected
+                    // isLoading ve callState = .connected, .startTransfer socket event'inde set edilir
+                    // (SDP answer alındıktan sonra kameralar hazır olur — legacy parity).
+                    _ = sdpConnOk
                 } else {
+                    self.isLoading = false
                     self.errorMessage = errMsg?.errorMessages ?? "Baglanti basarisiz"
                 }
             }
@@ -157,6 +216,49 @@ final class CallScreenViewModel: BaseModuleViewModel {
 
         manager.startRemoteNFC(birthDate: birthDate, validDate: validDate, docNo: docNo)
     }
+
+    // MARK: - NFC Remote Edit (panel .editNfcProcess sonrası kaydet + yeniden başlat)
+
+    func saveAndRestartRemoteNFC(serial: String, birth: String, valid: String) {
+        manager.sdkBackInfo.idDocumentNumberMRZ = serial
+        manager.sdkBackInfo.idBirthDateMRZ = birth.toMrzDate()
+        manager.sdkBackInfo.idValidDateMRZ = valid.toMrzDate()
+        showNFCEdit = false
+        startRemoteNFC(
+            birthDate: birth.toMrzDate(),
+            validDate: valid.toMrzDate(),
+            docNo: serial
+        )
+    }
+
+    // MARK: - Reconnect Callbacks (LostConnectionView'dan dönen)
+
+    func handleReconnectCompleted() {
+        showLostConnection = false
+        isTerminating = false
+    }
+
+    func handleReconnectCompletedWithStatus(
+        isWaitingRoom: Bool,
+        statusType: String?,
+        appState: AppStateViewModel
+    ) {
+        showLostConnection = false
+        isTerminating = false
+        if isWaitingRoom {
+            callState = .waiting
+        } else {
+            appState.pendingThankYouStatus = (statusType == "positive") ? .completed : .notCompleted
+            callState = .ended
+            appState.advanceToNextModule()
+        }
+    }
+
+    // MARK: - Cleanup
+
+    func cleanup() {
+        manager.nfcMsgHandler = nil
+    }
 }
 
 // MARK: - SDKSocketListener
@@ -164,6 +266,9 @@ final class CallScreenViewModel: BaseModuleViewModel {
 extension CallScreenViewModel: SDKSocketListener {
     nonisolated func listenSocketMessage(message: SDKCallActions) {
         Task { @MainActor in
+            // terminateCall işlemi devam ederken gelen diğer mesajlar görmezden gelinir.
+            guard !isTerminating else { return }
+
             switch message {
 
             case .incomingCall:
@@ -172,18 +277,47 @@ extension CallScreenViewModel: SDKSocketListener {
             case .comingSms:
                 callState = .smsVerification
 
+            case .startTransfer:
+                // SDP answer alındı; kameralar artık hazır, loader kapat ve connected'a geç.
+                isLoading = false
+                callState = .connected
+
             case .endCall:
                 callState = .ended
+                socketThankYouStatus = .notCompleted
 
             case .approveSms(let tan):
                 _ = tan
 
-            case .terminateCall(_, _):
-                callState = .ended
-                callCompleted = true
-                socketThankYouStatus = .completed
+            case .terminateCall(let reason, let statusType):
+                isTerminating = true
+
+                if reason == "TURN_DISCONNECTED" {
+                    // ICE/TURN bağlantısı koptu; reconnect ekranı göster, ended'e geçme.
+                    lostConnectionCallCompleted = false
+                    showLostConnection = true
+                    isTerminating = false
+                } else {
+                    let hasStatus: Bool = {
+                        guard let type = statusType else { return false }
+                        return type == "positive" || type == "negative" || type == "neutral"
+                    }()
+
+                    if hasStatus {
+                        socketThankYouStatus = (statusType == "positive") ? .completed : .notCompleted
+                        callState = .ended
+                        callCompleted = true
+                        isTerminating = false
+                    } else {
+                        // Bilinmeyen durum — reconnect dene.
+                        lostConnectionCallCompleted = false
+                        showLostConnection = true
+                        isTerminating = false
+                    }
+                }
 
             case .imOffline:
+                callState = .waiting
                 errorMessage = "Temsilci cevrimdisi"
 
             case .updateQueue(let order, let minutes):
@@ -194,14 +328,15 @@ extension CallScreenViewModel: SDKSocketListener {
                 endCallEnabled = false
 
             case .networkQuality(let quality):
-                networkQualityText = quality
+                networkQuality = NetworkQuality(raw: quality)
 
             case .missedCall:
                 callState = .ended
                 socketThankYouStatus = .missedCall
 
             case .connectionErr:
-                errorMessage = "Baglanti hatasi"
+                lostConnectionCallCompleted = false
+                showLostConnection = true
 
             case .wrongSocketActionErr(let err):
                 errorMessage = err
@@ -209,9 +344,23 @@ extension CallScreenViewModel: SDKSocketListener {
             case .subrejectedDismiss(let msg):
                 _ = msg
                 callState = .ended
+                socketThankYouStatus = .notCompleted
 
             case .openNfcRemote(let birthDate, let validDate, let serialNo):
                 startRemoteNFC(birthDate: birthDate, validDate: validDate, docNo: serialNo)
+
+            case .editNfcProcess:
+                nfcEditSerial = manager.sdkBackInfo.idDocumentNumberMRZ ?? ""
+                nfcEditBirth = (manager.sdkBackInfo.idBirthDateMRZ ?? "").mrzToNormalDate()
+                nfcEditValid = (manager.sdkBackInfo.idValidDateMRZ ?? "").mrzToNormalDate()
+                showNFCEdit = true
+
+            case .photoTaken(let msg):
+                photoTakenToast = msg
+                Task {
+                    try? await Task.sleep(nanoseconds: 2_500_000_000)
+                    await MainActor.run { self.photoTakenToast = nil }
+                }
 
             default:
                 break

@@ -41,7 +41,7 @@ final class PrepareViewModel: BaseModuleViewModel {
 
     override init() {
         super.init()
-        checkPermissions()
+        refreshPermissionStatus()
         if manager.needSpeedTest == true {
             startSpeedTest()
         } else {
@@ -51,10 +51,10 @@ final class PrepareViewModel: BaseModuleViewModel {
 
     // MARK: - Izin Kontrolleri
 
-    func checkPermissions() {
-        checkCamera()
-        checkMicrophone()
-        checkSpeech()
+    private func refreshPermissionStatus() {
+        cameraAuthorized = CameraPermission.camera.authorized
+        micAuthorized = MicrophonePermission.microphone.authorized
+        speechAuthorized = SpeechPermission.speech.authorized
     }
 
     func checkCamera() {

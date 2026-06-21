@@ -104,6 +104,8 @@
 		8D09EE442FE57E6D0060F313 /* Inter.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8D09EE432FE57E6D0060F313 /* Inter.ttf */; };
 		8D09EE462FE57E730060F313 /* Inter-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8D09EE452FE57E730060F313 /* Inter-Italic.ttf */; };
 		8D09EE482FE58A560060F313 /* SDKNavigationBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D09EE472FE58A560060F313 /* SDKNavigationBar.swift */; };
+		8D09EE4A2FE5F4140060F313 /* SDKButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D09EE492FE5F4140060F313 /* SDKButton.swift */; };
+		8D09EE4C2FE5FEE50060F313 /* IdCardScanningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D09EE4B2FE5FEE50060F313 /* IdCardScanningView.swift */; };
 		8D0D25F02FE4915400DE3B73 /* LostConnectionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D0D25EF2FE4915400DE3B73 /* LostConnectionViewModel.swift */; };
 		8D0D25F22FE4915500DE3B73 /* LostConnectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D0D25F12FE4915500DE3B73 /* LostConnectionView.swift */; };
 		8D0D25F42FE4958B00DE3B73 /* ExternalViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D0D25F32FE4958B00DE3B73 /* ExternalViewModel.swift */; };
@@ -118,7 +120,9 @@
 		8D91F2022FCE34D3000B56ED /* AppNavigationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D91F2012FCE34D3000B56ED /* AppNavigationCoordinator.swift */; };
 		8D91F2042FCE34DB000B56ED /* IdentifyNavigationCoordinatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D91F2032FCE34DB000B56ED /* IdentifyNavigationCoordinatorView.swift */; };
 		8DB4B1892FE2E4FB00BA4C67 /* SwiftSignatureViewRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DB4B1882FE2E4FA00BA4C67 /* SwiftSignatureViewRepresentable.swift */; };
-		8DB4B18B2FE3413300BA4C67 /* AddressConfirmPickerRepresentables.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DB4B18A2FE3413300BA4C67 /* AddressConfirmPickerRepresentables.swift */; };
+		8DDD39C62FE8A2A30078E962 /* SignLangRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DDD39C52FE8A2A30078E962 /* SignLangRepresentable.swift */; };
+		8DDD39C82FE8AEF10078E962 /* SignLangViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DDD39C72FE8AEF10078E962 /* SignLangViewModel.swift */; };
+		8DDD39CA2FE8AF000078E962 /* SignLangView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DDD39C92FE8AF000078E962 /* SignLangView.swift */; };
 		8DF844B62FE18B130066D35A /* SelfieCameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DF844B52FE18B120066D35A /* SelfieCameraView.swift */; };
 		DF7BC16A2D4A279600372CAB /* Env.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = DF7BC1682D4A279600372CAB /* Env.xcdatamodeld */; };
 /* End PBXBuildFile section */
@@ -224,6 +228,8 @@
 		8D09EE432FE57E6D0060F313 /* Inter.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Inter.ttf; sourceTree = "<group>"; };
 		8D09EE452FE57E730060F313 /* Inter-Italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-Italic.ttf"; sourceTree = "<group>"; };
 		8D09EE472FE58A560060F313 /* SDKNavigationBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKNavigationBar.swift; sourceTree = "<group>"; };
+		8D09EE492FE5F4140060F313 /* SDKButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKButton.swift; sourceTree = "<group>"; };
+		8D09EE4B2FE5FEE50060F313 /* IdCardScanningView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdCardScanningView.swift; sourceTree = "<group>"; };
 		8D0D25EF2FE4915400DE3B73 /* LostConnectionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LostConnectionViewModel.swift; sourceTree = "<group>"; };
 		8D0D25F12FE4915500DE3B73 /* LostConnectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LostConnectionView.swift; sourceTree = "<group>"; };
 		8D0D25F32FE4958B00DE3B73 /* ExternalViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalViewModel.swift; sourceTree = "<group>"; };
@@ -238,8 +244,10 @@
 		8D91F2012FCE34D3000B56ED /* AppNavigationCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppNavigationCoordinator.swift; sourceTree = "<group>"; };
 		8D91F2032FCE34DB000B56ED /* IdentifyNavigationCoordinatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifyNavigationCoordinatorView.swift; sourceTree = "<group>"; };
 		8DB4B1882FE2E4FA00BA4C67 /* SwiftSignatureViewRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftSignatureViewRepresentable.swift; sourceTree = "<group>"; };
-		8DB4B18A2FE3413300BA4C67 /* AddressConfirmPickerRepresentables.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddressConfirmPickerRepresentables.swift; sourceTree = "<group>"; };
 		8DB74A792FCF9AAD00C204AA /* IdentifySDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = IdentifySDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		8DDD39C52FE8A2A30078E962 /* SignLangRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignLangRepresentable.swift; sourceTree = "<group>"; };
+		8DDD39C72FE8AEF10078E962 /* SignLangViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignLangViewModel.swift; sourceTree = "<group>"; };
+		8DDD39C92FE8AF000078E962 /* SignLangView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignLangView.swift; sourceTree = "<group>"; };
 		8DF844B52FE18B120066D35A /* SelfieCameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelfieCameraView.swift; sourceTree = "<group>"; };
 		DF7BC1692D4A279600372CAB /* Env.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Env.xcdatamodel; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -397,6 +405,7 @@
 			children = (
 				8ABF20122F6A03C60010FABD /* Base */,
 				8D09EE472FE58A560060F313 /* SDKNavigationBar.swift */,
+				8D09EE492FE5F4140060F313 /* SDKButton.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -471,6 +480,7 @@
 				48171420294734FA0095A64F /* SDKPassportReaderViewController.swift */,
 				8AB276BE2F749D5100A764F1 /* IdCardViewModel.swift */,
 				8D16EAA92FCEDC2F00C7152E /* IdCardScannerView.swift */,
+				8D09EE4B2FE5FEE50060F313 /* IdCardScanningView.swift */,
 			);
 			path = IdCard;
 			sourceTree = "<group>";
@@ -535,7 +545,6 @@
 				4881A7FD29238CB400EB4072 /* SDKAddressConfirmViewController.swift */,
 				8AB276E82F749DA100A764F1 /* AddressConfirmView.swift */,
 				8AB276CE2F749D5800A764F1 /* AddressConfirmViewModel.swift */,
-				8DB4B18A2FE3413300BA4C67 /* AddressConfirmPickerRepresentables.swift */,
 			);
 			path = AddressConfirm;
 			sourceTree = "<group>";
@@ -548,6 +557,7 @@
 				8AB276EA2F749DA200A764F1 /* CallScreenView.swift */,
 				8AB276D02F749D5900A764F1 /* CallScreenViewModel.swift */,
 				8D67E2722FE3EA1B00F01E9D /* VideoFeedRepresentable.swift */,
+				8DDD39C52FE8A2A30078E962 /* SignLangRepresentable.swift */,
 			);
 			path = CallScreen;
 			sourceTree = "<group>";
@@ -566,6 +576,8 @@
 			isa = PBXGroup;
 			children = (
 				48A151E9292B73BA005B376B /* SDKSignLangViewController.swift */,
+				8DDD39C72FE8AEF10078E962 /* SignLangViewModel.swift */,
+				8DDD39C92FE8AF000078E962 /* SignLangView.swift */,
 			);
 			path = SignLang;
 			sourceTree = "<group>";
@@ -796,8 +808,8 @@
 				8AB276F12F749DC600A764F1 /* IdentifySwiftUIApp.swift in Sources */,
 				8D0D25F62FE4958B00DE3B73 /* ExternalView.swift in Sources */,
 				4825316C2B02632900B0472C /* SDKPrepareViewController.swift in Sources */,
-				8DB4B18B2FE3413300BA4C67 /* AddressConfirmPickerRepresentables.swift in Sources */,
 				8AB276C52F749D5200A764F1 /* LivenessViewModel.swift in Sources */,
+				8D09EE4C2FE5FEE50060F313 /* IdCardScanningView.swift in Sources */,
 				8AB276D72F749D9700A764F1 /* PrepareView.swift in Sources */,
 				8AB276D52F749D9600A764F1 /* LoginView.swift in Sources */,
 				8D8153CB2FE2152A0065BFE6 /* VideoCameraController.swift in Sources */,
@@ -812,7 +824,9 @@
 				DF7BC16A2D4A279600372CAB /* Env.xcdatamodeld in Sources */,
 				8AB276BB2F749D5100A764F1 /* LoginViewModel.swift in Sources */,
 				4881A8102923BF0000EB4072 /* SDKRingViewController.swift in Sources */,
+				8DDD39C82FE8AEF10078E962 /* SignLangViewModel.swift in Sources */,
 				8AB276EB2F749DA200A764F1 /* CallScreenView.swift in Sources */,
+				8D09EE4A2FE5F4140060F313 /* SDKButton.swift in Sources */,
 				8D20F8C92FC8FE0F008F7DCF /* SDKDesignTokens.swift in Sources */,
 				48C0381A2B5542F500AF690B /* CallStatusEnum.swift in Sources */,
 				8AB276C72F749D5300A764F1 /* SelfieViewModel.swift in Sources */,
@@ -822,7 +836,9 @@
 				8D91F2022FCE34D3000B56ED /* AppNavigationCoordinator.swift in Sources */,
 				48263C10292789C7005200A1 /* SDKThankYouViewController.swift in Sources */,
 				485C15622907F3A7007B9ED0 /* SDKCgRect+.swift in Sources */,
+				8DDD39CA2FE8AF000078E962 /* SignLangView.swift in Sources */,
 				48AB73FB291A75E200F591A4 /* SDKSignatureViewController.swift in Sources */,
+				8DDD39C62FE8A2A30078E962 /* SignLangRepresentable.swift in Sources */,
 				8D16EAAA2FCEDC2F00C7152E /* IdCardScannerView.swift in Sources */,
 				4881A80B2923BEF400EB4072 /* SDKCallScreenViewController.swift in Sources */,
 				4887009A292CDA3500961218 /* SDKListenSocketViewController.swift in Sources */,

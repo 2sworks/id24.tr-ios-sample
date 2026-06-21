@@ -54,18 +54,21 @@ struct SelfieView: View {
         ZStack {
             backgroundLayer
             VStack(spacing: 0) {
-                headerBar
+                SDKNavigationBar(
+                    style: .overlay,
+                    onBack: { appState.popBack() },
+                    onHelp: {}
+                )
                 cameraFrameOverlay
                 bottomInfoArea
                 Spacer()
                 actionButtons
-                    .padding(.bottom, 48)
+                    .padding(.bottom, 32)
             }
             if viewModel.isLoading {
                 loadingOverlay
             }
         }
-        .ignoresSafeArea()
         .onAppear { camera.start() }
         .onDisappear { camera.stop() }
         .onChange(of: viewModel.canContinue) { success in
@@ -98,25 +101,6 @@ private extension SelfieView {
                     .ignoresSafeArea()
             }
         }
-    }
-
-    var headerBar: some View {
-        ZStack {
-            HStack {
-                CircleIconButton(systemName: "chevron.left") {
-                    appState.skipCurrentModule()
-                }
-                Spacer()
-                CircleIconButton(systemName: "questionmark") {}
-            }
-            Text("identify")
-                .font(.system(size: 22, weight: .semibold, design: .serif))
-                .italic()
-                .foregroundColor(.white)
-        }
-        .padding(.horizontal, 20)
-        .padding(.top, 60)
-        .padding(.bottom, 16)
     }
 
     var cameraFrameOverlay: some View {
@@ -163,56 +147,62 @@ private extension SelfieView {
     }
 
     var actionButtons: some View {
-        HStack(spacing: 24) {
-            // Tekrar dene — sadece fotoğraf çekildiyse görünür
-            if viewModel.selfieImage != nil {
-                CircleActionButton(
-                    icon: AnyView(
-                        Image(systemName: "arrow.counterclockwise")
-                            .font(.system(size: 20, weight: .medium))
-                            .foregroundColor(.white)
-                    ),
-                    background: Color.white.opacity(0.2),
-                    size: 64
-                ) {
-                    viewModel.reset()
-                    showSuccessCheckmark = false
-                    isCameraActive = true
+        ZStack {
+            HStack {
+                if viewModel.selfieImage != nil {
+                    CircleActionButton(
+                        icon: AnyView(
+                            Image(systemName: "arrow.counterclockwise")
+                                .font(.system(size: 20, weight: .medium))
+                                .foregroundColor(.white)
+                        ),
+                        background: Color.white.opacity(0.2),
+                        size: 56
+                    ) {
+                        viewModel.reset()
+                        showSuccessCheckmark = false
+                        isCameraActive = true
+                    }
                 }
             }
+            .padding(.trailing, 170)
 
-            if viewModel.canContinue {
-                CircleActionButton(
-                    icon: AnyView(
-                        Image(systemName: "checkmark")
-                            .font(.system(size: 22, weight: .bold))
-                            .foregroundColor(.white)
-                    ),
-                    background: Color(red: 0.24, green: 0.52, blue: 0.98),
-                    size: 72
-                ) {
-                    appState.advanceToNextModule()
-                }
-                .scaleEffect(showSuccessCheckmark ? 1 : 0.5)
-                .opacity(showSuccessCheckmark ? 1 : 0)
-            } else if isCameraActive {
-                CircleActionButton(
-                    icon: AnyView(
-                        Image(systemName: "camera.fill")
-                            .font(.system(size: 24, weight: .medium))
-                            .foregroundColor(.white)
-                    ),
-                    background: Color(red: 0.24, green: 0.52, blue: 0.98),
-                    size: 72
-                ) {
-                    camera.capturePhoto { image in
-                        guard let image else { return }
-                        isCameraActive = false
-                        viewModel.processSelfie(image: image, appState: appState)
+            Group {
+                if viewModel.canContinue {
+                    CircleActionButton(
+                        icon: AnyView(
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 22, weight: .bold))
+                                .foregroundColor(.white)
+                        ),
+                        background: IDColor.primary,
+                        size: 80
+                    ) {
+                        appState.advanceToNextModule()
+                    }
+                    .scaleEffect(showSuccessCheckmark ? 1 : 0.5)
+                    .opacity(showSuccessCheckmark ? 1 : 0)
+                } else if isCameraActive {
+                    CircleActionButton(
+                        icon: AnyView(
+                            Image(systemName: "camera.fill")
+                                .font(.system(size: 24, weight: .medium))
+                                .foregroundColor(.white)
+                        ),
+                        background: IDColor.primary,
+                        size: 80
+                    ) {
+                        camera.capturePhoto { image in
+                            guard let image else { return }
+                            isCameraActive = false
+                            viewModel.processSelfie(image: image, appState: appState)
+                        }
                     }
                 }
             }
         }
+        .frame(maxWidth: .infinity)
+        .frame(height: 80)
         .animation(.spring(response: 0.4, dampingFraction: 0.7), value: viewModel.canContinue)
         .animation(.spring(response: 0.4, dampingFraction: 0.7), value: isCameraActive)
         .animation(.spring(response: 0.4, dampingFraction: 0.7), value: viewModel.selfieImage != nil)
@@ -225,26 +215,6 @@ private extension SelfieView {
             ProgressView()
                 .progressViewStyle(CircularProgressViewStyle(tint: .white))
                 .scaleEffect(1.4)
-        }
-    }
-}
-
-// MARK: - CircleIconButton
-
-private struct CircleIconButton: View {
-    let systemName: String
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            ZStack {
-                Circle()
-                    .fill(Color.white.opacity(0.15))
-                    .frame(width: 40, height: 40)
-                Image(systemName: systemName)
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.white)
-            }
         }
     }
 }
@@ -276,13 +246,13 @@ private struct DocumentFrame: View {
     let height: CGFloat
 
     private let cornerLength: CGFloat = 28
-    private let lineWidth: CGFloat = 3
+    private let lineWidth: CGFloat = 7
 
     var body: some View {
         Canvas { context, _ in
             let rect = CGRect(x: 0, y: 0, width: width, height: height)
             let color = GraphicsContext.Shading.color(.white)
-            let r: CGFloat = 10
+            let r: CGFloat = 18
 
             func corner(_ origin: CGPoint, dx: CGFloat, dy: CGFloat) {
                 var path = Path()
@@ -293,13 +263,29 @@ private struct DocumentFrame: View {
                     control: CGPoint(x: origin.x, y: origin.y)
                 )
                 path.addLine(to: CGPoint(x: origin.x, y: origin.y + dy * cornerLength))
-                context.stroke(path, with: color, lineWidth: lineWidth)
+                context.stroke(path, with: color, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
             }
 
             corner(CGPoint(x: rect.minX, y: rect.minY), dx: 1, dy: 1)
             corner(CGPoint(x: rect.maxX, y: rect.minY), dx: -1, dy: 1)
             corner(CGPoint(x: rect.minX, y: rect.maxY), dx: 1, dy: -1)
             corner(CGPoint(x: rect.maxX, y: rect.maxY), dx: -1, dy: -1)
+
+            func edge(from start: CGPoint, to end: CGPoint) {
+                var path = Path()
+                path.move(to: start)
+                path.addLine(to: end)
+                context.stroke(path, with: color, lineWidth: 0.5)
+            }
+
+            edge(from: CGPoint(x: rect.minX + cornerLength, y: rect.minY),
+                 to:   CGPoint(x: rect.maxX - cornerLength, y: rect.minY))
+            edge(from: CGPoint(x: rect.minX + cornerLength, y: rect.maxY),
+                 to:   CGPoint(x: rect.maxX - cornerLength, y: rect.maxY))
+            edge(from: CGPoint(x: rect.minX, y: rect.minY + cornerLength),
+                 to:   CGPoint(x: rect.minX, y: rect.maxY - cornerLength))
+            edge(from: CGPoint(x: rect.maxX, y: rect.minY + cornerLength),
+                 to:   CGPoint(x: rect.maxX, y: rect.maxY - cornerLength))
         }
         .frame(width: width, height: height)
     }

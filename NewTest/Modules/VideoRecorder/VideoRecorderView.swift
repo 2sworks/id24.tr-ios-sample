@@ -5,19 +5,20 @@
 //  --- DURUM MAKİNESİ ---
 //
 //  idle      : videoURL == nil && !camera.isRecording
-//              -> Ortada tek kayıt butonu (mavi, aktif)
+//              -> Okuma testi kartı + kayıt butonu (mavi, aktif)
 //
 //  recording : camera.isRecording == true
-//              -> Ortada tek kayıt butonu (gri, deaktif)
+//              -> Okuma testi kartı (kullanıcı cümleyi okur) + kayıt butonu (gri, deaktif)
 //
 //  recorded  : videoURL != nil
 //              -> Arka plan: inline video player (auto-play)
+//                 Transkripsiyon sonucu + doğrulama kutusu
 //                 Sol: Yeniden çek (↺)
-//                 Orta: Onayla / Sunucuya gönder (✓)
+//                 Orta: Onayla / Sunucuya gönder (✓) — speechSuccess olmadan disable
 //                 Sağ: Play/Pause toggle (▶/⏸)
 //
 //  --- AKIŞ ---
-//  1. Kayıt başlar  → auto-stop 5 sn → videoSelected → isCameraActive=false → auto-play
+//  1. Kayıt başlar  → auto-stop 5 sn → videoSelected → isCameraActive=false → auto-play + transkripsiyon
 //  2. Onay (✓)      → uploadVideo(appState:) → advanceToNextModule()
 //  3. Yeniden çek   → player temizle → deleteVideo() → isCameraActive=true → camera.start()
 //
@@ -26,6 +27,14 @@ import SwiftUI
 import AVFoundation
 
 struct VideoRecorderView: View {
+
+    /// Preview veya dış kaynak için opsiyonel başlangıç metni.
+    /// nil ise okuma testi devre dışı (normal akış).
+    private let initialReadingText: String?
+
+    init(readingText: String? = nil) {
+        self.initialReadingText = readingText
+    }
 
     @StateObject private var viewModel = VideoRecorderViewModel()
     @StateObject private var camera = VideoCameraController()
@@ -39,10 +48,15 @@ struct VideoRecorderView: View {
         ZStack {
             backgroundLayer
             VStack(spacing: 0) {
-                headerBar
                 Spacer()
-                VStack(spacing: 20) {
+                VStack(spacing: 12) {
+                    if viewModel.readingText != nil && viewModel.videoURL == nil {
+                        readingTestCard
+                    }
                     bottomInfoArea
+                    if viewModel.readingText != nil && viewModel.videoURL != nil {
+                        recognizedTextBox
+                    }
                     actionButtons
                 }
                 .padding(.bottom, 48)
@@ -52,7 +66,19 @@ struct VideoRecorderView: View {
             }
         }
         .ignoresSafeArea()
-        .onAppear { camera.start() }
+        .overlay(alignment: .top) {
+            SDKNavigationBar(
+                style: .overlay,
+                onBack: { appState.popBack() },
+                onHelp: {}
+            )
+        }
+        .onAppear {
+            camera.start()
+            if let text = initialReadingText {
+                viewModel.updateReadingText(text)
+            }
+        }
         .onDisappear {
             camera.stop()
             player?.pause()
@@ -102,61 +128,166 @@ private extension VideoRecorderView {
         }
     }
 
-    var headerBar: some View {
-        ZStack {
-            HStack {
-                VideoCircleIconButton(systemName: "chevron.left") {
-                    appState.skipCurrentModule()
-                }
-                Spacer()
-                VideoCircleIconButton(systemName: "questionmark") {}
+    // MARK: - Reading Test Card
+
+    var readingTestCard: some View {
+        let readingGreen = Color(red: 0.18, green: 0.82, blue: 0.44)
+        return VStack(spacing: 16) {
+            // Başlık ve açıklama — kart dışında, ortalanmış
+            VStack(spacing: 6) {
+                Text("Okuma Testi")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.white)
+
+                Text("Lütfen aşağıdaki metni okurken bir video kaydedin.")
+                    .font(.system(size: 14, weight: .regular))
+                    .foregroundColor(.white.opacity(0.85))
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(3)
             }
-            Text("identify")
-                .font(.system(size: 22, weight: .semibold, design: .serif))
-                .italic()
-                .foregroundColor(.white)
+            .frame(maxWidth: .infinity)
+
+            // Cümle kartı — yeşil dashed border
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Okumanız gereken cümle:")
+                    .font(.system(size: 12, weight: .regular))
+                    .foregroundColor(.white.opacity(0.65))
+
+                Text(viewModel.readingText ?? "")
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundColor(readingGreen)
+                    .lineSpacing(4)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(16)
+            .background(IDColor.successBright.opacity(0.05))
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .strokeBorder(
+                        readingGreen.opacity(0.75),
+                        style: StrokeStyle(lineWidth: 1.5, dash: [6, 4])
+                    )
+            )
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 60)
-        .padding(.bottom, 16)
+        .padding(.horizontal, 24)
+        .transition(.opacity)
     }
+
+    // MARK: - Recognized Text Box
+
+    @ViewBuilder
+    var recognizedTextBox: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if viewModel.isTranscribing {
+                HStack(spacing: 8) {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        .scaleEffect(0.85)
+                    Text("Ses doğrulanıyor...")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(.white.opacity(0.85))
+                }
+            } else {
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: viewModel.speechSuccess ? "checkmark.circle.fill" : "xmark.circle.fill")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(viewModel.speechSuccess
+                            ? Color(red: 0.3, green: 0.85, blue: 0.5)
+                            : Color(red: 1, green: 0.45, blue: 0.45))
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Söylediğiniz:")
+                            .font(.system(size: 11, weight: .regular))
+                            .foregroundColor(.white.opacity(0.65))
+                        Text(viewModel.recognizedText.isEmpty ? "—" : viewModel.recognizedText)
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.white)
+                    }
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 14)
+                .fill(Color.black.opacity(0.5))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .strokeBorder(
+                            viewModel.speechSuccess
+                                ? Color(red: 0.3, green: 0.85, blue: 0.5).opacity(0.5)
+                                : Color.white.opacity(0.15),
+                            lineWidth: 1
+                        )
+                )
+        )
+        .padding(.horizontal, 24)
+        .transition(.opacity.combined(with: .move(edge: .bottom)))
+        .animation(.easeInOut(duration: 0.3), value: viewModel.isTranscribing)
+        .animation(.easeInOut(duration: 0.3), value: viewModel.speechSuccess)
+    }
+
+    // MARK: - Bottom Info Area
 
     var bottomInfoArea: some View {
         VStack(spacing: 8) {
-            Text("Video")
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundColor(.white)
-
             Group {
                 if let error = viewModel.errorMessage {
                     Text(error)
                         .foregroundColor(Color(red: 1, green: 0.45, blue: 0.45))
+                        .multilineTextAlignment(.center)
                 } else if camera.isRecording {
-                    Text("Kaydediliyor...")
+                    Text(viewModel.readingText != nil
+                         ? "Kaydediliyor — cümleyi okuyun..."
+                         : "Kaydediliyor...")
                         .foregroundColor(.white.opacity(0.9))
                 } else if viewModel.videoURL != nil {
-                    Text("Video kaydedildi. Devam etmek için onaylayın\nveya tekrar çekin.")
-                        .foregroundColor(.white.opacity(0.85))
-                        .multilineTextAlignment(.center)
+                    if viewModel.readingText != nil {
+                        if viewModel.isTranscribing {
+                            Text("Video kaydedildi. Ses doğrulanıyor...")
+                                .foregroundColor(.white.opacity(0.85))
+                        } else if viewModel.speechSuccess {
+                            Text("Doğrulama başarılı. Devam etmek için onaylayın.")
+                                .foregroundColor(Color(red: 0.3, green: 0.85, blue: 0.5))
+                        } else {
+                            Text("Cümleyi okurken yeniden çekin.")
+                                .foregroundColor(.white.opacity(0.85))
+                        }
+                    } else {
+                        Text("Video kaydedildi. Devam etmek için onaylayın\nveya tekrar çekin.")
+                            .foregroundColor(.white.opacity(0.85))
+                            .multilineTextAlignment(.center)
+                    }
                 } else {
-                    Text("En fazla \(Int(viewModel.videoTimeLimit)) saniye uzunluğunda olacak\nbir video çekerek devam edin.")
+                    Text(viewModel.readingText != nil
+                         ? ""
+                         : "En fazla \(Int(viewModel.videoTimeLimit)) saniye uzunluğunda olacak\nbir video çekerek devam edin.")
                         .foregroundColor(.white.opacity(0.7))
                         .multilineTextAlignment(.center)
                 }
             }
             .font(.system(size: 14, weight: .regular))
+            .multilineTextAlignment(.center)
             .transition(.opacity)
             .animation(.easeInOut(duration: 0.3), value: viewModel.errorMessage)
             .animation(.easeInOut(duration: 0.3), value: camera.isRecording)
             .animation(.easeInOut(duration: 0.3), value: viewModel.videoURL != nil)
+            .animation(.easeInOut(duration: 0.3), value: viewModel.speechSuccess)
         }
         .padding(.horizontal, 32)
     }
+
+    // MARK: - Action Buttons
 
     var actionButtons: some View {
         Group {
             if viewModel.videoURL != nil {
                 // Recorded: yeniden çek | onayla | play/pause
+                let readingRequired = viewModel.readingText != nil
+                let confirmActive = !viewModel.isLoading &&
+                    (!readingRequired || (!viewModel.isTranscribing && viewModel.speechSuccess))
                 HStack(spacing: 24) {
                     VideoCircleActionButton(
                         icon: AnyView(
@@ -179,14 +310,16 @@ private extension VideoRecorderView {
                         icon: AnyView(
                             Image(systemName: "checkmark")
                                 .font(.system(size: 22, weight: .bold))
-                                .foregroundColor(.white)
+                                .foregroundColor(confirmActive ? .white : Color.white.opacity(0.4))
                         ),
-                        background: Color(red: 0.24, green: 0.52, blue: 0.98),
+                        background: confirmActive
+                            ? Color(red: 0.24, green: 0.52, blue: 0.98)
+                            : Color.white.opacity(0.15),
                         size: 72
                     ) {
                         viewModel.uploadVideo(appState: appState)
                     }
-                    .disabled(viewModel.isLoading)
+                    .disabled(!confirmActive)
 
                     VideoCircleActionButton(
                         icon: AnyView(
@@ -202,7 +335,6 @@ private extension VideoRecorderView {
                             player?.pause()
                             isVideoPlaying = false
                         } else {
-                            // Her zaman baştan oynat
                             player?.seek(to: .zero)
                             player?.play()
                             isVideoPlaying = true
@@ -236,7 +368,11 @@ private extension VideoRecorderView {
         .animation(.spring(response: 0.4, dampingFraction: 0.7), value: viewModel.videoURL != nil)
         .animation(.spring(response: 0.4, dampingFraction: 0.7), value: camera.isRecording)
         .animation(.easeInOut(duration: 0.2), value: isVideoPlaying)
+        .animation(.easeInOut(duration: 0.2), value: viewModel.speechSuccess)
+        .animation(.easeInOut(duration: 0.2), value: viewModel.isTranscribing)
     }
+
+    // MARK: - Loading Overlay
 
     var loadingOverlay: some View {
         ZStack {
@@ -272,26 +408,6 @@ private struct VideoPlayerView: UIViewRepresentable {
     }
 }
 
-// MARK: - VideoCircleIconButton
-
-private struct VideoCircleIconButton: View {
-    let systemName: String
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            ZStack {
-                Circle()
-                    .fill(Color.white.opacity(0.15))
-                    .frame(width: 40, height: 40)
-                Image(systemName: systemName)
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.white)
-            }
-        }
-    }
-}
-
 // MARK: - VideoCircleActionButton
 
 private struct VideoCircleActionButton: View {
@@ -314,7 +430,14 @@ private struct VideoCircleActionButton: View {
 
 // MARK: - Previews
 
-#Preview("Kamera Aktif") {
+/// Okuma testi yok — sunucudan reading_text gelmediği durum (eski normal akış)
+#Preview("Okuma Testi Yok") {
     VideoRecorderView()
+        .environmentObject(AppStateViewModel())
+}
+
+/// Okuma testi aktif — sunucudan reading_text geldiği durum
+#Preview("Okuma Testi Aktif") {
+    VideoRecorderView(readingText: "İstanbul'da mutlu bir kış akşamı")
         .environmentObject(AppStateViewModel())
 }
