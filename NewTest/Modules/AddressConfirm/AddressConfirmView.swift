@@ -20,7 +20,7 @@ struct AddressConfirmView: View {
             (colorScheme == .dark ? IDColor.darkBg : IDColor.primary).ignoresSafeArea()
             VStack(spacing: 0) {
                 SDKNavigationBar(
-                    style: .progress(steps: 4, current: 3),
+                    style: .progress(steps: appState.progressTotal, current: appState.progressStep),
                     title: "Adres Doğrulama",
                     subtitle: "Adresinizi doğrulamamıza yardımcı olun",
                     onBack: { coordinator.pop() }

@@ -40,6 +40,7 @@ struct LoginView: View {
     @State private var showHamburgerMenu = false
     @State private var showLangPicker = false
     @State private var pendingNavigation: HamburgerMenuItem? = nil
+    @State private var pendingConnect = false
 
     var body: some View {
         ZStack {
@@ -117,7 +118,15 @@ struct LoginView: View {
                 OptionsBottomSheet(viewModel: viewModel)
             }
         }
-        .sheet(isPresented: $showServerList, onDismiss: { viewModel.loadSavedServers() }) {
+        .sheet(isPresented: $showServerList, onDismiss: {
+            viewModel.loadSavedServers()
+            if pendingConnect {
+                pendingConnect = false
+                if viewModel.hasUserSelectedServer {
+                    viewModel.connect(appState: appState)
+                }
+            }
+        }) {
             ServerListView(viewModel: viewModel)
         }
         .sheet(isPresented: $showModuleList) {
@@ -200,6 +209,11 @@ struct LoginView: View {
     }
 
     private func connect() {
+        guard viewModel.hasUserSelectedServer else {
+            pendingConnect = true
+            showServerList = true
+            return
+        }
         viewModel.connect(appState: appState)
     }
 }
@@ -401,6 +415,17 @@ private struct IdentIdFormView: View {
     var body: some View {
         HStack(spacing: IDSpacing.sm) {
             StyledTextField(placeholder: "Ident ID", text: $identId)
+                .overlay(alignment: .trailing) {
+                    if !identId.isEmpty {
+                        Button { identId = "" } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.system(size: 16))
+                                .foregroundColor(IDColor.inkLight)
+                                .padding(.trailing, IDSpacing.md)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
 
             Button {
                 if let copied = UIPasteboard.general.string {

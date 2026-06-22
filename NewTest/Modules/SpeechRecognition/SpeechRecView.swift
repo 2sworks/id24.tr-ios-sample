@@ -19,7 +19,7 @@ struct SpeechRecView: View {
             (colorScheme == .dark ? IDColor.darkBg : IDColor.primary).ignoresSafeArea()
             VStack(spacing: 10) {
                 SDKNavigationBar(
-                    style: .progress(steps: 4, current: 3),
+                    style: .progress(steps: appState.progressTotal, current: appState.progressStep),
                     title: "Konuşma Testi",
                     subtitle: "İmzanızı doğrulamamıza yardımcı olun",
                     onBack: {}

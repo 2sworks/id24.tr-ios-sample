@@ -4,31 +4,6 @@
 //
 //  Canlılık testi ekranı.
 //
-//  --- KULLANIM REHBERİ ---
-//
-//  ADIM:
-//    viewModel.stepInstruction       -> kullanıcıya gösterilen talimat
-//    viewModel.currentStep           -> mevcut LivenessTestStep
-//    viewModel.allStepsCompleted     -> tüm adımlar bitti
-//
-//  BAYRAKLAR (ARSCNViewDelegate için):
-//    viewModel.allowBlink            -> kırpma adımı aktif mi
-//    viewModel.allowSmile            -> gülme adımı aktif mi
-//    viewModel.allowLeft / .allowRight -> baş dönme adımları
-//
-//  İŞLEMLER:
-//    viewModel.uploadFrame(image:appState:)      -> yakalanan frame'i gönder
-//    viewModel.uploadVideo(videoData:appState:)  -> video yükle + sonrakine geç
-//    viewModel.resetTest()                       -> testi sıfırla
-//
-//  VİDEO:
-//    viewModel.isRecordingEnabled    -> video kayıt aktif mi
-//    viewModel.maxVideoSize          -> max boyut (byte)
-//
-//  DURUM:
-//    viewModel.isLoading             -> yükleme devam ediyor
-//    viewModel.errorMessage          -> hata
-//
 
 import SwiftUI
 import ARKit

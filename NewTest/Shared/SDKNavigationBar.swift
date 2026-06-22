@@ -178,46 +178,46 @@ struct SDKNavigationBar: View {
     }
 
     // MARK: - Overlay Layout
-    // Black → clear top gradient | ← back | logo | help?
 
     private var overlayLayout: some View {
-        LinearGradient(
-            colors: [.black.opacity(0.72), .black.opacity(0)],
-            startPoint: .top,
-            endPoint: .bottom
-        )
-        .frame(height: 130)
-        .overlay(alignment: .top) {
-            HStack {
+        HStack {
+            circleButton(
+                systemName: "chevron.left",
+                tint: .white,
+                fill: Color.white.opacity(0.15),
+                border: Color.white.opacity(0.2)
+            ) { onBack?() }
+
+            Spacer()
+
+            Image(.icIdentifyLogoText)
+                .renderingMode(.template)
+                .foregroundColor(.white)
+
+            Spacer()
+
+            if let onHelp {
                 circleButton(
-                    systemName: "chevron.left",
+                    systemName: "questionmark",
                     tint: .white,
                     fill: Color.white.opacity(0.15),
                     border: Color.white.opacity(0.2)
-                ) { onBack?() }
-
-                Spacer()
-
-                Image(.icIdentifyLogoText)
-                    .renderingMode(.template)
-                    .foregroundColor(.white)
-
-                Spacer()
-
-                if let onHelp {
-                    circleButton(
-                        systemName: "questionmark",
-                        tint: .white,
-                        fill: Color.white.opacity(0.15),
-                        border: Color.white.opacity(0.2)
-                    ) { onHelp() }
-                } else {
-                    Color.clear.frame(width: 36, height: 36)
-                }
+                ) { onHelp() }
+            } else {
+                Color.clear.frame(width: 36, height: 36)
             }
-            .frame(height: 56)
-            .padding(.horizontal, IDSpacing.lg)
-            .padding(.top, IDSpacing.sm)
+        }
+        .frame(height: 56)
+        .padding(.horizontal, IDSpacing.lg)
+        .padding(.top, IDSpacing.sm)
+        .background(alignment: .top) {
+            LinearGradient(
+                colors: [.black.opacity(0.72), .black.opacity(0)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .frame(height: 130)
+            .ignoresSafeArea(edges: .top)
         }
     }
 

@@ -12,6 +12,7 @@ struct IdCardView: View {
 
     @StateObject private var viewModel = IdCardViewModel()
     @EnvironmentObject private var coordinator: AppNavigationCoordinator
+    @EnvironmentObject private var appState: AppStateViewModel
     @Environment(\.colorScheme) private var colorScheme
 
     @State private var selectedCardType: CardType = .idCard
@@ -21,9 +22,10 @@ struct IdCardView: View {
             (colorScheme == .dark ? IDColor.darkBg : IDColor.primary).ignoresSafeArea()
             VStack(spacing: 0) {
                 SDKNavigationBar(
-                    style: .progress(steps: 4, current: 2),
+                    style: .progress(steps: appState.progressTotal, current: appState.progressStep),
                     title: "Kimlik Doğrulama",
-                    subtitle: "Lütfen bir yöntem seçerek devam edin"
+                    subtitle: "Lütfen bir yöntem seçerek devam edin",
+                    onBack: { appState.popBack() }
                 )
                 .padding(.top, IDSpacing.sm)
                 cardArea

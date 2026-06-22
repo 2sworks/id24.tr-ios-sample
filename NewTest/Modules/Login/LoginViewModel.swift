@@ -70,6 +70,11 @@ final class LoginViewModel: BaseModuleViewModel {
         static let selectedServerApiUrl = "selected_server_api_url"
         static let selectedServerWsUrl  = "selected_server_ws_url"
         static let selectedSDKLang      = "selected_sdk_lang"
+        static let lastIdentId          = "last_ident_id"
+    }
+
+    var hasUserSelectedServer: Bool {
+        UserDefaults.standard.string(forKey: UDKey.selectedServerTitle) != nil
     }
 
     // MARK: - Init
@@ -80,6 +85,7 @@ final class LoginViewModel: BaseModuleViewModel {
         super.init()
         selectedSDKLang = savedLang
         manager.setSDKLang(lang: savedLang)
+        identId = UserDefaults.standard.string(forKey: UDKey.lastIdentId) ?? ""
         checkJailbreak()
         loadSavedServers()
         loadSelectedServer()
@@ -160,6 +166,7 @@ final class LoginViewModel: BaseModuleViewModel {
     // MARK: - Connect
 
     func connect(appState: AppStateViewModel) {
+        UserDefaults.standard.set(identId, forKey: UDKey.lastIdentId)
         appState.setupSDK(
             identId: resolveIdentId(),
             apiUrl: selectedServer.apiUrl,

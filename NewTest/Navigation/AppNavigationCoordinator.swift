@@ -32,7 +32,11 @@ final class AppNavigationCoordinator: ObservableObject {
     }
 
     func popToRoot() {
-        path.removeAll()
+        var t = Transaction()
+        t.disablesAnimations = true
+        withTransaction(t) {
+            path.removeAll()
+        }
     }
 }
 

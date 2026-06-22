@@ -35,10 +35,10 @@ struct PrepareView: View {
             (colorScheme == .dark ? IDColor.darkBg : IDColor.primary).ignoresSafeArea()
             VStack(spacing: 0) {
                 SDKNavigationBar(
-                    style: .progress(steps: 4, current: 2),
+                    style: .progress(steps: appState.progressTotal, current: appState.progressStep),
                     title: "Kimlik Doğrulama",
                     subtitle: "Test etmek istediğiniz ortamı seçin",
-                    onBack: {}
+                    onBack: { appState.popBack() }
                 )
 
                 if viewModel.isLoading {

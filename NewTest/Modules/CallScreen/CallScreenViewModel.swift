@@ -272,15 +272,24 @@ extension CallScreenViewModel: SDKSocketListener {
             switch message {
 
             case .incomingCall:
-                callState = .ringing
+                if manager.hideCallAnswerScreen {
+                    acceptCall()
+                } else {
+                    callState = .ringing
+                }
 
             case .comingSms:
                 callState = .smsVerification
 
             case .startTransfer:
-                // SDP answer alındı; kameralar artık hazır, loader kapat ve connected'a geç.
-                isLoading = false
-                callState = .connected
+                // SDP answer alındı; 0.4s bekleyip kameraları göster (UIKit parity — RTCEAGLVideoView frame hesabının tamamlanması için gerekli).
+                Task {
+                    try? await Task.sleep(nanoseconds: 400_000_000)
+                    await MainActor.run {
+                        self.isLoading = false
+                        self.callState = .connected
+                    }
+                }
 
             case .endCall:
                 callState = .ended

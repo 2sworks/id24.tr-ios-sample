@@ -24,6 +24,10 @@ final class AppStateViewModel: ObservableObject {
     /// Odada başka bir abone varsa true olur; modül geçişini engeller
     @Published private(set) var subRejected: Bool = false
 
+    /// Progress bar için: geçerli adım ve toplam modül sayısı
+    @Published private(set) var progressStep: Int = 0
+    @Published private(set) var progressTotal: Int = 0
+
     // MARK: - Internal
 
     /// CallScreen'den taşınan ThankYou durumu; advanceToNextModule tüketir.
@@ -141,6 +145,8 @@ final class AppStateViewModel: ObservableObject {
             guard let self else { return }
             Task { @MainActor in
                 self.manager.moduleStepOrder += 1
+                self.progressStep = self.manager.moduleStepOrder
+                self.progressTotal = self.manager.modulesControllersArray.count
                 if let module = self.sdkModule(for: nextVC) {
                     self.activeModule = module
                     self.coordinator?.push(module.navigationFlow)
@@ -172,10 +178,15 @@ final class AppStateViewModel: ObservableObject {
     }
 
     func resetFlow() {
-        activeModule = nil
-        sdkError = nil
-        isLoading = false
         coordinator?.popToRoot()
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 350_000_000)
+            activeModule = nil
+            sdkError = nil
+            isLoading = false
+            progressStep = 0
+            progressTotal = 0
+        }
     }
 
     // MARK: - Private

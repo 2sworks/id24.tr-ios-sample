@@ -92,8 +92,7 @@ final class LivenessViewModel: BaseModuleViewModel {
                 if resp.result == true {
                     self.fetchNextStep()
                 } else {
-                    self.errorMessage = "Adim basarisiz, yeniden denenecek"
-                    self.manager.resetLivenessTest()
+                    self.errorMessage = resp.messages?.first ?? "Adım başarısız, yeniden dene"
                     self.fetchNextStep()
                 }
             }

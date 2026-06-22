@@ -49,6 +49,7 @@ struct CallScreenView: View {
             .animation(.easeInOut(duration: 0.3), value: viewModel.callState)
 
             errorToast
+            photoTakenBanner
         }
         .onAppear {
             appState.manager.socketMessageListener = viewModel
@@ -73,7 +74,6 @@ struct CallScreenView: View {
         } message: {
             Text("Görüşmeyi kapatırsanız tüm işlemler iptal edilecektir.")
         }
-        .successBanner(viewModel.photoTakenToast ?? "", isVisible: viewModel.photoTakenToast != nil)
         .sheet(isPresented: $viewModel.showNFCEdit) {
             CallNFCEditSheet(viewModel: viewModel)
         }
@@ -234,8 +234,13 @@ struct CallScreenView: View {
 
     private var connectedScreen: some View {
         ZStack(alignment: .top) {
-            VideoFeedRepresentable(videoView: viewModel.remoteVideoView)
-                .ignoresSafeArea()
+            Color.black.ignoresSafeArea()
+
+            GeometryReader { geo in
+                VideoFeedRepresentable(videoView: viewModel.remoteVideoView)
+                    .frame(width: geo.size.width, height: geo.size.height)
+            }
+            .ignoresSafeArea()
 
             LinearGradient(
                 colors: [Color.black.opacity(0.55), Color.clear],
@@ -481,6 +486,22 @@ struct CallScreenView: View {
             }
             .transition(.move(edge: .bottom).combined(with: .opacity))
             .animation(.spring(response: 0.4), value: viewModel.errorMessage)
+        }
+    }
+
+    // MARK: - Photo Taken Banner
+
+    @ViewBuilder
+    private var photoTakenBanner: some View {
+        if let msg = viewModel.photoTakenToast {
+            VStack {
+                IDSuccessBanner(message: msg)
+                    .padding(.horizontal, IDSpacing.lg)
+                    .padding(.top, IDSpacing.sm)
+                Spacer()
+            }
+            .transition(.move(edge: .top).combined(with: .opacity))
+            .animation(.spring(response: 0.4), value: viewModel.photoTakenToast)
         }
     }
 

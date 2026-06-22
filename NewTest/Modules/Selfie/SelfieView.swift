@@ -91,11 +91,15 @@ private extension SelfieView {
                 SelfieCameraPreview(session: camera.session)
                     .ignoresSafeArea()
             } else if let img = viewModel.selfieImage {
-                Image(uiImage: img)
-                    .resizable()
-                    .scaledToFill()
-                    .ignoresSafeArea()
-                    .overlay(Color.black.opacity(0.25))
+                GeometryReader { geo in
+                    Image(uiImage: img)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: geo.size.width, height: geo.size.height)
+                        .clipped()
+                }
+                .ignoresSafeArea()
+                .overlay(Color.black.opacity(0.25))
             } else {
                 Color(white: 0.12)
                     .ignoresSafeArea()

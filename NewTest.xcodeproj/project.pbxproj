@@ -113,6 +113,7 @@
 		8D0D25F82FE495E100DE3B73 /* ExternalScreen_KnowHow.md in Resources */ = {isa = PBXBuildFile; fileRef = 8D0D25F72FE495E100DE3B73 /* ExternalScreen_KnowHow.md */; };
 		8D16EAAA2FCEDC2F00C7152E /* IdCardScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D16EAA92FCEDC2F00C7152E /* IdCardScannerView.swift */; };
 		8D20F8C92FC8FE0F008F7DCF /* SDKDesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D20F8C82FC8FE0F008F7DCF /* SDKDesignTokens.swift */; };
+		8D4D64A52FE95A3200CFDCA2 /* IDAlertView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D4D64A42FE95A3200CFDCA2 /* IDAlertView.swift */; };
 		8D58B84A2FC9A2B900EC0A5F /* IDSuccessBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D58B8492FC9A2B900EC0A5F /* IDSuccessBanner.swift */; };
 		8D67E2732FE3EA1B00F01E9D /* VideoFeedRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D67E2722FE3EA1B00F01E9D /* VideoFeedRepresentable.swift */; };
 		8D8153CB2FE2152A0065BFE6 /* VideoCameraController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D8153CA2FE2152A0065BFE6 /* VideoCameraController.swift */; };
@@ -237,6 +238,7 @@
 		8D0D25F72FE495E100DE3B73 /* ExternalScreen_KnowHow.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ExternalScreen_KnowHow.md; sourceTree = "<group>"; };
 		8D16EAA92FCEDC2F00C7152E /* IdCardScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdCardScannerView.swift; sourceTree = "<group>"; };
 		8D20F8C82FC8FE0F008F7DCF /* SDKDesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKDesignTokens.swift; sourceTree = "<group>"; };
+		8D4D64A42FE95A3200CFDCA2 /* IDAlertView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IDAlertView.swift; sourceTree = "<group>"; };
 		8D58B8492FC9A2B900EC0A5F /* IDSuccessBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IDSuccessBanner.swift; sourceTree = "<group>"; };
 		8D67E2722FE3EA1B00F01E9D /* VideoFeedRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoFeedRepresentable.swift; sourceTree = "<group>"; };
 		8D8153CA2FE2152A0065BFE6 /* VideoCameraController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCameraController.swift; sourceTree = "<group>"; };
@@ -415,6 +417,7 @@
 			children = (
 				485C15382907D3CF007B9ED0 /* SDKViewOptionsController.swift */,
 				8D58B8492FC9A2B900EC0A5F /* IDSuccessBanner.swift */,
+				8D4D64A42FE95A3200CFDCA2 /* IDAlertView.swift */,
 			);
 			path = Base;
 			sourceTree = "<group>";
@@ -833,6 +836,7 @@
 				8AB276B72F749CEF00A764F1 /* SDKModuleHostView.swift in Sources */,
 				48BFE3CB2AEA994200980684 /* ExternalViewController.swift in Sources */,
 				8D67E2732FE3EA1B00F01E9D /* VideoFeedRepresentable.swift in Sources */,
+				8D4D64A52FE95A3200CFDCA2 /* IDAlertView.swift in Sources */,
 				8D91F2022FCE34D3000B56ED /* AppNavigationCoordinator.swift in Sources */,
 				48263C10292789C7005200A1 /* SDKThankYouViewController.swift in Sources */,
 				485C15622907F3A7007B9ED0 /* SDKCgRect+.swift in Sources */,
