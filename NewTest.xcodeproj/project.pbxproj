@@ -115,6 +115,7 @@
 		8D20F8C92FC8FE0F008F7DCF /* SDKDesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D20F8C82FC8FE0F008F7DCF /* SDKDesignTokens.swift */; };
 		8D4D64A52FE95A3200CFDCA2 /* IDAlertView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D4D64A42FE95A3200CFDCA2 /* IDAlertView.swift */; };
 		8D58B84A2FC9A2B900EC0A5F /* IDSuccessBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D58B8492FC9A2B900EC0A5F /* IDSuccessBanner.swift */; };
+		8D5999822FEB3E0A004EF1CF /* IdCardROIPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D5999812FEB3E0A004EF1CF /* IdCardROIPreview.swift */; };
 		8D67E2732FE3EA1B00F01E9D /* VideoFeedRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D67E2722FE3EA1B00F01E9D /* VideoFeedRepresentable.swift */; };
 		8D8153CB2FE2152A0065BFE6 /* VideoCameraController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D8153CA2FE2152A0065BFE6 /* VideoCameraController.swift */; };
 		8D91F2002FCE34C1000B56ED /* IdentifyNavigationFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D91F1FF2FCE34C1000B56ED /* IdentifyNavigationFlow.swift */; };
@@ -240,6 +241,7 @@
 		8D20F8C82FC8FE0F008F7DCF /* SDKDesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKDesignTokens.swift; sourceTree = "<group>"; };
 		8D4D64A42FE95A3200CFDCA2 /* IDAlertView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IDAlertView.swift; sourceTree = "<group>"; };
 		8D58B8492FC9A2B900EC0A5F /* IDSuccessBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IDSuccessBanner.swift; sourceTree = "<group>"; };
+		8D5999812FEB3E0A004EF1CF /* IdCardROIPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdCardROIPreview.swift; sourceTree = "<group>"; };
 		8D67E2722FE3EA1B00F01E9D /* VideoFeedRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoFeedRepresentable.swift; sourceTree = "<group>"; };
 		8D8153CA2FE2152A0065BFE6 /* VideoCameraController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCameraController.swift; sourceTree = "<group>"; };
 		8D91F1FF2FCE34C1000B56ED /* IdentifyNavigationFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifyNavigationFlow.swift; sourceTree = "<group>"; };
@@ -484,6 +486,7 @@
 				8AB276BE2F749D5100A764F1 /* IdCardViewModel.swift */,
 				8D16EAA92FCEDC2F00C7152E /* IdCardScannerView.swift */,
 				8D09EE4B2FE5FEE50060F313 /* IdCardScanningView.swift */,
+				8D5999812FEB3E0A004EF1CF /* IdCardROIPreview.swift */,
 			);
 			path = IdCard;
 			sourceTree = "<group>";
@@ -877,6 +880,7 @@
 				485C155E2907F3A7007B9ED0 /* SDKUIStackView+.swift in Sources */,
 				8AB276E52F749DA000A764F1 /* VideoRecorderView.swift in Sources */,
 				8AB276D12F749D5900A764F1 /* CallScreenViewModel.swift in Sources */,
+				8D5999822FEB3E0A004EF1CF /* IdCardROIPreview.swift in Sources */,
 				8AB276E72F749DA000A764F1 /* SpeechRecView.swift in Sources */,
 				485C15612907F3A7007B9ED0 /* SDKUIView+.swift in Sources */,
 				8AB276DF2F749D9C00A764F1 /* LivenessView.swift in Sources */,
