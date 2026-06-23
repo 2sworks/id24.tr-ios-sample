@@ -81,7 +81,7 @@ struct CallScreenView: View {
                         }
                     ),
                     IDAlertAction(
-                        title: "Vazgeç",
+                        title: "Bitir",
                         style: .destructive,
                         action: {
                             viewModel.terminateCall(appState: appState)
