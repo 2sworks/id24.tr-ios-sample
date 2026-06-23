@@ -142,7 +142,7 @@ private struct FullPagePreview: View {
 }
 
 #Preview("Sadece Ön Yüz") {
-    let img = UIImage(named: "realFront") ?? blankCard(color: .systemBlue)
+    let img = UIImage(named: "frontID") ?? blankCard(color: .systemBlue)
     return ZStack {
         Color(white: 0.12).ignoresSafeArea()
         ROICardPreview(image: img, profile: .turkishIDFront)
@@ -151,7 +151,7 @@ private struct FullPagePreview: View {
 }
 
 #Preview("Sadece Arka Yüz") {
-    let img = UIImage(named: "realBack") ?? blankCard(color: .systemGreen)
+    let img = UIImage(named: "backID") ?? blankCard(color: .systemGreen)
     return ZStack {
         Color(white: 0.12).ignoresSafeArea()
         ROICardPreview(image: img, profile: .turkishIDBack)
