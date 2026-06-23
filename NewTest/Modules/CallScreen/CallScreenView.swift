@@ -66,14 +66,30 @@ struct CallScreenView: View {
             appState.pendingThankYouStatus = status
             appState.advanceToNextModule()
         }
-        .alert("Görüşmeyi bitir", isPresented: $showEndCallAlert) {
-            Button("İptal", role: .cancel) {}
-            Button("Bitir", role: .destructive) {
-                viewModel.terminateCall(appState: appState)
-            }
-        } message: {
-            Text("Görüşmeyi kapatırsanız tüm işlemler iptal edilecektir.")
-        }
+        .sdkAlert(
+            isPresented: $showEndCallAlert,
+            alert: IDAlertModel(
+                type: .normal,
+                title: "Görüşmeyi bitir",
+                message: "",
+                actions: [
+                    IDAlertAction(
+                        title: "Vazgeç",
+                        style: .cancel,
+                        action: {
+                            showEndCallAlert = false
+                        }
+                    ),
+                    IDAlertAction(
+                        title: "Vazgeç",
+                        style: .destructive,
+                        action: {
+                            viewModel.terminateCall(appState: appState)
+                        }
+                    ),
+                ]
+            )
+        )
         .sheet(isPresented: $viewModel.showNFCEdit) {
             CallNFCEditSheet(viewModel: viewModel)
         }

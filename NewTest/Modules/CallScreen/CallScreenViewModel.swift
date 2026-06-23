@@ -145,8 +145,11 @@ final class CallScreenViewModel: BaseModuleViewModel {
             Task { @MainActor in
                 guard let self else { return }
                 self.callState = .ended
-                appState.pendingThankYouStatus = .notCompleted
-                appState.advanceToNextModule()
+                if appState.manager.modulesControllersArray.count <= 1 {
+                    appState.pushThankYouDirectly(status: .notCompleted)
+                } else {
+                    appState.pendingThankYouStatus = .notCompleted
+                }
             }
         }
     }

@@ -222,6 +222,14 @@ extension View {
     func sdkAlert(item: Binding<IDAlertModel?>) -> some View {
         modifier(IDAlertModifier(item: item))
     }
+
+    func sdkAlert(isPresented: Binding<Bool>, alert: IDAlertModel) -> some View {
+        let binding = Binding<IDAlertModel?>(
+            get: { isPresented.wrappedValue ? alert : nil },
+            set: { isPresented.wrappedValue = $0 != nil }
+        )
+        return modifier(IDAlertModifier(item: binding))
+    }
 }
 
 // MARK: - Preview

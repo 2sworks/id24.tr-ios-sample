@@ -164,6 +164,10 @@ final class AppStateViewModel: ObservableObject {
     }
 
     func popBack() {
+        if coordinator?.path.count == 1 {
+            manager.exitSDK()
+            subscribeToModulePublisher()
+        }
         coordinator?.pop()
     }
 
@@ -178,6 +182,7 @@ final class AppStateViewModel: ObservableObject {
     }
 
     func resetFlow() {
+        subscribeToModulePublisher()
         coordinator?.popToRoot()
         Task { @MainActor in
             try? await Task.sleep(nanoseconds: 350_000_000)
@@ -187,6 +192,14 @@ final class AppStateViewModel: ObservableObject {
             progressStep = 0
             progressTotal = 0
         }
+    }
+
+    /// CallScreen tek modül senaryosunda terminateCall sonrası doğrudan ThankYou'ya yönlendirir.
+    /// advanceToNextModule()'u bypass eder; SDK state'i bozulmamış olsa bile güvenli çalışır.
+    func pushThankYouDirectly(status: ThankYouStatus) {
+        pendingThankYouStatus = status
+        coordinator?.push(.thankYou(status))
+        pendingThankYouStatus = .completed
     }
 
     // MARK: - Private
