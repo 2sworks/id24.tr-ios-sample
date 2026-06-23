@@ -229,6 +229,7 @@ extension SDKCallScreenViewController: SDKSocketListener {
             print("sms geliyor")
         case .endCall:
             stopLiveness()
+            self.listenToSocketConnection(callCompleted: true)
             manager.socket.disconnect()
             print("görüşme tamamlandı, sonraki modüle geçebiliriz")
             
