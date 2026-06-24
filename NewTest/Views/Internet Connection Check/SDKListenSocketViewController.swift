@@ -16,7 +16,9 @@ class SDKListenSocketViewController: SDKBaseViewController {
 
     @IBOutlet weak var reConnectBtn: UIButton!
     weak var delegate: SDKNoConnectionDelegate?
-    
+
+    private var isReconnecting = false
+
     override func viewDidLoad() {
         super.viewDidLoad()
         self.setupUI()
@@ -43,38 +45,41 @@ class SDKListenSocketViewController: SDKBaseViewController {
     }
     
     @objc func tapButton() {
-        
+        // İkinci dokunuşu veya reachability kaynaklı paralel tetiklenmeyi engeller
+        guard !isReconnecting else { return }
+
+        isReconnecting = true
         reConnectBtn.setTitle(self.translate(text: .coreReconnecting), for: .normal)
         toggleButton(disabled: true)
+
         if manager.socket.isConnected {
+            // Bağlı ama cevap vermiyorsa önce kes, 3s sonra yeniden bağlan.
+            // Bu süre boyunca isReconnecting = true olduğu için tekrar tetiklenemez.
             manager.socket.disconnect()
-            reConnectBtn.setTitle("*****", for: .normal)
             DispatchQueue.main.asyncAfter(deadline: .now() + 3, execute: {
                 self.reconnectSocket()
             })
-            
         } else {
             reconnectSocket()
         }
-        
-        
     }
-    
+
     func reconnectSocket() {
-        
         self.manager.reconnectToSocket(callback: { [weak self] socket in
             guard let self = self else { return }
+            // Callback dönünce (başarılı veya başarısız) flag'i serbest bırak
+            self.isReconnecting = false
             if socket.isConnected {
-                reConnectBtn.setTitle("!!!!!!", for: .normal)
                 self.delegate?.reconnectCompleted()
                 print("tekrar bağlantı kuruldu")
                 self.dismiss(animated: true)
             } else {
+                // Bağlantı kurulamadıysa butonu tekrar aktif et, kullanıcı tekrar deneyebilir
                 self.toggleButton(disabled: false)
-                reConnectBtn.setTitle("#####", for: .normal)
             }
         }, statusCallback: { [weak self] statusSummary in
             guard let self = self else { return }
+            // statusSummary.id == -3 → bekleme odasına dönülüyor
             let isWaitingRoom = statusSummary?.id == -3
             DispatchQueue.main.async {
                 self.delegate?.reconnectCompletedWithStatus(isWaitingRoom: isWaitingRoom, statusType: statusSummary?.type)
@@ -101,13 +106,15 @@ class SDKListenSocketViewController: SDKBaseViewController {
         DispatchQueue.main.async { [weak self] in
             switch reachability.connection {
             case .wifi, .cellular:
-                // Network available; enable reconnect
+                // İnternet geri geldi; ama reconnect zaten devam ediyorsa butonu
+                // açma — aksi takdirde kullanıcı tekrar tıklayıp çift girişim olur.
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
+                    guard self?.isReconnecting == false else { return }
                     self?.reConnectBtn.setTitle(self?.translate(text: .coreReConnect), for: .normal)
                     self?.toggleButton(disabled: false)
                 })
             case .unavailable:
-                // No network; disable reconnect
+                // İnternet yokken butonu devre dışı bırak
                 self?.reConnectBtn.setTitle(self?.translate(text: .coreNoInternet), for: .normal)
                 self?.toggleButton(disabled: true)
             }

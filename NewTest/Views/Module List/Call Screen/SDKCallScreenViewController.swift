@@ -248,30 +248,36 @@ extension SDKCallScreenViewController: SDKSocketListener {
             print("terminateCall: (terminateReason=\(terminateReason ?? "-"), statusSummaryType=\(statusSummaryType ?? "-"))")
             
             isTerminating = true
-            
+
             if terminateReason == "TURN_DISCONNECTED" {
                 reconnect()
+            } else if terminateReason == "CLIENT_IS_DISCONNECTED" {
+                if manager.socket.isConnected {
+                    isTerminating = false
+                } else {
+                    reconnect()
+                }
             } else {
-                
+
                 let hasStatus: Bool = {
                     guard let type = statusSummaryType else { return false }
                     return type == "positive" || type == "negative" || type == "neutral"
                 }()
-                
+
                 if hasStatus {
-                    
+
                     self.listenToSocketConnection(callCompleted: true)
                     self.setupCallScreen(inCall: false)
                     self.callIsDone(doneStatus: statusSummaryType == "positive" ? .completed : .notCompleted)
                     isTerminating = false
                     return
-                    
+
                 } else {
                     reconnect()
                 }
-                
+
             }
-            
+
             func reconnect() {
                 manager.socket.disconnect()
                 setupCallScreen(inCall: false) // kameraları kapatıp bekleme ekranı görüntüsünü aktif eder
