@@ -140,8 +140,8 @@ class SDKNewLivenessViewController: SDKBaseViewController {
     private func getNextTest() {
         manager.getNextLivenessTest { nextStep, completed in
             if completed ?? false {
-                self.nextStep = .completed
                 self.pauseSession()
+                self.nextStep = .completed
                 self.getNextModule()
             } else {
                 self.nextStep = nextStep

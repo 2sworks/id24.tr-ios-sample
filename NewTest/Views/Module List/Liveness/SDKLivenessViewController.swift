@@ -478,9 +478,9 @@ class SDKLivenessViewController: SDKBaseViewController {
     private func getNextTest() {
         manager.getNextLivenessTest { nextStep, completed in
             if completed ?? false {
-                self.nextStep = .completed
                 self.pauseSession()
-                
+                self.nextStep = .completed
+
                 if self.recordingIsEnabled {
                     self.stopAndUploadCapture()
                 } else {
