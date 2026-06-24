@@ -2,8 +2,6 @@
 //  PrepareView.swift
 //  NewTest
 //
-//  Hazirlik ekrani — iki state + dark mode + Inter font
-//
 
 import SwiftUI
 
@@ -25,9 +23,13 @@ struct PrepareView: View {
         viewModel.speedCheckDone && viewModel.connectionQuality == .good
     }
 
-    private var canProceedFull: Bool {
+    private var allChecklistSelected: Bool {
         viewModel.cameraAuthorized && viewModel.micAuthorized && viewModel.speechAuthorized
             && hasID && isAlone && hasGoodConditions
+    }
+
+    private var canProceedFull: Bool {
+        allChecklistSelected && !viewModel.isLoading
     }
 
     var body: some View {
@@ -40,32 +42,28 @@ struct PrepareView: View {
                     subtitle: "Test etmek istediğiniz ortamı seçin",
                     onBack: { appState.popBack() }
                 )
-
-                if viewModel.isLoading {
-                    HStack(spacing: 8) {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                            .scaleEffect(0.8)
-                        Text("Bağlantı hızı ölçülüyor...")
-                            .font(IDFont.caption(.regular))
-                            .foregroundColor(.white.opacity(0.85))
-                    }
-                    .padding(.bottom, IDSpacing.sm)
-                }
-
+                
                 cardArea
             }
         }
         .successBanner("Bağlantı için uygun internet hızına sahipsiniz.", isVisible: showSuccessBanner)
-        .alert("İzin Gerekli", isPresented: $viewModel.showSettingsAlert) {
-            Button("Ayarlar") { viewModel.settingsOpenAction?() }
-            Button("İptal", role: .cancel) {}
-        } message: {
-            Text(viewModel.settingsAlertMessage)
-        }
+        .sdkAlert(
+            isPresented: $viewModel.showSettingsAlert,
+            alert: IDAlertModel(
+                type: .info,
+                title: "İzin Gerekli",
+                message: viewModel.settingsAlertMessage,
+                actions: [
+                    IDAlertAction(title: "İptal", style: .cancel),
+                    IDAlertAction(title: "Ayarlar", style: .primary) {
+                        viewModel.settingsOpenAction?()
+                    }
+                ]
+            )
+        )
     }
 
-    // MARK: - Kart Alan
+    // MARK: Kart Alan
 
     private var cardArea: some View {
         VStack(spacing: 0) {
@@ -88,7 +86,7 @@ struct PrepareView: View {
         .ignoresSafeArea(edges: .bottom)
     }
 
-    // MARK: - Baslik
+    // MARK: Başlık
 
     private var titleSection: some View {
         VStack(alignment: .leading, spacing: IDSpacing.sm) {
@@ -107,7 +105,7 @@ struct PrepareView: View {
         }
     }
 
-    // MARK: - Izin Listesi
+    // MARK: İzin Listesi
 
     private var permissionList: some View {
         VStack(spacing: IDSpacing.sm) {
@@ -149,15 +147,31 @@ struct PrepareView: View {
         }
     }
 
-    // MARK: - Devam Butonu
+    // MARK: Devam Butonu
 
     private var continueButton: some View {
         SDKButton(
-            title: isSpeedTestDone ? "Devam Et" : "Bağlantı Kalitemi Ölç ve Devam Et",
+            title: viewModel.isLoading
+                ? ""
+                : (viewModel.needsSpeedTest && !isSpeedTestDone
+                    ? "Bağlantı Kalitemi Ölç ve Devam Et"
+                    : "Devam Et"),
+            isLoading: viewModel.isLoading,
             isDisabled: !canProceedFull
         ) {
-            viewModel.completePrepare(appState: appState)
+            handleContinue()
         }
+    }
+
+    // MARK: Akış
+
+    private func handleContinue() {
+        guard allChecklistSelected else { return }
+        if viewModel.needsSpeedTest && !isSpeedTestDone {
+            viewModel.startSpeedTest()
+            return
+        }
+        viewModel.completePrepare(appState: appState)
     }
 }
 

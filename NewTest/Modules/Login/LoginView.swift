@@ -96,14 +96,20 @@ struct LoginView: View {
                 ProgressView().scaleEffect(1.5).tint(.white)
             }
         }
-        .alert("Hata", isPresented: Binding(
-            get: { appState.sdkError != nil },
-            set: { if !$0 { appState.sdkError = nil } }
-        )) {
-            Button("Tamam") { appState.sdkError = nil }
-        } message: {
-            Text(appState.sdkError ?? "")
-        }
+        .sdkAlert(
+            isPresented: Binding(
+                get: { appState.sdkError != nil },
+                set: { if !$0 { appState.sdkError = nil } }
+            ),
+            alert: IDAlertModel(
+                type: .error,
+                title: "Hata",
+                message: appState.sdkError ?? "",
+                actions: [
+                    IDAlertAction(title: "Tamam", style: .primary)
+                ]
+            )
+        )
         .sheet(isPresented: $showOptions) {
             if #available(iOS 16.4, *) {
                 OptionsBottomSheet(viewModel: viewModel)

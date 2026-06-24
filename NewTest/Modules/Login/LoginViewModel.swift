@@ -199,6 +199,11 @@ final class LoginViewModel: BaseModuleViewModel {
             let apiUrl = ud.string(forKey: UDKey.selectedServerApiUrl),
             let wsUrl  = ud.string(forKey: UDKey.selectedServerWsUrl)
         else { return }
-        selectedServer = ServerOption(title: title, apiUrl: apiUrl, wsUrl: wsUrl)
+        // Match against serverList so the id stays consistent for selection highlighting
+        if let existing = serverList.first(where: { $0.apiUrl == apiUrl }) {
+            selectedServer = existing
+        } else {
+            selectedServer = ServerOption(title: title, apiUrl: apiUrl, wsUrl: wsUrl)
+        }
     }
 }

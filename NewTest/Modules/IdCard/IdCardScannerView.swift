@@ -26,12 +26,17 @@ struct IdCardScannerView: View {
     let side: IdCardSide
     @EnvironmentObject private var coordinator: AppNavigationCoordinator
 
+    @State private var isTorchOn = false
+    @State private var isTorchAvailable = false
+
     var body: some View {
-        ZStack(alignment: .topLeading) {
+        ZStack(alignment: .top) {
             IdentityScannerView(
                 profile: documentProfile,
                 style: quadStyle,
-                configuration: .default
+                configuration: .default,
+                externalTorchOn: $isTorchOn,
+                onTorchAvailability: { available in isTorchAvailable = available }
             ) { result in
                 switch result {
                 case .success(let doc):
@@ -42,12 +47,34 @@ struct IdCardScannerView: View {
             }
             .ignoresSafeArea()
 
-            closeButton
-                .padding(.leading, IDSpacing.lg)
-                .padding(.top, IDSpacing.lg)
+            SDKNavigationBar(
+                style: .overlay,
+                onBack: { cancel() },
+                trailing: isTorchAvailable ? AnyView(torchButton) : nil
+            )
         }
         .navigationBarHidden(true)
         .navigationBarBackButtonHidden(true)
+        .onDisappear {
+            coordinator.onScanComplete = nil
+        }
+    }
+
+    // MARK: - Torch Button
+
+    private var torchButton: some View {
+        Button { isTorchOn.toggle() } label: {
+            ZStack {
+                Circle()
+                    .fill(Color.white.opacity(0.15))
+                    .overlay(Circle().stroke(Color.white.opacity(0.2), lineWidth: 1))
+                Image(systemName: isTorchOn ? "bolt.fill" : "bolt.slash.fill")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.white)
+            }
+            .frame(width: 36, height: 36)
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Document Profile
@@ -86,15 +113,5 @@ struct IdCardScannerView: View {
         coordinator.pop()
     }
 
-    // MARK: - UI
-
-    private var closeButton: some View {
-        Button(action: cancel) {
-            Image(systemName: "chevron.left")
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(.white)
-                .frame(width: 40, height: 40)
-                .background(Circle().fill(Color.black.opacity(0.45)))
-        }
-    }
 }
+

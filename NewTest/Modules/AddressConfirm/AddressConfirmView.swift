@@ -14,6 +14,8 @@ struct AddressConfirmView: View {
     @EnvironmentObject private var coordinator: AppNavigationCoordinator
     @Environment(\.colorScheme) private var colorScheme
     @State private var showGallerySheet = false
+    @State private var isTorchOn = false
+    @State private var isTorchAvailable = false
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -46,7 +48,21 @@ struct AddressConfirmView: View {
                 showGallerySheet = false
             }
         }
-        .documentScanner(isPresented: $viewModel.showScanner, profile: .generic, style: scannerStyle, configuration: .document) { result in
+        .documentScanner(
+            isPresented: $viewModel.showScanner,
+            profile: .generic,
+            style: scannerStyle,
+            configuration: .document,
+            externalTorchOn: $isTorchOn,
+            onTorchAvailability: { available in isTorchAvailable = available },
+            navOverlay: {
+                SDKNavigationBar(
+                    style: .overlay,
+                    onBack: { viewModel.showScanner = false },
+                    trailing: isTorchAvailable ? AnyView(scannerTorchButton) : nil
+                )
+            }
+        ) { result in
             if case .success(let doc) = result {
                 viewModel.photoSelected(doc.croppedImage)
             }
@@ -244,6 +260,23 @@ struct AddressConfirmView: View {
             viewModel.submit(appState: appState)
         }
         .animation(.easeInOut(duration: 0.2), value: viewModel.canSubmit)
+    }
+
+    // MARK: - Scanner Torch Button
+
+    private var scannerTorchButton: some View {
+        Button { isTorchOn.toggle() } label: {
+            ZStack {
+                Circle()
+                    .fill(Color.white.opacity(0.15))
+                    .overlay(Circle().stroke(Color.white.opacity(0.2), lineWidth: 1))
+                Image(systemName: isTorchOn ? "bolt.fill" : "bolt.slash.fill")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.white)
+            }
+            .frame(width: 36, height: 36)
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Scanner Style

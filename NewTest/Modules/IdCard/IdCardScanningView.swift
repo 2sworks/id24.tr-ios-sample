@@ -40,14 +40,20 @@ struct IdCardScanningView: View {
                 ProgressView().tint(.white).scaleEffect(1.3)
             }
         }
-        .alert("Hata", isPresented: Binding(
-            get: { viewModel.errorMessage != nil },
-            set: { if !$0 { viewModel.errorMessage = nil } }
-        )) {
-            Button("Tamam", role: .cancel) { viewModel.errorMessage = nil }
-        } message: {
-            Text(viewModel.errorMessage ?? "")
-        }
+        .sdkAlert(
+            isPresented: Binding(
+                get: { viewModel.errorMessage != nil },
+                set: { if !$0 { viewModel.errorMessage = nil } }
+            ),
+            alert: IDAlertModel(
+                type: .error,
+                title: "Hata",
+                message: viewModel.errorMessage ?? "",
+                actions: [
+                    IDAlertAction(title: "Tamam", style: .cancel)
+                ]
+            )
+        )
         .onAppear {
             viewModel.selectCardType(cardType)
         }

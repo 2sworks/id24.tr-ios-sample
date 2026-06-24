@@ -196,7 +196,9 @@ struct SDKNavigationBar: View {
 
             Spacer()
 
-            if let onHelp {
+            if let trailing {
+                trailing
+            } else if let onHelp {
                 circleButton(
                     systemName: "questionmark",
                     tint: .white,

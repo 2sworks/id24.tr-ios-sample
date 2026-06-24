@@ -2,9 +2,6 @@
 //  PrepareViewModel.swift
 //  NewTest
 //
-//  Hazirlik ekrani - baglanti hizi, kamera/mikrofon/konusma izinleri.
-//  SDK: manager.startSpeedTest, manager.sendPreparetatus, manager.needSpeedTest
-//
 
 import Foundation
 import CameraPermission
@@ -16,7 +13,7 @@ import IdentifySDK
 @MainActor
 final class PrepareViewModel: BaseModuleViewModel {
 
-    // MARK: - Published State
+    // MARK: Published State
 
     @Published private(set) var speedCheckDone: Bool = false
     @Published private(set) var measuredSpeed: CGFloat = 0
@@ -33,23 +30,21 @@ final class PrepareViewModel: BaseModuleViewModel {
         cameraAuthorized && micAuthorized && speechAuthorized
     }
 
-    var canProceed: Bool {
-        allPermissionsGranted && (speedCheckDone || !(manager.needSpeedTest ?? false))
+    var needsSpeedTest: Bool {
+        manager.needSpeedTest == true
     }
 
-    // MARK: - Init
+    // MARK: Init
 
     override init() {
         super.init()
         refreshPermissionStatus()
-        if manager.needSpeedTest == true {
-            startSpeedTest()
-        } else {
+        if manager.needSpeedTest != true {
             speedCheckDone = true
         }
     }
 
-    // MARK: - Izin Kontrolleri
+    // MARK: İzin Kontrolleri
 
     private func refreshPermissionStatus() {
         cameraAuthorized = CameraPermission.camera.authorized
@@ -108,7 +103,7 @@ final class PrepareViewModel: BaseModuleViewModel {
         }
     }
 
-    // MARK: - Hiz Testi
+    // MARK: Hız Testi
 
     func startSpeedTest() {
         isLoading = true
@@ -123,11 +118,10 @@ final class PrepareViewModel: BaseModuleViewModel {
         }
     }
 
-    // MARK: - Hazirlik Tamamlama
+    // MARK: Hazırlık Tamamlama
 
     func completePrepare(appState: AppStateViewModel) {
         manager.sendPreparetatus(isCompleted: true)
         appState.advanceToNextModule()
     }
 }
-//
