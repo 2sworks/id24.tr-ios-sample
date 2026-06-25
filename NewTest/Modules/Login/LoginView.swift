@@ -171,7 +171,7 @@ struct LoginView: View {
                     pendingNavigation = item
                     showHamburgerMenu = false
                 }
-                .presentationDetents([.height(200)])
+                .presentationDetents([.height(280)])
                 .presentationDragIndicator(.visible)
                 .presentationBackground(.ultraThinMaterial)
             } else if #available(iOS 16.0, *) {
@@ -179,7 +179,7 @@ struct LoginView: View {
                     pendingNavigation = item
                     showHamburgerMenu = false
                 }
-                .presentationDetents([.height(200)])
+                .presentationDetents([.height(280)])
                 .presentationDragIndicator(.visible)
             } else {
                 HamburgerMenuSheet { item in
@@ -621,6 +621,7 @@ private struct ToggleOptionRow: View {
 
 private struct HamburgerMenuSheet: View {
     let onSelect: (HamburgerMenuItem) -> Void
+    @ObservedObject private var nfxState = NFXDebugState.shared
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
 
@@ -649,6 +650,11 @@ private struct HamburgerMenuSheet: View {
                 MenuOptionRow(icon: .init(.icBugBeetle), title: "Sunucu Ayarları") {
                     onSelect(.serverList)
                 }
+                MenuOptionRow(
+                    icon: Image(systemName: "ladybug.fill"),
+                    title: "Network Debug (Netfox)",
+                    isOn: $nfxState.isEnabled
+                )
             }
             .padding(.horizontal, IDSpacing.xl)
 
@@ -663,11 +669,29 @@ private struct HamburgerMenuSheet: View {
 private struct MenuOptionRow: View {
     let icon: Image
     let title: String
-    let onTap: () -> Void
+    private let isOn: Binding<Bool>?
+    private let onTap: (() -> Void)?
     @Environment(\.colorScheme) private var colorScheme
 
+    init(icon: Image, title: String, onTap: @escaping () -> Void) {
+        self.icon = icon
+        self.title = title
+        self.isOn = nil
+        self.onTap = onTap
+    }
+
+    init(icon: Image, title: String, isOn: Binding<Bool>) {
+        self.icon = icon
+        self.title = title
+        self.isOn = isOn
+        self.onTap = nil
+    }
+
     var body: some View {
-        Button(action: onTap) {
+        Button {
+            if let isOn { isOn.wrappedValue.toggle() }
+            else { onTap?() }
+        } label: {
             HStack(spacing: IDSpacing.md) {
                 icon
                     .font(.system(size: 18, weight: .regular))
@@ -677,9 +701,16 @@ private struct MenuOptionRow: View {
                     .font(IDFont.bodyRegular())
                     .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
                 Spacer()
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(IDColor.inkLight)
+                if let isOn {
+                    Toggle("", isOn: isOn)
+                        .labelsHidden()
+                        .tint(IDColor.primary)
+                        .allowsHitTesting(false)
+                } else {
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(IDColor.inkLight)
+                }
             }
             .padding(.horizontal, IDSpacing.lg)
             .padding(.vertical, IDSpacing.lg)

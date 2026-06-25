@@ -122,6 +122,8 @@
 		8D91F2022FCE34D3000B56ED /* AppNavigationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D91F2012FCE34D3000B56ED /* AppNavigationCoordinator.swift */; };
 		8D91F2042FCE34DB000B56ED /* IdentifyNavigationCoordinatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D91F2032FCE34DB000B56ED /* IdentifyNavigationCoordinatorView.swift */; };
 		8DB4B1892FE2E4FB00BA4C67 /* SwiftSignatureViewRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DB4B1882FE2E4FA00BA4C67 /* SwiftSignatureViewRepresentable.swift */; };
+		8DD4665F2FED275C00710491 /* SDKNetworkLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DD4665E2FED275C00710491 /* SDKNetworkLogger.swift */; };
+		8DD466612FED275D00710491 /* NetworkInspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DD466602FED275D00710491 /* NetworkInspectorView.swift */; };
 		8DDD39C62FE8A2A30078E962 /* SignLangRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DDD39C52FE8A2A30078E962 /* SignLangRepresentable.swift */; };
 		8DDD39C82FE8AEF10078E962 /* SignLangViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DDD39C72FE8AEF10078E962 /* SignLangViewModel.swift */; };
 		8DDD39CA2FE8AF000078E962 /* SignLangView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DDD39C92FE8AF000078E962 /* SignLangView.swift */; };
@@ -249,6 +251,8 @@
 		8D91F2032FCE34DB000B56ED /* IdentifyNavigationCoordinatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifyNavigationCoordinatorView.swift; sourceTree = "<group>"; };
 		8DB4B1882FE2E4FA00BA4C67 /* SwiftSignatureViewRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftSignatureViewRepresentable.swift; sourceTree = "<group>"; };
 		8DB74A792FCF9AAD00C204AA /* IdentifySDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = IdentifySDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		8DD4665E2FED275C00710491 /* SDKNetworkLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKNetworkLogger.swift; sourceTree = "<group>"; };
+		8DD466602FED275D00710491 /* NetworkInspectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkInspectorView.swift; sourceTree = "<group>"; };
 		8DDD39C52FE8A2A30078E962 /* SignLangRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignLangRepresentable.swift; sourceTree = "<group>"; };
 		8DDD39C72FE8AEF10078E962 /* SignLangViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignLangViewModel.swift; sourceTree = "<group>"; };
 		8DDD39C92FE8AF000078E962 /* SignLangView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignLangView.swift; sourceTree = "<group>"; };
@@ -356,6 +360,7 @@
 				8AB276B82F749D1900A764F1 /* AppStateViewModel.swift */,
 				8AB276B42F749CE100A764F1 /* BaseModuleViewModel.swift */,
 				8AB276B62F749CEF00A764F1 /* SDKModuleHostView.swift */,
+				8DD4665D2FED270000710491 /* Debug */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -676,6 +681,15 @@
 			path = Fonts;
 			sourceTree = "<group>";
 		};
+		8DD4665D2FED270000710491 /* Debug */ = {
+			isa = PBXGroup;
+			children = (
+				8DD4665E2FED275C00710491 /* SDKNetworkLogger.swift */,
+				8DD466602FED275D00710491 /* NetworkInspectorView.swift */,
+			);
+			path = Debug;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -810,6 +824,7 @@
 				4881A7FF29238CB400EB4072 /* SDKAddressConfirmViewController.swift in Sources */,
 				8AB276B92F749D1900A764F1 /* AppStateViewModel.swift in Sources */,
 				8AB276C12F749D5200A764F1 /* OVDViewModel.swift in Sources */,
+				8DD4665F2FED275C00710491 /* SDKNetworkLogger.swift in Sources */,
 				485C155C2907F3A7007B9ED0 /* SDKBundle+.swift in Sources */,
 				8AB276F12F749DC600A764F1 /* IdentifySwiftUIApp.swift in Sources */,
 				8D0D25F62FE4958B00DE3B73 /* ExternalView.swift in Sources */,
@@ -883,6 +898,7 @@
 				8D5999822FEB3E0A004EF1CF /* IdCardROIPreview.swift in Sources */,
 				8AB276E72F749DA000A764F1 /* SpeechRecView.swift in Sources */,
 				485C15612907F3A7007B9ED0 /* SDKUIView+.swift in Sources */,
+				8DD466612FED275D00710491 /* NetworkInspectorView.swift in Sources */,
 				8AB276DF2F749D9C00A764F1 /* LivenessView.swift in Sources */,
 				8AB276C92F749D5300A764F1 /* SignatureViewModel.swift in Sources */,
 				8AB276DB2F749D9900A764F1 /* OVDView.swift in Sources */,

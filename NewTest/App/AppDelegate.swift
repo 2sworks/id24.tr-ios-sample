@@ -23,6 +23,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         IQKeyboardManager.shared.enableAutoToolbar = true
         SDKReachabilityHelper.shared.observeReachability()
         NFX.sharedInstance().start()
+        NotificationCenter.default.addObserver(forName: .sdkNetworkDebugShake, object: nil, queue: .main) { _ in
+            NFX.sharedInstance().show()
+        }
         startSwiftUIScreen()
         return true
     }
@@ -30,7 +33,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // MARK: - SwiftUI Entry Point
 
     func startSwiftUIScreen() {
-        self.window = UIWindow(frame: UIScreen.main.bounds)
+        self.window = SDKWindow(frame: UIScreen.main.bounds)
         // Coordinator + AppState IdentifyNavigationCoordinatorView içinde @StateObject olarak yaşar.
         let rootView = IdentifyNavigationCoordinatorView()
         let hostingVC = UIHostingController(rootView: rootView)
