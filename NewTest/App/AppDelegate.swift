@@ -21,7 +21,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         UIApplication.shared.isIdleTimerDisabled = true
         IQKeyboardManager.shared.enable = true
         IQKeyboardManager.shared.enableAutoToolbar = true
-        SDKReachabilityHelper.shared.observeReachability()
         NFX.sharedInstance().start()
         NotificationCenter.default.addObserver(forName: .sdkNetworkDebugShake, object: nil, queue: .main) { _ in
             NFX.sharedInstance().show()
@@ -34,9 +33,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func startSwiftUIScreen() {
         self.window = SDKWindow(frame: UIScreen.main.bounds)
-        // Coordinator + AppState IdentifyNavigationCoordinatorView içinde @StateObject olarak yaşar.
-        let rootView = IdentifyNavigationCoordinatorView()
-        let hostingVC = UIHostingController(rootView: rootView)
+        // Tüm akış SDK'dan gelir: SDKFlowHostView(coordinator:registry:) { LoginView() }
+        let hostingVC = UIHostingController(rootView: RootView())
         self.window?.rootViewController = hostingVC
         self.window?.makeKeyAndVisible()
     }

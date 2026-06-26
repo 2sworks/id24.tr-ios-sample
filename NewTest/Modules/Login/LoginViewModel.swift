@@ -20,7 +20,13 @@ struct ServerOption: Identifiable, Hashable {
 // MARK: - LoginViewModel
 
 @MainActor
-final class LoginViewModel: BaseModuleViewModel {
+final class LoginViewModel: ObservableObject {
+
+    // MARK: - Base (eski BaseModuleViewModel'den inline)
+
+    @Published var isLoading: Bool = false
+    @Published var errorMessage: String? = nil
+    let manager = IdentifyManager.shared
 
     // MARK: - Ident ID
 
@@ -79,10 +85,9 @@ final class LoginViewModel: BaseModuleViewModel {
 
     // MARK: - Init
 
-    override init() {
+    init() {
         let savedLangRaw = UserDefaults.standard.string(forKey: UDKey.selectedSDKLang)
         let savedLang = savedLangRaw.flatMap(SDKLang.init) ?? .tr
-        super.init()
         selectedSDKLang = savedLang
         manager.setSDKLang(lang: savedLang)
         identId = UserDefaults.standard.string(forKey: UDKey.lastIdentId) ?? ""
@@ -96,7 +101,7 @@ final class LoginViewModel: BaseModuleViewModel {
     func setSDKLanguage(_ lang: SDKLang) {
         selectedSDKLang = lang
         manager.setSDKLang(lang: lang)
-        SDKLangManager.shared.clearCache()
+        SDKLocalization.shared.clearCache()
         UserDefaults.standard.set(lang.rawValue, forKey: UDKey.selectedSDKLang)
     }
 
@@ -165,18 +170,56 @@ final class LoginViewModel: BaseModuleViewModel {
 
     // MARK: - Connect
 
-    func connect(appState: AppStateViewModel) {
+    /// SDK'yı kurar ve başarıda Default UI akışını başlatır.
+    /// Opsiyon montajı eski `AppStateViewModel.setupSDK`'dan buraya taşındı.
+    func connect(coordinator: SDKFlowCoordinator) {
         UserDefaults.standard.set(identId, forKey: UDKey.lastIdentId)
-        appState.setupSDK(
+        isLoading = true
+        errorMessage = nil
+
+        // setupSDK'dan ÖNCE placeholder controller'ları kaydet; aksi halde SDK
+        // modulesControllersArray'i farklı instance'larla kurar ve modüller başlamaz.
+        coordinator.prepareForSetup()
+
+        manager.setupSDK(
             identId: resolveIdentId(),
-            apiUrl: selectedServer.apiUrl,
-            idLang: selectedIdLang,
+            baseApiUrl: selectedServer.apiUrl,
+            networkOptions: SDKNetworkOptions(
+                timeoutIntervalForRequest: 30,
+                timeoutIntervalForResource: 30,
+                useSslPinning: useSSLPinning
+            ),
+            kpsData: nil,
+            identCardType: [.idCard, .passport, .oldSchool],
             signLangSupport: useSignLang,
+            nfcMaxErrorCount: 3,
+            logLevel: .online,
+            logOnlineSecretKey: "dGhpc19pc19qdXN0X2R1bW15X3NlY3JldF9mb3JfZGVtbw==",
             bigCustomerCam: useBigCustomerCam,
-            useSSLPinning: useSSLPinning,
-            useNewLiveness: useNewLiveness,
-            selectedModules: selectedModules
-        )
+            selectedModules: selectedModules,
+            idCardLang: selectedIdLang,
+            turnKey: "AEdHh9OZu1kg+nSBSd2UNMu9y4Kc3xVfgTsvw+PTAic=",
+            wsSecretKey: "tgdRmdAABrWf9TCRJZIWoW3Bz0iPJpig5jtOkBN4pvU=",
+            showThankYouPage: true,
+            showNFCNotFoundPage: true,
+            supportU18: true,
+            AESKey: "SEATSJ8kk0v8+A1LeQsAMbOgL+fSj9pOaUKI5cDMITU=",
+            enableAutoRotateOCR: true
+        ) { [weak self] socketStats, apiResp, webErr in
+            guard let self else { return }
+            Task { @MainActor in
+                self.isLoading = false
+                if let err = webErr, err.errorMessages != "" {
+                    self.errorMessage = err.errorMessages
+                    return
+                }
+                if socketStats?.isConnected == true && (apiResp.result ?? false) {
+                    coordinator.start()
+                } else if socketStats?.isConnected == false {
+                    self.errorMessage = "Socket bağlantısı kurulamadı"
+                }
+            }
+        }
     }
 
     // MARK: - Private

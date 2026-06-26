@@ -9,7 +9,7 @@ import IdentifySDK
 // MARK: - HamburgerMenuItem
 
 private enum HamburgerMenuItem {
-    case serverList, moduleList
+    case serverList, moduleList, showcase
 }
 
 // MARK: - LoginMode
@@ -30,7 +30,7 @@ enum LoginMode: CaseIterable {
 struct LoginView: View {
 
     @StateObject private var viewModel = LoginViewModel()
-    @EnvironmentObject private var appState: AppStateViewModel
+    @EnvironmentObject private var coordinator: SDKFlowCoordinator
     @Environment(\.colorScheme) private var colorScheme
 
     @State private var loginMode: LoginMode = .identId
@@ -39,6 +39,7 @@ struct LoginView: View {
     @State private var showModuleList = false
     @State private var showHamburgerMenu = false
     @State private var showLangPicker = false
+    @State private var showShowcase = false
     @State private var pendingNavigation: HamburgerMenuItem? = nil
     @State private var pendingConnect = false
 
@@ -76,7 +77,7 @@ struct LoginView: View {
                 VStack(spacing: IDSpacing.lg) {
                     SDKButton(
                         title: "Hemen Bağlan",
-                        isLoading: appState.isLoading,
+                        isLoading: viewModel.isLoading,
                         isDisabled: isConnectDisabled,
                         action: connect
                     )
@@ -91,20 +92,20 @@ struct LoginView: View {
         .ignoresSafeArea(.keyboard)
         .navigationBarHidden(true)
         .overlay {
-            if appState.isLoading {
+            if viewModel.isLoading {
                 Color.black.opacity(0.45).ignoresSafeArea()
                 ProgressView().scaleEffect(1.5).tint(.white)
             }
         }
         .sdkAlert(
             isPresented: Binding(
-                get: { appState.sdkError != nil },
-                set: { if !$0 { appState.sdkError = nil } }
+                get: { viewModel.errorMessage != nil },
+                set: { if !$0 { viewModel.errorMessage = nil } }
             ),
             alert: IDAlertModel(
                 type: .error,
                 title: "Hata",
-                message: appState.sdkError ?? "",
+                message: viewModel.errorMessage ?? "",
                 actions: [
                     IDAlertAction(title: "Tamam", style: .primary)
                 ]
@@ -129,7 +130,7 @@ struct LoginView: View {
             if pendingConnect {
                 pendingConnect = false
                 if viewModel.hasUserSelectedServer {
-                    viewModel.connect(appState: appState)
+                    viewModel.connect(coordinator: coordinator)
                 }
             }
         }) {
@@ -137,6 +138,9 @@ struct LoginView: View {
         }
         .sheet(isPresented: $showModuleList) {
             ModuleListView(viewModel: viewModel)
+        }
+        .fullScreenCover(isPresented: $showShowcase) {
+            ShowcaseCatalogView()
         }
         .sheet(isPresented: $showLangPicker) {
             if #available(iOS 16.4, *) {
@@ -162,6 +166,7 @@ struct LoginView: View {
             switch pendingNavigation {
             case .serverList: showServerList = true
             case .moduleList: showModuleList = true
+            case .showcase: showShowcase = true
             case nil: break
             }
             pendingNavigation = nil
@@ -211,7 +216,7 @@ struct LoginView: View {
     }
 
     private var isConnectDisabled: Bool {
-        appState.isLoading || (loginMode == .identId ? viewModel.identId.isEmpty : viewModel.firstName.isEmpty)
+        viewModel.isLoading || (loginMode == .identId ? viewModel.identId.isEmpty : viewModel.firstName.isEmpty)
     }
 
     private func connect() {
@@ -220,7 +225,7 @@ struct LoginView: View {
             showServerList = true
             return
         }
-        viewModel.connect(appState: appState)
+        viewModel.connect(coordinator: coordinator)
     }
 }
 
@@ -644,6 +649,9 @@ private struct HamburgerMenuSheet: View {
             .padding(.bottom, IDSpacing.md)
 
             VStack(spacing: IDSpacing.sm) {
+                MenuOptionRow(icon: Image(systemName: "books.vertical.fill"), title: "SDK Modül Rehberi") {
+                    onSelect(.showcase)
+                }
                 MenuOptionRow(icon: .init(.icCubeFocus), title: "Modül Seçme Ekranı") {
                     onSelect(.moduleList)
                 }
@@ -1151,7 +1159,7 @@ extension SdkModules {
 
 #Preview {
     LoginView()
-        .environmentObject(AppStateViewModel())
+        .environmentObject(SDKFlowCoordinator())
 }
 
 #Preview("Modül Seçimi") {

@@ -1,4 +1,5 @@
 import SwiftUI
+import IdentifySDK
 
 // MARK: - IDAlertType
 
@@ -100,7 +101,7 @@ private struct IDAlertPopup: View {
 
             Text(model.message)
                 .font(IDFont.bodyRegular(.regular))
-                .foregroundColor(IDColor.adaptiveSubtitleContent(for: colorScheme))
+                .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
                 .multilineTextAlignment(.center)
                 .lineSpacing(4)
                 .padding(.horizontal, IDSpacing.xl)
