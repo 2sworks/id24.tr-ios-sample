@@ -3,6 +3,31 @@ Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.
 
 ---
 
+## Modül Entegrasyon Rehberleri
+
+Her SDK modülünün **detaylı entegrasyon rehberi** ilgili modül klasöründedir. Önce ortak
+kurulum/akış/özelleştirme kurallarını içeren indeksi okuyun:
+
+➡️ **[Modül Rehberleri İndeksi](NewTest/Modules/Modules.md)** — kurulum, `SDKFlowCoordinator`,
+`SDKViewRegistry`, üç özelleştirme yöntemi ve **"bypass yok" kuralı**.
+
+| Modül | Rehber | Modül | Rehber |
+|---|---|---|---|
+| Hazırlık | [Prepare](NewTest/Modules/Prepare/Prepare.md) | İmza | [Signature](NewTest/Modules/Signature/Signature.md) |
+| Kimlik (OCR) | [IdCard](NewTest/Modules/IdCard/IdCard.md) | Video kayıt | [VideoRecorder](NewTest/Modules/VideoRecorder/VideoRecorder.md) |
+| Kimlik (OVD) | [IdCardOVD](NewTest/Modules/IdCardOVD/IdCardOVD.md) | Adres onayı | [AddressConfirm](NewTest/Modules/AddressConfirm/AddressConfirm.md) |
+| NFC | [NFC](NewTest/Modules/NFC/NFC.md) | Görüntülü görüşme | [CallScreen](NewTest/Modules/CallScreen/CallScreen.md) |
+| Selfie | [Selfie](NewTest/Modules/Selfie/Selfie.md) | Teşekkür/sonuç | [ThankYou](NewTest/Modules/ThankYou/ThankYou.md) |
+| Selfie+Liveness | [SelfieWithLiveness](NewTest/Modules/SelfieWithLiveness/SelfieWithLiveness.md) | İşaret dili kapısı | [SignLang](NewTest/Modules/SignLang/SignLang.md) |
+| Canlılık | [Liveness](NewTest/Modules/Liveness/Liveness.md) | Bağlantı koptu | [LostConnection](NewTest/Modules/LostConnection/LostConnection.md) |
+| Konuşma | [Speech](NewTest/Modules/Speech/Speech.md) | | |
+
+> Not: Bu rehberler kasıtlı olarak **SampleApp (public repo)** içindedir. SDK ikili bir
+> XCFramework olarak dağıtıldığından, SDK kaynak ağacına konan dokümanlar tüketici tarafından
+> okunamaz; bu yüzden tek kaynak burada tutulur.
+
+---
+
 ## Navigasyon Mimarisi — Coordinator Pattern
 
 Sample App, **UIPilot** benzeri tip-güvenli bir koordinatör pattern kullanır. iOS 14+ uyumlu olup `NavigationView` + recursive `NavigationLink` zinciriyle uygulanmıştır.

@@ -97,7 +97,7 @@ struct LoginView: View {
                 ProgressView().scaleEffect(1.5).tint(.white)
             }
         }
-        .sdkAlert(
+        .idAlert(
             isPresented: Binding(
                 get: { viewModel.errorMessage != nil },
                 set: { if !$0 { viewModel.errorMessage = nil } }

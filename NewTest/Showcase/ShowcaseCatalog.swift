@@ -27,7 +27,7 @@ struct ShowcaseItem: Identifiable {
 }
 
 /// Katalogdaki bölüm sırası.
-let showcaseCategories = ["Modüller", "Tasarım Sistemi"]
+let showcaseCategories = ["Modüller", "Tasarım Sistemi", "Olay Örgüsü / Telemetri", "Çapraz Platform (RN/Flutter)"]
 
 // MARK: - Katalog
 
@@ -237,6 +237,111 @@ enum ShowcaseCatalog {
             // cancel→IDColor.error, success→IDColor.successBright). Tema rengini
             // değiştirince butonlar da otomatik değişir:
             SDKTheme.shared.colors.primary = IDColor.accentTeal
+            """
+        ),
+        .init(
+            id: "ds_alerts", title: "Uyarı (Alert)",
+            subtitle: "IDAlert — info / error / success / normal + tek/çift/destructive aksiyon",
+            icon: "exclamationmark.bubble", category: "Tasarım Sistemi",
+            liveView: { AnyView(AlertsShowcaseView()) },
+            integrationCode: """
+            // Native .alert yerine SDK'nın tema uyumlu uyarısı:
+            @State private var alert: IDAlertModel?
+
+            someView
+                .idAlert(item: $alert)   // model nil olunca kapanır
+
+            alert = IDAlertModel(
+                type: .error, title: "Hata",
+                message: "Bir şeyler ters gitti.",
+                actions: [
+                    IDAlertAction(title: "İptal", style: .cancel),
+                    IDAlertAction(title: "Tekrar Dene", style: .primary) { retry() }
+                ]
+            )
+
+            // Bool tabanlı kısa kullanım:
+            someView.idAlert(isPresented: $show, alert: IDAlertModel(
+                type: .info, title: "Bilgi", message: "...",
+                actions: [IDAlertAction(title: "Tamam", style: .primary)]
+            ))
+            """,
+            customizationCode: """
+            // type ikon + vurgu rengini belirler (tema token'larından):
+            //   .info→primary  .error→error  .success→success  .normal→inkMid
+            // İki aksiyon yan yana, üç+ aksiyon alt alta dizilir.
+            // Aksiyon stilleri: .primary / .cancel / .destructive
+            // message "" verilirse mesaj satırı gizlenir (yalnız başlık + aksiyon).
+            """
+        ),
+
+        // MARK: Olay Örgüsü / Telemetri (SDK'nın birleşik olay akışı)
+        .init(
+            id: "event_journey", title: "Olay Örgüsü (Telemetri)",
+            subtitle: "SDK ne zaman nerede ne yaptı, kullanıcı hangi ekranda çıktı, oturum nasıl kapandı",
+            icon: "point.topleft.down.curvedto.point.bottomright.up",
+            category: "Olay Örgüsü / Telemetri",
+            liveView: { AnyView(EventJourneyView()) },
+            integrationCode: """
+            // SDK tüm olayları TEK bir birleşik akıştan yayınlar (SDKEvent).
+            // 1) Bir dinleyici (SDKEventListener) yaz:
+            final class MyEventRecorder: SDKEventListener {
+                func onSDKEvent(_ event: SDKEvent) {
+                    // event.name      -> "session.started", "module.Selfie.completed", "call.ended" ...
+                    // event.category  -> .session / .module / .call / .network / .error / .navigation
+                    // event.status    -> .presented / .completed / .failed / .skipped / .success / .abandoned
+                    // event.module    -> "Selfie", "Mrz & Nfc Screen" ... (varsa)
+                    // event.screen    -> kullanıcının o anki/son ekranı
+                    // event.metadata  -> ["reason": ..., "statusSummary": ..., "lastScreen": ...]
+                    analytics.log(event.toDictionary())   // JSON-güvenli sözlük
+                }
+            }
+
+            // 2) setupSDK'dan ÖNCE bağla:
+            IdentifyManager.shared.eventDelegate = recorder
+
+            // NOT: Bu EK bir akıştır; mevcut trackingDelegate'i etkilemez.
+            """,
+            customizationCode: """
+            // Önemli olay adları (köprülerde de aynıdır):
+            //   session.started              -> oturum başladı (setupSDK)
+            //   module.<Modül>.presented     -> ekran gösterildi   (lastScreen güncellenir)
+            //   module.<Modül>.completed     -> modül tamamlandı
+            //   module.<Modül>.failed        -> modül başarısız
+            //   module.<Modül>.skipped       -> modül atlandı
+            //   call.connected / call.ended  -> görüntülü çağrı durumu
+            //   session.completed (.success) -> başarıyla kapandı
+            //   session.failed    (.failed)  -> başarısız kapandı
+            //   session.abandoned (.abandoned) -> kullanıcı terk etti (metadata.lastScreen = nerede kaldı)
+
+            // Kullanıcı SDK'yı açıkça kapatırsa terk olayını sen de tetikleyebilirsin:
+            IdentifyManager.shared.reportSessionAbandoned(reason: "user_closed")
+
+            // React Native / Flutter köprüleri event.toDictionary()'i olduğu gibi iletir.
+            // Ayrıntı (bu repoda): docs/integration/react-native ve docs/integration/flutter
+            """
+        ),
+
+        // MARK: Çapraz Platform (RN/Flutter) — gömülü köprü iskeletleri (target'a eklenmez)
+        .init(
+            id: "cross_platform", title: "React Native & Flutter Köprüsü",
+            subtitle: "Birleşik olay akışını RN ve Flutter'a taşıyan köprü iskeletleri (gömülü kod gösterimi)",
+            icon: "arrow.triangle.branch",
+            category: "Çapraz Platform (RN/Flutter)",
+            liveView: { AnyView(CrossPlatformIntegrationView()) },
+            integrationCode: """
+            // Bu ekran köprü kodunu GÖMÜLÜ olarak gösterir; gerçek köprü dosyaları
+            // Xcode target'ına EKLENMEZ (SampleApp derlemesini etkilemez).
+            // Tam dosyalar: SampleApp/docs/integration/{react-native,flutter}/
+            //
+            // Akış: SDKEvent → IdentifyManager.shared.eventDelegate
+            //   RN     : RCTEventEmitter.sendEvent("onSDKEvent", body: event.toDictionary())
+            //   Flutter: FlutterEventChannel sink(event.toDictionary())
+            """,
+            customizationCode: """
+            // event.toDictionary() JSON-güvenli sözlüktür; her iki köprüde de aynı şekilde
+            // taşınır ve TS interface / Dart model ile birebir eşlenir. Olay adları:
+            //   session.started / module.<Modül>.* / call.* / session.completed|failed|abandoned
             """
         ),
     ]

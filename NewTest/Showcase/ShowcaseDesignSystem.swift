@@ -147,8 +147,60 @@ struct ButtonsShowcaseView: View {
     }
 }
 
+// MARK: - Uyarı (Alert)
+
+struct AlertsShowcaseView: View {
+    @Environment(\.colorScheme) private var colorScheme
+    @State private var active: IDAlertModel?
+
+    var body: some View {
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: IDSpacing.lg) {
+                SDKButton(title: ".info — tek buton", style: .secondary) {
+                    active = IDAlertModel(
+                        type: .info, title: "Bilgi",
+                        message: "Bu işlem geri alınamaz. Devam etmek istediğinizden emin misiniz?",
+                        actions: [IDAlertAction(title: "Tamam", style: .primary)]
+                    )
+                }
+                SDKButton(title: ".error — iki buton", style: .cancel) {
+                    active = IDAlertModel(
+                        type: .error, title: "Bağlantı Hatası",
+                        message: "Sunucuya ulaşılamıyor. Lütfen internet bağlantınızı kontrol edin.",
+                        actions: [
+                            IDAlertAction(title: "İptal", style: .cancel),
+                            IDAlertAction(title: "Tekrar Dene", style: .primary)
+                        ]
+                    )
+                }
+                SDKButton(title: ".success", style: .success) {
+                    active = IDAlertModel(
+                        type: .success, title: "Kimlik Doğrulandı",
+                        message: "Kimlik doğrulama işleminiz başarıyla tamamlandı.",
+                        actions: [IDAlertAction(title: "Devam Et", style: .primary)]
+                    )
+                }
+                SDKButton(title: ".normal — destructive", style: .primary) {
+                    active = IDAlertModel(
+                        type: .normal, title: "Görüşmeyi bitir",
+                        message: "Görüşmeyi sonlandırmak istediğinize emin misiniz?",
+                        actions: [
+                            IDAlertAction(title: "Vazgeç", style: .cancel),
+                            IDAlertAction(title: "Bitir", style: .destructive)
+                        ]
+                    )
+                }
+            }
+            .padding(IDSpacing.xl)
+        }
+        .background(IDColor.adaptiveBackground(for: colorScheme).ignoresSafeArea())
+        .idAlert(item: $active)
+    }
+}
+
 // MARK: - Previews
 #Preview("Renkler") { ColorsShowcaseView() }
 #Preview("Tipografi") { FontsShowcaseView() }
 #Preview("Nav Bar") { NavBarShowcaseView() }
 #Preview("Buton") { ButtonsShowcaseView() }
+#Preview("Uyarı") { AlertsShowcaseView() }
