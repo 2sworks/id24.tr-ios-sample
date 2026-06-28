@@ -275,6 +275,43 @@ enum ShowcaseCatalog {
             """
         ),
 
+        .init(
+            id: "ds_customization", title: "Özelleştirme (Metin + İkon)",
+            subtitle: "Hazır ekranların metinlerini ve ikonlarını dışarıdan override et",
+            icon: "slider.horizontal.3", category: "Tasarım Sistemi",
+            liveView: { AnyView(CustomizationShowcaseView()) },
+            integrationCode: """
+            // --- METİN ---
+            // 1) Mevcut SDK metnini ez (dil bazlı):
+            SDKLocalization.shared.setOverride(key: .continuePage, language: .tr, value: "İlerle")
+            SDKLocalization.shared.registerOverrides([
+                .de: ["Continue": "Weiter", "IdVerifyTitle": "Ausweisprüfung"]
+            ])
+            SDKLocalization.shared.loadOverrides(from: jsonURL, language: .en)
+
+            // 2) Kendi yeni key'in (custom ekranlar için):
+            SDKLocalization.shared.registerOverrides([.tr: ["MyKey": "Merhaba"]])
+            Text(SDKLocalization.shared.string(forKey: "MyKey"))
+
+            // --- İKON ---
+            SDKTheme.shared.setIcon(.camera, Image("my_camera"))
+            SDKTheme.shared.setIcons([.checkmark: Image(systemName: "checkmark.seal.fill"),
+                                      .logo: Image("brand_logo")])
+            SDKTheme.shared.resetIcon(.camera)   // varsayılana dön
+            Image.sdk(.checkmark)                 // çözülmüş ikonu kullan
+            """,
+            customizationCode: """
+            // METİN çözüm sırası: host override → bundle JSON (5 dil) → key'in kendisi.
+            //   • Override'lar bundle'ın ÜSTÜNDE önceliklidir, aktif sdkLang'e göre çözülür.
+            //   • Yeni key eklemek için enum gerekmez: registerOverrides + string(forKey:).
+            // İKON çözüm sırası: setIcon override → SDKIconKey.defaultImage (SF Symbol / asset).
+            //   • SDKIconKey grupları: chrome, aksiyon, izin satırı, illüstrasyon, durum.
+            //   • Host custom ekranları (registry.custom) zaten kendi metin/ikonunu kullanır;
+            //     bu API yalnızca SDK'nın HAZIR ekranlarını markalamak içindir.
+            // NOT: Lokalizasyon reaktif değil — dili oturum başında (Login) seçip akışa girin.
+            """
+        ),
+
         // MARK: Olay Örgüsü / Telemetri (SDK'nın birleşik olay akışı)
         .init(
             id: "event_journey", title: "Olay Örgüsü (Telemetri)",

@@ -198,7 +198,137 @@ struct AlertsShowcaseView: View {
     }
 }
 
+// MARK: - Özelleştirme (Metin + İkon override)
+
+/// Host'un SDK'nın hazır ekranlarındaki METİN ve İKON'ları nasıl değiştireceğini gösterir.
+/// Canlı demo: "Override uygula" butonu birkaç ikonu/metni runtime'da değiştirir,
+/// ekrandan çıkınca eski haline döner (global SDKTheme/SDKLocalization durumu geri alınır).
+struct CustomizationShowcaseView: View {
+    @Environment(\.colorScheme) private var colorScheme
+    @State private var applied = false
+
+    // Demo amaçlı override edilecek ikonlar ve alternatifleri (SF Symbol).
+    private let iconDemo: [(SDKIconKey, String, Image)] = [
+        (.camera,    "camera",    Image(systemName: "camera.aperture")),
+        (.checkmark, "checkmark", Image(systemName: "checkmark.seal.fill")),
+        (.retry,     "retry",     Image(systemName: "gobackward")),
+        (.close,     "close",     Image(systemName: "xmark.octagon.fill"))
+    ]
+
+    var body: some View {
+        ScrollView(showsIndicators: false) {
+            VStack(alignment: .leading, spacing: IDSpacing.xl) {
+
+                section("1) İkon override — SDKTheme.shared.setIcon(_:_:)") {
+                    HStack(spacing: IDSpacing.xl) {
+                        ForEach(iconDemo, id: \.1) { key, name, _ in
+                            VStack(spacing: 6) {
+                                Image.sdk(key)                 // aktif (override edilmiş olabilir) ikon
+                                    .renderingMode(.template)
+                                    .resizable().scaledToFit()
+                                    .frame(width: 28, height: 28)
+                                    .foregroundColor(IDColor.accentPurple)
+                                Text("." + name)
+                                    .font(.system(size: 10, design: .monospaced))
+                                    .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
+                            }
+                        }
+                    }
+                    SDKButton(title: applied ? "Varsayılana dön" : "İkon + metin override uygula",
+                              style: applied ? .cancel : .primary) {
+                        applied ? revert() : apply()
+                    }
+                }
+
+                section("2) Metin override — mevcut SDK key'i") {
+                    codeBlock("""
+                    // Tek key, tek dil:
+                    SDKLocalization.shared.setOverride(
+                        key: .continuePage, language: .de, value: "Weiter →")
+
+                    // Toplu (dil → [JSONKey: değer]):
+                    SDKLocalization.shared.registerOverrides([
+                        .tr: ["Continue": "İlerle", "IdVerifyTitle": "Kimlik"],
+                        .de: ["Continue": "Weiter"]
+                    ])
+                    // JSON dosyasından:
+                    SDKLocalization.shared.loadOverrides(from: url, language: .de)
+                    """)
+                    Text("Aktif “devam” metni: \(SDKKeyword.continuePage.localized)")
+                        .font(IDFont.bodyMedium(.semibold))
+                        .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
+                }
+
+                section("3) Host'un KENDİ yeni key'i — string(forKey:)") {
+                    codeBlock("""
+                    // Kendi key'ini SDK dil sistemine ekle:
+                    SDKLocalization.shared.registerOverrides([
+                        .tr: ["MyIntroTitle": "Hoş geldin"],
+                        .en: ["MyIntroTitle": "Welcome"],
+                        .de: ["MyIntroTitle": "Willkommen"]
+                    ])
+                    // Custom ekranında oku (aktif dile göre çözülür):
+                    Text(SDKLocalization.shared.string(forKey: "MyIntroTitle"))
+                    """)
+                    Text("MyIntroTitle → \(SDKLocalization.shared.string(forKey: "MyIntroTitle"))")
+                        .font(IDFont.bodyMedium(.semibold))
+                        .foregroundColor(IDColor.accentTeal)
+                }
+
+                section("4) İkon anahtarları") {
+                    Text("SDKIconKey: chrome (logo/hamburger/back/help/close), aksiyon "
+                         + "(camera/checkmark/retry/trash/video/chat…), izin satırı (permCamera…), "
+                         + "illüstrasyon (incomingCall/nfcFront/thankYouSuccess/lostConnection…), "
+                         + "durum (torchOn/play/mic/wifiGood…). Her biri setIcon ile override edilir.")
+                        .font(IDFont.caption(.regular))
+                        .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
+                }
+            }
+            .padding(IDSpacing.xl)
+        }
+        .background(IDColor.adaptiveBackground(for: colorScheme).ignoresSafeArea())
+        .onDisappear { if applied { revert() } }   // global durumu temiz bırak
+    }
+
+    private func apply() {
+        for (key, _, img) in iconDemo { SDKTheme.shared.setIcon(key, img) }
+        SDKLocalization.shared.registerOverrides([
+            .tr: ["Continue": "İlerle ▸", "MyIntroTitle": "Hoş geldin"],
+            .eng: ["Continue": "Proceed ▸", "MyIntroTitle": "Welcome"],
+            .de: ["Continue": "Weiter ▸", "MyIntroTitle": "Willkommen"]
+        ])
+        applied = true
+    }
+
+    private func revert() {
+        for (key, _, _) in iconDemo { SDKTheme.shared.resetIcon(key) }
+        SDKLocalization.shared.clearOverrides()
+        SDKLocalization.shared.clearCache()
+        applied = false
+    }
+
+    @ViewBuilder
+    private func section<V: View>(_ title: String, @ViewBuilder _ content: () -> V) -> some View {
+        VStack(alignment: .leading, spacing: IDSpacing.md) {
+            Text(title)
+                .font(IDFont.bodyMedium(.semibold))
+                .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
+            content()
+        }
+    }
+
+    private func codeBlock(_ code: String) -> some View {
+        Text(code)
+            .font(.system(size: 11, design: .monospaced))
+            .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(IDSpacing.md)
+            .background(RoundedRectangle(cornerRadius: IDRadius.md).fill(IDColor.inkSurface))
+    }
+}
+
 // MARK: - Previews
+#Preview("Özelleştirme") { CustomizationShowcaseView() }
 #Preview("Renkler") { ColorsShowcaseView() }
 #Preview("Tipografi") { FontsShowcaseView() }
 #Preview("Nav Bar") { NavBarShowcaseView() }
