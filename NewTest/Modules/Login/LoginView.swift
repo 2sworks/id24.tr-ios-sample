@@ -30,6 +30,7 @@ enum LoginMode: CaseIterable {
 struct LoginView: View {
 
     @StateObject private var viewModel = LoginViewModel()
+    @ObservedObject private var speechService = SDKSpeechService.shared
     @EnvironmentObject private var coordinator: SDKFlowCoordinator
     @Environment(\.colorScheme) private var colorScheme
 
@@ -93,8 +94,7 @@ struct LoginView: View {
         .navigationBarHidden(true)
         .overlay {
             if viewModel.isLoading {
-                Color.black.opacity(0.45).ignoresSafeArea()
-                ProgressView().scaleEffect(1.5).tint(.white)
+                loadingOverlay
             }
         }
         .idAlert(
@@ -217,6 +217,35 @@ struct LoginView: View {
 
     private var isConnectDisabled: Bool {
         viewModel.isLoading || (loginMode == .identId ? viewModel.identId.isEmpty : viewModel.firstName.isEmpty)
+    }
+
+    private var loadingOverlay: some View {
+        ZStack {
+            Color.black.opacity(0.45).ignoresSafeArea()
+            switch speechService.state {
+            case .downloading(let progress):
+                ttsProgressCard(progress: progress)
+            default:
+                ProgressView()
+                    .scaleEffect(1.5)
+                    .tint(.white)
+            }
+        }
+    }
+
+    private func ttsProgressCard(progress: Double) -> some View {
+        VStack(spacing: IDSpacing.md) {
+            ProgressView(value: progress)
+                .progressViewStyle(.linear)
+                .tint(IDColor.successBright)
+                .frame(width: 220)
+
+            Text("Hazırlıklarımız son hızla devam ediyor.")
+                .font(IDFont.bodyRegular(.regular))
+                .foregroundColor(.white)
+                .multilineTextAlignment(.center)
+        }
+        .padding(IDSpacing.xl)
     }
 
     private func connect() {

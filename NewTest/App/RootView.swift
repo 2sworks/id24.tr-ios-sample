@@ -36,14 +36,14 @@ struct RootView: View {
         ])
 
         // 2) External ekran ekleme: Selfie modülünden ÖNCE bir bilgilendirme ekranı.
-        registry.custom("welcome") {
-            SDKExternalInfoView(
-                title: "Hoş geldiniz",
-                subtitle: "Selfie adımından önce kısa bir bilgilendirme ekranı (host tarafından eklendi).",
-                systemIcon: "hand.wave.fill"
-            )
-        }
-        coordinator.insert(["welcome"], before: .selfie)
+//        registry.custom("welcome") {
+//            SDKExternalInfoView(
+//                title: "Hoş geldiniz",
+//                subtitle: "Selfie adımından önce kısa bir bilgilendirme ekranı (host tarafından eklendi).",
+//                systemIcon: "hand.wave.fill"
+//            )
+//        }
+//        coordinator.insert(["welcome"], before: .selfie)
 
         // 3) Mevcut bir SDK modülünü host tasarımıyla override: AddressConfirm farklı renkte.
         registry.override(.addressConfirm) {

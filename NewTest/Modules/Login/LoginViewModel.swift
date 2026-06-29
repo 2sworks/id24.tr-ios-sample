@@ -204,7 +204,8 @@ final class LoginViewModel: ObservableObject {
             showNFCNotFoundPage: true,
             supportU18: true,
             AESKey: "SEATSJ8kk0v8+A1LeQsAMbOgL+fSj9pOaUKI5cDMITU=",
-            enableAutoRotateOCR: true
+            enableAutoRotateOCR: true,
+            ttsEnabled: true
         ) { [weak self] socketStats, apiResp, webErr in
             guard let self else { return }
             Task { @MainActor in
