@@ -104,20 +104,20 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		0046CF4158A838AC23E4A05E /* Prepare.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = Prepare.md; path = Prepare.md; sourceTree = "<group>"; };
+		0046CF4158A838AC23E4A05E /* Prepare.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; path = Prepare.md; sourceTree = "<group>"; };
 		0403CFDF0DB438E924B42014 /* ShowcaseSupport.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShowcaseSupport.swift; sourceTree = "<group>"; };
 		04F627E011A5FCBB33A21675 /* SDKEventRecorder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SDKEventRecorder.swift; sourceTree = "<group>"; };
 		057317BDAFB60877C85A3684 /* IdCardHostViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = IdCardHostViewModel.swift; sourceTree = "<group>"; };
-		0B53FD7244ABB96C21B862A3 /* AddressConfirm.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = AddressConfirm.md; path = AddressConfirm.md; sourceTree = "<group>"; };
+		0B53FD7244ABB96C21B862A3 /* AddressConfirm.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; path = AddressConfirm.md; sourceTree = "<group>"; };
 		132D8A6DC4548828A606F69A /* SignatureConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SignatureConfig.swift; sourceTree = "<group>"; };
 		1C421856A405475F3D9766A0 /* LostConnectionHostViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LostConnectionHostViewModel.swift; path = LostConnection/LostConnectionHostViewModel.swift; sourceTree = "<group>"; };
 		1C85D70669B1F7007C0C56C8 /* ShowcaseDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShowcaseDetailView.swift; sourceTree = "<group>"; };
-		1CAB2FD912344E09646B3249 /* ThankYou.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = ThankYou.md; path = ThankYou.md; sourceTree = "<group>"; };
+		1CAB2FD912344E09646B3249 /* ThankYou.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; path = ThankYou.md; sourceTree = "<group>"; };
 		1D02E04D34EAD1C52BC0DEC2 /* CallScreenConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CallScreenConfig.swift; sourceTree = "<group>"; };
 		1D5D6446508792351FAE43C1 /* LivenessExample.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LivenessExample.swift; sourceTree = "<group>"; };
 		1EF831B5FE4663D01DA67E72 /* SignLangConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SignLangConfig.swift; path = SignLang/SignLangConfig.swift; sourceTree = "<group>"; };
 		1F9E3D331273419983B367F0 /* LostConnectionExample.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LostConnectionExample.swift; path = LostConnection/LostConnectionExample.swift; sourceTree = "<group>"; };
-		229C1F0653291C93F4CF6203 /* IdCard.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = IdCard.md; path = IdCard.md; sourceTree = "<group>"; };
+		229C1F0653291C93F4CF6203 /* IdCard.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; path = IdCard.md; sourceTree = "<group>"; };
 		244665EDEBB483AC83A5250C /* IdCardExample.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = IdCardExample.swift; sourceTree = "<group>"; };
 		25E3D1CED1B9A1A164715AF1 /* LostConnection.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = LostConnection.md; path = LostConnection/LostConnection.md; sourceTree = "<group>"; };
 		2A57F8CBAD67C67E1AE6DEF4 /* SelfieExample.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SelfieExample.swift; sourceTree = "<group>"; };
@@ -142,10 +142,10 @@
 		489CBB1A28F586D500D22CC1 /* NewTest.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NewTest.entitlements; sourceTree = "<group>"; };
 		48BFF0D02BBAF3940088D67E /* v2api.identify.com.tr.cer */ = {isa = PBXFileReference; lastKnownFileType = file; path = v2api.identify.com.tr.cer; sourceTree = "<group>"; };
 		4CCC6A080892B339165DAEFE /* VideoRecorderExample.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VideoRecorderExample.swift; sourceTree = "<group>"; };
-		517A859A46C272E9C46092E3 /* Modules.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = Modules.md; path = Modules.md; sourceTree = "<group>"; };
+		517A859A46C272E9C46092E3 /* Modules.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; path = Modules.md; sourceTree = "<group>"; };
 		57E30CE984870EE743797F86 /* SelfieHostViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SelfieHostViewModel.swift; sourceTree = "<group>"; };
 		61B5EF76C54FCB981C0C918D /* RootView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
-		66049748E5A02AB0B69795DF /* CallScreen.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = CallScreen.md; path = CallScreen.md; sourceTree = "<group>"; };
+		66049748E5A02AB0B69795DF /* CallScreen.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; path = CallScreen.md; sourceTree = "<group>"; };
 		6739BE6561064B07E771C004 /* SelfieConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SelfieConfig.swift; sourceTree = "<group>"; };
 		67AFA8972E6D74BABD8F8908 /* SpeechHostViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SpeechHostViewModel.swift; sourceTree = "<group>"; };
 		67D3D084DA8B7D62494FBE14 /* HostModuleViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HostModuleViewModel.swift; sourceTree = "<group>"; };
@@ -168,24 +168,24 @@
 		956407D26FD611F5BFB3EA14 /* ThankYouExample.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ThankYouExample.swift; sourceTree = "<group>"; };
 		9B0E79159FAD6CF4165CA0EA /* ThankYouConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ThankYouConfig.swift; sourceTree = "<group>"; };
 		9D371CF8DF83A9DCADBB5BDC /* CallScreenExample.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CallScreenExample.swift; sourceTree = "<group>"; };
-		A6F847345ADC65600F74472B /* NFC.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = NFC.md; path = NFC.md; sourceTree = "<group>"; };
+		A6F847345ADC65600F74472B /* NFC.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; path = NFC.md; sourceTree = "<group>"; };
 		A74668EDBCF178CDC326A0CB /* ShowcaseCatalog.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShowcaseCatalog.swift; sourceTree = "<group>"; };
 		A8A1A3ABDF159420BA98A49A /* LostConnectionConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LostConnectionConfig.swift; path = LostConnection/LostConnectionConfig.swift; sourceTree = "<group>"; };
-		A976FA2849055FDBA027C5F9 /* Liveness.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = Liveness.md; path = Liveness.md; sourceTree = "<group>"; };
-		AEEB7D72CC9A421C38C8C68D /* Selfie.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = Selfie.md; path = Selfie.md; sourceTree = "<group>"; };
+		A976FA2849055FDBA027C5F9 /* Liveness.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; path = Liveness.md; sourceTree = "<group>"; };
+		AEEB7D72CC9A421C38C8C68D /* Selfie.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; path = Selfie.md; sourceTree = "<group>"; };
 		B594ADE180C9067F9BC3918F /* SwlConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SwlConfig.swift; path = SelfieWithLiveness/SwlConfig.swift; sourceTree = "<group>"; };
 		C2EA1D1725FD5B313D46D172 /* AddressConfirmExample.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AddressConfirmExample.swift; sourceTree = "<group>"; };
 		C785CA5A3D0E029AC94CC98C /* NfcExample.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NfcExample.swift; sourceTree = "<group>"; };
 		CAAC9761924AC978F78EFB3C /* SignatureExample.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SignatureExample.swift; sourceTree = "<group>"; };
-		CF4452B9BB47F5F5E9D79299 /* VideoRecorder.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = VideoRecorder.md; path = VideoRecorder.md; sourceTree = "<group>"; };
+		CF4452B9BB47F5F5E9D79299 /* VideoRecorder.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; path = VideoRecorder.md; sourceTree = "<group>"; };
 		D12ED3C247F6A7989DF9536F /* SignLang.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = SignLang.md; path = SignLang/SignLang.md; sourceTree = "<group>"; };
 		D769D9F2A2706129A88215A7 /* VideoRecorderConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VideoRecorderConfig.swift; sourceTree = "<group>"; };
 		DF7BC1692D4A279600372CAB /* Env.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Env.xcdatamodel; sourceTree = "<group>"; };
-		E382A83DAA46876BB234A0BF /* Speech.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = Speech.md; path = Speech.md; sourceTree = "<group>"; };
+		E382A83DAA46876BB234A0BF /* Speech.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; path = Speech.md; sourceTree = "<group>"; };
 		E3B4BED9E3082892F36C5BB2 /* CallScreenHostViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CallScreenHostViewModel.swift; sourceTree = "<group>"; };
 		E3BA5FC1FAB546013F29A92D /* LivenessConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LivenessConfig.swift; sourceTree = "<group>"; };
 		E508AA61B5FE4BC3634D1265 /* SelfieWithLiveness.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = SelfieWithLiveness.md; path = SelfieWithLiveness/SelfieWithLiveness.md; sourceTree = "<group>"; };
-		E657C2C0507F10544251E477 /* Signature.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = Signature.md; path = Signature.md; sourceTree = "<group>"; };
+		E657C2C0507F10544251E477 /* Signature.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; path = Signature.md; sourceTree = "<group>"; };
 		EDE0731CCB95FC8930B4CDF9 /* EventJourneyView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventJourneyView.swift; sourceTree = "<group>"; };
 		EF207A18079E2DEBDDF2C291 /* ShowcaseDesignSystem.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShowcaseDesignSystem.swift; sourceTree = "<group>"; };
 		F8AB4E3AB9B4946A4E942BCE /* AddressConfirmConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AddressConfirmConfig.swift; sourceTree = "<group>"; };
@@ -851,7 +851,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = NewTest/SupportingFiles/NewTest.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = 9D3UPKQ9AL;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -895,7 +895,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = NewTest/SupportingFiles/NewTest.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = 9D3UPKQ9AL;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
