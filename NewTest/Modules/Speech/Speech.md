@@ -95,4 +95,30 @@ struct MySpeechView: View {
 ## Notlar
 - `targetWord` sunucudan/akıştan gelir; sabit değildir.
 - Tanıma cihazda çalışır; yalnızca sonuç soketle bildirilir.
+
+---
+
+## Sesli Okuma (Read-Aloud)
+
+Bu modül ekranı açıldığında yönergesi otomatik seslendirilebilir. Mod **modül bazında**
+seçilir; tam ayrıntı: [ReadAloud](../ReadAloud/ReadAloud.md).
+
+- **Metin key'i:** `SpeechTts`  ·  **Custom audio dosyası:** `SpeechTts.m4a`
+- **Native (Siri / sistem sesi):**
+  ```swift
+  SDKSpeechConfig.shared.setMode(.native, for: .speech)
+  ```
+- **Custom audio (kendi kaydın):** bundle'a `SpeechTts.m4a` koy →
+  ```swift
+  SDKSpeechConfig.shared.audioBundle = Bundle.main
+  SDKSpeechConfig.shared.setMode(.customAudio, for: .speech)   // dosya yoksa native'e düşer
+  ```
+- **Kapalı:** `SDKSpeechConfig.shared.setMode(.off, for: .speech)`
+- **Metni ez:** `SDKLocalization.shared.setOverride(key: .speechTts, language: .tr, value: "...")`
+
+Seslendirme, ekran açılışında `SDKFlowHostView` tarafından otomatik yapılır — modül tarafında
+ekstra kod gerekmez.
+
+> ⚠️ Bu modül KYC konuşma-**TANIMA** adımıdır (kullanıcı mikrofona okur). Read-aloud yalnızca YÖNERGEYİ okur; kullanıcı kaydederken sesle çakışmaması için gerekiyorsa `.off` seçin.
+
 </content>

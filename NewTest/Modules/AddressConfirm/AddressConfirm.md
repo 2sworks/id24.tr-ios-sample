@@ -100,4 +100,28 @@ struct MyAddressView: View {
 - Adres en az 10 karakter olmalı (`isAddressValid`); aksi halde `canSubmit` false.
 - Foto **ve** PDF aynı anda gerekmez; biri yeterli. PDF boyutu `maxPDFSizeMB`'ı aşmamalı.
 - `registry.override(.addressConfirm)` örneği SampleApp `RootView.configureIfNeeded`'da mevcuttur.
+
+---
+
+## Sesli Okuma (Read-Aloud)
+
+Bu modül ekranı açıldığında yönergesi otomatik seslendirilebilir. Mod **modül bazında**
+seçilir; tam ayrıntı: [ReadAloud](../ReadAloud/ReadAloud.md).
+
+- **Metin key'i:** `AddressConfirmTts`  ·  **Custom audio dosyası:** `AddressConfirmTts.m4a`
+- **Native (Siri / sistem sesi):**
+  ```swift
+  SDKSpeechConfig.shared.setMode(.native, for: .addressConf)
+  ```
+- **Custom audio (kendi kaydın):** bundle'a `AddressConfirmTts.m4a` koy →
+  ```swift
+  SDKSpeechConfig.shared.audioBundle = Bundle.main
+  SDKSpeechConfig.shared.setMode(.customAudio, for: .addressConf)   // dosya yoksa native'e düşer
+  ```
+- **Kapalı:** `SDKSpeechConfig.shared.setMode(.off, for: .addressConf)`
+- **Metni ez:** `SDKLocalization.shared.setOverride(key: .addressConfirmTts, language: .tr, value: "...")`
+
+Seslendirme, ekran açılışında `SDKFlowHostView` tarafından otomatik yapılır — modül tarafında
+ekstra kod gerekmez.
+
 </content>

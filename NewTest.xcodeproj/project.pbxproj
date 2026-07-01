@@ -64,6 +64,7 @@
 		98A6E9F76B0CDEF0E6748CF1 /* LivenessHostViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC4636F8DFEB15E2CF8A987 /* LivenessHostViewModel.swift */; };
 		9BD45CE3D0D66FF246AFBBF8 /* SelfieExample.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A57F8CBAD67C67E1AE6DEF4 /* SelfieExample.swift */; };
 		9DC17DBB0B141C9CE23F7DE5 /* CallScreenHostViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3B4BED9E3082892F36C5BB2 /* CallScreenHostViewModel.swift */; };
+		A1B2C3D4E5F600000000D001 /* SpeechShowcaseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F600000000D002 /* SpeechShowcaseView.swift */; };
 		A2C6F79A2026898757BC42B9 /* SelfieHostViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57E30CE984870EE743797F86 /* SelfieHostViewModel.swift */; };
 		A32B80ACE7ACCDAA93A5809C /* ShowcaseDesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF207A18079E2DEBDDF2C291 /* ShowcaseDesignSystem.swift */; };
 		AB88553E8E9E8E75A287A860 /* VideoRecorderHostViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BC8B7BA0254177A2E9F18BF /* VideoRecorderHostViewModel.swift */; };
@@ -168,6 +169,7 @@
 		956407D26FD611F5BFB3EA14 /* ThankYouExample.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ThankYouExample.swift; sourceTree = "<group>"; };
 		9B0E79159FAD6CF4165CA0EA /* ThankYouConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ThankYouConfig.swift; sourceTree = "<group>"; };
 		9D371CF8DF83A9DCADBB5BDC /* CallScreenExample.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CallScreenExample.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F600000000D002 /* SpeechShowcaseView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SpeechShowcaseView.swift; sourceTree = "<group>"; };
 		A6F847345ADC65600F74472B /* NFC.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; path = NFC.md; sourceTree = "<group>"; };
 		A74668EDBCF178CDC326A0CB /* ShowcaseCatalog.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShowcaseCatalog.swift; sourceTree = "<group>"; };
 		A8A1A3ABDF159420BA98A49A /* LostConnectionConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LostConnectionConfig.swift; path = LostConnection/LostConnectionConfig.swift; sourceTree = "<group>"; };
@@ -318,6 +320,7 @@
 				1C85D70669B1F7007C0C56C8 /* ShowcaseDetailView.swift */,
 				67D3D084DA8B7D62494FBE14 /* HostModuleViewModel.swift */,
 				EF207A18079E2DEBDDF2C291 /* ShowcaseDesignSystem.swift */,
+				A1B2C3D4E5F600000000D002 /* SpeechShowcaseView.swift */,
 				01A17D0521B5F1361801D4C6 /* EventJourney */,
 				9E462EAA116AE45A4681F552 /* CrossPlatform */,
 			);
@@ -704,6 +707,7 @@
 				EEA18B090A71F8FB5D9B55C1 /* LostConnectionHostViewModel.swift in Sources */,
 				CAD702D5CF6607209085D82F /* LostConnectionExample.swift in Sources */,
 				A32B80ACE7ACCDAA93A5809C /* ShowcaseDesignSystem.swift in Sources */,
+				A1B2C3D4E5F600000000D001 /* SpeechShowcaseView.swift in Sources */,
 				20D83C3B6B1BF96AAC231916 /* OvdConfig.swift in Sources */,
 				3F3D346B21B00A04573BEFA7 /* OvdHostViewModel.swift in Sources */,
 				6EB04625C6C181E062318D3B /* OvdExample.swift in Sources */,
@@ -851,7 +855,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = NewTest/SupportingFiles/NewTest.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = 9D3UPKQ9AL;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -895,7 +899,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = NewTest/SupportingFiles/NewTest.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = 9D3UPKQ9AL;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",

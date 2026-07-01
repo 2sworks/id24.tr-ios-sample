@@ -93,4 +93,19 @@ struct MyLostConnectionView: View {
   yoluna gidebilir; bu durumda akış sonlanır.
 - Bu ekran kalıcı bağlantıyı (soket) kurtarmaya çalışır; WebRTC peer connection CallScreen
   tarafından yeniden kurulur.
+
+---
+
+## Sesli Okuma (Read-Aloud)
+
+Bu ekran bir **overlay**'dir ve akış rotası (`route.ttsKey`) yoktur; bu yüzden **otomatik
+sesli okuma uygulanmaz**. Gerekirse metni elle okutabilirsiniz:
+
+```swift
+SDKSpeechService.shared.speak(text: "…")   // native (Siri)
+SDKSpeechService.shared.stop()
+```
+
+Genel bilgi: [ReadAloud](../ReadAloud/ReadAloud.md).
+
 </content>

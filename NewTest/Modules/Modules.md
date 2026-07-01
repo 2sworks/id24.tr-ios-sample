@@ -197,4 +197,29 @@ o ekranlar zaten hiçbir VM metodu çağırmaz.
 
 Pasif ekranlar (ThankYou, host'un tanıtım/başarı ekranları) hiçbir sinyal göndermez;
 araya eklenmeleri güvenlidir.
+
+---
+
+## 7. Sesli Okuma (Read-Aloud) — kesişen özellik
+
+Her modül ekranı açıldığında yönergesi **sesli okunabilir**. Bu bir modül değil, tüm
+modüllere serpiştirilmiş erişilebilirlik katmanıdır. İki adımlı ve **modül bazında** seçilir:
+
+- `.native` → iOS `AVSpeechSynthesizer` (Siri/sistem sesi) `*_tts` metnini okur
+- `.customAudio` → host'un bundle'a koyduğu `<key>.m4a` klibini çalar (yoksa native'e düşer)
+- `.off` → o modülde sesli okuma yok
+
+```swift
+SDKSpeechConfig.shared.setModeForAll(.native)                  // tümü native
+SDKSpeechConfig.shared.setMode(.customAudio, for: [.selfie])   // per-modül
+SDKSpeechConfig.shared.setMode(.off, for: .livenessDetection)
+// Kısayol: setupSDK(ttsEnabled: true) → defaultMode .off ise .native
+```
+
+Seslendirme, ekran açılışında `SDKFlowHostView` tarafından **otomatik** yapılır; host'un
+modül başına kod yazmasına gerek yoktur. Her modülün kendi `.md` dosyasında o modüle özel
+key/dosya adı ve mod örneği vardır. Tam ayrıntı: [ReadAloud](ReadAloud/ReadAloud.md).
+
+> ⚠️ Buradaki "sesli okuma" (TTS), tablodaki **Konuşma** (`.speech` / konuşma-tanıma)
+> modülüyle karıştırılmamalıdır — ayrı şeylerdir.
 </content>

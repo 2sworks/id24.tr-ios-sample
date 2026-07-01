@@ -171,4 +171,30 @@ struct MyCallView: View {
 - İşaret dili gerekiyorsa (`connectToSignLang`) `checkSignLangIfNeeded()` kapıyı açar; bkz. [İşaret Dili](../SignLang/SignLang.md).
 - Bağlantı koparsa `showLostConnection` overlay'i devreye girer; bkz. [Bağlantı Koptu](../LostConnection/LostConnection.md).
 - Modül sırası bu ekranda tükenirse ThankYou'ya **statülü** geçilir (görüşme sonucu).
+
+---
+
+## Sesli Okuma (Read-Aloud)
+
+Bu modül ekranı açıldığında yönergesi otomatik seslendirilebilir. Mod **modül bazında**
+seçilir; tam ayrıntı: [ReadAloud](../ReadAloud/ReadAloud.md).
+
+- **Metin key'i:** `CallScreenTts`  ·  **Custom audio dosyası:** `CallScreenTts.m4a`
+- **Native (Siri / sistem sesi):**
+  ```swift
+  SDKSpeechConfig.shared.setMode(.native, for: .waitScreen)
+  ```
+- **Custom audio (kendi kaydın):** bundle'a `CallScreenTts.m4a` koy →
+  ```swift
+  SDKSpeechConfig.shared.audioBundle = Bundle.main
+  SDKSpeechConfig.shared.setMode(.customAudio, for: .waitScreen)   // dosya yoksa native'e düşer
+  ```
+- **Kapalı:** `SDKSpeechConfig.shared.setMode(.off, for: .waitScreen)`
+- **Metni ez:** `SDKLocalization.shared.setOverride(key: .callScreenTts, language: .tr, value: "...")`
+
+Seslendirme, ekran açılışında `SDKFlowHostView` tarafından otomatik yapılır — modül tarafında
+ekstra kod gerekmez.
+
+> ⚠️ Görüşme WebRTC sesiyle çakışmasın diye okuma `.duckOthers` ile kısılır; canlı görüşme başladıktan sonra `.off` önerilir.
+
 </content>

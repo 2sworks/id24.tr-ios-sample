@@ -89,4 +89,19 @@ struct MySignLangView: View {
 - Bu ekran genelde CallScreen tarafından `showSignLangGate` ile sunulur; tek başına bir
   modül rotası (`SDKModuleRoute`) yoktur.
 - `connectToSignLang` setupSDK'daki `signLangSupport` parametresiyle de başlatılabilir.
+
+---
+
+## Sesli Okuma (Read-Aloud)
+
+Bu ekran bir **overlay**'dir ve akış rotası (`route.ttsKey`) yoktur; bu yüzden **otomatik
+sesli okuma uygulanmaz**. Gerekirse metni elle okutabilirsiniz:
+
+```swift
+SDKSpeechService.shared.speak(text: "…")   // native (Siri)
+SDKSpeechService.shared.stop()
+```
+
+Genel bilgi: [ReadAloud](../ReadAloud/ReadAloud.md).
+
 </content>

@@ -22,7 +22,6 @@ import IdentifySDK
 struct AddressConfirmExample: View {
     var body: some View {
         SDKAddressConfirmView()
-            .showcaseThemed(primary: IDColor.accentPurple) // mor
     }
 }
 

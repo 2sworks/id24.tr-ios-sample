@@ -96,4 +96,30 @@ struct MyVideoView: View {
 ## Notlar
 - Video boyutu `manager.requestMaxBodySize`'ı aşarsa `videoSelected` reddeder; süre sınırı `videoTimeLimit` (5 sn).
 - Konuşma doğrulama opsiyoneldir; `speechSuccess`/`recognizedText` yalnızca okuma-metni senaryosunda anlamlıdır.
+
+---
+
+## Sesli Okuma (Read-Aloud)
+
+Bu modül ekranı açıldığında yönergesi otomatik seslendirilebilir. Mod **modül bazında**
+seçilir; tam ayrıntı: [ReadAloud](../ReadAloud/ReadAloud.md).
+
+- **Metin key'i:** `VideoRecorderTts`  ·  **Custom audio dosyası:** `VideoRecorderTts.m4a`
+- **Native (Siri / sistem sesi):**
+  ```swift
+  SDKSpeechConfig.shared.setMode(.native, for: .videoRecord)
+  ```
+- **Custom audio (kendi kaydın):** bundle'a `VideoRecorderTts.m4a` koy →
+  ```swift
+  SDKSpeechConfig.shared.audioBundle = Bundle.main
+  SDKSpeechConfig.shared.setMode(.customAudio, for: .videoRecord)   // dosya yoksa native'e düşer
+  ```
+- **Kapalı:** `SDKSpeechConfig.shared.setMode(.off, for: .videoRecord)`
+- **Metni ez:** `SDKLocalization.shared.setOverride(key: .videoRecorderTts, language: .tr, value: "...")`
+
+Seslendirme, ekran açılışında `SDKFlowHostView` tarafından otomatik yapılır — modül tarafında
+ekstra kod gerekmez.
+
+> ⚠️ Kayıt sırasında mikrofon açıktır; native okuma kayda karışabilir. Yönergeyi kayıt BAŞLAMADAN okutun ya da `.customAudio` / `.off` tercih edin.
+
 </content>

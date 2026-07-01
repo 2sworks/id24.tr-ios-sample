@@ -127,4 +127,28 @@ struct MyPrepareView: View {
 ## Notlar
 - `needsSpeedTest` `false` ise hız testi atlanabilir; yine de `completePrepare()` çağrılmalı.
 - İzin reddinde `showSettingsAlert` + `settingsOpenAction` ile kullanıcıyı Ayarlar'a yönlendirin.
+
+---
+
+## Sesli Okuma (Read-Aloud)
+
+Bu modül ekranı açıldığında yönergesi otomatik seslendirilebilir. Mod **modül bazında**
+seçilir; tam ayrıntı: [ReadAloud](../ReadAloud/ReadAloud.md).
+
+- **Metin key'i:** `PrepareTts`  ·  **Custom audio dosyası:** `PrepareTts.m4a`
+- **Native (Siri / sistem sesi):**
+  ```swift
+  SDKSpeechConfig.shared.setMode(.native, for: .prepare)
+  ```
+- **Custom audio (kendi kaydın):** bundle'a `PrepareTts.m4a` koy →
+  ```swift
+  SDKSpeechConfig.shared.audioBundle = Bundle.main
+  SDKSpeechConfig.shared.setMode(.customAudio, for: .prepare)   // dosya yoksa native'e düşer
+  ```
+- **Kapalı:** `SDKSpeechConfig.shared.setMode(.off, for: .prepare)`
+- **Metni ez:** `SDKLocalization.shared.setOverride(key: .prepareTts, language: .tr, value: "...")`
+
+Seslendirme, ekran açılışında `SDKFlowHostView` tarafından otomatik yapılır — modül tarafında
+ekstra kod gerekmez.
+
 </content>

@@ -86,4 +86,28 @@ struct MySignatureView: View {
 ## Notlar
 - Kendi tuvalinizi kullansanız bile imza görselini SDK'ya `uploadSignature` ile verin; kendi POST'unuzu atmayın (bypass).
 - `clearSignature()` sonrası `signatureDrawn` tekrar `false` olur, "Gönder" pasifleşir.
+
+---
+
+## Sesli Okuma (Read-Aloud)
+
+Bu modül ekranı açıldığında yönergesi otomatik seslendirilebilir. Mod **modül bazında**
+seçilir; tam ayrıntı: [ReadAloud](../ReadAloud/ReadAloud.md).
+
+- **Metin key'i:** `SignatureTts`  ·  **Custom audio dosyası:** `SignatureTts.m4a`
+- **Native (Siri / sistem sesi):**
+  ```swift
+  SDKSpeechConfig.shared.setMode(.native, for: .signature)
+  ```
+- **Custom audio (kendi kaydın):** bundle'a `SignatureTts.m4a` koy →
+  ```swift
+  SDKSpeechConfig.shared.audioBundle = Bundle.main
+  SDKSpeechConfig.shared.setMode(.customAudio, for: .signature)   // dosya yoksa native'e düşer
+  ```
+- **Kapalı:** `SDKSpeechConfig.shared.setMode(.off, for: .signature)`
+- **Metni ez:** `SDKLocalization.shared.setOverride(key: .signatureTts, language: .tr, value: "...")`
+
+Seslendirme, ekran açılışında `SDKFlowHostView` tarafından otomatik yapılır — modül tarafında
+ekstra kod gerekmez.
+
 </content>

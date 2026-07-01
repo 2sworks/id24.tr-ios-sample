@@ -142,4 +142,28 @@ struct MyIdCardScanView: View {
 ## Notlar
 - `scanPassport` yalnızca kart tipi `.passport` seçildiğinde gerekir; `comingData: FrontIdInfo` ön bilgileri taşır.
 - OCR cihazda çalışır (`ocrManager.frontScanner`); ağ yalnızca `uploadIdPhoto` için kullanılır.
+
+---
+
+## Sesli Okuma (Read-Aloud)
+
+Bu modül ekranı açıldığında yönergesi otomatik seslendirilebilir. Mod **modül bazında**
+seçilir; tam ayrıntı: [ReadAloud](../ReadAloud/ReadAloud.md).
+
+- **Metin key'i:** `IdCardTts`  ·  **Custom audio dosyası:** `IdCardTts.m4a`
+- **Native (Siri / sistem sesi):**
+  ```swift
+  SDKSpeechConfig.shared.setMode(.native, for: .idCard)
+  ```
+- **Custom audio (kendi kaydın):** bundle'a `IdCardTts.m4a` koy →
+  ```swift
+  SDKSpeechConfig.shared.audioBundle = Bundle.main
+  SDKSpeechConfig.shared.setMode(.customAudio, for: .idCard)   // dosya yoksa native'e düşer
+  ```
+- **Kapalı:** `SDKSpeechConfig.shared.setMode(.off, for: .idCard)`
+- **Metni ez:** `SDKLocalization.shared.setOverride(key: .idCardTts, language: .tr, value: "...")`
+
+Seslendirme, ekran açılışında `SDKFlowHostView` tarafından otomatik yapılır — modül tarafında
+ekstra kod gerekmez.
+
 </content>

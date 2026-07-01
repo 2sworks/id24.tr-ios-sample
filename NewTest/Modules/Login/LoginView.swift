@@ -30,7 +30,6 @@ enum LoginMode: CaseIterable {
 struct LoginView: View {
 
     @StateObject private var viewModel = LoginViewModel()
-    @ObservedObject private var speechService = SDKSpeechService.shared
     @EnvironmentObject private var coordinator: SDKFlowCoordinator
     @Environment(\.colorScheme) private var colorScheme
 
@@ -92,6 +91,11 @@ struct LoginView: View {
         }
         .ignoresSafeArea(.keyboard)
         .navigationBarHidden(true)
+        .onAppear {
+            // Kalıcı "Sesli Okuma" tercihini uygula (uygulama yeniden açıldığında da geçerli).
+            SDKSpeechConfig.shared.defaultMode =
+                UserDefaults.standard.bool(forKey: "sdkReadAloudEnabled") ? .native : .off
+        }
         .overlay {
             if viewModel.isLoading {
                 loadingOverlay
@@ -176,7 +180,7 @@ struct LoginView: View {
                     pendingNavigation = item
                     showHamburgerMenu = false
                 }
-                .presentationDetents([.height(280)])
+                .presentationDetents([.height(350)])
                 .presentationDragIndicator(.visible)
                 .presentationBackground(.ultraThinMaterial)
             } else if #available(iOS 16.0, *) {
@@ -184,7 +188,7 @@ struct LoginView: View {
                     pendingNavigation = item
                     showHamburgerMenu = false
                 }
-                .presentationDetents([.height(280)])
+                .presentationDetents([.height(350)])
                 .presentationDragIndicator(.visible)
             } else {
                 HamburgerMenuSheet { item in
@@ -222,30 +226,10 @@ struct LoginView: View {
     private var loadingOverlay: some View {
         ZStack {
             Color.black.opacity(0.45).ignoresSafeArea()
-            switch speechService.state {
-            case .downloading(let progress):
-                ttsProgressCard(progress: progress)
-            default:
-                ProgressView()
-                    .scaleEffect(1.5)
-                    .tint(.white)
-            }
+            ProgressView()
+                .scaleEffect(1.5)
+                .tint(.white)
         }
-    }
-
-    private func ttsProgressCard(progress: Double) -> some View {
-        VStack(spacing: IDSpacing.md) {
-            ProgressView(value: progress)
-                .progressViewStyle(.linear)
-                .tint(IDColor.successBright)
-                .frame(width: 220)
-
-            Text("Hazırlıklarımız son hızla devam ediyor.")
-                .font(IDFont.bodyRegular(.regular))
-                .foregroundColor(.white)
-                .multilineTextAlignment(.center)
-        }
-        .padding(IDSpacing.xl)
     }
 
     private func connect() {
@@ -656,6 +640,8 @@ private struct ToggleOptionRow: View {
 private struct HamburgerMenuSheet: View {
     let onSelect: (HamburgerMenuItem) -> Void
     @ObservedObject private var nfxState = NFXDebugState.shared
+    /// Sesli okuma (TTS) tercihi; kalıcı saklanır ve SDKSpeechConfig'e uygulanır.
+    @AppStorage("sdkReadAloudEnabled") private var readAloudEnabled = false
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
 
@@ -687,6 +673,17 @@ private struct HamburgerMenuSheet: View {
                 MenuOptionRow(icon: .init(.icBugBeetle), title: "Sunucu Ayarları") {
                     onSelect(.serverList)
                 }
+                MenuOptionRow(
+                    icon: Image(systemName: "speaker.wave.2.fill"),
+                    title: "Sesli Okuma (TTS)",
+                    isOn: Binding(
+                        get: { readAloudEnabled },
+                        set: { newValue in
+                            readAloudEnabled = newValue
+                            SDKSpeechConfig.shared.defaultMode = newValue ? .native : .off
+                        }
+                    )
+                )
                 MenuOptionRow(
                     icon: Image(systemName: "ladybug.fill"),
                     title: "Network Debug (Netfox)",

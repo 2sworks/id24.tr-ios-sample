@@ -113,4 +113,28 @@ struct MyOVDView: View {
 ## Notlar
 - `requiresHologramStep = false` yaparsanız hologram adımı atlanır (düşük donanımlı senaryolar).
 - `ingest` her karede çağrılır; pahalı olduğundan kamera frame rate'ini makul tutun.
+
+---
+
+## Sesli Okuma (Read-Aloud)
+
+Bu modül ekranı açıldığında yönergesi otomatik seslendirilebilir. Mod **modül bazında**
+seçilir; tam ayrıntı: [ReadAloud](../ReadAloud/ReadAloud.md).
+
+- **Metin key'i:** `IdCardOVDTts`  ·  **Custom audio dosyası:** `IdCardOVDTts.m4a`
+- **Native (Siri / sistem sesi):**
+  ```swift
+  SDKSpeechConfig.shared.setMode(.native, for: .idcard_w_ovd)
+  ```
+- **Custom audio (kendi kaydın):** bundle'a `IdCardOVDTts.m4a` koy →
+  ```swift
+  SDKSpeechConfig.shared.audioBundle = Bundle.main
+  SDKSpeechConfig.shared.setMode(.customAudio, for: .idcard_w_ovd)   // dosya yoksa native'e düşer
+  ```
+- **Kapalı:** `SDKSpeechConfig.shared.setMode(.off, for: .idcard_w_ovd)`
+- **Metni ez:** `SDKLocalization.shared.setOverride(key: .idCardOVDTts, language: .tr, value: "...")`
+
+Seslendirme, ekran açılışında `SDKFlowHostView` tarafından otomatik yapılır — modül tarafında
+ekstra kod gerekmez.
+
 </content>

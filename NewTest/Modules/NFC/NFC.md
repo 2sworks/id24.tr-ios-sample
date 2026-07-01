@@ -102,4 +102,28 @@ struct MyNfcView: View {
 - NFC okuma sistem NFC sheet'ini açar; simülatörde çalışmaz, gerçek cihaz gerekir.
 - MRZ alanları yanlışsa `showEditScreen = true` + `saveManualDates()` ile düzeltilebilir.
 - `onSkipRequested`, NFC çoklu denemede başarısız olursa akışı kilitlememek içindir.
+
+---
+
+## Sesli Okuma (Read-Aloud)
+
+Bu modül ekranı açıldığında yönergesi otomatik seslendirilebilir. Mod **modül bazında**
+seçilir; tam ayrıntı: [ReadAloud](../ReadAloud/ReadAloud.md).
+
+- **Metin key'i:** `NfcTts`  ·  **Custom audio dosyası:** `NfcTts.m4a`
+- **Native (Siri / sistem sesi):**
+  ```swift
+  SDKSpeechConfig.shared.setMode(.native, for: .nfc)
+  ```
+- **Custom audio (kendi kaydın):** bundle'a `NfcTts.m4a` koy →
+  ```swift
+  SDKSpeechConfig.shared.audioBundle = Bundle.main
+  SDKSpeechConfig.shared.setMode(.customAudio, for: .nfc)   // dosya yoksa native'e düşer
+  ```
+- **Kapalı:** `SDKSpeechConfig.shared.setMode(.off, for: .nfc)`
+- **Metni ez:** `SDKLocalization.shared.setOverride(key: .nfcTts, language: .tr, value: "...")`
+
+Seslendirme, ekran açılışında `SDKFlowHostView` tarafından otomatik yapılır — modül tarafında
+ekstra kod gerekmez.
+
 </content>

@@ -30,10 +30,10 @@ struct RootView: View {
         didConfigure = true
 
         // 1) Host-side localization override: dışarıdan SDK string'ini değiştir.
-        SDKLocalization.shared.registerOverrides([
-            .tr: ["Connect": "Bağlan (host)"],
-            .eng: ["Connect": "Connect (host)"]
-        ])
+//        SDKLocalization.shared.registerOverrides([
+//            .tr: ["Connect": "Bağlan (host)"],
+//            .eng: ["Connect": "Connect (host)"]
+//        ])
 
         // 2) External ekran ekleme: Selfie modülünden ÖNCE bir bilgilendirme ekranı.
 //        registry.custom("welcome") {
@@ -46,8 +46,8 @@ struct RootView: View {
 //        coordinator.insert(["welcome"], before: .selfie)
 
         // 3) Mevcut bir SDK modülünü host tasarımıyla override: AddressConfirm farklı renkte.
-        registry.override(.addressConfirm) {
-            AddressConfirmExample()
-        }
+//        registry.override(.addressConfirm) {
+//            AddressConfirmExample()
+//        }
     }
 }

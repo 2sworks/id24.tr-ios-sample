@@ -41,4 +41,28 @@ ayrı bir `SDKBaseModuleViewModel` VM'i yoktur.
   Selfie/Liveness ile aynı VM-tablosu formatına geçer.
 - O güne kadar: gerçek host-tarafı özelleştirme gerekiyorsa ayrık `.selfie` + `.liveness`
   kullanın.
+
+---
+
+## Sesli Okuma (Read-Aloud)
+
+Bu modül ekranı açıldığında yönergesi otomatik seslendirilebilir. Mod **modül bazında**
+seçilir; tam ayrıntı: [ReadAloud](../ReadAloud/ReadAloud.md).
+
+- **Metin key'i:** `SelfieWithLivenessTts`  ·  **Custom audio dosyası:** `SelfieWithLivenessTts.m4a`
+- **Native (Siri / sistem sesi):**
+  ```swift
+  SDKSpeechConfig.shared.setMode(.native, for: .selfieWithLiveness)
+  ```
+- **Custom audio (kendi kaydın):** bundle'a `SelfieWithLivenessTts.m4a` koy →
+  ```swift
+  SDKSpeechConfig.shared.audioBundle = Bundle.main
+  SDKSpeechConfig.shared.setMode(.customAudio, for: .selfieWithLiveness)   // dosya yoksa native'e düşer
+  ```
+- **Kapalı:** `SDKSpeechConfig.shared.setMode(.off, for: .selfieWithLiveness)`
+- **Metni ez:** `SDKLocalization.shared.setOverride(key: .selfieWithLivenessTts, language: .tr, value: "...")`
+
+Seslendirme, ekran açılışında `SDKFlowHostView` tarafından otomatik yapılır — modül tarafında
+ekstra kod gerekmez.
+
 </content>

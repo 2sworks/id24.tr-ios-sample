@@ -100,4 +100,28 @@ struct MyLivenessView: View {
 ## Notlar
 - `isRecordingEnabled` `false` ise `uploadVideo` boş `Data` ile çağrılabilir; VM yine `onCompleted`'a düşer.
 - `allowBlink/allowSmile/...` ile hangi adımların isteneceğini host belirleyebilir.
+
+---
+
+## Sesli Okuma (Read-Aloud)
+
+Bu modül ekranı açıldığında yönergesi otomatik seslendirilebilir. Mod **modül bazında**
+seçilir; tam ayrıntı: [ReadAloud](../ReadAloud/ReadAloud.md).
+
+- **Metin key'i:** `LivenessTts`  ·  **Custom audio dosyası:** `LivenessTts.m4a`
+- **Native (Siri / sistem sesi):**
+  ```swift
+  SDKSpeechConfig.shared.setMode(.native, for: .livenessDetection)
+  ```
+- **Custom audio (kendi kaydın):** bundle'a `LivenessTts.m4a` koy →
+  ```swift
+  SDKSpeechConfig.shared.audioBundle = Bundle.main
+  SDKSpeechConfig.shared.setMode(.customAudio, for: .livenessDetection)   // dosya yoksa native'e düşer
+  ```
+- **Kapalı:** `SDKSpeechConfig.shared.setMode(.off, for: .livenessDetection)`
+- **Metni ez:** `SDKLocalization.shared.setOverride(key: .livenessTts, language: .tr, value: "...")`
+
+Seslendirme, ekran açılışında `SDKFlowHostView` tarafından otomatik yapılır — modül tarafında
+ekstra kod gerekmez.
+
 </content>

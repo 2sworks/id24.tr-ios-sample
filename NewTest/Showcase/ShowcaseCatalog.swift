@@ -27,7 +27,7 @@ struct ShowcaseItem: Identifiable {
 }
 
 /// Katalogdaki bölüm sırası.
-let showcaseCategories = ["Modüller", "Tasarım Sistemi", "Olay Örgüsü / Telemetri", "Çapraz Platform (RN/Flutter)"]
+let showcaseCategories = ["Modüller", "Tasarım Sistemi", "Sesli Okuma", "Olay Örgüsü / Telemetri", "Çapraz Platform (RN/Flutter)"]
 
 // MARK: - Katalog
 
@@ -309,6 +309,48 @@ enum ShowcaseCatalog {
             //   • Host custom ekranları (registry.custom) zaten kendi metin/ikonunu kullanır;
             //     bu API yalnızca SDK'nın HAZIR ekranlarını markalamak içindir.
             // NOT: Lokalizasyon reaktif değil — dili oturum başında (Login) seçip akışa girin.
+            """
+        ),
+
+        // MARK: Sesli Okuma (read-aloud / erişilebilirlik)
+        .init(
+            id: "speech_read_aloud", title: "Sesli Okuma (Read-Aloud)",
+            subtitle: "Modül yönergelerini native (Siri) sesle oku veya kendi ses kaydını çal",
+            icon: "speaker.wave.2.circle",
+            category: "Sesli Okuma",
+            liveView: { AnyView(SpeechShowcaseView()) },
+            integrationCode: """
+            // Sesli okuma modül bazında SDKSpeechConfig.shared ile açılır; seslendirme
+            // ekran açılışında SDKFlowHostView tarafından OTOMATİK yapılır (ekstra kod yok).
+
+            // 1) Tümü native (Siri / sistem sesi, *_tts metnini okur):
+            SDKSpeechConfig.shared.setModeForAll(.native)
+
+            // 2) Per-modül karışık:
+            SDKSpeechConfig.shared.defaultMode = .native
+            SDKSpeechConfig.shared.setMode(.customAudio, for: [.selfie, .nfc])
+            SDKSpeechConfig.shared.setMode(.off, for: .livenessDetection)
+
+            // 3) Kısayol — setupSDK(ttsEnabled: true), defaultMode .off ise .native yapar.
+            """,
+            customizationCode: """
+            // CUSTOM AUDIO — kendi ses kaydını çal:
+            // Bundle'a <SDKKeyword.rawValue>.m4a koy: SelfieTts.m4a, NfcTts.m4a, PrepareTts.m4a ...
+            SDKSpeechConfig.shared.audioBundle = Bundle.main       // önce burada aranır
+            SDKSpeechConfig.shared.audioFileExtension = "m4a"      // mp3/wav/caf de olur
+            SDKSpeechConfig.shared.setMode(.customAudio, for: .selfie)
+            // Dosya yoksa otomatik native metne düşer (varsayılan açık):
+            SDKSpeechConfig.shared.fallbackToNativeIfAudioMissing = true
+
+            // NATIVE ayarları:
+            SDKSpeechConfig.shared.speechRate = AVSpeechUtteranceDefaultSpeechRate
+            SDKSpeechConfig.shared.pitch = 1.0
+            SDKSpeechConfig.shared.voiceIdentifier = "com.apple.voice.enhanced.tr-TR.Yelda"
+
+            // EKSTRA/ÖZEL key (ör. NFC retry) — modül VM'inden, moduna göre okur/çalar:
+            speak(.nfcRetryTts, in: .nfc)   // native metin ya da NfcRetryTts.m4a
+            // Yeni metni ekle/ez (XCFramework JSON'u salt-okunur; override runtime'da):
+            SDKLocalization.shared.registerOverrides([.tr: ["NfcRetryTts": "Tekrar deneyin."]])
             """
         ),
 
