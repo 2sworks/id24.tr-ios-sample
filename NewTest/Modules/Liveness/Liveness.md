@@ -106,14 +106,15 @@ struct MyLivenessView: View {
 ## Sesli Okuma (Read-Aloud)
 
 Bu modül ekranı açıldığında yönergesi otomatik seslendirilebilir. Mod **modül bazında**
-seçilir; tam ayrıntı: [ReadAloud](../ReadAloud/ReadAloud.md).
+seçilir; tam ayrıntı: [ReadAloud](../ReadAloud.md).
 
-- **Metin key'i:** `LivenessTts`  ·  **Custom audio dosyası:** `LivenessTts.m4a`
+- **Metin key'i:** `LivenessTts`  ·  **Custom audio dosyası:** `LivenessTts.<uzantı>`
+  (uzantı serbest: `m4a`/`mp3`/`wav`/`caf`/`aac`/`aiff` otomatik denenir)
 - **Native (Siri / sistem sesi):**
   ```swift
   SDKSpeechConfig.shared.setMode(.native, for: .livenessDetection)
   ```
-- **Custom audio (kendi kaydın):** bundle'a `LivenessTts.m4a` koy →
+- **Custom audio (kendi kaydın):** bundle'a `LivenessTts.<uzantı>` koy (örn. `LivenessTts.m4a` veya `LivenessTts.mp3`) →
   ```swift
   SDKSpeechConfig.shared.audioBundle = Bundle.main
   SDKSpeechConfig.shared.setMode(.customAudio, for: .livenessDetection)   // dosya yoksa native'e düşer

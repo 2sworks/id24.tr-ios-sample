@@ -47,14 +47,15 @@ ayrı bir `SDKBaseModuleViewModel` VM'i yoktur.
 ## Sesli Okuma (Read-Aloud)
 
 Bu modül ekranı açıldığında yönergesi otomatik seslendirilebilir. Mod **modül bazında**
-seçilir; tam ayrıntı: [ReadAloud](../ReadAloud/ReadAloud.md).
+seçilir; tam ayrıntı: [ReadAloud](../ReadAloud.md).
 
-- **Metin key'i:** `SelfieWithLivenessTts`  ·  **Custom audio dosyası:** `SelfieWithLivenessTts.m4a`
+- **Metin key'i:** `SelfieWithLivenessTts`  ·  **Custom audio dosyası:** `SelfieWithLivenessTts.<uzantı>`
+  (uzantı serbest: `m4a`/`mp3`/`wav`/`caf`/`aac`/`aiff` otomatik denenir)
 - **Native (Siri / sistem sesi):**
   ```swift
   SDKSpeechConfig.shared.setMode(.native, for: .selfieWithLiveness)
   ```
-- **Custom audio (kendi kaydın):** bundle'a `SelfieWithLivenessTts.m4a` koy →
+- **Custom audio (kendi kaydın):** bundle'a `SelfieWithLivenessTts.<uzantı>` koy (örn. `SelfieWithLivenessTts.m4a` veya `SelfieWithLivenessTts.mp3`) →
   ```swift
   SDKSpeechConfig.shared.audioBundle = Bundle.main
   SDKSpeechConfig.shared.setMode(.customAudio, for: .selfieWithLiveness)   // dosya yoksa native'e düşer

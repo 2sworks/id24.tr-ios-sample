@@ -102,6 +102,6 @@ SDKSpeechService.shared.speak(text: "…")   // native (Siri)
 SDKSpeechService.shared.stop()
 ```
 
-Genel bilgi: [ReadAloud](../ReadAloud/ReadAloud.md).
+Genel bilgi: [ReadAloud](../ReadAloud.md).
 
 </content>

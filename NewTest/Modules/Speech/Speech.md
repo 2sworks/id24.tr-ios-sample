@@ -101,14 +101,15 @@ struct MySpeechView: View {
 ## Sesli Okuma (Read-Aloud)
 
 Bu modül ekranı açıldığında yönergesi otomatik seslendirilebilir. Mod **modül bazında**
-seçilir; tam ayrıntı: [ReadAloud](../ReadAloud/ReadAloud.md).
+seçilir; tam ayrıntı: [ReadAloud](../ReadAloud.md).
 
-- **Metin key'i:** `SpeechTts`  ·  **Custom audio dosyası:** `SpeechTts.m4a`
+- **Metin key'i:** `SpeechTts`  ·  **Custom audio dosyası:** `SpeechTts.<uzantı>`
+  (uzantı serbest: `m4a`/`mp3`/`wav`/`caf`/`aac`/`aiff` otomatik denenir)
 - **Native (Siri / sistem sesi):**
   ```swift
   SDKSpeechConfig.shared.setMode(.native, for: .speech)
   ```
-- **Custom audio (kendi kaydın):** bundle'a `SpeechTts.m4a` koy →
+- **Custom audio (kendi kaydın):** bundle'a `SpeechTts.<uzantı>` koy (örn. `SpeechTts.m4a` veya `SpeechTts.mp3`) →
   ```swift
   SDKSpeechConfig.shared.audioBundle = Bundle.main
   SDKSpeechConfig.shared.setMode(.customAudio, for: .speech)   // dosya yoksa native'e düşer

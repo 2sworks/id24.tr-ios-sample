@@ -108,14 +108,15 @@ struct MyNfcView: View {
 ## Sesli Okuma (Read-Aloud)
 
 Bu modül ekranı açıldığında yönergesi otomatik seslendirilebilir. Mod **modül bazında**
-seçilir; tam ayrıntı: [ReadAloud](../ReadAloud/ReadAloud.md).
+seçilir; tam ayrıntı: [ReadAloud](../ReadAloud.md).
 
-- **Metin key'i:** `NfcTts`  ·  **Custom audio dosyası:** `NfcTts.m4a`
+- **Metin key'i:** `NfcTts`  ·  **Custom audio dosyası:** `NfcTts.<uzantı>`
+  (uzantı serbest: `m4a`/`mp3`/`wav`/`caf`/`aac`/`aiff` otomatik denenir)
 - **Native (Siri / sistem sesi):**
   ```swift
   SDKSpeechConfig.shared.setMode(.native, for: .nfc)
   ```
-- **Custom audio (kendi kaydın):** bundle'a `NfcTts.m4a` koy →
+- **Custom audio (kendi kaydın):** bundle'a `NfcTts.<uzantı>` koy (örn. `NfcTts.m4a` veya `NfcTts.mp3`) →
   ```swift
   SDKSpeechConfig.shared.audioBundle = Bundle.main
   SDKSpeechConfig.shared.setMode(.customAudio, for: .nfc)   // dosya yoksa native'e düşer

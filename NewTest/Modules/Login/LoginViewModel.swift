@@ -205,7 +205,10 @@ final class LoginViewModel: ObservableObject {
             supportU18: true,
             AESKey: "SEATSJ8kk0v8+A1LeQsAMbOgL+fSj9pOaUKI5cDMITU=",
             enableAutoRotateOCR: true,
-            ttsEnabled: true
+            // "Sesli Okuma (TTS)" tercihi (Ayarlar menüsündeki toggle). Hardcoded true iken
+            // setupSDK, kapalıyken bile defaultMode .off → .native yükseltip toggle'ı
+            // anlamsız kılıyordu. Artık gerçek tercih geçiliyor.
+            ttsEnabled: UserDefaults.standard.bool(forKey: "sdkReadAloudEnabled")
         ) { [weak self] socketStats, apiResp, webErr in
             guard let self else { return }
             Task { @MainActor in

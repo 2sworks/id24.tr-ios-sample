@@ -106,14 +106,26 @@ struct MyAddressView: View {
 ## Sesli Okuma (Read-Aloud)
 
 Bu modül ekranı açıldığında yönergesi otomatik seslendirilebilir. Mod **modül bazında**
-seçilir; tam ayrıntı: [ReadAloud](../ReadAloud/ReadAloud.md).
+seçilir; tam ayrıntı: [ReadAloud](../ReadAloud.md).
 
-- **Metin key'i:** `AddressConfirmTts`  ·  **Custom audio dosyası:** `AddressConfirmTts.m4a`
+- **Metin key'i:** `AddressConfirmTts`  ·  **Custom audio dosyası:** `AddressConfirmTts.<uzantı>`
+  (uzantı serbest: `m4a`/`mp3`/`wav`/`caf`/`aac`/`aiff` otomatik denenir)
 - **Native (Siri / sistem sesi):**
   ```swift
   SDKSpeechConfig.shared.setMode(.native, for: .addressConf)
   ```
-- **Custom audio (kendi kaydın):** bundle'a `AddressConfirmTts.m4a` koy →
+- **Hazır klip (SDK içinde, yalnız Türkçe):** SDK bundle'ında `AddressConfirmTts_tr.mp3`
+  gelir. Sesli okuma açıkken, host bu modüle açıkça mod atamadıkça: **dil TR ise hazır
+  klip çalar**, diğer dillerde klip bulunmaz ve native okuma (aktif dilin
+  `AddressConfirmTts` metni) devreye girer.
+  Ekstra kod gerekmez; kapatmak/ezmek için modüle açıkça mod ata:
+  ```swift
+  SDKSpeechConfig.shared.setMode(.native, for: .addressConf)   // hazır klibi kullanma
+  ```
+- **Custom audio (kendi kaydın):** `AddressConfirmTts.<uzantı>` (tüm diller) veya
+  `AddressConfirmTts_<dil>.<uzantı>` (örn. `AddressConfirmTts_tr.m4a`, yalnız o dilde)
+  dosyasını bundle'a koy; `audioBundle`/`Bundle.main`'deki dosya SDK'nın hazır klibine
+  göre öncelik kazanır:
   ```swift
   SDKSpeechConfig.shared.audioBundle = Bundle.main
   SDKSpeechConfig.shared.setMode(.customAudio, for: .addressConf)   // dosya yoksa native'e düşer

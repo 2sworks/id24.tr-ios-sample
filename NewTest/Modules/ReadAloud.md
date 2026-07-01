@@ -28,7 +28,7 @@ Ekran açılır → SDKFlowHostView.speakOnAppear(route)
              → SDKSpeechService.speak(route:)
              → mode = SDKSpeechConfig.mode(for: route.sdkModule)
                 • .native      → AVSpeechSynthesizer( translate(route.ttsKey) )
-                • .customAudio → AVAudioPlayer( <route.ttsKey.rawValue>.m4a )  // yoksa native'e düş
+                • .customAudio → AVAudioPlayer( <route.ttsKey.rawValue>.<uzantı> )  // yoksa native'e düş
                 • .off         → sessiz
 Ekrandan ayrılınca → stop()
 ```
@@ -75,14 +75,30 @@ dil sesi cihazda yoksa sistem varsayılanına düşer; okuma yine denenir.
 
 ## 4. Custom audio — kendi ses kaydını çal
 
-Dosya adı konvansiyonu: **`<SDKKeyword.rawValue>.<uzantı>`**. Uzantı varsayılan `m4a`
-(mp3/wav/caf da olur). Arama sırası: `SDKSpeechConfig.audioBundle` → SDK bundle → `Bundle.main`.
+Dosya adı konvansiyonu: **`<SDKKeyword.rawValue>.<uzantı>`**. Uzantı ayarlamak zorunda
+değilsin: önce `audioFileExtension` (varsayılan `m4a`), bulunamazsa diğer desteklenen
+uzantılar (`mp3`/`wav`/`caf`/`aac`/`aiff`) otomatik denenir — yani `SelfieTts.mp3` de
+ekstra ayar olmadan bulunur. Arama sırası: `SDKSpeechConfig.audioBundle` → SDK bundle →
+`Bundle.main`.
 
 ```swift
 SDKSpeechConfig.shared.audioBundle = Bundle.main   // önce burada ara
-SDKSpeechConfig.shared.audioFileExtension = "m4a"
 SDKSpeechConfig.shared.setMode(.customAudio, for: .selfie)
 ```
+
+### Dile özel klip — `<rawValue>_<dil>.<uzantı>`
+
+Bir klibi yalnızca belirli bir dilde çalmak için dosya adına dil son eki ekle
+(`SDKLang` rawValue'ları: `tr`/`eng`/`de`/`az`/`ru`): önce `<rawValue>_<aktifDil>.<uzantı>`,
+yoksa dilsiz `<rawValue>.<uzantı>` aranır. Örn. `SelfieTts_tr.m4a` yalnız TR'de çalar;
+`SelfieTts.m4a` her dilde çalar.
+
+> **Not:** Adres modülü için SDK, kendi bundle'ında hazır **Türkçe** bir klip taşır
+> (`AddressConfirmTts_tr.mp3`). Sesli okuma açıkken, host `.addressConf` için açıkça mod
+> atamadıkça SDK bu klibi otomatik kullanır: dil TR ise klip çalar, diğer dillerde native
+> okunur. Host kendi `AddressConfirmTts[_<dil>].<uzantı>` dosyasını
+> `audioBundle`/`Bundle.main`'e koyarsa o öncelik kazanır;
+> `setMode(.native, for: .addressConf)` hazır klibi tamamen kapatır.
 
 Örnek bundle içeriği:
 ```
@@ -93,7 +109,8 @@ MyApp.app/
   ...
 ```
 
-Modül → dosya adı karşılıkları (route.ttsKey.rawValue):
+Modül → dosya adı karşılıkları (route.ttsKey.rawValue; tabloda `m4a` örnek —
+uzantı serbest, `mp3`/`wav`/`caf`/`aac`/`aiff` de otomatik bulunur):
 
 | Modül | Dosya |
 |---|---|
@@ -108,7 +125,7 @@ Modül → dosya adı karşılıkları (route.ttsKey.rawValue):
 | `.nfc` | `NfcTts.m4a` |
 | `.livenessDetection` | `LivenessTts.m4a` |
 | `.speech` | `SpeechTts.m4a` |
-| `.addressConf` | `AddressConfirmTts.m4a` |
+| `.addressConf` | `AddressConfirmTts.m4a` (SDK bundle'ında hazır `AddressConfirmTts_tr.mp3` var — yalnız TR'de çalar) |
 | `.signature` | `SignatureTts.m4a` |
 | `.videoRecord` (düz video) | `VideoRecorderTts.m4a` |
 | `.videoRecord` (okuma testi) | — (dinamik cümle, yalnız native) |
@@ -140,13 +157,13 @@ SDKLocalization.shared.registerOverrides([
 ])
 ```
 
-**3) Modül VM'inden tetikle** (moda göre native metin ya da `NfcRetryTts.m4a`):
+**3) Modül VM'inden tetikle** (moda göre native metin ya da `NfcRetryTts.<uzantı>`):
 ```swift
 speak(.nfcRetryTts, in: .nfc)
 ```
 
-`speak(_:in:)` verilen modülün moduna bakar; `.customAudio` ise `<rawValue>.m4a`'yı çalar,
-yoksa native metne düşer.
+`speak(_:in:)` verilen modülün moduna bakar; `.customAudio` ise `<rawValue>.<uzantı>`
+klibini çalar, yoksa native metne düşer.
 
 ---
 
@@ -244,8 +261,8 @@ ve kart tipine** göre farklı key ile bağlar; böylece kullanıcı hangi taraf
 | **Pasaport** (veri sayfası) | `.passportTts` — "Pasaportunuzun kimlik bilgilerinin olduğu sayfayı…" |
 
 Beş dilde (TR/EN/DE/RU/AZ) karşılıkları hazırdır; host isterse `SDKLocalization.setOverride`
-ile metinleri veya `.customAudio` modunda `IdCardFrontTts.m4a` / `IdCardBackTts.m4a` /
-`PassportTts.m4a` ses dosyalarını değiştirebilir. Genel `.idCardTts` (yön belirtmeyen) hâlâ
+ile metinleri veya `.customAudio` modunda `IdCardFrontTts.<uzantı>` / `IdCardBackTts.<uzantı>` /
+`PassportTts.<uzantı>` ses dosyalarını değiştirebilir. Genel `.idCardTts` (yön belirtmeyen) hâlâ
 mevcuttur; standalone `IdentityScannerView` kullananlar dilediği key'i geçebilir.
 
 > idCard modülünde yönerge iki anda okunur: modül seçim ekranına girişte (`.idCardTts`) ve
@@ -266,7 +283,8 @@ func setMode(_:for: SdkModules)          // tek modül
 func setMode(_:for: [SdkModules])        // çoklu
 func setModeForAll(_:)                    // default + override temizle
 var speechRate: Float; var pitch: Float; var voiceIdentifier: String?
-var audioBundle: Bundle?; var audioFileExtension: String
+var audioBundle: Bundle?
+var audioFileExtension: String             // öncelikli uzantı; diğerleri otomatik denenir
 var fallbackToNativeIfAudioMissing: Bool  // varsayılan true
 
 // Seslendirme (SDKSpeechService.shared)

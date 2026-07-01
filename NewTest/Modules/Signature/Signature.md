@@ -92,14 +92,15 @@ struct MySignatureView: View {
 ## Sesli Okuma (Read-Aloud)
 
 Bu modül ekranı açıldığında yönergesi otomatik seslendirilebilir. Mod **modül bazında**
-seçilir; tam ayrıntı: [ReadAloud](../ReadAloud/ReadAloud.md).
+seçilir; tam ayrıntı: [ReadAloud](../ReadAloud.md).
 
-- **Metin key'i:** `SignatureTts`  ·  **Custom audio dosyası:** `SignatureTts.m4a`
+- **Metin key'i:** `SignatureTts`  ·  **Custom audio dosyası:** `SignatureTts.<uzantı>`
+  (uzantı serbest: `m4a`/`mp3`/`wav`/`caf`/`aac`/`aiff` otomatik denenir)
 - **Native (Siri / sistem sesi):**
   ```swift
   SDKSpeechConfig.shared.setMode(.native, for: .signature)
   ```
-- **Custom audio (kendi kaydın):** bundle'a `SignatureTts.m4a` koy →
+- **Custom audio (kendi kaydın):** bundle'a `SignatureTts.<uzantı>` koy (örn. `SignatureTts.m4a` veya `SignatureTts.mp3`) →
   ```swift
   SDKSpeechConfig.shared.audioBundle = Bundle.main
   SDKSpeechConfig.shared.setMode(.customAudio, for: .signature)   // dosya yoksa native'e düşer
