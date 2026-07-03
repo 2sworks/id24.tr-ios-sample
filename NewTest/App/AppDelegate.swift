@@ -7,7 +7,6 @@
 
 import UIKit
 import SwiftUI
-import IQKeyboardManagerSwift
 import netfox
 import IdentifySDK
 import CoreData
@@ -19,8 +18,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         UIApplication.shared.isIdleTimerDisabled = true
-        IQKeyboardManager.shared.enable = true
-        IQKeyboardManager.shared.enableAutoToolbar = true
         NFX.sharedInstance().start()
         NotificationCenter.default.addObserver(forName: .sdkNetworkDebugShake, object: nil, queue: .main) { _ in
             NFX.sharedInstance().show()

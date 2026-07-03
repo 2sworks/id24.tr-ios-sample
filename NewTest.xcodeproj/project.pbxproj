@@ -24,7 +24,6 @@
 		480961182C64E70C00B9E6D5 /* v2api.identify.com.tr.cer in Resources */ = {isa = PBXBuildFile; fileRef = 48BFF0D02BBAF3940088D67E /* v2api.identify.com.tr.cer */; };
 		480C1E4F2BDB8B8D0076D28B /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 480C1E4E2BDB8B8D0076D28B /* PrivacyInfo.xcprivacy */; };
 		48171405294716830095A64F /* netfox in Frameworks */ = {isa = PBXBuildFile; productRef = 48171404294716830095A64F /* netfox */; settings = {ATTRIBUTES = (Required, ); }; };
-		4831E1F32B69284400B67891 /* IQKeyboardManagerSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 4831E1F22B69284400B67891 /* IQKeyboardManagerSwift */; };
 		483BDB0F28F459CC00635BCC /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 483BDB0E28F459CC00635BCC /* AppDelegate.swift */; };
 		483BDB1828F459CC00635BCC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 483BDB1728F459CC00635BCC /* Assets.xcassets */; };
 		483BDB1B28F459CC00635BCC /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 483BDB1928F459CC00635BCC /* LaunchScreen.storyboard */; };
@@ -36,11 +35,8 @@
 		486A111E2B07BED000A34623 /* CameraPermission in Frameworks */ = {isa = PBXBuildFile; productRef = 486A111D2B07BED000A34623 /* CameraPermission */; };
 		486A11202B07BED000A34623 /* MicrophonePermission in Frameworks */ = {isa = PBXBuildFile; productRef = 486A111F2B07BED000A34623 /* MicrophonePermission */; };
 		486A11222B07BED000A34623 /* SpeechRecognizerPermission in Frameworks */ = {isa = PBXBuildFile; productRef = 486A11212B07BED000A34623 /* SpeechRecognizerPermission */; };
-		4880596E291D0EBD0058C7CD /* Toast in Frameworks */ = {isa = PBXBuildFile; productRef = 4880596D291D0EBD0058C7CD /* Toast */; settings = {ATTRIBUTES = (Required, ); }; };
 		488B29FB2E05BFDC00D1B6A0 /* Env.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 488B29F92E05BFDC00D1B6A0 /* Env.xcdatamodeld */; };
 		48AB73FF291A762100F591A4 /* SwiftSignatureView in Frameworks */ = {isa = PBXBuildFile; productRef = 48AB73FE291A762100F591A4 /* SwiftSignatureView */; settings = {ATTRIBUTES = (Required, ); }; };
-		48D802292924F6B000B9BB83 /* CHIOTPField in Frameworks */ = {isa = PBXBuildFile; productRef = 48D802282924F6B000B9BB83 /* CHIOTPField */; settings = {ATTRIBUTES = (Required, ); }; };
-		48F0867829F7CA4E00FCA4BF /* QKMRZScanner in Frameworks */ = {isa = PBXBuildFile; productRef = 48F0867729F7CA4E00FCA4BF /* QKMRZScanner */; };
 		4EB8F9AEC50F3D16E89F571A /* SpeechHostViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67AFA8972E6D74BABD8F8908 /* SpeechHostViewModel.swift */; };
 		4F4F4786244CE15242F72E20 /* SignLangConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EF831B5FE4663D01DA67E72 /* SignLangConfig.swift */; };
 		52AE70C807B1DE6C78EF42B1 /* AddressConfirmConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8AB4E3AB9B4946A4E942BCE /* AddressConfirmConfig.swift */; };
@@ -201,18 +197,14 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4880596E291D0EBD0058C7CD /* Toast in Frameworks */,
 				486A11222B07BED000A34623 /* SpeechRecognizerPermission in Frameworks */,
 				486A11202B07BED000A34623 /* MicrophonePermission in Frameworks */,
 				48AB73FF291A762100F591A4 /* SwiftSignatureView in Frameworks */,
 				486A111E2B07BED000A34623 /* CameraPermission in Frameworks */,
 				48420BA72A8B61840005250F /* WebRTC in Frameworks */,
 				4857BFF82902D621001FE850 /* OpenSSL in Frameworks */,
-				4831E1F32B69284400B67891 /* IQKeyboardManagerSwift in Frameworks */,
 				48171405294716830095A64F /* netfox in Frameworks */,
-				48F0867829F7CA4E00FCA4BF /* QKMRZScanner in Frameworks */,
 				4857BFFB2902D636001FE850 /* Starscream in Frameworks */,
-				48D802292924F6B000B9BB83 /* CHIOTPField in Frameworks */,
 				8D09EE402FE576700060F313 /* IdentifySDK.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -559,15 +551,11 @@
 				4857BFF72902D621001FE850 /* OpenSSL */,
 				4857BFFA2902D636001FE850 /* Starscream */,
 				48AB73FE291A762100F591A4 /* SwiftSignatureView */,
-				4880596D291D0EBD0058C7CD /* Toast */,
-				48D802282924F6B000B9BB83 /* CHIOTPField */,
 				48171404294716830095A64F /* netfox */,
-				48F0867729F7CA4E00FCA4BF /* QKMRZScanner */,
 				48420BA62A8B61840005250F /* WebRTC */,
 				486A111D2B07BED000A34623 /* CameraPermission */,
 				486A111F2B07BED000A34623 /* MicrophonePermission */,
 				486A11212B07BED000A34623 /* SpeechRecognizerPermission */,
-				4831E1F22B69284400B67891 /* IQKeyboardManagerSwift */,
 			);
 			productName = NewTest;
 			productReference = 483BDB0B28F459CC00635BCC /* IdentifyTR.app */;
@@ -620,13 +608,9 @@
 				4857BFF62902D621001FE850 /* XCRemoteSwiftPackageReference "OpenSSL" */,
 				4857BFF92902D636001FE850 /* XCRemoteSwiftPackageReference "Starscream" */,
 				48AB73FD291A762100F591A4 /* XCRemoteSwiftPackageReference "SwiftSignatureView" */,
-				4880596C291D0EBD0058C7CD /* XCRemoteSwiftPackageReference "Toast" */,
-				48D802272924F6B000B9BB83 /* XCRemoteSwiftPackageReference "CHIOTPField" */,
 				48171403294716830095A64F /* XCRemoteSwiftPackageReference "netfox" */,
-				48F0867629F7CA4E00FCA4BF /* XCRemoteSwiftPackageReference "QKMRZScanner" */,
 				48420BA52A8B61840005250F /* XCRemoteSwiftPackageReference "WebRTC" */,
 				486A111C2B07BED000A34623 /* XCRemoteSwiftPackageReference "PermissionsKit" */,
-				4831E1F12B69284400B67891 /* XCRemoteSwiftPackageReference "IQKeyboardManager" */,
 			);
 			productRefGroup = 483BDB0C28F459CC00635BCC /* Products */;
 			projectDirPath = "";
@@ -859,7 +843,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = NewTest/SupportingFiles/NewTest.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				DEVELOPMENT_TEAM = 9D3UPKQ9AL;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -903,7 +887,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = NewTest/SupportingFiles/NewTest.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				DEVELOPMENT_TEAM = 9D3UPKQ9AL;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -971,14 +955,6 @@
 				minimumVersion = 1.0.0;
 			};
 		};
-		4831E1F12B69284400B67891 /* XCRemoteSwiftPackageReference "IQKeyboardManager" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/hackiftekhar/IQKeyboardManager.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 7.0.1;
-			};
-		};
 		48420BA52A8B61840005250F /* XCRemoteSwiftPackageReference "WebRTC" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/stasel/WebRTC.git";
@@ -1011,36 +987,12 @@
 				minimumVersion = 10.0.1;
 			};
 		};
-		4880596C291D0EBD0058C7CD /* XCRemoteSwiftPackageReference "Toast" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/hengyu/Toast.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.0;
-			};
-		};
 		48AB73FD291A762100F591A4 /* XCRemoteSwiftPackageReference "SwiftSignatureView" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/alankarmisra/SwiftSignatureView.git";
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 3.0.0;
-			};
-		};
-		48D802272924F6B000B9BB83 /* XCRemoteSwiftPackageReference "CHIOTPField" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/ChiliLabs/CHIOTPField.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.1.0;
-			};
-		};
-		48F0867629F7CA4E00FCA4BF /* XCRemoteSwiftPackageReference "QKMRZScanner" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Mattijah/QKMRZScanner.git";
-			requirement = {
-				branch = "master-spm";
-				kind = branch;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -1050,11 +1002,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 48171403294716830095A64F /* XCRemoteSwiftPackageReference "netfox" */;
 			productName = netfox;
-		};
-		4831E1F22B69284400B67891 /* IQKeyboardManagerSwift */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 4831E1F12B69284400B67891 /* XCRemoteSwiftPackageReference "IQKeyboardManager" */;
-			productName = IQKeyboardManagerSwift;
 		};
 		48420BA62A8B61840005250F /* WebRTC */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -1086,25 +1033,10 @@
 			package = 486A111C2B07BED000A34623 /* XCRemoteSwiftPackageReference "PermissionsKit" */;
 			productName = SpeechRecognizerPermission;
 		};
-		4880596D291D0EBD0058C7CD /* Toast */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 4880596C291D0EBD0058C7CD /* XCRemoteSwiftPackageReference "Toast" */;
-			productName = Toast;
-		};
 		48AB73FE291A762100F591A4 /* SwiftSignatureView */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 48AB73FD291A762100F591A4 /* XCRemoteSwiftPackageReference "SwiftSignatureView" */;
 			productName = SwiftSignatureView;
-		};
-		48D802282924F6B000B9BB83 /* CHIOTPField */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 48D802272924F6B000B9BB83 /* XCRemoteSwiftPackageReference "CHIOTPField" */;
-			productName = CHIOTPField;
-		};
-		48F0867729F7CA4E00FCA4BF /* QKMRZScanner */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 48F0867629F7CA4E00FCA4BF /* XCRemoteSwiftPackageReference "QKMRZScanner" */;
-			productName = QKMRZScanner;
 		};
 /* End XCSwiftPackageProductDependency section */
 

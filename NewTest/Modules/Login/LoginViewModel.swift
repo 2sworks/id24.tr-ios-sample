@@ -32,6 +32,10 @@ final class LoginViewModel: ObservableObject {
 
     @Published var identId: String = ""
 
+    /// "Beni Hatırla" tercihi. Açıkken girilen Ident ID kaydedilir ve bir sonraki
+    /// açılışta alana otomatik gelir; kapalıyken hiçbir şey saklanmaz.
+    @Published var rememberMe: Bool = false
+
     // MARK: - Yeni Müşteri Form
 
     @Published var firstName: String = ""
@@ -77,6 +81,7 @@ final class LoginViewModel: ObservableObject {
         static let selectedServerWsUrl  = "selected_server_ws_url"
         static let selectedSDKLang      = "selected_sdk_lang"
         static let lastIdentId          = "last_ident_id"
+        static let rememberMe           = "remember_ident_id"
     }
 
     var hasUserSelectedServer: Bool {
@@ -90,7 +95,9 @@ final class LoginViewModel: ObservableObject {
         let savedLang = savedLangRaw.flatMap(SDKLang.init) ?? .tr
         selectedSDKLang = savedLang
         manager.setSDKLang(lang: savedLang)
-        identId = UserDefaults.standard.string(forKey: UDKey.lastIdentId) ?? ""
+        rememberMe = UserDefaults.standard.bool(forKey: UDKey.rememberMe)
+        // "Beni Hatırla" açıksa son Ident ID'yi alana getir; kapalıysa boş başla.
+        identId = rememberMe ? (UserDefaults.standard.string(forKey: UDKey.lastIdentId) ?? "") : ""
         checkJailbreak()
         loadSavedServers()
         loadSelectedServer()
@@ -150,6 +157,20 @@ final class LoginViewModel: ObservableObject {
         saveSelectedServer(server)
     }
 
+    // MARK: - Remember Me
+
+    /// "Beni Hatırla" tercihini değiştirir ve kalıcı olarak saklar. Kapatılırsa
+    /// saklanan son Ident ID de silinir.
+    func setRememberMe(_ on: Bool) {
+        rememberMe = on
+        UserDefaults.standard.set(on, forKey: UDKey.rememberMe)
+        if on {
+            UserDefaults.standard.set(identId, forKey: UDKey.lastIdentId)
+        } else {
+            UserDefaults.standard.removeObject(forKey: UDKey.lastIdentId)
+        }
+    }
+
     // MARK: - Ident ID Aliases
 
     func resolveIdentId() -> String {
@@ -173,7 +194,12 @@ final class LoginViewModel: ObservableObject {
     /// SDK'yı kurar ve başarıda Default UI akışını başlatır.
     /// Opsiyon montajı eski `AppStateViewModel.setupSDK`'dan buraya taşındı.
     func connect(coordinator: SDKFlowCoordinator) {
-        UserDefaults.standard.set(identId, forKey: UDKey.lastIdentId)
+        // "Beni Hatırla" açıksa girilen Ident ID'yi sakla; kapalıysa temizle.
+        if rememberMe {
+            UserDefaults.standard.set(identId, forKey: UDKey.lastIdentId)
+        } else {
+            UserDefaults.standard.removeObject(forKey: UDKey.lastIdentId)
+        }
         isLoading = true
         errorMessage = nil
 
