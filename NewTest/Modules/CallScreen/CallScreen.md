@@ -1,9 +1,18 @@
-# CallScreen — Görüntülü görüşme (WebRTC + soket)
+# CallScreen — Görüntülü Görüşme
 
-SDK'nın en karmaşık modülü. Temsilciyle canlı görüntülü görüşmeyi yönetir: **WebRTC** peer
-connection (yerel/uzak video), **soket** üzerinden çağrı durumu, SMS doğrulama, uzaktan
-NFC tetikleme, işaret dili kapısı ve bağlantı-koptu kurtarma. Görüşme bittiğinde sonuç
-statüsü ThankYou'ya taşınır.
+SDK'nın kalbi ve en karmaşık modülü: müşteri ile temsilci (agent) arasındaki **canlı WebRTC
+görüşmesi**. Bekleme odası, çağrı kabul, SMS doğrulama, görüşme sırasında uzaktan NFC,
+işaret dili kapısı ve bağlantı-koptu kurtarma — hepsi bu ekranda buluşur. Görüşme bittiğinde
+sonuç statüsü ThankYou ekranına taşınır.
+
+Altyapıyı anlamak için: [TURN & WebRTC](../../../docs/guides/turn-webrtc.md) ·
+[WebSocket](../../../docs/guides/websocket.md)
+
+← [Modül İndeksi](../Modules.md) · [README](../../../README.md)
+
+---
+
+## Bir Bakışta
 
 | | |
 |---|---|
@@ -11,30 +20,86 @@ statüsü ThankYou'ya taşınır.
 | Rota | `SDKModuleRoute.callScreen` |
 | Drop-in view | `SDKCallScreenView` (+ `SDKVideoFeedRepresentable`) |
 | ViewModel | `SDKCallScreenViewModel` |
-| Bağımlılık | **WebRTC** (`manager.webRTCClient`) + **soket** (çağrı aksiyonları) + HTTP |
+| Dış dünya | **WebRTC** + **soket** (çağrı aksiyonları) + HTTP |
+| Ses anahtarı | `CallScreenTts` |
 
-> Bu modül çalışırken **soket dinleyicisini coordinator'dan devralır.** Ekrandan ayrılırken
-> `coordinator.restoreSocketListener()` ile geri verir (terminate akışında otomatik yapılır).
+> Önemli: Bu modül çalışırken **soket dinleyicisini coordinator'dan devralır.** Ekrandan
+> ayrılırken `coordinator.restoreSocketListener()` ile geri verilir (terminate akışında
+> otomatik yapılır).
+
+## Kullanıcı Ne Yaşar?
+
+1. Bekleme odasına düşer; sıradaki konumu ve tahmini bekleme süresini görür.
+2. Temsilci aradığında çağrı ekranı gelir; kabul edince görüntülü görüşme başlar.
+3. Görüşme sırasında temsilci SMS kodu isteyebilir, fotoğraf alabilir, uyarı/kimlik çemberi
+   açabilir, hatta uzaktan NFC okuma başlatabilir.
+4. Görüşme biter; sonuç (onaylandı/reddedildi/beklemede) ThankYou'da gösterilir.
 
 ---
 
-## Tipler
+## Kullanım — Drop-in Şiddetle Önerilir
 
+```swift
+// Hiçbir şey yazmayın; rota gelince SDK çizer:
+case .callScreen: SDKCallScreenView()
+```
+
+WebRTC peer connection, ICE aday değişimi, data channel ve soket aksiyon eşlemesi VM içinde
+sıkı bağlıdır — yeniden yazmaya değmez. Marka uyumu için önce [Tema](../../../docs/guides/theming.md)'yı deneyin.
+
+## Kendi Tasarımınızla (Override) — Dikkatli İlerleyin
+
+Yine de tasarımı değiştirmek isterseniz iki kesin kural vardır:
+**(1)** video katmanlarını VM'den alın, **(2)** tüm çağrı eylemleri VM'den geçsin.
+
+```swift
+registry.override(.callScreen) { MyCallView() }
+
+struct MyCallView: View {
+    @EnvironmentObject var coordinator: SDKFlowCoordinator
+    @StateObject private var vm = SDKCallScreenViewModel()
+
+    var body: some View {
+        ZStack {
+            // WebRTC video katmanları — kendiniz peer connection KURMAYIN:
+            if let remote = vm.remoteVideoView { UIViewWrapper(remote) }   // ✅
+            if let local  = vm.localVideoView  { UIViewWrapper(local) }    // ✅
+
+            VStack {
+                Text("Sıra: \(vm.queuePosition)")
+                if vm.callState == .waiting {
+                    Button("Kabul Et") { vm.acceptCall() }                 // ✅ soket + WebRTC
+                }
+                TextField("SMS", text: $vm.smsCode)
+                Button("Doğrula") { vm.verifySMS() }
+                    .disabled(!vm.isSMSCodeValid)                          // ✅
+                Button("Bitir") { vm.terminateCall(coordinator: coordinator) }  // ✅
+                    .disabled(!vm.endCallEnabled)
+            }
+        }
+        .onAppear { vm.checkSignLangIfNeeded() }
+    }
+}
+```
+
+---
+
+## ViewModel Referansı — `SDKCallScreenViewModel`
+
+### Tipler
 ```swift
 public enum SDKCallState { case waiting, /* ... */ connected, ended }
 public enum SDKCallNetworkQuality { case none, /* ... */ good, poor }
 ```
 
-## VM API — `SDKCallScreenViewModel`
-
 ### Çağrı durumu (`@Published`, salt-okunur)
 | Üye | Tip | Anlam |
 |---|---|---|
-| `callState` | `SDKCallState` | Çağrı durumu (bekliyor/bağlı/bitti) |
+| `callState` | `SDKCallState` | Bekliyor / bağlı / bitti |
 | `queuePosition` | `String` | Sıradaki konum |
 | `estimatedWait` | `String` | Tahmini bekleme |
 | `networkQuality` | `SDKCallNetworkQuality` | Ağ kalitesi |
-| `endCallEnabled` | `Bool` | "Görüşmeyi bitir" aktif mi |
+| `endCallEnabled` | `Bool` | "Görüşmeyi bitir" aktif mi (agent kilitleyebilir) |
 | `callCompleted` | `Bool` | Görüşme tamamlandı mı |
 | `socketThankYouStatus` | `ThankYouStatus?` | Soketten gelen sonuç statüsü |
 | `photoTakenToast` | `String?` | "Fotoğraf alındı" bildirimi |
@@ -44,37 +109,37 @@ public enum SDKCallNetworkQuality { case none, /* ... */ good, poor }
 | Üye | Tip | Anlam |
 |---|---|---|
 | `smsCode` | `String` (r/w) | Girilen SMS kodu |
-| `isSMSCodeValid` | `Bool` (hesaplanan) | Kod 6 haneli mi |
+| `isSMSCodeValid` | `Bool` | Kod 6 haneli mi |
 
-### Uzaktan NFC (görüşme sırasında temsilcinin tetiklediği)
+### Uzaktan NFC (temsilci tetikler)
 | Üye | Tip | Anlam |
 |---|---|---|
-| `nfcStatusMessage` | `String` (salt-okunur) | NFC durum metni |
+| `nfcStatusMessage` | `String` | NFC durum metni |
 | `showNFCEdit` | `Bool` (r/w) | MRZ düzenleme ekranı |
 | `nfcEditSerial / nfcEditBirth / nfcEditValid` | `String` (r/w) | Düzenlenebilir MRZ alanları |
 
-### İşaret dili kapısı / kopma
+### İşaret dili / kopma
 | Üye | Tip | Anlam |
 |---|---|---|
-| `showSignLangGate` | `Bool` (r/w) | İşaret dili kapısı göster |
+| `showSignLangGate` | `Bool` (r/w) | İşaret dili kapısını göster |
 | `showLostConnection` | `Bool` (r/w) | Bağlantı-koptu overlay'i |
 
 ### Video (WebRTC)
 | Üye | Anlam |
 |---|---|
-| `remoteVideoView: UIView?` | Uzak (temsilci) video katmanı (`webRTCClient.remoteVideoView()`) |
+| `remoteVideoView: UIView?` | Uzak (temsilci) video katmanı |
 | `localVideoView: UIView?` | Yerel (kullanıcı) video katmanı |
 
-### Girdi (metotlar)
+### Metotlar
 | Metot | Etki |
 |---|---|
 | `checkSignLangIfNeeded()` | `connectToSignLang` ise işaret dili kapısını açar |
 | `signLangCompleted()` | İşaret dili adımını tamamlar |
-| `acceptCall()` | Çağrıyı kabul eder (`manager.acceptCall`) |
-| `terminateCall(coordinator:)` | Görüşmeyi bitirir (`terminateCallByUser`) + dinleyiciyi geri verir + ThankYou'ya geçer |
+| `acceptCall()` | Çağrıyı kabul eder (`manager.acceptCall`) — TURN kimliği + SDP offer |
+| `terminateCall(coordinator:)` | Görüşmeyi bitirir + dinleyiciyi geri verir + ThankYou'ya geçer |
 | `verifySMS()` | SMS kodunu doğrular (`manager.smsVerification`) |
-| `startRemoteNFC(birthDate:validDate:docNo:)` | Uzaktan NFC okumayı başlatır (`manager.startRemoteNFC`) |
-| `saveAndRestartRemoteNFC(serial:birth:valid:)` | MRZ'yi kaydedip NFC'yi yeniden başlatır |
+| `startRemoteNFC(birthDate:validDate:docNo:)` | Uzaktan NFC okumayı başlatır |
+| `saveAndRestartRemoteNFC(serial:birth:valid:)` | MRZ'yi düzeltip NFC'yi yeniden başlatır |
 | `handleReconnectCompleted()` / `handleReconnectCompletedWithStatus(...)` | Kopma sonrası kurtarma |
 | `cleanup()` | Kaynakları temizler (ekrandan ayrılırken) |
 
@@ -82,11 +147,10 @@ public enum SDKCallNetworkQuality { case none, /* ... */ good, poor }
 ```swift
 nonisolated public func listenSocketMessage(message: SDKCallActions)
 ```
-CallScreen aktifken soket mesajlarını **doğrudan** bu VM işler (coordinator yerine).
+CallScreen aktifken soket mesajlarını **doğrudan bu VM** işler (coordinator yerine).
+Aksiyonların tam listesi: [WebSocket → Aksiyon Kataloğu](../../../docs/guides/websocket.md#aksiyon-kataloğu--sdkcallactions).
 
----
-
-## Sinyal zinciri
+## Sinyal Zinciri — Perde Arkası
 
 ```
 (görünür) → checkSignLangIfNeeded() → connectToSignLang ? showSignLangGate
@@ -102,100 +166,46 @@ terminateCall(coordinator:)
    → coordinator.advanceToNextModule()  →  .thankYou(status)
 ```
 
----
-
-## Drop-in kullanım
-
-CallScreen'i **drop-in kullanmanız şiddetle önerilir.** WebRTC peer connection, ICE
-candidate, data channel ve soket aksiyon eşlemesi VM içinde sıkı bağlıdır.
+## Host VM ile Gözlem (Composition) — Güvenli
 
 ```swift
-case .callScreen: SDKCallScreenView()
-```
-
-## Host VM (gözlem) — güvenli
-
-```swift
+@MainActor
 final class CallHostViewModel: HostModuleViewModel {
     let sdk = SDKCallScreenViewModel()
-    override init() {
-        super.init(); bridge(sdk)
-    }
+    override init() { super.init(); bridge(sdk) }
     var state: SDKCallState { sdk.callState }
     var queue: String { sdk.queuePosition }
     var quality: SDKCallNetworkQuality { sdk.networkQuality }
 }
 ```
 
-## Custom tasarım (override) — dikkatli
-
-Tasarımı değiştirebilirsiniz ama **tüm çağrı eylemleri SDK VM'inden geçmeli** ve video
-katmanlarını VM'den almalısınız:
-
-```swift
-registry.override(.callScreen) { MyCallView() }
-
-struct MyCallView: View {
-    @EnvironmentObject var coordinator: SDKFlowCoordinator
-    @StateObject private var vm = SDKCallScreenViewModel()
-    var body: some View {
-        ZStack {
-            // Uzak/yerel video — WebRTC katmanlarını VM'den alın (kendiniz kurmayın):
-            if let remote = vm.remoteVideoView { UIViewWrapper(remote) }   // ✅
-            if let local  = vm.localVideoView  { UIViewWrapper(local) }    // ✅
-
-            VStack {
-                Text("Sıra: \(vm.queuePosition)")
-                if vm.callState == .waiting {
-                    Button("Kabul Et") { vm.acceptCall() }                 // ✅ soket
-                }
-                // SMS:
-                TextField("SMS", text: $vm.smsCode)
-                Button("Doğrula") { vm.verifySMS() }.disabled(!vm.isSMSCodeValid) // ✅
-                Button("Bitir") { vm.terminateCall(coordinator: coordinator) }    // ✅
-            }
-        }
-        .onAppear { vm.checkSignLangIfNeeded() }
-    }
-}
-```
-
-> **WebRTC sorun olur mu?** Hayır — `webRTCClient` `IdentifyManager.shared`'da yaşar, View
-> yaşam döngüsünden bağımsızdır. Ama video katmanlarını **mutlaka** `vm.remoteVideoView` /
-> `vm.localVideoView`'den alın; kendi peer connection'ınızı kurmayın. Çağrı aksiyonları
-> (`accept/verify/terminate`) VM'den geçmezse soket sinyalleri gitmez (bypass).
-
-## Notlar
-- Görüşme bitince `terminateCall(coordinator:)` hem soketi bilgilendirir hem dinleyiciyi
-  coordinator'a geri verir; bunu atlamayın yoksa sonraki ekranlar soket mesajı almaz.
-- İşaret dili gerekiyorsa (`connectToSignLang`) `checkSignLangIfNeeded()` kapıyı açar; bkz. [İşaret Dili](../SignLang/SignLang.md).
-- Bağlantı koparsa `showLostConnection` overlay'i devreye girer; bkz. [Bağlantı Koptu](../LostConnection/LostConnection.md).
-- Modül sırası bu ekranda tükenirse ThankYou'ya **statülü** geçilir (görüşme sonucu).
-
 ---
 
 ## Sesli Okuma (Read-Aloud)
 
-Bu modül ekranı açıldığında yönergesi otomatik seslendirilebilir. Mod **modül bazında**
-seçilir; tam ayrıntı: [ReadAloud](../ReadAloud.md).
+Ekran açıldığında yönerge otomatik seslendirilebilir (`SDKFlowHostView` yapar, kod gerekmez).
 
-- **Metin key'i:** `CallScreenTts`  ·  **Custom audio dosyası:** `CallScreenTts.<uzantı>`
-  (uzantı serbest: `m4a`/`mp3`/`wav`/`caf`/`aac`/`aiff` otomatik denenir)
-- **Native (Siri / sistem sesi):**
-  ```swift
-  SDKSpeechConfig.shared.setMode(.native, for: .waitScreen)
-  ```
-- **Custom audio (kendi kaydın):** bundle'a `CallScreenTts.<uzantı>` koy (örn. `CallScreenTts.m4a` veya `CallScreenTts.mp3`) →
-  ```swift
-  SDKSpeechConfig.shared.audioBundle = Bundle.main
-  SDKSpeechConfig.shared.setMode(.customAudio, for: .waitScreen)   // dosya yoksa native'e düşer
-  ```
-- **Kapalı:** `SDKSpeechConfig.shared.setMode(.off, for: .waitScreen)`
-- **Metni ez:** `SDKLocalization.shared.setOverride(key: .callScreenTts, language: .tr, value: "...")`
+```swift
+SDKSpeechConfig.shared.setMode(.native, for: .waitScreen)         // Siri/sistem sesi
+// veya kendi kaydınız: bundle'a CallScreenTts.m4a koyun →
+SDKSpeechConfig.shared.audioBundle = Bundle.main
+SDKSpeechConfig.shared.setMode(.customAudio, for: .waitScreen)    // dosya yoksa native'e düşer
+```
 
-Seslendirme, ekran açılışında `SDKFlowHostView` tarafından otomatik yapılır — modül tarafında
-ekstra kod gerekmez.
+> ⚠️ Okuma, WebRTC sesiyle çakışmasın diye `.duckOthers` ile kısılır; canlı görüşme
+> başladıktan sonra bu modülde `.off` önerilir.
 
-> ⚠️ Görüşme WebRTC sesiyle çakışmasın diye okuma `.duckOthers` ile kısılır; canlı görüşme başladıktan sonra `.off` önerilir.
+Metni ezmek: `SDKLocalization.shared.setOverride(key: .callScreenTts, language: .tr, value: "...")`
+· Tüm ayrıntı: [ReadAloud](../ReadAloud.md)
 
-</content>
+## Sık Sorulanlar & Dikkat Edilecekler
+
+- **`terminateCall(coordinator:)`'ı asla atlamayın** — hem soketi bilgilendirir hem
+  dinleyiciyi coordinator'a geri verir; atlarsanız sonraki ekranlar soket mesajı almaz.
+- **İşaret dili:** `signLangSupport: true` ise `checkSignLangIfNeeded()` kapıyı açar —
+  [SignLang rehberi](../SignLang/SignLang.md).
+- **Bağlantı koparsa:** `showLostConnection` overlay'i devreye girer —
+  [LostConnection rehberi](../LostConnection/LostConnection.md).
+- **Görüşme kurulamıyor / tek yönlü medya:** Neredeyse her zaman TURN kimlik sorunudur —
+  [TURN & WebRTC → Sorun Giderme](../../../docs/guides/turn-webrtc.md#sorun-giderme).
+- **Simülatör:** Kamera yok — görüşme yalnızca gerçek cihazda test edilir.

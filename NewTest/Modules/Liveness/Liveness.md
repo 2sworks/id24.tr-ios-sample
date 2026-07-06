@@ -1,8 +1,15 @@
-# Liveness — Canlılık tespiti
+# Liveness — Canlılık Testi
 
-Kullanıcıya adım adım hareket talimatı verir (göz kırp, gülümse, sola/sağa bak), her adımı
-kare yükleyerek doğrular. Tüm adımlar bitince — kayıt açıksa video yüklenir
-(`uploadLivenessVideo`), kapalıysa doğrudan `onCompleted`.
+"Karşımdaki gerçek ve canlı bir insan mı, yoksa bir fotoğraf/video mu?" sorusunu cevaplar.
+Kullanıcıya sırayla hareket talimatları verilir — **göz kırp, gülümse, sola bak, sağa bak** —
+ve her adım bir doğrulama karesiyle kanıtlanır. Adım sırasını sunucu belirler (her oturumda
+farklı olabilir), böylece önceden kaydedilmiş videoyla aldatma zorlaşır.
+
+← [Modül İndeksi](../Modules.md) · [README](../../../README.md)
+
+---
+
+## Bir Bakışta
 
 | | |
 |---|---|
@@ -10,42 +17,86 @@ kare yükleyerek doğrular. Tüm adımlar bitince — kayıt açıksa video yük
 | Rota | `SDKModuleRoute.liveness` |
 | Drop-in view | `SDKLivenessView` |
 | ViewModel | `SDKLivenessViewModel` |
-| Bağımlılık | adım API (`getNextLivenessTest`) + **HTTP** (frame `uploadIdPhoto` / video `uploadLivenessVideo`) |
+| Dış dünya | Adım API'si (`getNextLivenessTest`) + **HTTP** (kare + isteğe bağlı video) |
+| Ses anahtarı | `LivenessTts` |
+
+## Kullanıcı Ne Yaşar?
+
+1. Ön kamera açılır; ekranda ilk talimat belirir (ör. "Gözlerinizi kırpın").
+2. Hareketi yapar; doğrulama karesi arka planda yüklenir, sıradaki talimat gelir.
+3. Tüm adımlar bitince — sunucu ekran kaydı istiyorsa — oturum videosu da yüklenir.
+4. Akış otomatik ilerler.
 
 ---
 
-## VM API — `SDKLivenessViewModel`
+## Hazır Ekranla Kullanım (Drop-in)
+
+Hiçbir şey yazmayın; rota gelince `SDKLivenessView` çizilir.
+
+## Kendi Tasarımınızla (Override)
+
+Talimat sunumu ve kamera sizin; adım sırası, kare doğrulama ve yükleme SDK'da kalır:
+
+```swift
+registry.override(.liveness) { MyLivenessView() }
+
+struct MyLivenessView: View {
+    @EnvironmentObject var coordinator: SDKFlowCoordinator
+    @StateObject private var vm = SDKLivenessViewModel()
+
+    var body: some View {
+        VStack {
+            Text(vm.stepInstruction)                    // "Göz kırpın" vb.
+            MyCameraFeed { frame in
+                // hareket algılandığında doğrulama karesi:
+                vm.uploadFrame(image: frame)            // ✅ HTTP
+            }
+        }
+        .onAppear {
+            vm.onCompleted = { coordinator.advanceToNextModule() }   // ✅
+            vm.fetchNextStep()                          // ✅ ilk adımı sunucudan al
+        }
+        // tüm adımlar bitince: vm.uploadVideo(videoData: data)      // ✅
+    }
+}
+```
+
+> ❌ **Bypass yapmayın:** Adımları kendi mantığınızla "geçti" sayıp ilerlemeyin — her adım
+> `uploadFrame`, kapanış `uploadVideo` ile kanıtlanmalıdır.
+> Kural: [bypass yok](../../../docs/guides/customization.md#bypass-yok-kuralı).
+
+---
+
+## ViewModel Referansı — `SDKLivenessViewModel`
 
 ### State (`@Published`, salt-okunur)
 | Üye | Tip | Anlam |
 |---|---|---|
-| `currentStep` | `LivenessTestStep?` | Mevcut adım (nil = yok) |
+| `currentStep` | `LivenessTestStep?` | Mevcut adım (`turnLeft/turnRight/blinkEyes/smile/completed`) |
 | `stepInstruction` | `String` | Adım talimatı (ör. "Göz kırpın") |
 | `allStepsCompleted` | `Bool` | Tüm adımlar bitti mi |
 
 ### Hesaplanan / ayar
 | Üye | Anlam |
 |---|---|
-| `isRecordingEnabled: Bool` | Video kaydı açık mı (`manager.livenessRecordingEnabled`) |
+| `isRecordingEnabled: Bool` | Video kaydı açık mı (`manager.livenessRecordingEnabled` — sunucudan) |
 | `maxVideoSize: Int` | İzinli en büyük video boyutu |
-| `allowBlink / allowSmile / allowLeft / allowRight` | Hangi adımların etkin olduğu (r/w) |
+| `allowBlink / allowSmile / allowLeft / allowRight` | Hangi adımlar etkin (r/w) |
 
-### Girdi (metotlar)
+### Metotlar
 | Metot | Etki |
 |---|---|
 | `fetchNextStep()` | Sıradaki adımı sunucudan alır (`getNextLivenessTest`) |
-| `uploadFrame(image: UIImage)` | Mevcut adımın doğrulama karesini yükler (`uploadIdPhoto`) |
-| `uploadVideo(videoData: Data)` | Tüm adımlar bitince videoyu yükler (`uploadLivenessVideo`); kayıt kapalıysa direkt `onCompleted` |
-| `resetTest()` | Testi başa alır (`resetLivenessTest`) |
+| `uploadFrame(image: UIImage)` | Mevcut adımın doğrulama karesini yükler |
+| `uploadVideo(videoData: Data)` | Adımlar bitince videoyu yükler; kayıt kapalıysa doğrudan `onCompleted` |
+| `resetTest()` | Testi başa alır |
 
-### Çıktı (closure)
+### Closure'lar
 | Üye | Ne zaman |
 |---|---|
-| `onCompleted: (() -> Void)?` | Tüm akış (adımlar + varsa video) tamamlanınca |
+| `onCompleted: (() -> Void)?` | Tüm akış (adımlar + varsa video) tamamlandı |
 
----
-
-## Sinyal zinciri
+## Sinyal Zinciri — Perde Arkası
 
 ```
 fetchNextStep()          → manager.getNextLivenessTest  → currentStep / stepInstruction
@@ -56,15 +107,10 @@ uploadFrame(image:)      → manager.uploadIdPhoto [HTTP]  (her adım doğrulama
 host: → coordinator.advanceToNextModule() [modulePresented]
 ```
 
----
-
-## Drop-in / Host VM / Custom
+## Host VM ile Gözlem (Composition)
 
 ```swift
-// Drop-in
-case .liveness: SDKLivenessView()
-
-// Host VM
+@MainActor
 final class LivenessHostViewModel: HostModuleViewModel {
     let sdk = SDKLivenessViewModel()
     override init() {
@@ -75,54 +121,29 @@ final class LivenessHostViewModel: HostModuleViewModel {
     func next() { sdk.fetchNextStep() }
     func sendFrame(_ img: UIImage) { sdk.uploadFrame(image: img) }
 }
-
-// Custom (override)
-registry.override(.liveness) { MyLivenessView() }
-
-struct MyLivenessView: View {
-    @EnvironmentObject var coordinator: SDKFlowCoordinator
-    @StateObject private var vm = SDKLivenessViewModel()
-    var body: some View {
-        Text(vm.stepInstruction)
-        // adım doğrulandığında:  vm.uploadFrame(image: frame)   ✅
-        // tüm adımlar bitince:    vm.uploadVideo(videoData: data) ✅
-        .onAppear {
-            vm.onCompleted = { coordinator.advanceToNextModule() }   // ✅
-            vm.fetchNextStep()
-        }
-    }
-}
 ```
-
-> **Bypass yok:** Adımları kendi mantığınızla "geçti" sayıp `advanceToNextModule`'e
-> atlamayın; her adım `uploadFrame`, kapanış `uploadVideo` ile doğrulanmalı.
-
-## Notlar
-- `isRecordingEnabled` `false` ise `uploadVideo` boş `Data` ile çağrılabilir; VM yine `onCompleted`'a düşer.
-- `allowBlink/allowSmile/...` ile hangi adımların isteneceğini host belirleyebilir.
 
 ---
 
 ## Sesli Okuma (Read-Aloud)
 
-Bu modül ekranı açıldığında yönergesi otomatik seslendirilebilir. Mod **modül bazında**
-seçilir; tam ayrıntı: [ReadAloud](../ReadAloud.md).
+Ekran açıldığında yönerge otomatik seslendirilebilir (`SDKFlowHostView` yapar, kod gerekmez).
 
-- **Metin key'i:** `LivenessTts`  ·  **Custom audio dosyası:** `LivenessTts.<uzantı>`
-  (uzantı serbest: `m4a`/`mp3`/`wav`/`caf`/`aac`/`aiff` otomatik denenir)
-- **Native (Siri / sistem sesi):**
-  ```swift
-  SDKSpeechConfig.shared.setMode(.native, for: .livenessDetection)
-  ```
-- **Custom audio (kendi kaydın):** bundle'a `LivenessTts.<uzantı>` koy (örn. `LivenessTts.m4a` veya `LivenessTts.mp3`) →
-  ```swift
-  SDKSpeechConfig.shared.audioBundle = Bundle.main
-  SDKSpeechConfig.shared.setMode(.customAudio, for: .livenessDetection)   // dosya yoksa native'e düşer
-  ```
-- **Kapalı:** `SDKSpeechConfig.shared.setMode(.off, for: .livenessDetection)`
-- **Metni ez:** `SDKLocalization.shared.setOverride(key: .livenessTts, language: .tr, value: "...")`
+```swift
+SDKSpeechConfig.shared.setMode(.native, for: .livenessDetection)        // Siri/sistem sesi
+// veya kendi kaydınız: bundle'a LivenessTts.m4a koyun →
+SDKSpeechConfig.shared.audioBundle = Bundle.main
+SDKSpeechConfig.shared.setMode(.customAudio, for: .livenessDetection)   // dosya yoksa native'e düşer
+```
 
-Seslendirme, ekran açılışında `SDKFlowHostView` tarafından otomatik yapılır — modül tarafında
-ekstra kod gerekmez.
+Metni ezmek: `SDKLocalization.shared.setOverride(key: .livenessTts, language: .tr, value: "...")`
+· Tüm ayrıntı: [ReadAloud](../ReadAloud.md)
 
-</content>
+## Sık Sorulanlar & Dikkat Edilecekler
+
+- **Video kaydı zorunlu mu?** Sunucu belirler (`liveness_recording`). `isRecordingEnabled`
+  `false` ise `uploadVideo` boş `Data` ile çağrılabilir; VM yine `onCompleted`'a düşer.
+- **Adım seti:** `allowBlink/allowSmile/allowLeft/allowRight` ile hangi hareketlerin
+  isteneceğini host daraltabilir.
+- **Adım sırası neden rastgele?** `RoomResponse.liveness` dizisi sırayı belirler —
+  replay saldırılarını zorlaştırmak için oturum başına değişebilir.

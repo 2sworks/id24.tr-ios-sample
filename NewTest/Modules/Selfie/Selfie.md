@@ -1,8 +1,18 @@
-# Selfie — Selfie çekimi + yüz tespiti
+# Selfie — Yüz Fotoğrafı
 
-Ön kameradan selfie alır, **cihaz üzerinde** yüz tespiti yapar (`detectHumanFace`) ve
-görseli `uploadIdPhoto` ile yükler. Karşılaştırma denemeleri tükenip atlamaya izin varsa
-`onSkipRequested`.
+Kullanıcı ön kamerayla bir selfie çeker; SDK **cihaz üzerinde** yüz olup olmadığını doğrular
+(`detectHumanFace`) ve görseli sunucuya yükler. Sunucu tarafında bu selfie, kimlik
+fotoğrafı ve NFC çip fotoğrafıyla karşılaştırılır — "belgedeki kişi gerçekten bu kişi mi?"
+sorusunun cevabı burada başlar.
+
+Bu modül aynı zamanda Default UI geçişinin pilotuydu; **composition deseninin referans
+örneğidir** — diğer modüllere bakmadan önce bunu okumak iyi bir başlangıçtır.
+
+← [Modül İndeksi](../Modules.md) · [README](../../../README.md)
+
+---
+
+## Bir Bakışta
 
 | | |
 |---|---|
@@ -10,11 +20,51 @@ görseli `uploadIdPhoto` ile yükler. Karşılaştırma denemeleri tükenip atla
 | Rota | `SDKModuleRoute.selfie` |
 | Drop-in view | `SDKSelfieView` |
 | ViewModel | `SDKSelfieViewModel` |
-| Bağımlılık | yüz tespiti (on-device) + **HTTP** (`uploadIdPhoto`) |
+| Dış dünya | Yüz tespiti (cihazda) + **HTTP** (`uploadIdPhoto`) |
+| Ses anahtarı | `SelfieTts` |
+
+## Kullanıcı Ne Yaşar?
+
+1. Ön kamera açılır; kullanıcı yüzünü çerçeveye alır ve fotoğrafı çeker.
+2. SDK cihazda yüz arar — yüz yoksa (ya da birden fazla yüz varsa) uyarı çıkar, yeniden çekilir.
+3. Yüz doğrulanınca görsel yüklenir; "Devam" aktifleşir.
+4. Sunucudaki karşılaştırma hakkı tükenir ve atlamaya izin varsa adım atlanabilir.
 
 ---
 
-## VM API — `SDKSelfieViewModel`
+## Hazır Ekranla Kullanım (Drop-in)
+
+Hiçbir şey yazmayın; rota gelince `SDKSelfieView` çizilir.
+
+## Kendi Tasarımınızla (Override)
+
+Kamera ve tüm UI sizin; yüz tespiti + yükleme SDK VM'inde kalır:
+
+```swift
+registry.override(.selfie) { MySelfieView() }
+
+struct MySelfieView: View {
+    @EnvironmentObject var coordinator: SDKFlowCoordinator
+    @StateObject private var vm = SDKSelfieViewModel()
+
+    var body: some View {
+        VStack {
+            MyFrontCameraView { captured in
+                vm.processSelfie(image: captured)    // ✅ yüz tespiti + upload
+            }
+            Text(vm.resultText)
+            Button("Yeniden Çek") { vm.reset() }
+            Button("Devam") { coordinator.advanceToNextModule() }   // ✅ modulePresented
+                .disabled(!vm.canContinue)
+        }
+        .onAppear { vm.onSkipRequested = { coordinator.skipCurrentModule() } }
+    }
+}
+```
+
+---
+
+## ViewModel Referansı — `SDKSelfieViewModel`
 
 ### State
 | Üye | Tip | Erişim | Anlam |
@@ -24,88 +74,60 @@ görseli `uploadIdPhoto` ile yükler. Karşılaştırma denemeleri tükenip atla
 | `canContinue` | `Bool` | salt-okunur | Devam edilebilir mi |
 | `resultText` | `String` | salt-okunur | Sonuç metni |
 
-### Girdi (metotlar)
+### Metotlar
 | Metot | Etki |
 |---|---|
 | `processSelfie(image: UIImage)` | Yüz tespiti (`detectHumanFace`) → `uploadIdPhoto` |
 | `reset()` | Durumu sıfırlar (yeniden çekim) |
 
-### Çıktı (closure)
+### Closure'lar
 | Üye | Ne zaman |
 |---|---|
-| `onSkipRequested: (() -> Void)?` | Karşılaştırma tükenip skip izinliyse |
+| `onSkipRequested: (() -> Void)?` | Karşılaştırma hakkı tükenip atlamaya izin varsa |
 
----
-
-## Sinyal zinciri
+## Sinyal Zinciri — Perde Arkası
 
 ```
-processSelfie(image:)  → manager.detectHumanFace (on-device) → uploadIdPhoto [HTTP]
+processSelfie(image:)  → manager.detectHumanFace (cihazda) → uploadIdPhoto [HTTP]
                        → (selfieComparisonCount tükendi & skip izinli) → onSkipRequested?()
 host: canContinue → coordinator.advanceToNextModule() [modulePresented]
 ```
 
----
-
-## Drop-in / Host VM / Custom
+## Host VM ile Gözlem (Composition) — Referans Desen
 
 ```swift
-// Drop-in
-case .selfie: SDKSelfieView()
-
-// Host VM (pilot — referans desen)
+@MainActor
 final class SelfieHostViewModel: HostModuleViewModel {
     let sdk = SDKSelfieViewModel()
     override init() {
-        super.init(); bridge(sdk)
+        super.init(); bridge(sdk)                     // child objectWillChange'i yukarı ilet
         sdk.onSkipRequested = { [weak self] in self?.log("selfie_skip") }
     }
     var canContinue: Bool { sdk.canContinue }
     func process(_ img: UIImage) { log("selfie_scan"); sdk.processSelfie(image: img) }
 }
-
-// Custom (override)
-registry.override(.selfie) { MySelfieView() }
-
-struct MySelfieView: View {
-    @EnvironmentObject var coordinator: SDKFlowCoordinator
-    @StateObject private var vm = SDKSelfieViewModel()
-    var body: some View {
-        // kamera → çekilen görsel:
-        // vm.processSelfie(image: captured)              ✅ yüz tespiti + upload
-        Button("Devam") { coordinator.advanceToNextModule() }   // ✅
-            .disabled(!vm.canContinue)
-            .onAppear { vm.onSkipRequested = { coordinator.skipCurrentModule() } }
-    }
-}
 ```
-
-## Notlar
-- Yüz tespit edilmezse `faceDetected = false` kalır, `canContinue` false olur — kullanıcıyı yeniden çekime yönlendirin (`reset()`).
-- Bu modül Default UI migrasyonunun pilotuydu; composition desen örneği olarak referans alın.
 
 ---
 
 ## Sesli Okuma (Read-Aloud)
 
-Bu modül ekranı açıldığında yönergesi otomatik seslendirilebilir. Mod **modül bazında**
-seçilir; tam ayrıntı: [ReadAloud](../ReadAloud.md).
+Ekran açıldığında yönerge otomatik seslendirilebilir (`SDKFlowHostView` yapar, kod gerekmez).
 
-- **Metin key'i:** `SelfieTts`  ·  **Custom audio dosyası:** `SelfieTts.<uzantı>`
-  (uzantı serbest: `m4a`/`mp3`/`wav`/`caf`/`aac`/`aiff` otomatik denenir)
-- **Native (Siri / sistem sesi):**
-  ```swift
-  SDKSpeechConfig.shared.setMode(.native, for: .selfie)
-  ```
-- **Custom audio (kendi kaydın):** bundle'a `SelfieTts.<uzantı>` koy (örn. `SelfieTts.m4a` veya `SelfieTts.mp3`) →
-  ```swift
-  SDKSpeechConfig.shared.audioBundle = Bundle.main
-  SDKSpeechConfig.shared.setMode(.customAudio, for: .selfie)   // dosya yoksa native'e düşer
-  ```
-- **Kapalı:** `SDKSpeechConfig.shared.setMode(.off, for: .selfie)`
-- **Metni ez:** `SDKLocalization.shared.setOverride(key: .selfieTts, language: .tr, value: "...")`
+```swift
+SDKSpeechConfig.shared.setMode(.native, for: .selfie)         // Siri/sistem sesi
+// veya kendi kaydınız: bundle'a SelfieTts.m4a koyun →
+SDKSpeechConfig.shared.audioBundle = Bundle.main
+SDKSpeechConfig.shared.setMode(.customAudio, for: .selfie)    // dosya yoksa native'e düşer
+```
 
-Seslendirme, ekran açılışında `SDKFlowHostView` tarafından otomatik yapılır — modül tarafında
-ekstra kod gerekmez.
+Metni ezmek: `SDKLocalization.shared.setOverride(key: .selfieTts, language: .tr, value: "...")`
+· Tüm ayrıntı: [ReadAloud](../ReadAloud.md)
 
-</content>
+## Sık Sorulanlar & Dikkat Edilecekler
+
+- **Yüz bulunamadı:** `faceDetected` `false` kalır, `canContinue` açılmaz — kullanıcıyı
+  `reset()` ile yeniden çekime yönlendirin (ışık ve tek-yüz koşulunu hatırlatın).
+- **Birden fazla yüz:** SDK yalnızca **tek yüz** algılandığında ilerletir (2.3.15+).
+- **Deneme hakkı:** `selfie_comparison_count` sunucudan gelir; custom ekranınızda
+  `onSkipRequested`'ı bağlamayı unutmayın — yoksa hak tükenince kullanıcı sıkışır.

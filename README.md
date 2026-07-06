@@ -1,287 +1,261 @@
-# Identify SDK Sample App
-Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.com.tr/docs/ios/first-setup/ adresinden ulaşabilirsiniz.
+# IdentifySDK — iOS Sample App & Geliştirici Rehberi
+
+**IdentifySDK**, uçtan uca dijital kimlik doğrulama (KYC) akışını uygulamanıza gömmenizi sağlayan
+bir iOS SDK'sıdır: kimlik kartı/pasaport tarama (OCR), NFC çip okuma, selfie + canlılık testi,
+sesli okuma doğrulaması, imza, adres belgesi ve **agent ile canlı görüntülü görüşme** — hepsi
+tek bir akış içinde, sunucu tarafından yönetilen modül sırasıyla çalışır.
+
+Bu depo, SDK'yı edinen bir geliştiricinin **ilk bakacağı yer** olarak tasarlandı:
+
+- **Çalışan bir örnek uygulama** (`NewTest/`) — her modülün hazır ekranı ve host-tarafı örneği
+- **Modül bazlı entegrasyon rehberleri** — her ekran için "kendi tasarımınla nasıl çalıştırırsın"
+- **Kavram rehberleri** — sunucu yapısı, WebSocket, TURN/WebRTC, log, event, tema, dil
+
+> Resmi dökümantasyon ve SDK indirme linki: <https://docs.identify.com.tr/docs/ios/first-setup/>
 
 ---
 
-## Modül Entegrasyon Rehberleri
+## İçindekiler
 
-Her SDK modülünün **detaylı entegrasyon rehberi** ilgili modül klasöründedir. Önce ortak
-kurulum/akış/özelleştirme kurallarını içeren indeksi okuyun:
-
-➡️ **[Modül Rehberleri İndeksi](NewTest/Modules/Modules.md)** — kurulum, `SDKFlowCoordinator`,
-`SDKViewRegistry`, üç özelleştirme yöntemi ve **"bypass yok" kuralı**.
-
-| Modül | Rehber | Modül | Rehber |
-|---|---|---|---|
-| Hazırlık | [Prepare](NewTest/Modules/Prepare/Prepare.md) | İmza | [Signature](NewTest/Modules/Signature/Signature.md) |
-| Kimlik (OCR) | [IdCard](NewTest/Modules/IdCard/IdCard.md) | Video kayıt | [VideoRecorder](NewTest/Modules/VideoRecorder/VideoRecorder.md) |
-| Kimlik (OVD) | [IdCardOVD](NewTest/Modules/IdCardOVD/IdCardOVD.md) | Adres onayı | [AddressConfirm](NewTest/Modules/AddressConfirm/AddressConfirm.md) |
-| NFC | [NFC](NewTest/Modules/NFC/NFC.md) | Görüntülü görüşme | [CallScreen](NewTest/Modules/CallScreen/CallScreen.md) |
-| Selfie | [Selfie](NewTest/Modules/Selfie/Selfie.md) | Teşekkür/sonuç | [ThankYou](NewTest/Modules/ThankYou/ThankYou.md) |
-| Selfie+Liveness | [SelfieWithLiveness](NewTest/Modules/SelfieWithLiveness/SelfieWithLiveness.md) | İşaret dili kapısı | [SignLang](NewTest/Modules/SignLang/SignLang.md) |
-| Canlılık | [Liveness](NewTest/Modules/Liveness/Liveness.md) | Bağlantı koptu | [LostConnection](NewTest/Modules/LostConnection/LostConnection.md) |
-| Konuşma | [Speech](NewTest/Modules/Speech/Speech.md) | | |
-
-> Not: Bu rehberler kasıtlı olarak **SampleApp (public repo)** içindedir. SDK ikili bir
-> XCFramework olarak dağıtıldığından, SDK kaynak ağacına konan dokümanlar tüketici tarafından
-> okunamaz; bu yüzden tek kaynak burada tutulur.
+1. [5 Dakikada Başlangıç](#5-dakikada-başlangıç)
+2. [SDK Nasıl Çalışır — Kuşbakışı](#sdk-nasıl-çalışır--kuşbakışı)
+3. [Modül Kataloğu](#modül-kataloğu)
+4. [Kavram Rehberleri](#kavram-rehberleri)
+5. [Ekranları Özelleştirme](#ekranları-özelleştirme)
+6. [Kesişen Özellikler](#kesişen-özellikler)
+7. [React Native & Flutter](#react-native--flutter)
+8. [Örnek Uygulamanın Yapısı](#örnek-uygulamanın-yapısı)
+9. [Sürüm Geçmişi](#sürüm-geçmişi)
 
 ---
 
-## Navigasyon Mimarisi — Coordinator Pattern
+## 5 Dakikada Başlangıç
 
-Sample App, **UIPilot** benzeri tip-güvenli bir koordinatör pattern kullanır. iOS 14+ uyumlu olup `NavigationView` + recursive `NavigationLink` zinciriyle uygulanmıştır.
+### 1. Paketi ekleyin (Swift Package Manager)
 
-### Temel Dosyalar
+Xcode → *File → Add Package Dependencies* →
 
-| Dosya | Konum | Açıklama |
+```
+https://github.com/2sworks/id24.tr-ios-sdk-spm
+```
+
+Paket, SDK ile birlikte üç çalışma zamanı bağımlılığını da getirir: `OpenSSL` (NFC kripto),
+`Starscream` (WebSocket) ve `WebRTC` (görüntülü görüşme).
+
+### 2. İzinleri tanımlayın
+
+| İzin | Anahtar | Hangi modül için |
 |---|---|---|
-| `IdentifyNavigationFlow.swift` | `Navigation/` | Tüm ekran rotalarını tanımlayan `enum` |
-| `AppNavigationCoordinator.swift` | `Navigation/` | `push / pop / popToRoot` metodları + recursive `IdentifyNavContent` |
-| `IdentifyNavigationCoordinatorView.swift` | `Navigation/` | Uygulamanın navigasyon kökü (`AppDelegate` buradan başlar) |
-| `AppStateViewModel.swift` | `Core/` | SDK modüllerini koordinatöre yönlendirir |
+| Kamera | `NSCameraUsageDescription` | Kimlik, Selfie, Canlılık, Video, Görüşme |
+| Mikrofon | `NSMicrophoneUsageDescription` | Görüşme, Video kayıt, Konuşma |
+| Konuşma tanıma | `NSSpeechRecognitionUsageDescription` | Konuşma (Speech) modülü |
+| NFC | `com.apple.developer.nfc.readersession.formats` → `TAG` (entitlement) + Info.plist'e `com.apple.developer.nfc.readersession.iso7816.select-identifiers` → `A0000002471001` | NFC çip okuma |
 
-### Navigasyon Akışı
+### 3. Akışı başlatın
 
-```
-AppDelegate
-  └─ UIHostingController<IdentifyNavigationCoordinatorView>
-       └─ NavigationView
-            └─ IdentifyNavContent(depth: 0)   ← Login (sabit kök)
-                 └─ NavigationLink → IdentifyNavContent(depth: 1)   ← Modül 1
-                      └─ NavigationLink → IdentifyNavContent(depth: 2)   ← Modül 2
-                           └─ ...
-```
-
-### SDK Modülünden Ekrana Geçiş
-
-```
-advanceToNextModule()
-  → manager.getNextModule { _ in }       // SDK sayacını ilerlet
-  → modulePublisher.send(module)         // SDK yayını tetiklenir
-  → coordinator.push(module.navigationFlow)  // Otomatik push
-  → IdentifyNavContent NavigationLink aktifleşir
-  → SwiftUI ekran animasyonla gösterilir
-```
-
-### Yeni Ekran / Rota Ekleme
-
-1. `IdentifyNavigationFlow` enum'una yeni `case` ekle
-2. `AppNavigationCoordinator.swift` içindeki `screenFor()` switch'ine karşılık gelen view'ı ekle
-3. Gerekirse `SdkModules.navigationFlow` extension'ını güncelle
-
-### Hibrit Kullanım (SwiftUI + UIKit)
-
-UIKit `UIViewController`'ları da aynı stack içinde gösterilebilir:
+Uygulamanızın kökünde `SDKFlowHostView` kurun, sonra `setupSDK` çağırın.
+**Sıralama kritik:** `coordinator.prepareForSetup()` her zaman `setupSDK`'dan **önce** çağrılmalı.
 
 ```swift
-// UIViewController'ı Hashable yapmak için wrapper
-final class ViewControllerBox: Hashable {
-    let viewController: UIViewController
-    init(_ vc: UIViewController) { self.viewController = vc }
-    static func == (lhs: ViewControllerBox, rhs: ViewControllerBox) -> Bool { lhs === rhs }
-    func hash(into hasher: inout Hasher) { hasher.combine(ObjectIdentifier(self)) }
+import IdentifySDK
+import SwiftUI
+
+struct RootView: View {
+    @StateObject private var coordinator = SDKFlowCoordinator()
+    @State private var registry = SDKViewRegistry()
+
+    var body: some View {
+        SDKFlowHostView(coordinator: coordinator, registry: registry) {
+            LoginView()                      // sizin giriş ekranınız (kök)
+                .environmentObject(coordinator)
+        }
+    }
 }
 
-// Route enum'una UIKit case eklenir
-enum IdentifyNavigationFlow: Hashable {
-    // ...mevcut case'ler...
-    case uiKit(ViewControllerBox)
+func connect(coordinator: SDKFlowCoordinator) {
+    coordinator.prepareForSetup()            // 1) setupSDK'dan ÖNCE
+
+    IdentifyManager.shared.setupSDK(
+        identId: "MÜŞTERİ-İŞLEM-NO",
+        baseApiUrl: "https://v2api.identify.com.tr/",
+        networkOptions: SDKNetworkOptions(useSslPinning: false),
+        kpsData: nil,
+        signLangSupport: false,
+        nfcMaxErrorCount: 3,
+        selectedModules: [],                 // boş = sırayı backend belirler
+        turnKey: "TURN-ANAHTARINIZ",
+        wsSecretKey: "WS-ANAHTARINIZ",
+        showThankYouPage: true
+    ) { socket, roomResponse, error in
+        Task { @MainActor in
+            if error == nil, socket?.isConnected == true, roomResponse.result == true {
+                coordinator.start()          // 2) ilk modüle geç
+            }
+        }
+    }
 }
-
-// screenFor() içinde
-case .uiKit(let box):
-    SDKModuleHostView(viewController: box.viewController).ignoresSafeArea()
-
-// Kullanım
-coordinator.push(.uiKit(ViewControllerBox(myViewController)))
 ```
+
+Bu kadar. Backend'in `modules` listesinde ne varsa, ekranlar o sırayla otomatik gelir.
+Hiçbir modül ekranı yazmanıza gerek yok — hepsinin hazır (drop-in) SwiftUI sürümü SDK'nın içindedir.
+Tam parametre listesi için: [Sunucu & API Rehberi](docs/guides/server-api.md).
+
+> Minimum iOS sürümü: **iOS 14** (örnek uygulama iOS 15 hedefler).
 
 ---
 
-# Son Güncellemeler
+## SDK Nasıl Çalışır — Kuşbakışı
 
-### SDK 2.5.4:
-•⁠  ⁠iceTransportPolicy relay den .all’a çekildi.
-•⁠  ⁠sdkLogApiUrl hatası giderildi.
-•⁠  ⁠Nfc iyileştirmesi yapıldı algılama seviyeleri değiştirildi stabilize sağlandı.
-•⁠  ⁠SendIdentStatusInfo ile görüntülü görüşme kopması esnasında sunucudan gönderilen verinin tanımlanması sağlandı.
-•⁠  ⁠uploadAddressInfo’da sıkıştırma ayarları güncellendi.
-•⁠  ⁠socket_auth ile token ile bağlantı sürece dahil edildi artık müşterile ile agent arasında token ile görüntülü görüşme sağlanabiliyor.
-•⁠  ⁠liveStreamModuleController ismi -> callWaitModuleController ismi ile değiştirildi.
-•⁠  ⁠Socket mesajında gönderilen Live Stream ismi Call Wait Screen ile değiştirildi.
+```
+Host App                         IdentifySDK                        Identify Backend
+────────                         ───────────                        ────────────────
+setupSDK(identId, ...)  ───────► connectToRoom ────────────────────► oda + modül listesi
+                                 RoomResponse.modules ◄─────────────  (RoomResponse)
+coordinator.start()     ───────► SDKFlowCoordinator
+                                   │  path'e rota push eder
+                                   ▼
+                                 SDKFlowHostView ─► registry'de override var mı?
+                                   │                   evet → sizin ekranınız
+                                   │                   hayır → SDK'nın hazır ekranı
+                                   ▼
+                                 Modül VM'i (OCR / NFC / upload / soket sinyali)
+                                   │
+                                   ▼
+                                 advanceToNextModule() ────────────► adım tamamlandı sinyali
+                                   (son modülden sonra ThankYou)
+```
 
-### Build 178:
--⁠  ⁠NFC de iyileştirmeler yapıldı.
--⁠  ⁠Adress modülünde ki görselinin sunucuya gönderilirken kalitesinin düşmesindeki ayarlar yükseltildi.
--⁠  ⁠Bağlantı koptuğunda eğer durum seçilmediyse bekleme odasına yönlendirme geliştirmesi yapıldı via “-3” durum kodu.
--⁠  ⁠liveStreamModuleController ismi -> callWaitModuleController ismi ile değiştirildi.
-- ⁠Websocket secret key geliştirilmesi yapıldı isteğe göre artık görüntülü görüşme token ile peer to peer güvenlik seviyesine çıkarıldı.
--  ws token generate token hatası giderildi.
+Üç yapı taşını tanımak yeterli:
 
-### SDK 2.5.3:
-- Sdk log api url eklendi.
+| Yapı | Ne işe yarar |
+|---|---|
+| `IdentifyManager.shared` | Tek orkestratör: HTTP, WebSocket ve WebRTC burada yaşar. Ekranlardan bağımsızdır. |
+| `SDKFlowCoordinator` | Akışın beyni: hangi modüldeyiz, ileri/atla/geri, ilerleme yüzdesi. |
+| `SDKViewRegistry` | Ekran defteri: bir SDK ekranını kendi tasarımınızla değiştirmek veya araya ekran sokmak için. |
 
-### Build 166:
-- OVD modülünde iyileştirmeler yapıldı.
+Derinlemesine anlatım: [Mimari Rehberi](docs/guides/architecture.md).
 
-### SDK 2.5.2
-- Kimlik OCR - Ad Soyad alanında özel karakterlerin algılanması engellendi.
+---
 
-***
+## Modül Kataloğu
 
-## Sample App 
+Her modülün kendi rehberi vardır: ekranın ne yaptığı, kullanıcının ne yaşadığı, hazır ekranı
+kullanma, **kendi tasarımınla değiştirme** ve ViewModel referansı — hepsi tek dosyada.
 
-## Build 166:
-- OVD modülünde iyileştirmeler yapıldı.
+| Modül             | Ne yapar                                                             | Rehber                                                                         |
+| ----------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Hazırlık          | İzinleri ve bağlantı hızını kontrol eder, kullanıcıyı akışa hazırlar | [Prepare](NewTest/Modules/Prepare/Prepare.md)                                  |
+| Kimlik (OCR)      | Kimlik kartının ön/arka yüzünü çeker, cihaz üzerinde okur            | [IdCard](NewTest/Modules/IdCard/IdCard.md)                                     |
+| Kimlik (OVD)      | Hologram/optik doğrulama ile sahte kimlik tespiti                    | [IdCardOVD](NewTest/Modules/IdCardOVD/IdCardOVD.md)                            |
+| NFC               | Kimlik/pasaport çipini okur (ICAO: BAC/PACE/CA)                      | [NFC](NewTest/Modules/NFC/NFC.md)                                              |
+| Selfie            | Selfie çeker, cihaz üzerinde yüz tespiti yapar                       | [Selfie](NewTest/Modules/Selfie/Selfie.md)                                     |
+| Selfie + Canlılık | Selfie ile canlılık testini birleştirir                              | [SelfieWithLiveness](NewTest/Modules/SelfieWithLiveness/SelfieWithLiveness.md) |
+| Canlılık          | Sola dön / göz kırp / gülümse adımlarıyla canlılık testi             | [Liveness](NewTest/Modules/Liveness/Liveness.md)                               |
+| Konuşma           | Ekrandaki metni sesli okutup doğrular (STT)                          | [Speech](NewTest/Modules/Speech/Speech.md)                                     |
+| İmza              | Ekranda imza alır ve yükler                                          | [Signature](NewTest/Modules/Signature/Signature.md)                            |
+| Video Kayıt       | Kısa video kaydı alır ve yükler                                      | [VideoRecorder](NewTest/Modules/VideoRecorder/VideoRecorder.md)                |
+| Adres Onayı       | Adres belgesi fotoğrafı/PDF'i yükler                                 | [AddressConfirm](NewTest/Modules/AddressConfirm/AddressConfirm.md)             |
+| Görüntülü Görüşme | Agent ile canlı WebRTC görüşmesi                                     | [CallScreen](NewTest/Modules/CallScreen/CallScreen.md)                         |
+| Teşekkür          | Akış sonucu ekranı (başarılı/başarısız/beklemede)                    | [ThankYou](NewTest/Modules/ThankYou/ThankYou.md)                               |
+| İşaret Dili       | Görüşme öncesi işaret dili tercihi kapısı                            | [SignLang](NewTest/Modules/SignLang/SignLang.md)                               |
+|  Bağlantı Koptu   | Bağlantı kopunca çıkan overlay + otomatik toparlanma                 | [LostConnection](NewTest/Modules/LostConnection/LostConnection.md)             |
 
-## Build 165:
-- Adres fotoğraflarının daha kaliteli gönderilmesi sağlandı.
+➡️ Ortak kurallar (kurulum, üç özelleştirme yöntemi, "bypass yok" kuralı) için önce
+**[Modül Rehberleri İndeksi](NewTest/Modules/Modules.md)**'ni okuyun.
 
-## Build 162:
-- enableDebugPrint eklendi.
+> Not: Bu rehberler kasıtlı olarak **SampleApp (public repo)** içindedir. SDK, ikili (binary)
+> XCFramework olarak dağıtıldığından SDK kaynak ağacına konan dokümanlar tüketici tarafından
+> okunamaz; tek kaynak burasıdır.
 
-## Build 160:
-- TURN için şifreli kullanım opsiyonu eklendi.
-- Görüntülü görüşme sonlandırma senaryoları için sebep ve durum bilgileri eklendi
-- Sunucudan gelen hata mesajlarının gösteriminde düzenlemeler yapıldı
-- Kimlik çekim ekranındaki flaş çalışmama hatası düzenlendi
-- OVD (beta) ekranı eklendi
+---
 
-## Build 141:
-- Kimlik çekimlerinde otomatik yön düzeltme seçeneği eklendi
-- Aktif karşılaştırmada modül atlama kontrolü eklendi
-- Agent durum seçtiğinde arama butonunun devre dışı bırakılması sağlandı
-- OCR, NFC ve Selfie adımlarında tekrar deneme sayısı kontrolleri eklendi
+## Kavram Rehberleri
 
-## Build 126:
-- Kimlik çekimlerinde yeni cihazlardaki yakınlaştırma modu uyumu sağlandı
-- İşaret dili seçimi ekranında görüntülü görüşme kuyruğuna düşmemesi sağlandı
-- Agent görüntüsünün dikey ölçüde gösterilebilmesi sağlandı
-- Süresi geçmiş ident için hata mesajı gösterimi eklendi
-- İlgili ekranlara kamera, mikrofon ve konuşma izni kontrolleri eklendi
-- Tekrar Bağlan butonuna internet bağlantısı kontrolü eklendi
+Modüllerin altında yatan sistemleri anlamak için:
 
-## Build 107:
-- SDK'i işlemler tamamlanmadan kapatabilme özelliği eklendi
-- Müşterinin çağrıyı sonlandırabilmesi eklendi
+| Rehber | İçerik |
+|---|---|
+| [Mimari](docs/guides/architecture.md) | `IdentifyManager`, modül hattı, DefaultUI üçlüsü, yaşam döngüsü |
+| [Sunucu & API](docs/guides/server-api.md) | `setupSDK` tüm parametreleri, `RoomResponse`, modül sırası, SSL pinning |
+| [WebSocket](docs/guides/websocket.md) | Soket aksiyonları, `socket_auth` token'ı, reconnect ve LostConnection katmanı |
+| [TURN & WebRTC](docs/guides/turn-webrtc.md) | STUN/TURN kimlik üretimi, şifreli TURN, görüşme akışı |
+| [Loglama](docs/guides/logging.md) | `SDKLog` facade'i, severity/kategori, online log, redaksiyon |
+| [Event Sistemi](docs/guides/events.md) | `SDKEvent`, `IdentifyTrackingListener`, analitik entegrasyonu |
+| [Tema](docs/guides/theming.md) | `SDKTheme` — renk/font/ikon/metrik override |
+| [Lokalizasyon](docs/guides/localization.md) | 5 dil (TR/EN/DE/AZ/RU), metin override |
+| [Özelleştirme](docs/guides/customization.md) | Üç özelleştirme yöntemi derinlemesine + "bypass yok" kuralı |
+| [IdentityScanner](docs/guides/identity-scanner.md) | Gerçek zamanlı belge tarama motoru: profiller, alan OCR, TCKN/MRZ doğrulama, bağımsız kullanım |
 
-## Build 106:
-- Sunucudan maksimum dosya yükleme boyutunu al
+---
 
-## Build 103:
-- Canlılık modülünü kaydetme seçeneği eklendi
+## Ekranları Özelleştirme
 
-## Build 101:
-- Adres modülüne PDF yükleme seçeneği eklendi
+Kısa özet — üç seviye vardır, dilediğinizde karıştırabilirsiniz:
 
-## Build 100:
-- IdentifyTrackingListener kullanımı eklendi (Yalnızca 2.1.0 ve üstü sürümler için geçerli)
+```swift
+// A) Hiçbir şey yapma → SDK'nın hazır ekranları çalışır (drop-in)
 
-## Build 97:
-- yeni dil desteği eklendi
+// B) Bir ekranı kendi tasarımınla değiştir
+registry.override(.selfie) { MySelfieView() }
 
-## Build 89:
-- yeni canlılık testi kodları eklendi
-- ssl pinning örnek sertifika eklendi
-- privacy info dosyası eklendi
+// C) Araya kendi ekranını sok (tanıtım, sözleşme, başarı...)
+registry.custom("welcome") { MyIntroView() }
+coordinator.insert(["welcome"], before: .selfie)
+```
 
-## Build 84:
-- scanner ekranında kimliğin yatay olma zorunluluğu iptal edildi
-- login ekranı yeni SDK kurulumuna göre düzenlendi
-- login ekranında socket hata vermesi durumunda ekstra durum bildirimi eklendi
+Tek altın kural: custom ekranınız **iş mantığını SDK ViewModel'ine bırakmalı**
+(taramayı `vm.scanFront(image:)`, geçişi `coordinator.advanceToNextModule()` yapar).
+Kendi HTTP isteğinizi atarsanız backend akışı ilerlemez.
+Ayrıntı: [Özelleştirme Rehberi](docs/guides/customization.md).
 
-## Build 80:
-- scanner ekranında daha hızlı fotoğraf çekimi sağlandı 
-- active result için NfcViewController, CardreaderViewController ve ThankYouViewController buna bağlı olarak güncellendi
-- scanner için yatay fotoğraf çekilmesi zorunluluğu eklendi
-- dil dosyaları güncellendi
+---
 
-## Build 75:
-- Scanner ve onu çağıran ekranlar güncellendi
-- Prepare modülü için örnek ekran eklendi
-- Missed Call için yeni status eklendi
-- Teşekkür ekranı güncellendi
+## Kesişen Özellikler
 
-## Build 73:
-- prepare modülünün örnek tasarımı eklendi
-- socketListener tarafına connectionErr eklendi
-- button tiplerine loader eklendi
-- socket bağlantısı kopması durumunda çıkan ekran güncellendi
+Modüllerden bağımsız, akışın tamamına dokunan yetenekler:
 
+- **Sesli okuma (Read-Aloud)** — her modül ekranı açıldığında yönergesi otomatik seslendirilebilir;
+  modül başına `.native` (Siri sesi) / `.customAudio` (kendi ses kaydınız) / `.off` seçilir.
+  → [ReadAloud Rehberi](NewTest/Modules/ReadAloud.md)
+- **Tema** — tüm renk/font/ikon/metrik token'ları `SDKTheme.shared` üzerinden değiştirilebilir.
+  → [Tema Rehberi](docs/guides/theming.md)
+- **Dil** — TR, EN, DE, AZ, RU; her metni tek tek ezebilirsiniz.
+  → [Lokalizasyon Rehberi](docs/guides/localization.md)
+- **Log & İzleme** — konsol + online log, kategori bazlı; `TrackingEventType` ile her modülün
+  gösterildi/tamamlandı/atlandı olaylarını dinlersiniz.
+  → [Loglama](docs/guides/logging.md) · [Event Sistemi](docs/guides/events.md)
 
+---
 
-## SDK
+## React Native & Flutter
 
-## 2.5.2
-- Kimlik OCR - Ad Soyad alanında özel karakterlerin algılanması engellendi.
+SDK'yı köprüleyerek RN/Flutter uygulamalarında da kullanabilirsiniz. Hazır köprü iskeletleri:
 
-## 2.5.1
-- Turn şifrelemeyi destekleme bilgisi backende gönderildi
-- enableDebugPrint ile print loglarını açıp kapatabilme opsiyonu eklendi
+- [React Native entegrasyonu](docs/integration/react-native/README.md)
+- [Flutter entegrasyonu](docs/integration/flutter/README.md)
 
-## 2.5.0
-- OCR kimlik ön yüz ve arka yüz iyileştirmeleri yapıldı
-- TURN için encryptedTurnCredential ve shortTermUsage parametreleri eklendi
-- terminateCall fonksiyonuna terminateReason ve statusSummaryType eklendi
-- response messages düzenlemeleri yapıldı
-- SDK online log iyileştirmeleri yapıldı
+---
 
-## 2.3.15
-- Selfie modülünde sadece tek yüz algılandığında ilerlenmesi sağlandı
+## Örnek Uygulamanın Yapısı
 
-## 2.3.14
-- disableEndCallButton socket aksiyonu eklendi
-- enableAutoRotateOCR sdk parametresi eklendi
-- active_comparison_result_skip_module eklendi
+```
+NewTest/
+├── App/            AppDelegate + RootView (SDKFlowHostView kurulumu)
+├── Core/           Debug araçları, extension'lar
+├── Modules/        Modül başına: örnek ekran + HostViewModel + <Modül>.md rehberi
+│   ├── Login/      Host'un giriş ekranı örneği (identId girişi + setupSDK)
+│   ├── Selfie/     SelfieExample, SelfieHostViewModel, Selfie.md ...
+│   └── ...
+├── Showcase/       Yetenek vitrini: event akış ekranı, sesli okuma denemesi,
+│                   cross-platform rehber ekranı, tasarım kataloğu
+└── SupportingFiles/ Info.plist, entitlements, asset'ler
+```
 
-## 2.3.9
-- appVersion, appBuild, sdkVersion bilgilerinin gönderilmesi sağlandı
-- agentViewScale desteği eklendi
-- ident_id trim eklendi
-- doc_type desteği eklendi
+Uygulamayı açıp `NewTest.xcodeproj` ile derleyin; Login ekranına bir `identId` girip
+tüm akışı cihazda uçtan uca deneyimleyebilirsiniz (NFC ve görüşme için gerçek cihaz gerekir).
 
-## 2.3.1
-- Sunucudan maksimum dosya yükleme boyutunu al
+---
 
-## 2.3.0
-- Adres modülüne PDF yükleme seçeneği eklendi
-- Canlılık modülüne ekran kaydı desteği eklendiw
+## Sürüm Geçmişi
 
-## 2.2.0
-- IdentifyTrackingListener tarafına HTTP_RESPONSE_TRACKING_EVENT ve HTTP_REQUEST_TRACKING_EVENT eklendi
-- Turn sunucu için Short term auth servisi eklendi
-
-## 2.1.0
-- SDK tarafında yeni bir IdentifyTrackingListener eklendi, örnek kullanım için SDKBaseViewController dosyasını inceleyebilirsiniz.
-
-## 2.0.6
-- Network sınıfında ssl pinning için ekstra log eklendi
-
-## 2.0.5
-- yeni dil desteği eklendi
-
-## 2.0.4
-- close sdk methodu güncellendi
-- endReconnectSubscribe eklendi
-
-## 2.0.3 (Xcode 15.3 sürümü ayrıca eklenmiştir, dökümantasyonu mutlaka kontrol edin)
-- network sınıfı güncellendi
-- ssl pinning desteği eklendi
-
-## 2.0.2
-- ws credential webservisten gelecek hale getirildi, docs güncellendi
-
-## 2.0.1
-- active result desteği eklendi
-- ocr alanında güncellemeler yapıldı
-
-## 1.9.8
-- bağlantı hızına bağlı olarak kamera güncellemesi düzenlendi
-- prepare modülünün panele attığı istek eklendi
-
-## 1.9.7
-- prepare modülü eklendi
-- forceQuitSDK eklendi
-- socket disconnect olunca socket listener için method eklendi (.connectionErr)
-- ocr tarafında güncelleme yapıldı
+SDK ve Sample App sürüm notlarının tamamı için: **[CHANGELOG.md](CHANGELOG.md)**

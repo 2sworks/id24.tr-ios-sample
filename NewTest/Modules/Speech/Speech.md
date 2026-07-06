@@ -1,8 +1,18 @@
-# Speech — Konuşma doğrulama
+# Speech — Konuşma Doğrulama
 
-Kullanıcıya bir hedef kelime gösterir (ör. "Berlin"), mikrofonla söyletir ve Apple
-**Speech** framework'ü ile tanır. Tanınan metin hedefle eşleşince doğrulanır;
-`confirmSpeech()` sonucu **soket** üzerinden bildirir (`sendSpeechStatus`).
+Kullanıcıya bir hedef kelime/metin gösterilir (ör. "Berlin"); kullanıcı bunu mikrofona
+söyler, Apple **Speech** framework'ü **cihaz üzerinde** tanır ve hedefle eşleştirir.
+Amaç, mikrofonun çalıştığını ve karşıda konuşabilen gerçek bir kişinin olduğunu
+görüşme öncesinde kanıtlamaktır. Sonuç, sokete `sendSpeechStatus` ile bildirilir.
+
+> ⚠️ Karıştırmayın: Bu modül konuşma **TANIMA** adımıdır (kullanıcı konuşur, SDK dinler).
+> "Sesli okuma / Read-Aloud" ise SDK'nın yönergeleri **seslendirmesidir** — ayrı özelliktir.
+
+← [Modül İndeksi](../Modules.md) · [README](../../../README.md)
+
+---
+
+## Bir Bakışta
 
 | | |
 |---|---|
@@ -10,54 +20,88 @@ Kullanıcıya bir hedef kelime gösterir (ör. "Berlin"), mikrofonla söyletir v
 | Rota | `SDKModuleRoute.speech` |
 | Drop-in view | `SDKSpeechRecView` |
 | ViewModel | `SDKSpeechRecViewModel` |
-| Bağımlılık | Speech framework (on-device) + **soket** (`sendSpeechStatus`) |
+| Dış dünya | Speech framework (cihazda) + **soket** (`sendSpeechStatus`) |
+| Ses anahtarı | `SpeechTts` |
 
-> `Info.plist` → `NSSpeechRecognitionUsageDescription` ve `NSMicrophoneUsageDescription`.
+**İzinler:** `NSSpeechRecognitionUsageDescription` + `NSMicrophoneUsageDescription`.
+
+## Kullanıcı Ne Yaşar?
+
+1. Ekranda söylemesi gereken kelimeyi görür.
+2. "Konuş"a basar, kelimeyi söyler; tanınan metin canlı akar.
+3. Eşleşme sağlanınca "Onayla" aktifleşir; onayla sonuç sokete gider ve akış ilerler.
 
 ---
 
-## VM API — `SDKSpeechRecViewModel`
+## Hazır Ekranla Kullanım (Drop-in)
+
+Hiçbir şey yazmayın; rota gelince `SDKSpeechRecView` çizilir.
+
+## Kendi Tasarımınızla (Override)
+
+```swift
+registry.override(.speech) { MySpeechView() }
+
+struct MySpeechView: View {
+    @EnvironmentObject var coordinator: SDKFlowCoordinator
+    @StateObject private var vm = SDKSpeechRecViewModel()
+
+    var body: some View {
+        VStack {
+            Text("Söyleyin: \(vm.targetWord)")
+            Text(vm.recognizedText)                          // canlı transkript
+            Button(vm.isRecording ? "Durdur" : "Konuş") {
+                vm.isRecording ? vm.stopRecording() : vm.startRecording()
+            }
+            Button("Onayla") { vm.confirmSpeech() }          // ✅ sendSpeechStatus (soket)
+                .disabled(!vm.speechSuccess)
+        }
+        .onAppear { vm.onCompleted = { coordinator.advanceToNextModule() } }  // ✅
+    }
+}
+```
+
+> ❌ **Bypass yapmayın:** `confirmSpeech()` çağrılmadan ilerlerseniz `sendSpeechStatus`
+> gitmez — backend konuşma doğrulamasını hiç görmez.
+> Kural: [bypass yok](../../../docs/guides/customization.md#bypass-yok-kuralı).
+
+---
+
+## ViewModel Referansı — `SDKSpeechRecViewModel`
 
 ### State (`@Published`, salt-okunur)
 | Üye | Tip | Anlam |
 |---|---|---|
-| `targetWord` | `String` | Söylenmesi gereken kelime (varsayılan "Berlin") |
+| `targetWord` | `String` | Söylenmesi gereken kelime (sunucudan gelir) |
 | `isRecording` | `Bool` | Kayıt sürüyor mu |
 | `recognizedText` | `String` | Tanınan metin |
 | `speechSuccess` | `Bool` | Hedefle eşleşti mi |
 
-### Girdi (metotlar)
+### Metotlar
 | Metot | Etki |
 |---|---|
 | `startRecording()` | Mikrofon + tanımayı başlatır |
 | `stopRecording()` | Kaydı durdurur, sonucu değerlendirir |
 | `confirmSpeech()` | **`manager.sendSpeechStatus` (soket)** + `onCompleted?()` |
 
-### Çıktı (closure)
+### Closure'lar
 | Üye | Ne zaman |
 |---|---|
-| `onCompleted: (() -> Void)?` | Doğrulama tamamlanınca |
+| `onCompleted: (() -> Void)?` | Doğrulama tamamlandı |
 
----
-
-## Sinyal zinciri
+## Sinyal Zinciri — Perde Arkası
 
 ```
-startRecording()  → Speech tanıma (on-device) → recognizedText / speechSuccess
+startRecording()  → Speech tanıma (cihazda) → recognizedText / speechSuccess
 stopRecording()   → değerlendirme
 confirmSpeech()   → manager.sendSpeechStatus [SOKET] → onCompleted?()
 host: → coordinator.advanceToNextModule() [modulePresented]
 ```
 
----
-
-## Drop-in / Host VM / Custom
+## Host VM ile Gözlem (Composition)
 
 ```swift
-// Drop-in
-case .speech: SDKSpeechRecView()
-
-// Host VM
+@MainActor
 final class SpeechHostViewModel: HostModuleViewModel {
     let sdk = SDKSpeechRecViewModel()
     override init() {
@@ -69,57 +113,31 @@ final class SpeechHostViewModel: HostModuleViewModel {
     func start() { sdk.startRecording() }
     func stop()  { sdk.stopRecording() }
 }
-
-// Custom (override)
-registry.override(.speech) { MySpeechView() }
-
-struct MySpeechView: View {
-    @EnvironmentObject var coordinator: SDKFlowCoordinator
-    @StateObject private var vm = SDKSpeechRecViewModel()
-    var body: some View {
-        Text("Söyleyin: \(vm.targetWord)")
-        Text(vm.recognizedText)
-        Button(vm.isRecording ? "Durdur" : "Konuş") {
-            vm.isRecording ? vm.stopRecording() : vm.startRecording()
-        }
-        Button("Onayla") { vm.confirmSpeech() }              // ✅ sendSpeechStatus (soket)
-            .disabled(!vm.speechSuccess)
-            .onAppear { vm.onCompleted = { coordinator.advanceToNextModule() } } // ✅
-    }
-}
 ```
-
-> **Bypass yok:** `confirmSpeech()` çağrılmadan ilerlerseniz `sendSpeechStatus` gitmez,
-> backend konuşma doğrulamasını görmez.
-
-## Notlar
-- `targetWord` sunucudan/akıştan gelir; sabit değildir.
-- Tanıma cihazda çalışır; yalnızca sonuç soketle bildirilir.
 
 ---
 
 ## Sesli Okuma (Read-Aloud)
 
-Bu modül ekranı açıldığında yönergesi otomatik seslendirilebilir. Mod **modül bazında**
-seçilir; tam ayrıntı: [ReadAloud](../ReadAloud.md).
+Ekran açıldığında yönerge otomatik seslendirilebilir (`SDKFlowHostView` yapar, kod gerekmez).
 
-- **Metin key'i:** `SpeechTts`  ·  **Custom audio dosyası:** `SpeechTts.<uzantı>`
-  (uzantı serbest: `m4a`/`mp3`/`wav`/`caf`/`aac`/`aiff` otomatik denenir)
-- **Native (Siri / sistem sesi):**
-  ```swift
-  SDKSpeechConfig.shared.setMode(.native, for: .speech)
-  ```
-- **Custom audio (kendi kaydın):** bundle'a `SpeechTts.<uzantı>` koy (örn. `SpeechTts.m4a` veya `SpeechTts.mp3`) →
-  ```swift
-  SDKSpeechConfig.shared.audioBundle = Bundle.main
-  SDKSpeechConfig.shared.setMode(.customAudio, for: .speech)   // dosya yoksa native'e düşer
-  ```
-- **Kapalı:** `SDKSpeechConfig.shared.setMode(.off, for: .speech)`
-- **Metni ez:** `SDKLocalization.shared.setOverride(key: .speechTts, language: .tr, value: "...")`
+```swift
+SDKSpeechConfig.shared.setMode(.native, for: .speech)         // Siri/sistem sesi
+// veya kendi kaydınız: bundle'a SpeechTts.m4a koyun →
+SDKSpeechConfig.shared.audioBundle = Bundle.main
+SDKSpeechConfig.shared.setMode(.customAudio, for: .speech)    // dosya yoksa native'e düşer
+```
 
-Seslendirme, ekran açılışında `SDKFlowHostView` tarafından otomatik yapılır — modül tarafında
-ekstra kod gerekmez.
+> ⚠️ Bu modülde kullanıcı mikrofona konuşur; sesli okuma yönergeyle çakışabilir.
+> Gerekirse bu modül için `.off` seçin.
 
-> ⚠️ Bu modül KYC konuşma-**TANIMA** adımıdır (kullanıcı mikrofona okur). Read-aloud yalnızca YÖNERGEYİ okur; kullanıcı kaydederken sesle çakışmaması için gerekiyorsa `.off` seçin.
+Metni ezmek: `SDKLocalization.shared.setOverride(key: .speechTts, language: .tr, value: "...")`
+· Tüm ayrıntı: [ReadAloud](../ReadAloud.md)
 
-</content>
+## Sık Sorulanlar & Dikkat Edilecekler
+
+- **Hedef kelime nereden gelir?** Sunucudan/akıştan — sabit değildir; UI'nizi uzun
+  metinlere de hazırlayın.
+- **Tanıma dili:** `IdentifyManager.shared.sdkLang`'e göre seçilir
+  ([Lokalizasyon](../../../docs/guides/localization.md)).
+- **Tanıma nerede çalışır?** Cihazda; sokete yalnızca **sonuç** (başarılı/başarısız) gider.

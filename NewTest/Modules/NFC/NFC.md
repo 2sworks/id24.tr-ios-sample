@@ -1,8 +1,15 @@
-# NFC — Kimlik/Pasaport çip okuma
+# NFC — Kimlik/Pasaport Çip Okuma
 
-ICAO çipini (BAC/PACE → Secure Messaging) okur. MRZ anahtarı (seri no + doğum tarihi +
-geçerlilik tarihi) ile `startNFC` başlatılır; başarıda `onCompleted`. Karşılaştırma
-denemeleri tükenip atlamaya izin varsa `onSkipRequested`.
+Kimlik doğrulamanın en güçlü kanıtı: belgedeki **çipin** okunması. SDK, tam bir ICAO
+yığını taşır (BAC/PACE ile anahtar anlaşması → Secure Messaging → veri grupları) ve çipteki
+fotoğraf/kimlik verisini güvenle çıkarır. Çipe erişimin anahtarı, bir önceki OCR adımında
+okunan üç MRZ alanıdır: **seri no + doğum tarihi + son geçerlilik tarihi**.
+
+← [Modül İndeksi](../Modules.md) · [README](../../../README.md)
+
+---
+
+## Bir Bakışta
 
 | | |
 |---|---|
@@ -10,14 +17,55 @@ denemeleri tükenip atlamaya izin varsa `onSkipRequested`.
 | Rota | `SDKModuleRoute.nfc` |
 | Drop-in view | `SDKNfcView` |
 | ViewModel | `SDKNfcViewModel` |
-| Bağımlılık | CoreNFC (on-device çip) + **HTTP** (sonuç) |
+| Dış dünya | CoreNFC (cihazda çip) + **HTTP** (sonuç yükleme) |
+| Ses anahtarı | `NfcTts` |
 
-> `Info.plist` → `NFCReaderUsageDescription` ve `*.entitlements` →
-> `com.apple.developer.nfc.readersession.formats` zorunludur.
+**Kurulum gereksinimi:** entitlement dosyasına
+`com.apple.developer.nfc.readersession.formats` → `TAG`, Info.plist'e
+`NFCReaderUsageDescription` ve
+`com.apple.developer.nfc.readersession.iso7816.select-identifiers` → `A0000002471001`.
+
+## Kullanıcı Ne Yaşar?
+
+1. "Kimliğinizi telefonun arkasına yaslayın" yönergesini görür.
+2. "Çipi Oku"ya dokununca sistemin NFC sayfası açılır; belgeyi telefonun üst-arka kısmına tutar.
+3. Okuma sırasında durum metni akar (`nfcStatus`); başarıda otomatik ilerlenir.
+4. MRZ alanları yanlışsa manuel düzeltme ekranı açılabilir; deneme hakkı tükenirse adım atlanabilir.
 
 ---
 
-## VM API — `SDKNfcViewModel`
+## Hazır Ekranla Kullanım (Drop-in)
+
+Hiçbir şey yazmayın; rota gelince `SDKNfcView` çizilir. NFC illüstrasyonlarını
+değiştirmek için tema anahtarları: `nfcFront`, `nfcBack` ([Tema](../../../docs/guides/theming.md)).
+
+## Kendi Tasarımınızla (Override)
+
+```swift
+registry.override(.nfc) { MyNfcView() }
+
+struct MyNfcView: View {
+    @EnvironmentObject var coordinator: SDKFlowCoordinator
+    @StateObject private var vm = SDKNfcViewModel()
+
+    var body: some View {
+        VStack {
+            Text(vm.nfcStatus)                                      // canlı durum
+            Button("Çipi Oku") { vm.startNFC() }                    // ✅ manager.startNFC
+            Button("Devam") { coordinator.advanceToNextModule() }   // ✅
+                .disabled(!vm.canContinue)
+        }
+        .onAppear {
+            vm.onCompleted     = { coordinator.advanceToNextModule() }
+            vm.onSkipRequested = { coordinator.skipCurrentModule() }
+        }
+    }
+}
+```
+
+---
+
+## ViewModel Referansı — `SDKNfcViewModel`
 
 ### State
 | Üye | Tip | Erişim | Anlam |
@@ -30,25 +78,24 @@ denemeleri tükenip atlamaya izin varsa `onSkipRequested`.
 | `showEditScreen` | `Bool` | r/w | Manuel MRZ düzenleme ekranı |
 | `canContinue` | `Bool` | salt-okunur | Devam edilebilir mi |
 
-### Girdi (metotlar)
+### Metotlar
 | Metot | Etki |
 |---|---|
 | `startNFC()` | MRZ anahtarıyla çip okumayı başlatır (`manager.startNFC`) |
 | `saveManualDates()` | Manuel girilen MRZ alanlarını kaydeder |
 
-### Çıktı (closure)
+### Closure'lar
 | Üye | Ne zaman |
 |---|---|
 | `onCompleted: (() -> Void)?` | Okuma başarılı |
-| `onSkipRequested: (() -> Void)?` | Karşılaştırma tükenip skip izinliyse |
+| `onSkipRequested: (() -> Void)?` | Deneme hakkı tükenip atlamaya izin varsa |
 
 MRZ alanları VM açılışında otomatik dolar: `manager.mrzDocNo`, `manager.mrzBirthDay`,
-`manager.mrzValidDate` (önceki OCR adımından gelir). `manager.useKpsData` aktifse KPS
-verisi kullanılır.
+`manager.mrzValidDate` (önceki OCR adımından). `manager.useKpsData` aktifse KPS verisi
+kullanılır — sunucudan şifreli MRZ da gelebilir
+([Sunucu & API → şifreli MRZ](../../../docs/guides/server-api.md#şifreli-mrz-verisi-kpsdata-yerine)).
 
----
-
-## Sinyal zinciri
+## Sinyal Zinciri — Perde Arkası
 
 ```
 (VM init) ← manager.mrzDocNo / mrzBirthDay / mrzValidDate (önceki OCR'dan)
@@ -57,15 +104,10 @@ startNFC()  → manager.startNFC (CoreNFC çip okuma) → nfcMsgHandler (durum) 
 host: → coordinator.advanceToNextModule() [modulePresented]
 ```
 
----
-
-## Drop-in / Host VM / Custom
+## Host VM ile Gözlem (Composition)
 
 ```swift
-// Drop-in
-case .nfc: SDKNfcView()
-
-// Host VM
+@MainActor
 final class NfcHostViewModel: HostModuleViewModel {
     let sdk = SDKNfcViewModel()
     override init() {
@@ -76,55 +118,32 @@ final class NfcHostViewModel: HostModuleViewModel {
     var status: String { sdk.nfcStatus }
     func start() { log("nfc_start"); sdk.startNFC() }
 }
-
-// Custom (override)
-registry.override(.nfc) { MyNfcView() }
-
-struct MyNfcView: View {
-    @EnvironmentObject var coordinator: SDKFlowCoordinator
-    @StateObject private var vm = SDKNfcViewModel()
-    var body: some View {
-        VStack {
-            Text(vm.nfcStatus)
-            Button("Çipi Oku") { vm.startNFC() }           // ✅ manager.startNFC
-            Button("Devam") { coordinator.advanceToNextModule() } // ✅
-                .disabled(!vm.canContinue)
-        }
-        .onAppear {
-            vm.onCompleted     = { coordinator.advanceToNextModule() }
-            vm.onSkipRequested = { coordinator.skipCurrentModule() }
-        }
-    }
-}
 ```
-
-## Notlar
-- NFC okuma sistem NFC sheet'ini açar; simülatörde çalışmaz, gerçek cihaz gerekir.
-- MRZ alanları yanlışsa `showEditScreen = true` + `saveManualDates()` ile düzeltilebilir.
-- `onSkipRequested`, NFC çoklu denemede başarısız olursa akışı kilitlememek içindir.
 
 ---
 
 ## Sesli Okuma (Read-Aloud)
 
-Bu modül ekranı açıldığında yönergesi otomatik seslendirilebilir. Mod **modül bazında**
-seçilir; tam ayrıntı: [ReadAloud](../ReadAloud.md).
+Ekran açıldığında yönerge otomatik seslendirilebilir (`SDKFlowHostView` yapar, kod gerekmez).
 
-- **Metin key'i:** `NfcTts`  ·  **Custom audio dosyası:** `NfcTts.<uzantı>`
-  (uzantı serbest: `m4a`/`mp3`/`wav`/`caf`/`aac`/`aiff` otomatik denenir)
-- **Native (Siri / sistem sesi):**
-  ```swift
-  SDKSpeechConfig.shared.setMode(.native, for: .nfc)
-  ```
-- **Custom audio (kendi kaydın):** bundle'a `NfcTts.<uzantı>` koy (örn. `NfcTts.m4a` veya `NfcTts.mp3`) →
-  ```swift
-  SDKSpeechConfig.shared.audioBundle = Bundle.main
-  SDKSpeechConfig.shared.setMode(.customAudio, for: .nfc)   // dosya yoksa native'e düşer
-  ```
-- **Kapalı:** `SDKSpeechConfig.shared.setMode(.off, for: .nfc)`
-- **Metni ez:** `SDKLocalization.shared.setOverride(key: .nfcTts, language: .tr, value: "...")`
+```swift
+SDKSpeechConfig.shared.setMode(.native, for: .nfc)          // Siri/sistem sesi
+// veya kendi kaydınız: bundle'a NfcTts.m4a koyun →
+SDKSpeechConfig.shared.audioBundle = Bundle.main
+SDKSpeechConfig.shared.setMode(.customAudio, for: .nfc)     // dosya yoksa native'e düşer
+```
 
-Seslendirme, ekran açılışında `SDKFlowHostView` tarafından otomatik yapılır — modül tarafında
-ekstra kod gerekmez.
+Metni ezmek: `SDKLocalization.shared.setOverride(key: .nfcTts, language: .tr, value: "...")`
+· Tüm ayrıntı: [ReadAloud](../ReadAloud.md)
 
-</content>
+## Sık Sorulanlar & Dikkat Edilecekler
+
+- **Simülatörde çalışmaz** — CoreNFC gerçek cihaz ister; NFC'yi test etmeden yayına çıkmayın.
+- **Okuma başarısız oluyor:** Kılıfı çıkartın, belgeyi telefonun **üst-arka** kısmına tutun,
+  okuma bitene kadar oynatmayın. Hata sayısı `setupSDK(nfcMaxErrorCount:)` ile sınırlanır.
+- **MRZ yanlış okunmuşsa:** `showEditScreen = true` + `saveManualDates()` ile kullanıcı
+  düzeltebilir; agent uzaktan da NFC düzeltme başlatabilir (`editNfcProcess` soket aksiyonu).
+- **Çipsiz belge:** `setupSDK(showNFCNotFoundPage: true)` ile "NFC bulunamadı" ekranı
+  gösterilebilir; event akışında `notFound` durumu görülür ([Event Sistemi](../../../docs/guides/events.md)).
+- **Sertifika doğrulama:** `needCertForNfc: true` ile çip sertifika zinciri, gömülü CSCA
+  listesine karşı doğrulanır.

@@ -1,9 +1,14 @@
-# ThankYou — Teşekkür / sonuç ekranı
+# ThankYou — Sonuç Ekranı
 
-Akışın terminal ekranı. KYC sonucunu gösterir. İki biçimde gelir:
-- **Statüsüz** (`SDKThankYouView()`): `manager.kycIsCompleted`'a göre genel başarı.
-- **Statülü** (`SDKThankYouView(status:)`): görüşme sonucu (pozitif/negatif/missed) —
-  CallScreen tarafından `coordinator.pendingThankYouStatus`'a yazılıp rotaya gömülür.
+Akışın son durağı. Kullanıcıya KYC sürecinin sonucunu gösterir: başarıyla tamamlandı,
+reddedildi ya da cevapsız çağrı. **Tamamen pasiftir** — hiçbir soket/HTTP çağrısı yapmaz;
+bu yüzden en güvenle özelleştirilebilen ekrandır.
+
+← [Modül İndeksi](../Modules.md) · [README](../../../README.md)
+
+---
+
+## Bir Bakışta
 
 | | |
 |---|---|
@@ -11,11 +16,14 @@ Akışın terminal ekranı. KYC sonucunu gösterir. İki biçimde gelir:
 | Rota | `SDKModuleRoute.thankYou(ThankYouStatus?)` |
 | Drop-in view | `SDKThankYouView` |
 | ViewModel | `SDKThankYouViewModel` |
-| Bağımlılık | — (pasif terminal; soket/HTTP yok) |
+| Dış dünya | — (pasif terminal; soket/HTTP yok) |
+| Ses anahtarı | `ThankYouTts` |
 
----
+## İki Biçimde Gelir
 
-## Tip — `ThankYouStatus`
+- **Statüsüz** — `SDKThankYouView()`: `manager.kycIsCompleted`'a göre genel başarı/başarısızlık.
+- **Statülü** — `SDKThankYouView(status:)`: görüşme sonucu (pozitif/negatif/cevapsız).
+  CallScreen, sonucu `coordinator.pendingThankYouStatus`'a yazar; statü rotaya gömülür.
 
 ```swift
 public enum ThankYouStatus: Hashable {
@@ -24,7 +32,46 @@ public enum ThankYouStatus: Hashable {
 }
 ```
 
-## VM API — `SDKThankYouViewModel`
+---
+
+## Kullanım
+
+```swift
+// Drop-in (statüsüz)
+SDKThankYouView()
+
+// Drop-in (statülü)
+SDKThankYouView(status: .completed)
+
+// Görüşme akışından doğrudan geçiş
+coordinator.pushThankYouDirectly(status: .completed)
+```
+
+`SDKFlowHostView` rotayı statüye göre çizer:
+
+```swift
+case .thankYou(let status):
+    if let status { SDKThankYouView(status: status) }
+    else          { SDKThankYouView() }
+```
+
+## Kendi Tasarımınızla (Override)
+
+```swift
+registry.override(.thankYou(.completed)) {
+    MyThankYouView(status: .completed)
+}
+```
+
+> **Dikkat:** `.thankYou(_)` rotası **associated value** taşır — override belirli bir statü
+> için kaydedilir. Tüm statüleri tek tasarımla karşılamak istiyorsanız her olası statü için
+> ayrı `registry.override` kaydı ekleyin (ya da drop-in kullanıp
+> [tema](../../../docs/guides/theming.md) ile `thankYouSuccess`/`thankYouFail`
+> illüstrasyonlarını değiştirin).
+
+---
+
+## ViewModel Referansı — `SDKThankYouViewModel`
 
 ### Init
 ```swift
@@ -35,80 +82,34 @@ public init(status: ThankYouStatus = .completed)
 | Üye | Tip | Anlam |
 |---|---|---|
 | `status` | `ThankYouStatus` | Gösterilen sonuç |
-| `isSelfieIdentification` | `Bool` | Selfie-only kimlik akışı mıydı (`manager.isSelfieIdent`) |
-| `kycCompleted` | `Bool` | KYC tamamlandı mı (`manager.kycIsCompleted`) |
+| `isSelfieIdentification` | `Bool` | Selfie-only kimlik akışı mıydı |
+| `kycCompleted` | `Bool` | KYC tamamlandı mı |
 
-Bu modülün **girdi metodu veya çıktı closure'u yoktur** — pasiftir. Terminal olduğundan
-ekrandan sonra `advanceToNextModule` yoktur; akış burada biter (`getNextModule` modül
-sırası tükendiğinde SDK `disconnect()` çağırır).
-
----
-
-## Rota çizimi
-
-`SDKFlowHostView` statüye göre ayrım yapar:
-
-```swift
-case .thankYou(let status):
-    if let status { SDKThankYouView(status: status) }
-    else          { SDKThankYouView() }
-```
-
-Görüşme akışında doğrudan geçiş:
-```swift
-coordinator.pushThankYouDirectly(status: .completed)
-// veya CallScreen: coordinator.pendingThankYouStatus = status; coordinator.advanceToNextModule()
-```
-
----
-
-## Drop-in / Custom
-
-```swift
-// Drop-in (statüsüz)
-SDKThankYouView()
-
-// Drop-in (statülü)
-SDKThankYouView(status: .completed)
-
-// Custom (override) — statüyü rotadan alın
-registry.override(.thankYou(.completed)) {
-    MyThankYouView(status: .completed)
-}
-```
-
-> **Not:** `.thankYou(_)` rotası **associated value** taşır; override'ı belirli bir statü
-> için kaydedersiniz. Tüm statüleri tek tasarımla karşılamak istiyorsanız, host view'ınız
-> kendi içinde statü ayrımını yapsın ve her olası statü için `registry.override` kaydı
-> ekleyin (ya da basitçe drop-in'i kullanın).
-
-## Notlar
-- Bu ekran pasiftir: hiçbir VM metodu soket/HTTP tetiklemez. Araya/yerine custom koymak akışı bozmaz.
-- `showThankYouPage: true` setupSDK parametresi bu ekranın gösterilip gösterilmeyeceğini belirler.
-- KYC sonrası kapanış (`disconnect`/`closeSDK`) SDK tarafında, ekrandan bağımsız yönetilir.
+Bu VM'in **girdi metodu veya çıktı closure'u yoktur** — terminal ekrandır. Modül sırası
+tükendiğinde SDK bağlantıyı kendisi kapatır (`disconnect()`); ekrandan sonra
+`advanceToNextModule` yoktur.
 
 ---
 
 ## Sesli Okuma (Read-Aloud)
 
-Bu modül ekranı açıldığında yönergesi otomatik seslendirilebilir. Mod **modül bazında**
-seçilir; tam ayrıntı: [ReadAloud](../ReadAloud.md).
+Ekran açıldığında sonuç mesajı otomatik seslendirilebilir (`SDKFlowHostView` yapar).
 
-- **Metin key'i:** `ThankYouTts`  ·  **Custom audio dosyası:** `ThankYouTts.<uzantı>`
-  (uzantı serbest: `m4a`/`mp3`/`wav`/`caf`/`aac`/`aiff` otomatik denenir)
-- **Native (Siri / sistem sesi):**
-  ```swift
-  SDKSpeechConfig.shared.setMode(.native, for: .thankU)
-  ```
-- **Custom audio (kendi kaydın):** bundle'a `ThankYouTts.<uzantı>` koy (örn. `ThankYouTts.m4a` veya `ThankYouTts.mp3`) →
-  ```swift
-  SDKSpeechConfig.shared.audioBundle = Bundle.main
-  SDKSpeechConfig.shared.setMode(.customAudio, for: .thankU)   // dosya yoksa native'e düşer
-  ```
-- **Kapalı:** `SDKSpeechConfig.shared.setMode(.off, for: .thankU)`
-- **Metni ez:** `SDKLocalization.shared.setOverride(key: .thankYouTts, language: .tr, value: "...")`
+```swift
+SDKSpeechConfig.shared.setMode(.native, for: .thankU)         // Siri/sistem sesi
+// veya kendi kaydınız: bundle'a ThankYouTts.m4a koyun →
+SDKSpeechConfig.shared.audioBundle = Bundle.main
+SDKSpeechConfig.shared.setMode(.customAudio, for: .thankU)    // dosya yoksa native'e düşer
+```
 
-Seslendirme, ekran açılışında `SDKFlowHostView` tarafından otomatik yapılır — modül tarafında
-ekstra kod gerekmez.
+Metni ezmek: `SDKLocalization.shared.setOverride(key: .thankYouTts, language: .tr, value: "...")`
+· Tüm ayrıntı: [ReadAloud](../ReadAloud.md)
 
-</content>
+## Sık Sorulanlar & Dikkat Edilecekler
+
+- **Bu ekran gösterilmesin istiyorum:** `setupSDK(showThankYouPage: false)` — akış sonunda
+  kontrol size döner; kendi kapanış deneyiminizi kurarsınız.
+- **Özelleştirmesi risksiz mi?** Evet — pasif olduğundan yerine/arasına ne koyarsanız koyun
+  akış bozulmaz.
+- **Kapanış kim yapar?** KYC sonrası `disconnect`/`closeSDK` SDK tarafında, ekrandan
+  bağımsız yönetilir.

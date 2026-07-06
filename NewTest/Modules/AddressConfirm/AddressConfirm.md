@@ -1,8 +1,14 @@
-# AddressConfirm — Adres onayı
+# AddressConfirm — Adres Onayı
 
-Kullanıcı adresini girer ve bir kanıt belgesi ekler (foto **veya** PDF). `submit()` adres +
-belgeyi **HTTP** üzerinden yükler (`uploadAddressInfo` / `uploadAddressInfoWithPdf`);
-başarıda `onCompleted`.
+Kullanıcı ikamet adresini yazar ve kanıt olarak bir belge ekler — kamerayla çekilmiş bir
+**fotoğraf** ya da bir **PDF** (ör. e-Devlet ikametgâh belgesi). "Gönder" ile adres + belge
+tek istekte sunucuya yüklenir.
+
+← [Modül İndeksi](../Modules.md) · [README](../../../README.md)
+
+---
+
+## Bir Bakışta
 
 | | |
 |---|---|
@@ -10,11 +16,49 @@ başarıda `onCompleted`.
 | Rota | `SDKModuleRoute.addressConfirm` |
 | Drop-in view | `SDKAddressConfirmView` |
 | ViewModel | `SDKAddressConfirmViewModel` |
-| Bağımlılık | **HTTP** (foto: `uploadAddressInfo`, PDF: `uploadAddressInfoWithPdf`) |
+| Dış dünya | **HTTP** (foto: `uploadAddressInfo` / PDF: `uploadAddressInfoWithPdf`) |
+| Ses anahtarı | `AddressConfirmTts` |
+
+## Kullanıcı Ne Yaşar?
+
+1. Adresini metin alanına yazar (en az 10 karakter).
+2. "Belge ekle" ile kaynağını seçer: kamerayla tara **veya** dosyalardan PDF seç.
+3. Adres geçerli + belge ekli olunca "Gönder" aktifleşir; yükleme biter, akış ilerler.
 
 ---
 
-## VM API — `SDKAddressConfirmViewModel`
+## Hazır Ekranla Kullanım (Drop-in)
+
+Hiçbir şey yazmayın; rota gelince `SDKAddressConfirmView` çizilir.
+
+## Kendi Tasarımınızla (Override)
+
+Sample App'te bu modülün canlı bir override örneği zaten vardır
+(`AddressConfirmExample`, kayıt yeri: `RootView.configureIfNeeded`):
+
+```swift
+registry.override(.addressConfirm) { MyAddressView() }
+
+struct MyAddressView: View {
+    @EnvironmentObject var coordinator: SDKFlowCoordinator
+    @StateObject private var vm = SDKAddressConfirmViewModel()
+
+    var body: some View {
+        VStack {
+            TextField("Adres", text: $vm.addressText)
+            Button("Belgeyi tara") { vm.openScanner() }
+            Button("PDF seç") { vm.openPDFPicker() }
+            Button("Gönder") { vm.submit() }        // ✅ uploadAddressInfo[WithPdf]
+                .disabled(!vm.canSubmit)
+        }
+        .onAppear { vm.onCompleted = { coordinator.advanceToNextModule() } }  // ✅
+    }
+}
+```
+
+---
+
+## ViewModel Referansı — `SDKAddressConfirmViewModel`
 
 ### State (`@Published`)
 | Üye | Tip | Anlam |
@@ -33,7 +77,7 @@ başarıda `onCompleted`.
 | `canSubmit: Bool` | Adres geçerli **ve** (foto veya PDF) var mı |
 | `maxPDFSizeMB: Int` | İzinli en büyük PDF (`manager.maxAddressPDFFileSize`) |
 
-### Girdi (metotlar)
+### Metotlar
 | Metot | Etki |
 |---|---|
 | `openScanner()` | Belge tarayıcısını açar |
@@ -43,14 +87,12 @@ başarıda `onCompleted`.
 | `pdfSelected(_ data: Data, preview: UIImage?)` | PDF verisini set eder |
 | `submit()` | Adres + belgeyi yükler → `onCompleted` |
 
-### Çıktı (closure)
+### Closure'lar
 | Üye | Ne zaman |
 |---|---|
 | `onCompleted: (() -> Void)?` | Yükleme başarılı |
 
----
-
-## Sinyal zinciri
+## Sinyal Zinciri — Perde Arkası
 
 ```
 photoSelected / pdfSelected...  → docPhoto / pdfData (UI durumu)
@@ -61,15 +103,10 @@ submit()
 host: → coordinator.advanceToNextModule() [modulePresented]
 ```
 
----
-
-## Drop-in / Host VM / Custom
+## Host VM ile Gözlem (Composition)
 
 ```swift
-// Drop-in
-case .addressConfirm: SDKAddressConfirmView()
-
-// Host VM
+@MainActor
 final class AddressHostViewModel: HostModuleViewModel {
     let sdk = SDKAddressConfirmViewModel()
     override init() {
@@ -79,61 +116,41 @@ final class AddressHostViewModel: HostModuleViewModel {
     var canSubmit: Bool { sdk.canSubmit }
     func submit() { sdk.submit() }
 }
-
-// Custom (override) — SampleApp'te canlı örnek var (AddressConfirmExample)
-registry.override(.addressConfirm) { MyAddressView() }
-
-struct MyAddressView: View {
-    @EnvironmentObject var coordinator: SDKFlowCoordinator
-    @StateObject private var vm = SDKAddressConfirmViewModel()
-    var body: some View {
-        TextField("Adres", text: $vm.addressText)
-        Button("Belge ekle") { vm.openScanner() }            // veya vm.openPDFPicker()
-        Button("Gönder") { vm.submit() }                     // ✅ uploadAddressInfo[WithPdf]
-            .disabled(!vm.canSubmit)
-            .onAppear { vm.onCompleted = { coordinator.advanceToNextModule() } } // ✅
-    }
-}
 ```
-
-## Notlar
-- Adres en az 10 karakter olmalı (`isAddressValid`); aksi halde `canSubmit` false.
-- Foto **ve** PDF aynı anda gerekmez; biri yeterli. PDF boyutu `maxPDFSizeMB`'ı aşmamalı.
-- `registry.override(.addressConfirm)` örneği SampleApp `RootView.configureIfNeeded`'da mevcuttur.
 
 ---
 
 ## Sesli Okuma (Read-Aloud)
 
-Bu modül ekranı açıldığında yönergesi otomatik seslendirilebilir. Mod **modül bazında**
-seçilir; tam ayrıntı: [ReadAloud](../ReadAloud.md).
+Ekran açıldığında yönerge otomatik seslendirilebilir (`SDKFlowHostView` yapar, kod gerekmez).
 
-- **Metin key'i:** `AddressConfirmTts`  ·  **Custom audio dosyası:** `AddressConfirmTts.<uzantı>`
-  (uzantı serbest: `m4a`/`mp3`/`wav`/`caf`/`aac`/`aiff` otomatik denenir)
-- **Native (Siri / sistem sesi):**
-  ```swift
-  SDKSpeechConfig.shared.setMode(.native, for: .addressConf)
-  ```
-- **Hazır klip (SDK içinde, yalnız Türkçe):** SDK bundle'ında `AddressConfirmTts_tr.mp3`
-  gelir. Sesli okuma açıkken, host bu modüle açıkça mod atamadıkça: **dil TR ise hazır
-  klip çalar**, diğer dillerde klip bulunmaz ve native okuma (aktif dilin
-  `AddressConfirmTts` metni) devreye girer.
-  Ekstra kod gerekmez; kapatmak/ezmek için modüle açıkça mod ata:
-  ```swift
-  SDKSpeechConfig.shared.setMode(.native, for: .addressConf)   // hazır klibi kullanma
-  ```
-- **Custom audio (kendi kaydın):** `AddressConfirmTts.<uzantı>` (tüm diller) veya
-  `AddressConfirmTts_<dil>.<uzantı>` (örn. `AddressConfirmTts_tr.m4a`, yalnız o dilde)
-  dosyasını bundle'a koy; `audioBundle`/`Bundle.main`'deki dosya SDK'nın hazır klibine
-  göre öncelik kazanır:
-  ```swift
-  SDKSpeechConfig.shared.audioBundle = Bundle.main
-  SDKSpeechConfig.shared.setMode(.customAudio, for: .addressConf)   // dosya yoksa native'e düşer
-  ```
-- **Kapalı:** `SDKSpeechConfig.shared.setMode(.off, for: .addressConf)`
-- **Metni ez:** `SDKLocalization.shared.setOverride(key: .addressConfirmTts, language: .tr, value: "...")`
+Bu modülün bir ayrıcalığı vardır: SDK bundle'ında **hazır Türkçe klip** gelir
+(`AddressConfirmTts_tr.mp3`). Sesli okuma açıkken ve bu modüle açıkça mod atamadıysanız:
+dil TR ise hazır klip çalar; diğer dillerde native okuma devreye girer.
 
-Seslendirme, ekran açılışında `SDKFlowHostView` tarafından otomatik yapılır — modül tarafında
-ekstra kod gerekmez.
+```swift
+// Hazır klibi kullanma, native oku:
+SDKSpeechConfig.shared.setMode(.native, for: .addressConf)
 
-</content>
+// Kendi kaydınız — tüm diller için AddressConfirmTts.m4a
+// veya dil bazlı AddressConfirmTts_tr.m4a (host dosyası SDK klibini ezer):
+SDKSpeechConfig.shared.audioBundle = Bundle.main
+SDKSpeechConfig.shared.setMode(.customAudio, for: .addressConf)   // dosya yoksa native'e düşer
+
+// Kapalı:
+SDKSpeechConfig.shared.setMode(.off, for: .addressConf)
+```
+
+Metni ezmek: `SDKLocalization.shared.setOverride(key: .addressConfirmTts, language: .tr, value: "...")`
+· Tüm ayrıntı: [ReadAloud](../ReadAloud.md)
+
+## Sık Sorulanlar & Dikkat Edilecekler
+
+- **Foto mu PDF mi?** Biri yeterli — ikisi aynı anda gerekmez.
+- **"Gönder" pasif:** Adres 10 karakterin altındaysa `isAddressValid` `false` kalır.
+- **PDF sınırı:** `maxPDFSizeMB` sunucudan gelir; seçimden önce kullanıcıya gösterin.
+- **Fotoğraf kalitesi:** SDK, adres belgesini okunaklı kalacak sıkıştırma ayarlarıyla yükler
+  (2.5.4'te iyileştirildi) — ekstra sıkıştırma yapmayın.
+- **Belge tarayıcısı:** `openScanner()` ile açılan kamera, SDK'nın gerçek zamanlı tarama
+  motorunu (`.generic` profil — otomatik kırpma + perspektif düzeltme) kullanır —
+  [IdentityScanner rehberi](../../../docs/guides/identity-scanner.md).

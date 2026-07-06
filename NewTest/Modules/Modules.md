@@ -1,69 +1,64 @@
-# IdentifySDK — Modül Entegrasyon Rehberleri
+# Modül Rehberleri — Buradan Başlayın
 
-Bu klasör, `IdentifySDK` Default UI katmanındaki **her modül** için ayrı bir entegrasyon
-dokümanı içerir. Önce bu sayfayı okuyun: tüm modüllerde ortak olan **kurulum, akış,
-özelleştirme ve "bypass yok" kuralı** burada anlatılır. Sonra ilgilendiğiniz modülün
-kendi dosyasına geçin.
+IdentifySDK'daki her doğrulama adımı bir **modüldür**: kimlik tarama, NFC, selfie, görüntülü
+görüşme... Her modülün bu klasörde kendi rehberi vardır. Bu sayfa, hepsinde ortak olan şeyleri
+bir kez anlatır: kurulum, akışın nasıl ilerlediği, ekranları özelleştirme yolları ve tek
+altın kural.
 
-> SDK ikili (binary) XCFramework'tür ve SPM ile dağıtılır. Modül ekranları (`SDKXxxView`)
-> drop-in'dir: hiçbir şey yazmadan hazır akışı çalıştırabilir; istediğiniz ekranı kendi
-> tasarımınızla değiştirebilirsiniz. **İç mantık (OCR, soket, WebRTC, yükleme) hep SDK'da
-> kalır** — siz yalnızca UI'ı değiştirirsiniz.
+> SDK, ikili (binary) XCFramework olarak dağıtılır. Modül ekranları **drop-in**'dir: hiçbir şey
+> yazmadan hazır akış çalışır; istediğiniz ekranı kendi tasarımınızla değiştirirsiniz.
+> **İç mantık (OCR, soket, WebRTC, yükleme) her zaman SDK'da kalır** — siz yalnızca UI'a dokunursunuz.
 
----
-
-## 1. Mimari — üç parça
-
-| Parça | Tip | Görev |
-|---|---|---|
-| `SDKFlowCoordinator` | `ObservableObject` | Akışın beyni: modül geçişleri (ileri/atla/geri), navigasyon `path`, ilerleme, `IdentifyManager` köprüsü |
-| `SDKViewRegistry` | sınıf | Ekran çözümleme defteri: bir SDK ekranını override etmek veya araya custom ekran eklemek |
-| `SDKFlowHostView` | `View` | Kök view: `coordinator.path`'teki rotayı çizer, önce registry'ye bakar, yoksa SDK default'una düşer |
-
-Her modülün üç dosyası vardır:
-
-- `SDKXxxView.swift` — drop-in SwiftUI ekranı
-- `SDKXxxViewModel.swift` — `public final class : SDKBaseModuleViewModel` (iş mantığı + state)
-- (host tarafında, opsiyonel) `XxxHostViewModel` — SDK VM'ini **saran** kendi VM'iniz
-
-`SDKBaseModuleViewModel` tüm modül VM'lerinin tabanıdır:
-
-```swift
-@MainActor open class SDKBaseModuleViewModel: ObservableObject {
-    @Published public var isLoading: Bool = false
-    @Published public var errorMessage: String? = nil
-    let manager = IdentifyManager.shared   // singleton orchestrator (soket + WebRTC burada yaşar)
-}
-```
+Daha geniş bağlam için: [Mimari](../../docs/guides/architecture.md) ·
+[Sunucu & API](../../docs/guides/server-api.md) · [Özelleştirme](../../docs/guides/customization.md)
 
 ---
 
-## 2. Kurulum — uçtan uca
+## Modül Kataloğu
 
-### 2.1 Kök view
+| Modül | Ne yapar | Backend key | Rota | Rehber |
+|---|---|---|---|---|
+| 🎬 Hazırlık | İzinler + hız testi, kullanıcıyı akışa hazırlar | `.prepare` | `.prepare` | [Prepare.md](Prepare/Prepare.md) |
+| 🪪 Kimlik (OCR) | Kimlik ön/arka yüz çekimi + cihazda okuma | `.idCard` | `.idCard` | [IdCard.md](IdCard/IdCard.md) |
+| ✨ Kimlik (OVD) | Hologram/optik doğrulamayla sahtecilik kontrolü | `.idcard_w_ovd` | `.idCardOVD` | [IdCardOVD.md](IdCardOVD/IdCardOVD.md) |
+| 📡 NFC | Kimlik/pasaport çipini okur | `.nfc` | `.nfc` | [NFC.md](NFC/NFC.md) |
+| 🤳 Selfie | Selfie + cihazda yüz tespiti | `.selfie` | `.selfie` | [Selfie.md](Selfie/Selfie.md) |
+| 🫦 Selfie + Canlılık | İkisini tek adımda birleştirir | `.selfieWithLiveness` | `.selfieWithLiveness` | [SelfieWithLiveness.md](SelfieWithLiveness/SelfieWithLiveness.md) |
+| 👁 Canlılık | Sola dön / göz kırp / gülümse testleri | `.livenessDetection` | `.liveness` | [Liveness.md](Liveness/Liveness.md) |
+| 🗣 Konuşma | Metni sesli okutup doğrular | `.speech` | `.speech` | [Speech.md](Speech/Speech.md) |
+| ✍️ İmza | Ekranda imza alır | `.signature` | `.signature` | [Signature.md](Signature/Signature.md) |
+| 🎥 Video Kayıt | Kısa video kaydı (isteğe bağlı sesli okuma doğrulamalı) | `.videoRecord` | `.videoRecorder` | [VideoRecorder.md](VideoRecorder/VideoRecorder.md) |
+| 🏠 Adres Onayı | Adres belgesi foto/PDF yükler | `.addressConf` | `.addressConfirm` | [AddressConfirm.md](AddressConfirm/AddressConfirm.md) |
+| 📞 Görüntülü Görüşme | Agent ile canlı WebRTC görüşmesi | `.waitScreen` | `.callScreen` | [CallScreen.md](CallScreen/CallScreen.md) |
+| 🙏 Teşekkür | Akış sonucu (terminal ekran) | `.thankU` | `.thankYou(_)` | [ThankYou.md](ThankYou/ThankYou.md) |
+| 🤟 İşaret Dili | Görüşme öncesi tercih kapısı (CallScreen alt-ekranı) | — | — | [SignLang.md](SignLang/SignLang.md) |
+| 📵 Bağlantı Koptu | Kopma overlay'i + toparlanma (modül değil, katman) | — | — | [LostConnection.md](LostConnection/LostConnection.md) |
+
+Modül sırasına backend karar verir (`RoomResponse.modules`) — uygulamanız hangi modüller
+gelirse gelsin çalışacak şekilde kurulur.
+
+---
+
+## Kurulum — Bir Kez Yapılır
+
+İki adım vardır ve **sıra kritiktir**:
 
 ```swift
+// 1) Kök view — SDKFlowHostView her şeyi çizer
 struct RootView: View {
     @StateObject private var coordinator = SDKFlowCoordinator()
     @State private var registry = SDKViewRegistry()
 
     var body: some View {
         SDKFlowHostView(coordinator: coordinator, registry: registry) {
-            LoginView()                       // kök (host'un kendi giriş ekranı)
-                .environmentObject(coordinator)
+            LoginView().environmentObject(coordinator)   // sizin giriş ekranınız
         }
     }
 }
-```
 
-### 2.2 setupSDK — sıralama kritik
-
-`coordinator.prepareForSetup()` **setupSDK'dan ÖNCE** çağrılmalı. Aksi halde SDK
-`modulesControllersArray`'i farklı instance'larla kurar ve modüller hiç başlamaz.
-
-```swift
+// 2) Bağlanma — prepareForSetup HER ZAMAN setupSDK'dan önce
 func connect(coordinator: SDKFlowCoordinator) {
-    coordinator.prepareForSetup()             // 1) placeholder controller'ları kaydet
+    coordinator.prepareForSetup()                        // ⚠️ önce bu
 
     IdentifyManager.shared.setupSDK(
         identId: "...",
@@ -72,155 +67,101 @@ func connect(coordinator: SDKFlowCoordinator) {
         kpsData: nil,
         signLangSupport: false,
         nfcMaxErrorCount: 3,
-        selectedModules: [],                  // boş = backend'in döndürdüğü sıra
+        selectedModules: [],                             // boş = backend'in sırası
         turnKey: "...",
         wsSecretKey: "...",
         showThankYouPage: true
     ) { socket, roomResponse, error in
         Task { @MainActor in
             if error == nil, socket?.isConnected == true, roomResponse.result == true {
-                coordinator.start()           // 2) ilk modüle geç
+                coordinator.start()                      // ilk modüle geç
             }
         }
     }
 }
 ```
 
-`setupSDK` → backend `RoomResponse.modules` döndürür → `addModules` modül dizisini kurar →
-`coordinator.start()` → `advanceToNextModule()` → ilk rota `path`'e push edilir →
-`SDKFlowHostView` o rotanın ekranını çizer.
+`prepareForSetup()` atlanırsa SDK modül dizisini farklı instance'larla kurar ve **hiçbir modül
+başlamaz** — en sık yapılan kurulum hatası budur.
 
-### 2.3 Coordinator API
-
-| Üye | Görev |
-|---|---|
-| `prepareForSetup()` | setupSDK'dan **önce** placeholder controller'ları kaydeder |
-| `start()` | setupSDK başarılıysa ilk modüle geçer |
-| `advanceToNextModule()` | Sıradaki SDK modülüne geçer; varsa önce/sonra eklenmiş custom ekranları gösterir |
-| `skipCurrentModule()` | Mevcut modülü atlar (`manager.skipModule()` + ilerle) |
-| `insert(_ ids:before:)` / `insert(_ ids:after:)` | Bir SDK rotasının önüne/arkasına custom ekran(lar) zincirler |
-| `showExternalScreen(_ id:)` | Anlık custom ekran gösterir (`moduleStepOrder` değişmez) |
-| `advanceExternal()` | Custom ekranın "Devam"ı: kuyrukta bekleyen custom → bekleyen SDK rotası → sıradaki modül |
-| `popBack()` | Geri; path tek eleman kalmışsa `exitSDK()` |
-| `pushThankYouDirectly(status:)` | Doğrudan ThankYou'ya geçer (görüşme sonucu için) |
-| `restoreSocketListener()` | CallScreen gibi dinleyiciyi devralanlar ayrılırken geri verir |
-| `resetFlow()` | Tüm state'i sıfırlar |
-| **Published:** `path`, `activeModule`, `progressStep`, `progressTotal`, `sdkError`, `subRejected`, `pendingThankYouStatus` | Akış durumu (host UI bunlara bağlanabilir) |
+Tüm `setupSDK` parametreleri için: [Sunucu & API rehberi](../../docs/guides/server-api.md#setupsdk--tam-parametre-referansı).
 
 ---
 
-## 3. Üç özelleştirme yöntemi
+## Her Modülde Aynı Üçlü
 
-### A) Tam ekran override — SDK ekranını kendi tasarımınızla değiştirin
-```swift
-registry.override(.selfie) { MyCustomSelfieView() }
-```
-`SDKFlowHostView` o rota için sizin view'ınızı çizer. **Ama** view'ınız hâlâ SDK VM'inin
-metotlarını çağırmalı (aşağı bkz. bypass kuralı).
+| Dosya | Kimin | Görev |
+|---|---|---|
+| `SDKXxxView.swift` | SDK | Drop-in SwiftUI ekranı — hiçbir şey yazmazsanız bu çalışır |
+| `SDKXxxViewModel.swift` | SDK | İş mantığı + state (`public final`, `SDKBaseModuleViewModel` tabanlı) |
+| `XxxHostViewModel.swift` | Sample App (örnek) | SDK VM'ini saran host VM — kopyalanabilir referans |
 
-### B) Araya custom ekran ekleme — yeni `.custom(id)` rotaları
-```swift
-registry.custom("welcome") { MyIntroView() }         // ekranı tanımla
-coordinator.insert(["welcome"], before: .selfie)     // Selfie'den ÖNCE göster
-```
-Custom ekranın "Devam" butonu `coordinator.advanceExternal()` çağırmalı. Bu ekranlar
-`moduleStepOrder`'ı etkilemez (pasiftir, soketle konuşmaz).
-
-### C) Host VM composition — SDK VM'ini sarın (gözlem/log/analitik)
-```swift
-@MainActor
-final class SelfieHostViewModel: HostModuleViewModel {
-    let sdk = SDKSelfieViewModel()
-    override init() {
-        super.init()
-        bridge(sdk)                                   // child objectWillChange'i yukarı ilet
-        sdk.onSkipRequested = { [weak self] in self?.log("skip") }
-    }
-    func process(_ img: UIImage) { log("scan"); sdk.processSelfie(image: img) }
-}
-```
-> **Karar:** Modül VM'leri `public final` + composition kalıyor; `open`/subclass'a
-> geçilmiyor. Dış geliştiriciler davranışı ezmez, yalnızca gözlemler + kendi UI'ını yapar.
-> Ayrıntı: bu kararın gerekçesi proje notlarında kayıtlıdır (composition + `final`).
+Her VM'de hazır olanlar: `isLoading`, `errorMessage` (`@Published`) ve `manager`
+(`IdentifyManager.shared`) erişimi.
 
 ---
 
-## 4. "Bypass yok" kuralı — en önemli kural
+## Ekranları Özelleştirme — Üç Yöntem
 
-Custom bir ekran yaptığınızda, her adım eylemini (**tara / yükle / sonraki modüle geç**)
-**SDK VM metoduna indirmelisiniz.** Kendi HTTP isteğinizi atıp kendi navigasyonunuzu
-kurarsanız, backend ilerleme sinyallerini (`sendStep`, `modulePresented`) almaz ve akış
-sunucu tarafında ilerlemez.
+```swift
+// A) Ekranı kendi tasarımınla değiştir
+registry.override(.selfie) { MySelfieView() }
+
+// B) Araya kendi ekranını sok (pasif: tanıtım, sözleşme, başarı...)
+registry.custom("welcome") { MyIntroView() }
+coordinator.insert(["welcome"], before: .selfie)
+// custom ekranın devam butonu → coordinator.advanceExternal()
+
+// C) SDK VM'ini sar (gözlem/log/analitik) — ekran SDK'nın kalır
+final class SelfieHostViewModel: HostModuleViewModel { let sdk = SDKSelfieViewModel() ... }
+```
+
+Derinlemesine anlatım + kontrol listesi: [Özelleştirme rehberi](../../docs/guides/customization.md).
+
+---
+
+## ⚠️ Altın Kural: Bypass Yok
+
+Custom ekranınız her iş eylemini — **tara / yükle / ilerle** — SDK VM metoduna indirmelidir.
+VM metotları işin yanında backend'e ilerleme sinyali gönderir (`sendStep`, `modulePresented`);
+kendi HTTP isteğinizi atar veya kendi navigasyonunuzu kurarsanız **sunucu akışı ilerlemez.**
 
 | ✅ Doğru | ❌ Bypass |
 |---|---|
-| `vm.scanFront(image:)` → OCR + upload + `sendStep` | Kendi OCR'ınız + kendi `POST`'unuz |
-| `coordinator.advanceToNextModule()` → `modulePresented` sinyali | `path.append(...)` ile kendi geçişiniz |
-| `vm.uploadSignature(image:)` | Görseli kendiniz yükleme |
+| `vm.scanFront(image:)` | Kendi OCR'ınız + kendi `POST`'unuz |
+| `coordinator.advanceToNextModule()` | `path.append(...)` |
+| `vm.uploadSignature(image:)` | Görseli kendiniz yüklemek |
 
-**Soket + WebRTC `IdentifyManager.shared` singleton'ında yaşar**, View yaşam döngüsünden
-izoledir. Araya **pasif** ekran (tanıtım/başarı) eklemek soketi/WebRTC'yi **etkilemez** —
-o ekranlar zaten hiçbir VM metodu çağırmaz.
-
----
-
-## 5. Modül listesi
-
-| Modül | Backend key (`SdkModules`) | Rota | Bağımlılık | Doküman |
-|---|---|---|---|---|
-| Hazırlık | `.prepare` | `.prepare` | hız testi + izinler | [Prepare.md](Prepare/Prepare.md) |
-| Kimlik (OCR) | `.idCard` | `.idCard` | on-device OCR + HTTP | [IdCard.md](IdCard/IdCard.md) |
-| Kimlik (OVD/hologram) | `.idcard_w_ovd` | `.idCardOVD` | on-device skor + HTTP | [IdCardOVD.md](IdCardOVD/IdCardOVD.md) |
-| NFC çip okuma | `.nfc` | `.nfc` | CoreNFC + HTTP | [NFC.md](NFC/NFC.md) |
-| Selfie | `.selfie` | `.selfie` | yüz tespiti + HTTP | [Selfie.md](Selfie/Selfie.md) |
-| Selfie + Liveness | `.selfieWithLiveness` | `.selfieWithLiveness` | UIKit controller + HTTP | [SelfieWithLiveness.md](SelfieWithLiveness/SelfieWithLiveness.md) |
-| Canlılık (Liveness) | `.livenessDetection` | `.liveness` | adım API + HTTP | [Liveness.md](Liveness/Liveness.md) |
-| Konuşma | `.speech` | `.speech` | Speech framework + soket | [Speech.md](Speech/Speech.md) |
-| İmza | `.signature` | `.signature` | HTTP | [Signature.md](Signature/Signature.md) |
-| Video kayıt | `.videoRecord` | `.videoRecorder` | HTTP | [VideoRecorder.md](VideoRecorder/VideoRecorder.md) |
-| Adres onayı | `.addressConf` | `.addressConfirm` | HTTP (foto/PDF) | [AddressConfirm.md](AddressConfirm/AddressConfirm.md) |
-| Görüntülü görüşme | `.waitScreen` | `.callScreen` | **WebRTC + soket** | [CallScreen.md](CallScreen/CallScreen.md) |
-| Teşekkür / sonuç | `.thankU` | `.thankYou(_)` | — (terminal) | [ThankYou.md](ThankYou/ThankYou.md) |
-| İşaret dili kapısı | — (CallScreen alt-ekranı) | — | soket (`sendStep`) | [SignLang.md](SignLang/SignLang.md) |
-| Bağlantı koptu | — (overlay) | — | soket reconnect | [LostConnection.md](LostConnection/LostConnection.md) |
+Soket + WebRTC `IdentifyManager.shared`'da yaşar, ekranlardan izoledir. Araya **pasif** ekran
+eklemek bağlantıyı etkilemez.
 
 ---
 
-## 6. Soket/WebRTC bağımlılık özeti
+## Sesli Okuma (Read-Aloud) — Kesişen Özellik
+
+Her modül ekranı açıldığında yönergesi otomatik seslendirilebilir; mod **modül bazında** seçilir:
+
+```swift
+SDKSpeechConfig.shared.setModeForAll(.native)                  // Siri/sistem sesi
+SDKSpeechConfig.shared.setMode(.customAudio, for: [.selfie])   // kendi ses kaydınız
+SDKSpeechConfig.shared.setMode(.off, for: .livenessDetection)  // kapalı
+```
+
+Seslendirmeyi `SDKFlowHostView` otomatik yapar; modül başına kod gerekmez. Her modülün
+rehberinde kendi ses anahtarı yazar. Tam ayrıntı: [ReadAloud.md](ReadAloud.md).
+
+> ⚠️ "Sesli okuma" (TTS) ile **Konuşma modülü** (`.speech`, konuşma **tanıma**) ayrı şeylerdir.
+
+---
+
+## Modüllerin Dış Bağımlılıkları
 
 | Bağımlılık | Modüller |
 |---|---|
-| **Yalnızca on-device** (kamera/OCR/yüz, soket yok) | IdCard(OCR), IdCardOVD, Selfie, Liveness(frame), Prepare(izin) |
-| **HTTP upload** (sonuç sunucuya yüklenir) | IdCard, IdCardOVD, NFC, Selfie, Liveness, Signature, VideoRecorder, AddressConfirm |
-| **Soket sinyali** (adım/durum bildirimi) | Prepare(`sendPreparetatus`), SignLang(`sendStep`), Speech(`sendSpeechStatus`), CallScreen |
-| **WebRTC** (canlı görüntü + data channel) | CallScreen |
+| Yalnızca cihaz üzerinde (soket yok) | IdCard (OCR), IdCardOVD, Selfie, Liveness (kare analizi), Prepare (izinler) |
+| HTTP upload | IdCard, IdCardOVD, NFC, Selfie, Liveness, Signature, VideoRecorder, AddressConfirm |
+| Soket sinyali | Prepare (`sendPreparetatus`), SignLang (`sendStep`), Speech (`sendSpeechStatus`), CallScreen |
+| WebRTC | CallScreen |
 
-Pasif ekranlar (ThankYou, host'un tanıtım/başarı ekranları) hiçbir sinyal göndermez;
-araya eklenmeleri güvenlidir.
-
----
-
-## 7. Sesli Okuma (Read-Aloud) — kesişen özellik
-
-Her modül ekranı açıldığında yönergesi **sesli okunabilir**. Bu bir modül değil, tüm
-modüllere serpiştirilmiş erişilebilirlik katmanıdır. İki adımlı ve **modül bazında** seçilir:
-
-- `.native` → iOS `AVSpeechSynthesizer` (Siri/sistem sesi) `*_tts` metnini okur
-- `.customAudio` → host'un bundle'a koyduğu `<key>.<uzantı>` klibini çalar; uzantı serbest
-  (`m4a`/`mp3`/`wav`/`caf`/`aac`/`aiff` otomatik denenir), yoksa native'e düşer
-- `.off` → o modülde sesli okuma yok
-
-```swift
-SDKSpeechConfig.shared.setModeForAll(.native)                  // tümü native
-SDKSpeechConfig.shared.setMode(.customAudio, for: [.selfie])   // per-modül
-SDKSpeechConfig.shared.setMode(.off, for: .livenessDetection)
-// Kısayol: setupSDK(ttsEnabled: true) → defaultMode .off ise .native
-```
-
-Seslendirme, ekran açılışında `SDKFlowHostView` tarafından **otomatik** yapılır; host'un
-modül başına kod yazmasına gerek yoktur. Her modülün kendi `.md` dosyasında o modüle özel
-key/dosya adı ve mod örneği vardır. Tam ayrıntı: [ReadAloud](ReadAloud.md).
-
-> ⚠️ Buradaki "sesli okuma" (TTS), tablodaki **Konuşma** (`.speech` / konuşma-tanıma)
-> modülüyle karıştırılmamalıdır — ayrı şeylerdir.
-</content>
+Pasif ekranlar (ThankYou + sizin eklediğiniz ekranlar) hiçbir sinyal göndermez; araya
+eklenmeleri her zaman güvenlidir.

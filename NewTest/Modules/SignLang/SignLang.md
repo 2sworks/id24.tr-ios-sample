@@ -1,20 +1,31 @@
-# SignLang — İşaret dili kapısı
+# SignLang — İşaret Dili Kapısı
 
-Bağımsız bir akış modülü değil; görüşme öncesi/sırasında kullanıcıya işaret dili desteği
-isteyip istemediğini soran bir **kapı (gate)** ekranıdır. Tercih `manager.connectToSignLang`
-bayrağını ayarlar ve `sendStep()` ile **soket** üzerinden backend'e bildirilir.
+Bağımsız bir akış modülü değil, bir **kapı (gate)** ekranıdır: görüşme öncesinde kullanıcıya
+"işaret dili destekli temsilci ister misiniz?" diye sorar. Tercih, backend'e sokete bildirilir
+ve kullanıcı doğru temsilci kuyruğuna yönlendirilir — erişilebilirlik için küçük ama önemli
+bir adım.
 
-| | |
-|---|---|
-| Backend key | — (CallScreen alt-ekranı; ayrı rota yok) |
-| Tetikleyici | `SDKCallScreenViewModel.checkSignLangIfNeeded()` → `showSignLangGate` |
-| Drop-in view | `SDKSignLangView` |
-| ViewModel | `SDKSignLangViewModel` |
-| Bağımlılık | **soket** (`sendStep`) |
+← [Modül İndeksi](../Modules.md) · [README](../../../README.md) · İlgili: [CallScreen](../CallScreen/CallScreen.md)
 
 ---
 
-## VM API — `SDKSignLangViewModel`
+## Bir Bakışta
+
+|              |                                                                       |
+| ------------ | --------------------------------------------------------------------- |
+| Backend key  | — (CallScreen alt-ekranı; ayrı rota yok)                              |
+| Tetikleyici  | `SDKCallScreenViewModel.checkSignLangIfNeeded()` → `showSignLangGate` |
+| Drop-in view | `SDKSignLangView`                                                     |
+| ViewModel    | `SDKSignLangViewModel`                                                |
+| Dış dünya    | **Soket** (`sendStep`)                                                |
+
+Kapının görünmesi için `setupSDK(signLangSupport: true)` verilmelidir.
+
+---
+
+## ViewModel Referansı — `SDKSignLangViewModel`
+
+VM o kadar küçük ki tamamını gösterebiliriz:
 
 ```swift
 public final class SDKSignLangViewModel: SDKBaseModuleViewModel {
@@ -33,12 +44,10 @@ public final class SDKSignLangViewModel: SDKBaseModuleViewModel {
 | `isSignLangEnabled` | `Bool` (r/w) | İşaret dili desteği isteniyor mu |
 | `continueAction(onFinish:)` | metot | Tercihi kaydeder + `sendStep` (soket) + `onFinish` |
 
-> Diğer modüllerin aksine bağımsız bir `onCompleted` closure'u yoktur; `continueAction`
-> doğrudan bir `onFinish` parametresi alır.
+> Diğer modüllerin aksine `onCompleted` closure'u yoktur; `continueAction` doğrudan bir
+> `onFinish` parametresi alır.
 
----
-
-## Sinyal zinciri
+## Sinyal Zinciri — Perde Arkası
 
 ```
 isSignLangEnabled = true/false           (kullanıcı tercihi)
@@ -50,10 +59,33 @@ continueAction(onFinish:)
 
 ---
 
-## Drop-in / Host VM / Custom
+## Kendi Tasarımınızla
+
+Toggle'ınız nasıl görünürse görünsün, tercih **mutlaka** `continueAction`'dan geçmeli:
 
 ```swift
-// Host VM (SampleApp'teki gerçek desen)
+struct MySignLangView: View {
+    @StateObject private var vm = SDKSignLangViewModel()
+    let onFinish: () -> Void
+
+    var body: some View {
+        VStack {
+            Toggle("İşaret dili desteği istiyorum", isOn: $vm.isSignLangEnabled)
+            Button("Devam") {
+                vm.continueAction(onFinish: onFinish)   // ✅ connectToSignLang + sendStep
+            }
+        }
+    }
+}
+```
+
+> ❌ **Bypass yapmayın:** `manager.connectToSignLang`'ı elle set edip geçmeyin —
+> `continueAction` çağrılmazsa `sendStep` gitmez ve backend tercihi hiç görmez;
+> kullanıcı yanlış kuyruğa düşer.
+
+## Host VM ile Gözlem (Composition)
+
+```swift
 @MainActor
 final class SignLangHostViewModel: HostModuleViewModel {
     let sdk = SDKSignLangViewModel()
@@ -68,40 +100,25 @@ final class SignLangHostViewModel: HostModuleViewModel {
         sdk.continueAction(onFinish: { [weak self] in self?.onCompleted?() })
     }
 }
-
-// Custom tasarım — toggle + devam, ama tercihi mutlaka VM'e verin
-struct MySignLangView: View {
-    @StateObject private var vm = SDKSignLangViewModel()
-    let onFinish: () -> Void
-    var body: some View {
-        Toggle("İşaret dili desteği", isOn: $vm.isSignLangEnabled)
-        Button("Devam") {
-            vm.continueAction(onFinish: onFinish)            // ✅ connectToSignLang + sendStep
-        }
-    }
-}
 ```
-
-> **Bypass yok:** Toggle'ı kendiniz okuyup `manager.connectToSignLang`'ı elle set etmeyin;
-> `continueAction` çağırın, aksi halde `sendStep` gitmez ve backend tercihi görmez.
-
-## Notlar
-- Bu ekran genelde CallScreen tarafından `showSignLangGate` ile sunulur; tek başına bir
-  modül rotası (`SDKModuleRoute`) yoktur.
-- `connectToSignLang` setupSDK'daki `signLangSupport` parametresiyle de başlatılabilir.
 
 ---
 
 ## Sesli Okuma (Read-Aloud)
 
-Bu ekran bir **overlay**'dir ve akış rotası (`route.ttsKey`) yoktur; bu yüzden **otomatik
-sesli okuma uygulanmaz**. Gerekirse metni elle okutabilirsiniz:
+Bu ekran bir **overlay**'dir ve akış rotası olmadığından **otomatik sesli okuma uygulanmaz.**
+Gerekirse elle okutun:
 
 ```swift
-SDKSpeechService.shared.speak(text: "…")   // native (Siri)
+SDKSpeechService.shared.speak(text: "İşaret dili desteği ister misiniz?")
 SDKSpeechService.shared.stop()
 ```
 
-Genel bilgi: [ReadAloud](../ReadAloud.md).
+Genel bilgi: [ReadAloud](../ReadAloud.md)
 
-</content>
+## Sık Sorulanlar & Dikkat Edilecekler
+
+- **Kapı hiç görünmüyor:** `signLangSupport: true` verilmiş mi? Kapıyı CallScreen açar
+  (`checkSignLangIfNeeded()`); tek başına bir rota yoktur.
+- **Kuyruk etkisi:** İşaret dili seçen kullanıcı normal görüşme kuyruğuna düşmez —
+  doğru temsilci havuzuna yönlendirilir.

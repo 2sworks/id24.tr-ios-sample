@@ -1,8 +1,14 @@
-# VideoRecorder — Video kayıt (okuma metni)
+# VideoRecorder — Kısa Video Kaydı
 
-Kullanıcı ekrandaki metni okurken kısa bir video (varsayılan 5 sn) çeker. Opsiyonel olarak
-konuşma tanıma ile okunan metni doğrular. Video `manager.upload` ile **HTTP** üzerinden
-yüklenir; başarıda `onCompleted`.
+Kullanıcı, ekrandaki metni sesli okurken kısa bir video çeker (varsayılan 5 sn). Sunucu
+istiyorsa, okunan metin **konuşma tanıma ile doğrulanır** — böylece videonun gerçekten o
+oturumda ve o kişi tarafından çekildiği kanıtlanır. Video HTTP ile yüklenir.
+
+← [Modül İndeksi](../Modules.md) · [README](../../../README.md)
+
+---
+
+## Bir Bakışta
 
 | | |
 |---|---|
@@ -10,11 +16,51 @@ yüklenir; başarıda `onCompleted`.
 | Rota | `SDKModuleRoute.videoRecorder` |
 | Drop-in view | `SDKVideoRecorderView` (+ `SDKVideoCamera`) |
 | ViewModel | `SDKVideoRecorderViewModel` |
-| Bağımlılık | **HTTP** (`upload`) + opsiyonel konuşma tanıma (on-device) |
+| Dış dünya | **HTTP** (`upload`) + isteğe bağlı konuşma doğrulama |
+| Ses anahtarı | `VideoRecorderTts` |
+
+## Kullanıcı Ne Yaşar?
+
+1. Ekranda okunacak metni görür (metin sunucudan gelir).
+2. Kayda başlar, metni sesli okur; süre dolunca kayıt biter.
+3. (Sesli doğrulama açıksa) okunan metin arka planda eşleştirilir; tutmuyorsa yeniden çeker.
+4. "Gönder" ile video yüklenir, akış ilerler.
 
 ---
 
-## VM API — `SDKVideoRecorderViewModel`
+## Hazır Ekranla Kullanım (Drop-in)
+
+Hiçbir şey yazmayın; rota gelince `SDKVideoRecorderView` çizilir.
+
+## Kendi Tasarımınızla (Override)
+
+Kamera/kayıt UI'ı sizin; transkripsiyon, boyut kontrolü ve yükleme SDK'da kalır:
+
+```swift
+registry.override(.videoRecorder) { MyVideoView() }
+
+struct MyVideoView: View {
+    @EnvironmentObject var coordinator: SDKFlowCoordinator
+    @StateObject private var vm = SDKVideoRecorderViewModel()
+
+    var body: some View {
+        VStack {
+            if let text = vm.readingText { Text(text) }       // okunacak metin
+            MyRecorderView { recordedURL in
+                vm.videoSelected(url: recordedURL)            // ✅ transkripsiyon + kontrol
+            }
+            Button("Tekrar çek") { vm.deleteVideo() }
+            Button("Gönder") { vm.uploadVideo() }             // ✅ manager.upload
+                .disabled(vm.videoData == nil && vm.videoURL == nil)
+        }
+        .onAppear { vm.onCompleted = { coordinator.advanceToNextModule() } }  // ✅
+    }
+}
+```
+
+---
+
+## ViewModel Referansı — `SDKVideoRecorderViewModel`
 
 ### State
 | Üye | Tip | Erişim | Anlam |
@@ -30,41 +76,34 @@ yüklenir; başarıda `onCompleted`.
 ### Sabit
 | Üye | Değer | Anlam |
 |---|---|---|
-| `videoTimeLimit` | `5.0` | Maksimum kayıt süresi (sn) |
+| `videoTimeLimit` | `5.0` | Maksimum kayıt süresi (sn) — sunucu farklı süre gönderebilir |
 
-### Girdi (metotlar)
+### Metotlar
 | Metot | Etki |
 |---|---|
 | `updateReadingText(_ text: String)` | Okunacak metni günceller |
-| `videoSelected(url: URL)` | Çekilen videoyu yükler (transkripsiyon + boyut kontrolü) |
-| `deleteVideo()` | Çekilen videoyu siler (yeniden çekim) |
-| `uploadVideo()` | Videoyu sunucuya gönderir (`manager.upload`) → `onCompleted` |
+| `videoSelected(url: URL)` | Videoyu işler (transkripsiyon + boyut kontrolü) |
+| `deleteVideo()` | Videoyu siler (yeniden çekim) |
+| `uploadVideo()` | Videoyu sunucuya gönderir → `onCompleted` |
 
-### Çıktı (closure)
+### Closure'lar
 | Üye | Ne zaman |
 |---|---|
 | `onCompleted: (() -> Void)?` | Yükleme başarılı |
 
----
-
-## Sinyal zinciri
+## Sinyal Zinciri — Perde Arkası
 
 ```
 updateReadingText(_:)   → readingText (UI)
-videoSelected(url:)      → transkripsiyon + boyut kontrolü (on-device) → videoData/videoURL
-uploadVideo()            → manager.upload [HTTP] → onCompleted?()
+videoSelected(url:)     → transkripsiyon + boyut kontrolü (cihazda) → videoData/videoURL
+uploadVideo()           → manager.upload [HTTP] → onCompleted?()
 host: → coordinator.advanceToNextModule() [modulePresented]
 ```
 
----
-
-## Drop-in / Host VM / Custom
+## Host VM ile Gözlem (Composition)
 
 ```swift
-// Drop-in
-case .videoRecorder: SDKVideoRecorderView()
-
-// Host VM
+@MainActor
 final class VideoRecorderHostViewModel: HostModuleViewModel {
     let sdk = SDKVideoRecorderViewModel()
     override init() {
@@ -75,52 +114,33 @@ final class VideoRecorderHostViewModel: HostModuleViewModel {
     func picked(_ url: URL) { sdk.videoSelected(url: url) }
     func upload() { sdk.uploadVideo() }
 }
-
-// Custom (override)
-registry.override(.videoRecorder) { MyVideoView() }
-
-struct MyVideoView: View {
-    @EnvironmentObject var coordinator: SDKFlowCoordinator
-    @StateObject private var vm = SDKVideoRecorderViewModel()
-    var body: some View {
-        if let text = vm.readingText { Text(text) }
-        // kayıt bitince:  vm.videoSelected(url: recordedURL)   ✅
-        Button("Gönder") { vm.uploadVideo() }                  // ✅ manager.upload
-            .disabled(vm.videoData == nil && vm.videoURL == nil)
-            .onAppear { vm.onCompleted = { coordinator.advanceToNextModule() } } // ✅
-        Button("Tekrar çek") { vm.deleteVideo() }
-    }
-}
 ```
-
-## Notlar
-- Video boyutu `manager.requestMaxBodySize`'ı aşarsa `videoSelected` reddeder; süre sınırı `videoTimeLimit` (5 sn).
-- Konuşma doğrulama opsiyoneldir; `speechSuccess`/`recognizedText` yalnızca okuma-metni senaryosunda anlamlıdır.
 
 ---
 
 ## Sesli Okuma (Read-Aloud)
 
-Bu modül ekranı açıldığında yönergesi otomatik seslendirilebilir. Mod **modül bazında**
-seçilir; tam ayrıntı: [ReadAloud](../ReadAloud.md).
+Ekran açıldığında yönerge otomatik seslendirilebilir (`SDKFlowHostView` yapar, kod gerekmez).
 
-- **Metin key'i:** `VideoRecorderTts`  ·  **Custom audio dosyası:** `VideoRecorderTts.<uzantı>`
-  (uzantı serbest: `m4a`/`mp3`/`wav`/`caf`/`aac`/`aiff` otomatik denenir)
-- **Native (Siri / sistem sesi):**
-  ```swift
-  SDKSpeechConfig.shared.setMode(.native, for: .videoRecord)
-  ```
-- **Custom audio (kendi kaydın):** bundle'a `VideoRecorderTts.<uzantı>` koy (örn. `VideoRecorderTts.m4a` veya `VideoRecorderTts.mp3`) →
-  ```swift
-  SDKSpeechConfig.shared.audioBundle = Bundle.main
-  SDKSpeechConfig.shared.setMode(.customAudio, for: .videoRecord)   // dosya yoksa native'e düşer
-  ```
-- **Kapalı:** `SDKSpeechConfig.shared.setMode(.off, for: .videoRecord)`
-- **Metni ez:** `SDKLocalization.shared.setOverride(key: .videoRecorderTts, language: .tr, value: "...")`
+```swift
+SDKSpeechConfig.shared.setMode(.native, for: .videoRecord)        // Siri/sistem sesi
+// veya kendi kaydınız: bundle'a VideoRecorderTts.m4a koyun →
+SDKSpeechConfig.shared.audioBundle = Bundle.main
+SDKSpeechConfig.shared.setMode(.customAudio, for: .videoRecord)   // dosya yoksa native'e düşer
+```
 
-Seslendirme, ekran açılışında `SDKFlowHostView` tarafından otomatik yapılır — modül tarafında
-ekstra kod gerekmez.
+> ⚠️ Kayıt sırasında mikrofon açıktır; native okuma kayda karışabilir. Yönergeyi kayıt
+> **başlamadan** okutun ya da bu modülde `.customAudio` / `.off` tercih edin.
 
-> ⚠️ Kayıt sırasında mikrofon açıktır; native okuma kayda karışabilir. Yönergeyi kayıt BAŞLAMADAN okutun ya da `.customAudio` / `.off` tercih edin.
+Metni ezmek: `SDKLocalization.shared.setOverride(key: .videoRecorderTts, language: .tr, value: "...")`
+· Tüm ayrıntı: [ReadAloud](../ReadAloud.md)
 
-</content>
+## Sık Sorulanlar & Dikkat Edilecekler
+
+- **Sesli doğrulama nasıl açılır?** Sunucu tarafından (`video_record_speech` bayrağı) —
+  okunacak metin, eşleşme eşiği ve süre de sunucudan gelir
+  ([Sunucu & API](../../../docs/guides/server-api.md#roomresponse--akışı-şekillendiren-alanlar)).
+- **Video reddediliyor:** Boyut `manager.requestMaxBodySize`'ı aşıyorsa `videoSelected`
+  kabul etmez; süreyi ve çözünürlüğü düşürün.
+- **`speechSuccess` ne zaman anlamlı?** Yalnızca okuma-metni senaryosunda; doğrulama
+  kapalıysa bu alanları yok sayın.

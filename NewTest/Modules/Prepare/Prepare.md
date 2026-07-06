@@ -1,8 +1,18 @@
-# Prepare — Hazırlık (izinler + hız testi)
+# Prepare — Hazırlık Ekranı
 
-Akışın ilk modülü. Kamera/mikrofon/konuşma izinlerini ister ve (gerekiyorsa) ağ hız testi
-yapar. Hepsi tamamlanınca `sendPreparetatus` ile soket üzerinden backend'e "hazır"
-bilgisini gönderir ve sıradaki modüle geçer.
+Akışın kapı görevlisi. Kullanıcı daha hiçbir doğrulama adımına girmeden, sürecin sorunsuz
+ilerlemesi için gerekenler burada toplanır: **kamera / mikrofon / konuşma izinleri** ve
+(gerekiyorsa) **bağlantı hız testi**. Her şey hazır olduğunda backend'e soket üzerinden
+"müşteri hazır" sinyali gider ve akış başlar.
+
+Bu modül sayesinde kullanıcı, görüşmenin ortasında izin pop-up'larıyla bölünmez —
+en sık düşülen kötü deneyim daha en başta engellenir.
+
+← [Modül İndeksi](../Modules.md) · [README](../../../README.md)
+
+---
+
+## Bir Bakışta
 
 | | |
 |---|---|
@@ -10,11 +20,60 @@ bilgisini gönderir ve sıradaki modüle geçer.
 | Rota | `SDKModuleRoute.prepare` |
 | Drop-in view | `SDKPrepareView` |
 | ViewModel | `SDKPrepareViewModel` |
-| Bağımlılık | İzinler (on-device) + hız testi + **soket sinyali** (`sendPreparetatus`) |
+| Dış dünya | İzinler (cihazda) + hız testi + **soket sinyali** (`sendPreparetatus`) |
+| Ses anahtarı | `PrepareTts` |
+
+## Kullanıcı Ne Yaşar?
+
+1. Ekranda izin satırları görür (kamera, mikrofon, konuşma) — her birine dokunup izni verir.
+2. Gerekliyse kısa bir bağlantı hız testi koşar.
+3. Hepsi yeşile dönünce "Devam" aktifleşir; dokunduğunda akışın ilk gerçek adımına geçilir.
+4. Bir izni reddederse, onu Ayarlar'a yönlendiren bir uyarı görür.
 
 ---
 
-## VM API — `SDKPrepareViewModel`
+## Hazır Ekranla Kullanım (Drop-in)
+
+Hiçbir şey yazmayın — rota geldiğinde `SDKFlowHostView`, `SDKPrepareView`'ı kendisi çizer.
+Görünümü markanıza uydurmak için [Tema rehberi](../../../docs/guides/theming.md) yeterlidir
+(izin satırı ikonları: `permCamera`, `permMic`, `permSpeech`...).
+
+## Kendi Tasarımınızla (Override)
+
+UI tamamen sizin; izin isteme, hız testi ve "hazırım" sinyali SDK VM'inde kalır:
+
+```swift
+registry.override(.prepare) { MyPrepareView() }
+
+struct MyPrepareView: View {
+    @EnvironmentObject var coordinator: SDKFlowCoordinator
+    @StateObject private var vm = SDKPrepareViewModel()
+
+    var body: some View {
+        VStack {
+            // kendi izin/hız UI'ınız — vm.cameraAuthorized, vm.measuredSpeed... okuyun
+            PermissionRow("Kamera", granted: vm.cameraAuthorized) { vm.checkCamera() }
+            PermissionRow("Mikrofon", granted: vm.micAuthorized) { vm.checkMicrophone() }
+
+            Button("Devam") {
+                vm.completePrepare()                  // ✅ sendPreparetatus (soket)
+            }
+            .disabled(!vm.allPermissionsGranted)
+        }
+        .onAppear {
+            vm.onCompleted = { coordinator.advanceToNextModule() }  // ✅ modulePresented
+        }
+    }
+}
+```
+
+> ❌ **Bypass yapmayın:** Kendi izin kontrolünüzü yapıp doğrudan
+> `coordinator.advanceToNextModule()` çağırırsanız `sendPreparetatus` gitmez —
+> backend, müşterinin hazır olduğunu hiç öğrenmez. Kural: [bypass yok](../../../docs/guides/customization.md#bypass-yok-kuralı).
+
+---
+
+## ViewModel Referansı — `SDKPrepareViewModel`
 
 ### State (`@Published`, salt-okunur)
 | Üye | Tip | Anlam |
@@ -39,7 +98,7 @@ bilgisini gönderir ve sıradaki modüle geçer.
 | `allPermissionsGranted` | Tüm gerekli izinler verildi mi |
 | `needsSpeedTest` | Hız testi gerekli mi (`manager.needSpeedTest`) |
 
-### Girdi (metotlar)
+### Metotlar
 | Metot | Etki |
 |---|---|
 | `checkCamera()` | Kamera iznini ister/günceller |
@@ -48,33 +107,24 @@ bilgisini gönderir ve sıradaki modüle geçer.
 | `startSpeedTest()` | `manager.startSpeedTest()` ile hız ölçer |
 | `completePrepare()` | **`manager.sendPreparetatus` (soket) + `onCompleted?()`** |
 
-### Çıktı (closure)
+### Closure'lar
 | Üye | Ne zaman |
 |---|---|
-| `onCompleted: (() -> Void)?` | Hazırlık bittiğinde — host `coordinator.advanceToNextModule()` çağırır |
+| `onCompleted: (() -> Void)?` | Hazırlık bitti — host `coordinator.advanceToNextModule()` çağırır |
 
----
-
-## Sinyal zinciri
+## Sinyal Zinciri — Perde Arkası
 
 ```
-checkCamera()/checkMicrophone()/checkSpeech()  → izinler (on-device)
-startSpeedTest()                               → manager.startSpeedTest (on-device ölçüm)
+checkCamera()/checkMicrophone()/checkSpeech()  → izinler (cihazda)
+startSpeedTest()                               → manager.startSpeedTest (cihazda ölçüm)
 completePrepare()  → manager.sendPreparetatus  [SOKET: hazır]  → onCompleted?()
                                                                 ↓ host
                                               coordinator.advanceToNextModule()  [modulePresented]
 ```
 
----
+## Host VM ile Gözlem (Composition)
 
-## Drop-in kullanım
-
-```swift
-// Hiçbir şey yazmayın — SDKFlowHostView default'u çizer:
-case .prepare: SDKPrepareView()
-```
-
-## Host VM (gözlem)
+Ekranı değiştirmeden log/analitik eklemek için SDK VM'ini sarın:
 
 ```swift
 @MainActor
@@ -90,66 +140,26 @@ final class PrepareHostViewModel: HostModuleViewModel {
 }
 ```
 
-## Custom tasarım (override) — bypass-safe
-
-```swift
-registry.override(.prepare) {
-    MyPrepareView()   // @StateObject var vm = SDKPrepareViewModel()
-}
-```
-
-İçeride **mutlaka** SDK VM'ini kullanın:
-
-```swift
-struct MyPrepareView: View {
-    @EnvironmentObject var coordinator: SDKFlowCoordinator
-    @StateObject private var vm = SDKPrepareViewModel()
-
-    var body: some View {
-        VStack {
-            // ... kendi izin/hız UI'ınız, vm.cameraAuthorized vb. okuyun ...
-            Button("Devam") {
-                vm.completePrepare()                  // ✅ sendPreparetatus (soket)
-            }
-            .disabled(!vm.allPermissionsGranted)
-        }
-        .onAppear {
-            vm.onCompleted = { coordinator.advanceToNextModule() }  // ✅ modulePresented
-            vm.checkCamera(); vm.checkMicrophone()
-        }
-    }
-}
-```
-
-> ❌ Kendi izin kontrolünüzü yapıp `coordinator.advanceToNextModule()`'ü doğrudan çağırmayın:
-> `sendPreparetatus` gitmez, backend hazırlığı görmez.
-
-## Notlar
-- `needsSpeedTest` `false` ise hız testi atlanabilir; yine de `completePrepare()` çağrılmalı.
-- İzin reddinde `showSettingsAlert` + `settingsOpenAction` ile kullanıcıyı Ayarlar'a yönlendirin.
-
 ---
 
 ## Sesli Okuma (Read-Aloud)
 
-Bu modül ekranı açıldığında yönergesi otomatik seslendirilebilir. Mod **modül bazında**
-seçilir; tam ayrıntı: [ReadAloud](../ReadAloud.md).
+Ekran açıldığında yönerge otomatik seslendirilebilir (`SDKFlowHostView` yapar, kod gerekmez).
 
-- **Metin key'i:** `PrepareTts`  ·  **Custom audio dosyası:** `PrepareTts.<uzantı>`
-  (uzantı serbest: `m4a`/`mp3`/`wav`/`caf`/`aac`/`aiff` otomatik denenir)
-- **Native (Siri / sistem sesi):**
-  ```swift
-  SDKSpeechConfig.shared.setMode(.native, for: .prepare)
-  ```
-- **Custom audio (kendi kaydın):** bundle'a `PrepareTts.<uzantı>` koy (örn. `PrepareTts.m4a` veya `PrepareTts.mp3`) →
-  ```swift
-  SDKSpeechConfig.shared.audioBundle = Bundle.main
-  SDKSpeechConfig.shared.setMode(.customAudio, for: .prepare)   // dosya yoksa native'e düşer
-  ```
-- **Kapalı:** `SDKSpeechConfig.shared.setMode(.off, for: .prepare)`
-- **Metni ez:** `SDKLocalization.shared.setOverride(key: .prepareTts, language: .tr, value: "...")`
+```swift
+SDKSpeechConfig.shared.setMode(.native, for: .prepare)        // Siri/sistem sesi
+// veya kendi kaydınız: bundle'a PrepareTts.m4a koyun →
+SDKSpeechConfig.shared.audioBundle = Bundle.main
+SDKSpeechConfig.shared.setMode(.customAudio, for: .prepare)   // dosya yoksa native'e düşer
+```
 
-Seslendirme, ekran açılışında `SDKFlowHostView` tarafından otomatik yapılır — modül tarafında
-ekstra kod gerekmez.
+Metni ezmek: `SDKLocalization.shared.setOverride(key: .prepareTts, language: .tr, value: "...")`
+· Tüm ayrıntı: [ReadAloud](../ReadAloud.md)
 
-</content>
+## Sık Sorulanlar & Dikkat Edilecekler
+
+- **Hız testi her zaman gerekli mi?** Hayır — `needsSpeedTest` `false` ise atlanabilir;
+  ama `completePrepare()` yine de çağrılmalıdır (hazır sinyali her durumda gider).
+- **Kullanıcı izni reddederse?** `showSettingsAlert` + `settingsOpenAction` ile Ayarlar'a
+  yönlendirin; iOS, reddedilen izni uygulama içinden tekrar soramaz.
+- **Simülatörde?** İzin akışı çalışır; hız testi gerçek ağa bağlıdır.

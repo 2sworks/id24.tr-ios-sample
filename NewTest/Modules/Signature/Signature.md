@@ -1,7 +1,14 @@
-# Signature — İmza
+# Signature — Islak İmza
 
-Kullanıcı parmağıyla imza çizer (`SDKSignatureCanvas`), imza görseli `uploadIdPhoto` ile
-**HTTP** üzerinden yüklenir. Başarıda `onCompleted`.
+Kullanıcı parmağıyla ekrana imzasını atar; imza görseli sunucuya yüklenir. Modüllerin en
+sadesi: soket yok, WebRTC yok — yalnızca bir tuval ve bir HTTP yüklemesi. Bu yüzden custom
+ekran yazmayı öğrenmek için de en iyi başlangıç noktasıdır.
+
+← [Modül İndeksi](../Modules.md) · [README](../../../README.md)
+
+---
+
+## Bir Bakışta
 
 | | |
 |---|---|
@@ -9,13 +16,58 @@ Kullanıcı parmağıyla imza çizer (`SDKSignatureCanvas`), imza görseli `uplo
 | Rota | `SDKModuleRoute.signature` |
 | Drop-in view | `SDKSignatureView` (+ `SDKSignatureCanvas`) |
 | ViewModel | `SDKSignatureViewModel` |
-| Bağımlılık | **HTTP** (`uploadIdPhoto`) — soket/WebRTC yok |
+| Dış dünya | **HTTP** (`uploadIdPhoto`) — soket/WebRTC yok |
+| Ses anahtarı | `SignatureTts` |
 
-> Çizim için `SwiftSignatureView` (SPM) kullanılır.
+Hazır tuval, `SwiftSignatureView` (SPM) üzerine kuruludur.
+
+## Kullanıcı Ne Yaşar?
+
+1. Boş bir imza alanı görür; parmağıyla imzasını çizer.
+2. Beğenmezse "Temizle" ile baştan başlar.
+3. "Gönder"e basınca imza yüklenir ve akış ilerler.
 
 ---
 
-## VM API — `SDKSignatureViewModel`
+## Hazır Ekranla Kullanım (Drop-in)
+
+Hiçbir şey yazmayın; rota gelince `SDKSignatureView` çizilir.
+
+## Kendi Tasarımınızla (Override)
+
+Kendi tuvalinizi bile kullanabilirsiniz — tek şart, görselin SDK üzerinden yüklenmesi:
+
+```swift
+registry.override(.signature) { MySignatureView() }
+
+struct MySignatureView: View {
+    @EnvironmentObject var coordinator: SDKFlowCoordinator
+    @StateObject private var vm = SDKSignatureViewModel()
+
+    var body: some View {
+        VStack {
+            MyCanvas(onDraw: { vm.signatureDidDraw() })       // çizim başladı işareti
+            HStack {
+                Button("Temizle") { vm.clearSignature() }
+                Button("Gönder") {
+                    let rendered = myCanvasRenderedImage()    // tuvali UIImage'a çevirin
+                    vm.uploadSignature(image: rendered)       // ✅ uploadIdPhoto
+                }
+                .disabled(!vm.signatureDrawn)
+            }
+        }
+        .onAppear { vm.onCompleted = { coordinator.advanceToNextModule() } }  // ✅
+    }
+}
+```
+
+> ❌ **Bypass yapmayın:** İmza görselini kendi `POST`'unuzla yüklemeyin — `uploadSignature`
+> kullanılmazsa backend imzayı bu oturumla ilişkilendiremez.
+> Kural: [bypass yok](../../../docs/guides/customization.md#bypass-yok-kuralı).
+
+---
+
+## ViewModel Referansı — `SDKSignatureViewModel`
 
 ### State
 | Üye | Tip | Erişim | Anlam |
@@ -23,37 +75,30 @@ Kullanıcı parmağıyla imza çizer (`SDKSignatureCanvas`), imza görseli `uplo
 | `signatureDrawn` | `Bool` | r/w | En az bir çizim yapıldı mı |
 | `uploadCompleted` | `Bool` | salt-okunur | Yükleme tamamlandı mı |
 
-### Girdi (metotlar)
+### Metotlar
 | Metot | Etki |
 |---|---|
 | `signatureDidDraw()` | Çizim başladığını işaretler (`signatureDrawn = true`) |
-| `clearSignature()` | Tuvali temizler |
-| `uploadSignature(image: UIImage)` | İmza görselini yükler (`uploadIdPhoto`) → `onCompleted` |
+| `clearSignature()` | Tuvali temizler (`signatureDrawn` tekrar `false`) |
+| `uploadSignature(image: UIImage)` | İmza görselini yükler → `onCompleted` |
 
-### Çıktı (closure)
+### Closure'lar
 | Üye | Ne zaman |
 |---|---|
 | `onCompleted: (() -> Void)?` | Yükleme başarılı |
 
----
-
-## Sinyal zinciri
+## Sinyal Zinciri — Perde Arkası
 
 ```
-signatureDidDraw()              → signatureDrawn = true (UI durumu)
-uploadSignature(image:)         → manager.uploadIdPhoto [HTTP] → onCompleted?()
+signatureDidDraw()       → signatureDrawn = true (UI durumu)
+uploadSignature(image:)  → manager.uploadIdPhoto [HTTP] → onCompleted?()
 host: → coordinator.advanceToNextModule() [modulePresented]
 ```
 
----
-
-## Drop-in / Host VM / Custom
+## Host VM ile Gözlem (Composition)
 
 ```swift
-// Drop-in
-case .signature: SDKSignatureView()
-
-// Host VM
+@MainActor
 final class SignatureHostViewModel: HostModuleViewModel {
     let sdk = SDKSignatureViewModel()
     override init() {
@@ -63,52 +108,27 @@ final class SignatureHostViewModel: HostModuleViewModel {
     var canUpload: Bool { sdk.signatureDrawn }
     func upload(_ img: UIImage) { sdk.uploadSignature(image: img) }
 }
-
-// Custom (override) — kendi tuvalinizi kullanabilirsiniz, ama yükleme VM'den geçsin
-registry.override(.signature) { MySignatureView() }
-
-struct MySignatureView: View {
-    @EnvironmentObject var coordinator: SDKFlowCoordinator
-    @StateObject private var vm = SDKSignatureViewModel()
-    var body: some View {
-        // kendi imza tuvaliniz; çizim olduğunda: vm.signatureDidDraw()
-        Button("Temizle") { vm.clearSignature() }
-        Button("Gönder") {
-            // tuvali UIImage'a render edin → renderedImage
-            vm.uploadSignature(image: renderedImage)         // ✅ uploadIdPhoto
-        }
-        .disabled(!vm.signatureDrawn)
-        .onAppear { vm.onCompleted = { coordinator.advanceToNextModule() } } // ✅
-    }
-}
 ```
-
-## Notlar
-- Kendi tuvalinizi kullansanız bile imza görselini SDK'ya `uploadSignature` ile verin; kendi POST'unuzu atmayın (bypass).
-- `clearSignature()` sonrası `signatureDrawn` tekrar `false` olur, "Gönder" pasifleşir.
 
 ---
 
 ## Sesli Okuma (Read-Aloud)
 
-Bu modül ekranı açıldığında yönergesi otomatik seslendirilebilir. Mod **modül bazında**
-seçilir; tam ayrıntı: [ReadAloud](../ReadAloud.md).
+Ekran açıldığında yönerge otomatik seslendirilebilir (`SDKFlowHostView` yapar, kod gerekmez).
 
-- **Metin key'i:** `SignatureTts`  ·  **Custom audio dosyası:** `SignatureTts.<uzantı>`
-  (uzantı serbest: `m4a`/`mp3`/`wav`/`caf`/`aac`/`aiff` otomatik denenir)
-- **Native (Siri / sistem sesi):**
-  ```swift
-  SDKSpeechConfig.shared.setMode(.native, for: .signature)
-  ```
-- **Custom audio (kendi kaydın):** bundle'a `SignatureTts.<uzantı>` koy (örn. `SignatureTts.m4a` veya `SignatureTts.mp3`) →
-  ```swift
-  SDKSpeechConfig.shared.audioBundle = Bundle.main
-  SDKSpeechConfig.shared.setMode(.customAudio, for: .signature)   // dosya yoksa native'e düşer
-  ```
-- **Kapalı:** `SDKSpeechConfig.shared.setMode(.off, for: .signature)`
-- **Metni ez:** `SDKLocalization.shared.setOverride(key: .signatureTts, language: .tr, value: "...")`
+```swift
+SDKSpeechConfig.shared.setMode(.native, for: .signature)         // Siri/sistem sesi
+// veya kendi kaydınız: bundle'a SignatureTts.m4a koyun →
+SDKSpeechConfig.shared.audioBundle = Bundle.main
+SDKSpeechConfig.shared.setMode(.customAudio, for: .signature)    // dosya yoksa native'e düşer
+```
 
-Seslendirme, ekran açılışında `SDKFlowHostView` tarafından otomatik yapılır — modül tarafında
-ekstra kod gerekmez.
+Metni ezmek: `SDKLocalization.shared.setOverride(key: .signatureTts, language: .tr, value: "...")`
+· Tüm ayrıntı: [ReadAloud](../ReadAloud.md)
 
-</content>
+## Sık Sorulanlar & Dikkat Edilecekler
+
+- **"Gönder" pasif kalıyor:** `signatureDidDraw()` çağrılmamıştır — kendi tuvalinizde ilk
+  dokunuşta bu metodu çağırın.
+- **İmza görüntü formatı:** Tuvali beyaz zeminli, okunaklı bir `UIImage`'a render edin;
+  şeffaf zemin agent panelinde kötü görünebilir.

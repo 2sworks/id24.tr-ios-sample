@@ -1,8 +1,17 @@
-# SelfieWithLiveness — Selfie + canlılık (birleşik)
+# SelfieWithLiveness — Selfie + Canlılık (Birleşik)
 
-Selfie ile liveness adımlarını tek ekranda birleştiren varyant. Diğer modüllerden farkı:
-bu modül **UIKit controller** tabanlıdır (`SDKSelfieWithLivenessController`) ve henüz
-ayrı bir `SDKBaseModuleViewModel` VM'i yoktur.
+Selfie çekimi ile canlılık testini **tek ekranda** birleştiren varyant: kullanıcı tek
+oturuşta hem yüz fotoğrafını verir hem canlı olduğunu kanıtlar. Akışı kısaltmak isteyen
+kurumlar için idealdir.
+
+Diğer modüllerden önemli bir farkı var: bu modül **UIKit controller tabanlıdır**
+(`SDKSelfieWithLivenessController`) ve henüz ayrı bir public ViewModel yüzeyi yoktur.
+
+← [Modül İndeksi](../Modules.md) · [README](../../../README.md)
+
+---
+
+## Bir Bakışta
 
 | | |
 |---|---|
@@ -10,60 +19,57 @@ ayrı bir `SDKBaseModuleViewModel` VM'i yoktur.
 | Rota | `SDKModuleRoute.selfieWithLiveness` |
 | Drop-in view | `SDKSelfieWithLivenessView` (controller'ı saran SwiftUI) |
 | Controller | `SDKSelfieWithLivenessController` (UIKit) |
-| Bağımlılık | yüz/canlılık (on-device) + **HTTP** |
+| Dış dünya | Yüz/canlılık (cihazda) + **HTTP** |
+| Ses anahtarı | `SelfieWithLivenessTts` |
+
+## Kullanıcı Ne Yaşar?
+
+1. Ön kamera açılır; kullanıcı yüzünü çerçeveye alır.
+2. Aynı ekranda canlılık talimatları gelir (göz kırp, gülümse...).
+3. Selfie + canlılık kanıtı birlikte yüklenir; akış ilerler.
 
 ---
 
-## Mevcut durum
+## Kullanım — Drop-in Önerilir
 
-- Ekran `SDKSelfieWithLivenessView` ile drop-in çalışır:
-  ```swift
-  case .selfieWithLiveness: SDKSelfieWithLivenessView()
-  ```
-- İç mantık `SDKSelfieWithLivenessController` (UIKit) içindedir; SwiftUI sarmalı bunu
-  `UIViewControllerRepresentable` benzeri bir köprüyle sunar.
-- **Composition deseni henüz uygulanmadı.** Diğer modüllerdeki gibi `let sdk = SDKXxxVM()`
-  sarma yapısı bu modülde yok.
+```swift
+// Hiçbir şey yazmayın; rota gelince SDK çizer:
+case .selfieWithLiveness: SDKSelfieWithLivenessView()
+```
 
-## Özelleştirme
+İç mantık `SDKSelfieWithLivenessController` (UIKit) içindedir; SwiftUI sarmalayıcı bunu
+köprüler. **Composition deseni bu modülde henüz yok** — diğer modüllerdeki gibi
+`let sdk = SDKXxxViewModel()` sarma yapısı sunulmuyor.
 
-- **Tam override** mümkün: `registry.override(.selfieWithLiveness) { MyView() }`. Ancak
-  kendi ekranınızı yazarsanız selfie+liveness iş mantığını (yakalama, yüz/canlılık
-  doğrulama, yükleme) controller üzerinden tetiklemeniz gerekir — bu modülde henüz temiz
-  bir public VM yüzeyi olmadığından, **özel tasarım yerine drop-in kullanımı önerilir.**
-- Selfie ve Liveness'ı ayrı ayrı özelleştirmek istiyorsanız, backend'de `.selfie` +
-  `.livenessDetection` modüllerini ayrı kullanın ([Selfie](../Selfie/Selfie.md),
-  [Liveness](../Liveness/Liveness.md)); her ikisinin de tam VM API'si vardır.
+## Özelleştirme — Dürüst Durum Değerlendirmesi
 
-## Notlar / TODO
-- Diğer modüllerle tutarlılık için ileride `SDKSelfieWithLivenessViewModel`
-  (`: SDKBaseModuleViewModel`) çıkarılması planlanabilir; o zaman bu doküman
-  Selfie/Liveness ile aynı VM-tablosu formatına geçer.
-- O güne kadar: gerçek host-tarafı özelleştirme gerekiyorsa ayrık `.selfie` + `.liveness`
-  kullanın.
+- **Tema** her zaman çalışır: renk/font/ikon değişimi için ekran yazmanıza gerek yok
+  ([Tema rehberi](../../../docs/guides/theming.md)).
+- **Tam override teknik olarak mümkün** (`registry.override(.selfieWithLiveness) {...}`),
+  ama temiz bir public VM yüzeyi olmadığından iş mantığını tetiklemek zordur —
+  **şimdilik önermiyoruz.**
+- **Ekranları gerçekten özelleştirmek istiyorsanız:** backend'de bu birleşik modül yerine
+  ayrık `.selfie` + `.livenessDetection` modüllerini kullanın. İkisinin de tam VM API'si
+  vardır: [Selfie](../Selfie/Selfie.md) · [Liveness](../Liveness/Liveness.md).
+
+## Yol Haritası
+
+Diğer modüllerle tutarlılık için ileride `SDKSelfieWithLivenessViewModel`
+(`: SDKBaseModuleViewModel`) çıkarılması planlanabilir; o zaman bu rehber de
+Selfie/Liveness ile aynı VM-referans formatına geçer.
 
 ---
 
 ## Sesli Okuma (Read-Aloud)
 
-Bu modül ekranı açıldığında yönergesi otomatik seslendirilebilir. Mod **modül bazında**
-seçilir; tam ayrıntı: [ReadAloud](../ReadAloud.md).
+Ekran açıldığında yönerge otomatik seslendirilebilir (`SDKFlowHostView` yapar, kod gerekmez).
 
-- **Metin key'i:** `SelfieWithLivenessTts`  ·  **Custom audio dosyası:** `SelfieWithLivenessTts.<uzantı>`
-  (uzantı serbest: `m4a`/`mp3`/`wav`/`caf`/`aac`/`aiff` otomatik denenir)
-- **Native (Siri / sistem sesi):**
-  ```swift
-  SDKSpeechConfig.shared.setMode(.native, for: .selfieWithLiveness)
-  ```
-- **Custom audio (kendi kaydın):** bundle'a `SelfieWithLivenessTts.<uzantı>` koy (örn. `SelfieWithLivenessTts.m4a` veya `SelfieWithLivenessTts.mp3`) →
-  ```swift
-  SDKSpeechConfig.shared.audioBundle = Bundle.main
-  SDKSpeechConfig.shared.setMode(.customAudio, for: .selfieWithLiveness)   // dosya yoksa native'e düşer
-  ```
-- **Kapalı:** `SDKSpeechConfig.shared.setMode(.off, for: .selfieWithLiveness)`
-- **Metni ez:** `SDKLocalization.shared.setOverride(key: .selfieWithLivenessTts, language: .tr, value: "...")`
+```swift
+SDKSpeechConfig.shared.setMode(.native, for: .selfieWithLiveness)        // Siri/sistem sesi
+// veya kendi kaydınız: bundle'a SelfieWithLivenessTts.m4a koyun →
+SDKSpeechConfig.shared.audioBundle = Bundle.main
+SDKSpeechConfig.shared.setMode(.customAudio, for: .selfieWithLiveness)   // dosya yoksa native'e düşer
+```
 
-Seslendirme, ekran açılışında `SDKFlowHostView` tarafından otomatik yapılır — modül tarafında
-ekstra kod gerekmez.
-
-</content>
+Metni ezmek: `SDKLocalization.shared.setOverride(key: .selfieWithLivenessTts, language: .tr, value: "...")`
+· Tüm ayrıntı: [ReadAloud](../ReadAloud.md)
