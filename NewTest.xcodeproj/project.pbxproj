@@ -50,7 +50,6 @@
 		73C80F0F118FA44373E27E74 /* LivenessConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3BA5FC1FAB546013F29A92D /* LivenessConfig.swift */; };
 		8129E6C8B3CDBC929051CB6F /* IdCardExample.swift in Sources */ = {isa = PBXBuildFile; fileRef = 244665EDEBB483AC83A5250C /* IdCardExample.swift */; };
 		85F7CAB3920EA35AF9F2E7C3 /* ShowcaseSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0403CFDF0DB438E924B42014 /* ShowcaseSupport.swift */; };
-		AA10C0DE920EA35AF9F2E099 /* ShowcaseMockData.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10C0DE0DB438E924B42099 /* ShowcaseMockData.swift */; };
 		8AB276BB2F749D5100A764F1 /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB276BA2F749D5100A764F1 /* LoginViewModel.swift */; };
 		8AB276D52F749D9600A764F1 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB276D42F749D9600A764F1 /* LoginView.swift */; };
 		8C877716827596EDABDB1A0C /* HostModuleViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67D3D084DA8B7D62494FBE14 /* HostModuleViewModel.swift */; };
@@ -106,7 +105,6 @@
 /* Begin PBXFileReference section */
 		0046CF4158A838AC23E4A05E /* Prepare.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; path = Prepare.md; sourceTree = "<group>"; };
 		0403CFDF0DB438E924B42014 /* ShowcaseSupport.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShowcaseSupport.swift; sourceTree = "<group>"; };
-		AA10C0DE0DB438E924B42099 /* ShowcaseMockData.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShowcaseMockData.swift; sourceTree = "<group>"; };
 		04F627E011A5FCBB33A21675 /* SDKEventRecorder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SDKEventRecorder.swift; sourceTree = "<group>"; };
 		057317BDAFB60877C85A3684 /* IdCardHostViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = IdCardHostViewModel.swift; sourceTree = "<group>"; };
 		0B53FD7244ABB96C21B862A3 /* AddressConfirm.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; path = AddressConfirm.md; sourceTree = "<group>"; };
@@ -937,7 +935,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = NewTest/SupportingFiles/NewTest.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = 9D3UPKQ9AL;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -981,7 +979,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = NewTest/SupportingFiles/NewTest.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = 9D3UPKQ9AL;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
