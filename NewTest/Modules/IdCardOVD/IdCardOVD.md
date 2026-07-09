@@ -22,11 +22,40 @@ fotokopi ya da ekran görüntüsüyle yapılan sahtecilik denemeleri bu adımda 
 
 ## Kullanıcı Ne Yaşar?
 
-1. Kimliğini çerçeveye hizalar; SDK kareleri canlı değerlendirir.
-2. Hologram adımında kimliği hafifçe oynatması istenir — gökkuşağı efekti ölçülür
-   (`rainbowProgress` doluyor).
-3. Adımlar (`OVDStep`) sırayla tamamlanır; her yakalama sunucuya yüklenir.
-4. Son adım bitince akış otomatik ilerler.
+0. **Belge tipi seçim ekranı** açılır (IdCardView deseni): **Çipli Kimlik** ya da **Pasaport**.
+   Seçime göre çekim akışı belirlenir. (Host `SDKIdCardOVDView(documentType:)` ile bu ekranı atlayabilir.)
+1. Belgeyi çerçeveye hizalar; SDK kareleri canlı değerlendirir (dikdörtgen/coverage + netlik +
+   cihaz sabitliği + parlama). Uygun olunca **otomatik** yüksek-çözünürlüklü fotoğraf çekilir.
+2. (Yalnız kimlik) Hologram adımında torch açılır ve belgeyi hafifçe eğip çevirmesi istenir —
+   gökkuşağı efekti ölçülür (`rainbowProgress` doluyor, baseline'a göre delta).
+3. (Yalnız kimlik) arka yüz hizalanır — **MRZ okunana kadar** yakalama tetiklenmez.
+4. Adımlar (`OVDStep`) sırayla tamamlanır; her yakalama sunucuya yüklenir. Son adım bitince
+   akış otomatik ilerler.
+
+**Adım sayısı belge tipine göre:**
+- **Kimlik** → ön → **flaşlı ön (hologram)** → arka  (3 adım)
+- **Pasaport** → ön (veri sayfası) → **flaşlı ön (hologram)**  (2 adım — yalnız **arka yüz** çalıştırılmaz)
+
+Her adım geçişinde yönerge hem ekranda gösterilir hem de (TTS açıksa) seslendirilir — UIKit
+referans akışının davranışının aynısı. **TTS kapalıysa** yalnız ekran metni yönlendirir.
+
+### Belge Tipi — Pasaport (sadece ön yüz)
+
+Pasaportun tek veri sayfası olduğu için **arka yüz adımı yoktur** — ama flaşlı (hologram) adımı
+kimliktekiyle **aynı şekilde çalışır**: `ön (veri sayfası) → flaşlı (hologram) → tamamlandı` (2 adım).
+Ön yüz upload'ı `type=passport` + `doc_type=passport`; flaşlı adım kimliktekiyle aynı (`.frontIdOvd`).
+
+```swift
+SDKIdCardOVDView(documentType: .passport)   // seçim ekranını atlar, doğrudan pasaport çekimi
+// veya VM ayarı:
+let vm = SDKIdCardOVDViewModel(); vm.documentType = .passport
+```
+
+Standart drop-in `SDKIdCardOVDView()` ise **önce belge tipi seçim ekranı** gösterir; kullanıcı
+Kimlik/Pasaport seçince ilgili akış başlar.
+
+`documentType` ayarlanınca `IdentifyManager.selectedCardType` otomatik güncellenir (WS location =
+"Passport"). Kimlik varsayılandır (`.idCard`).
 
 ---
 
@@ -83,11 +112,15 @@ public enum OVDStep: Int, CaseIterable {
 | `canContinue` | `Bool` | Devam edilebilir mi |
 | `isUploading` | `Bool` | Yükleme sürüyor mu |
 | `rainbowProgress` | `Double` | Hologram adımı ilerlemesi |
+| `guideDetected` | `Bool` | Çerçeve yeşil (yakalama koşulu tuttu) |
+| `instruction` | `String` | Anlık ekran talimatı (adım/gating'e göre değişir) |
 
 ### Ayar
 | Üye | Varsayılan | Anlam |
 |---|---|---|
+| `documentType` | `.idCard` | `.idCard` (ön→hologram→arka) / `.passport` (ön→hologram, arka YOK) |
 | `requiresHologramStep` | `true` | Hologram adımı zorunlu mu |
+| `onRequestCapture` / `onSetTorch` | `nil` | Drop-in View kameraya bağlar; özel View'da siz bağlarsınız |
 
 ### Hesaplanan
 | Üye | Anlam |
@@ -114,10 +147,15 @@ public enum OVDStep: Int, CaseIterable {
 ## Sinyal Zinciri — Perde Arkası
 
 ```
-ingest(ciImage:roi:)  → manager.ovdGlareScore / ovdTextureMean / ovdRainbowScoreDetailed (cihazda)
-capture(image:)       → manager.makeUIImage + processCaptured + uploadIdPhoto [HTTP]
+ingest(ciImage:roi:)  → Vision(VNDetectRectangles) + ovdTextureMean + ovdColorMetrics(whiteOut)
+                        + CMMotion sabitlik + (arka) probeMRZPresence + ovdRainbowMaxScoreDetailed
+                        → readyScore histerezis → uygun olunca onRequestCapture (kamera fotoğraf çeker)
+handleCaptured(_:roi:) → processCaptured + (front/back) startFrontIdOcr/startBackIdOcr + uploadIdPhoto [HTTP]
 advance()  (son adım) → onCompleted?()  → host: coordinator.advanceToNextModule() [modulePresented]
 ```
+
+> Sesli yönerge adım geçişlerinde `SDKSpeechService.shared.speak(_:in: .idcard_w_ovd)` ile verilir
+> (ayrı synthesizer YOK). TTS kapalıysa sessizdir; ekran metni her hâlde görünür.
 
 ## Host VM ile Gözlem (Composition)
 

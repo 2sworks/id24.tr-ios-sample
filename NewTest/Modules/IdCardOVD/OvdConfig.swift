@@ -14,12 +14,15 @@ final class OvdConfig: ObservableObject {
     @Published var accentColor: Color = IDColor.primary
     /// Hologram (eğ-çevir) adımı zorunlu mu?
     @Published var requiresHologramStep: Bool = true
+    /// Belge tipi: `.idCard` (ön→hologram→arka) / `.passport` (ön→hologram, arka YOK).
+    @Published var documentType: OVDDocumentType = .idCard
 
     static var preview: OvdConfig {
         let c = OvdConfig()
         c.headerTitle = "OVD (env-config ile özelleştirildi)"
         c.accentColor = IDColor.accentTeal
         c.requiresHologramStep = true
+        c.documentType = .idCard
         return c
     }
 }

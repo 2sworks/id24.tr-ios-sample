@@ -175,6 +175,7 @@ Modüllerin altında yatan sistemleri anlamak için:
 
 | Rehber | İçerik |
 |---|---|
+| [Full Integration (Tek Referans)](FULL-INTERGATION.md) | **Tüm özelleştirme yetenekleri tek yerde** — tema, font, ikon, metin, TTS, akış, ekran override, olaylar, log, `setupSDK` |
 | [Mimari](docs/guides/architecture.md) | `IdentifyManager`, modül hattı, DefaultUI üçlüsü, yaşam döngüsü |
 | [Sunucu & API](docs/guides/server-api.md) | `setupSDK` tüm parametreleri, `RoomResponse`, modül sırası, SSL pinning |
 | [WebSocket](docs/guides/websocket.md) | Soket aksiyonları, `socket_auth` token'ı, reconnect ve LostConnection katmanı |

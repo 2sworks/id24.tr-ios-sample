@@ -50,6 +50,7 @@
 		73C80F0F118FA44373E27E74 /* LivenessConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3BA5FC1FAB546013F29A92D /* LivenessConfig.swift */; };
 		8129E6C8B3CDBC929051CB6F /* IdCardExample.swift in Sources */ = {isa = PBXBuildFile; fileRef = 244665EDEBB483AC83A5250C /* IdCardExample.swift */; };
 		85F7CAB3920EA35AF9F2E7C3 /* ShowcaseSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0403CFDF0DB438E924B42014 /* ShowcaseSupport.swift */; };
+		AA10C0DE920EA35AF9F2E099 /* ShowcaseMockData.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10C0DE0DB438E924B42099 /* ShowcaseMockData.swift */; };
 		8AB276BB2F749D5100A764F1 /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB276BA2F749D5100A764F1 /* LoginViewModel.swift */; };
 		8AB276D52F749D9600A764F1 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB276D42F749D9600A764F1 /* LoginView.swift */; };
 		8C877716827596EDABDB1A0C /* HostModuleViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67D3D084DA8B7D62494FBE14 /* HostModuleViewModel.swift */; };
@@ -104,6 +105,7 @@
 /* Begin PBXFileReference section */
 		0046CF4158A838AC23E4A05E /* Prepare.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; path = Prepare.md; sourceTree = "<group>"; };
 		0403CFDF0DB438E924B42014 /* ShowcaseSupport.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShowcaseSupport.swift; sourceTree = "<group>"; };
+		AA10C0DE0DB438E924B42099 /* ShowcaseMockData.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShowcaseMockData.swift; sourceTree = "<group>"; };
 		04F627E011A5FCBB33A21675 /* SDKEventRecorder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SDKEventRecorder.swift; sourceTree = "<group>"; };
 		057317BDAFB60877C85A3684 /* IdCardHostViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = IdCardHostViewModel.swift; sourceTree = "<group>"; };
 		0B53FD7244ABB96C21B862A3 /* AddressConfirm.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; path = AddressConfirm.md; sourceTree = "<group>"; };
@@ -161,6 +163,24 @@
 		83FFC10ACB37A7082C2B7501 /* PrepareExample.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PrepareExample.swift; sourceTree = "<group>"; };
 		8AB276BA2F749D5100A764F1 /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
 		8AB276D42F749D9600A764F1 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		8D1917192FFD99E9009B6554 /* architecture.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = architecture.md; sourceTree = "<group>"; };
+		8D19171A2FFD99E9009B6554 /* customization.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = customization.md; sourceTree = "<group>"; };
+		8D19171B2FFD99E9009B6554 /* events.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = events.md; sourceTree = "<group>"; };
+		8D19171C2FFD99E9009B6554 /* identity-scanner.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "identity-scanner.md"; sourceTree = "<group>"; };
+		8D19171D2FFD99E9009B6554 /* localization.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = localization.md; sourceTree = "<group>"; };
+		8D19171E2FFD99E9009B6554 /* logging.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = logging.md; sourceTree = "<group>"; };
+		8D19171F2FFD99E9009B6554 /* server-api.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "server-api.md"; sourceTree = "<group>"; };
+		8D1917202FFD99E9009B6554 /* theming.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = theming.md; sourceTree = "<group>"; };
+		8D1917212FFD99E9009B6554 /* turn-webrtc.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "turn-webrtc.md"; sourceTree = "<group>"; };
+		8D1917222FFD99E9009B6554 /* websocket.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = websocket.md; sourceTree = "<group>"; };
+		8D1917242FFD99E9009B6554 /* IdentifySdkPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifySdkPlugin.swift; sourceTree = "<group>"; };
+		8D1917252FFD99E9009B6554 /* identify_sdk.dart */ = {isa = PBXFileReference; lastKnownFileType = text; path = identify_sdk.dart; sourceTree = "<group>"; };
+		8D1917262FFD99E9009B6554 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		8D1917282FFD99E9009B6554 /* IdentifySdk.ts */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.typescript; path = IdentifySdk.ts; sourceTree = "<group>"; };
+		8D1917292FFD99E9009B6554 /* IdentifySdkModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = IdentifySdkModule.m; sourceTree = "<group>"; };
+		8D19172A2FFD99E9009B6554 /* IdentifySdkModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifySdkModule.swift; sourceTree = "<group>"; };
+		8D19172B2FFD99E9009B6554 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		8D1917AA2FFD99E9009B6554 /* FULL-INTERGATION.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "FULL-INTERGATION.md"; sourceTree = "<group>"; };
 		8DB567A12FF5D0DD0062D77F /* ReadAloud.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ReadAloud.md; sourceTree = "<group>"; };
 		8DB74A792FCF9AAD00C204AA /* IdentifySDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = IdentifySDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8DD4665E2FED275C00710491 /* SDKNetworkLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKNetworkLogger.swift; sourceTree = "<group>"; };
@@ -178,6 +198,8 @@
 		C785CA5A3D0E029AC94CC98C /* NfcExample.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NfcExample.swift; sourceTree = "<group>"; };
 		CAAC9761924AC978F78EFB3C /* SignatureExample.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SignatureExample.swift; sourceTree = "<group>"; };
 		CF4452B9BB47F5F5E9D79299 /* VideoRecorder.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; path = VideoRecorder.md; sourceTree = "<group>"; };
+		D0C5D0C5D0C5000000000002 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		D0C5D0C5D0C5000000000003 /* CHANGELOG.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; path = CHANGELOG.md; sourceTree = "<group>"; };
 		D12ED3C247F6A7989DF9536F /* SignLang.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = SignLang.md; path = SignLang/SignLang.md; sourceTree = "<group>"; };
 		D769D9F2A2706129A88215A7 /* VideoRecorderConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VideoRecorderConfig.swift; sourceTree = "<group>"; };
 		DF7BC1692D4A279600372CAB /* Env.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Env.xcdatamodel; sourceTree = "<group>"; };
@@ -268,6 +290,7 @@
 		483BDB0228F459CC00635BCC = {
 			isa = PBXGroup;
 			children = (
+				D0C5D0C5D0C5000000000004 /* Documentation */,
 				483BDB0D28F459CC00635BCC /* NewTest */,
 				8A6DA0202F55B9C30070041C /* Frameworks */,
 				483BDB0C28F459CC00635BCC /* Products */,
@@ -309,6 +332,7 @@
 			isa = PBXGroup;
 			children = (
 				0403CFDF0DB438E924B42014 /* ShowcaseSupport.swift */,
+				AA10C0DE0DB438E924B42099 /* ShowcaseMockData.swift */,
 				A74668EDBCF178CDC326A0CB /* ShowcaseCatalog.swift */,
 				428C48EC43106C38A1B1CF96 /* ShowcaseCatalogView.swift */,
 				1C85D70669B1F7007C0C56C8 /* ShowcaseDetailView.swift */,
@@ -427,6 +451,62 @@
 			path = SupportingFiles;
 			sourceTree = "<group>";
 		};
+		8D1917232FFD99E9009B6554 /* guides */ = {
+			isa = PBXGroup;
+			children = (
+				8D1917192FFD99E9009B6554 /* architecture.md */,
+				8D19171A2FFD99E9009B6554 /* customization.md */,
+				8D19171B2FFD99E9009B6554 /* events.md */,
+				8D19171C2FFD99E9009B6554 /* identity-scanner.md */,
+				8D19171D2FFD99E9009B6554 /* localization.md */,
+				8D19171E2FFD99E9009B6554 /* logging.md */,
+				8D19171F2FFD99E9009B6554 /* server-api.md */,
+				8D1917202FFD99E9009B6554 /* theming.md */,
+				8D1917212FFD99E9009B6554 /* turn-webrtc.md */,
+				8D1917222FFD99E9009B6554 /* websocket.md */,
+			);
+			path = guides;
+			sourceTree = "<group>";
+		};
+		8D1917272FFD99E9009B6554 /* flutter */ = {
+			isa = PBXGroup;
+			children = (
+				8D1917242FFD99E9009B6554 /* IdentifySdkPlugin.swift */,
+				8D1917252FFD99E9009B6554 /* identify_sdk.dart */,
+				8D1917262FFD99E9009B6554 /* README.md */,
+			);
+			path = flutter;
+			sourceTree = "<group>";
+		};
+		8D19172C2FFD99E9009B6554 /* react-native */ = {
+			isa = PBXGroup;
+			children = (
+				8D1917282FFD99E9009B6554 /* IdentifySdk.ts */,
+				8D1917292FFD99E9009B6554 /* IdentifySdkModule.m */,
+				8D19172A2FFD99E9009B6554 /* IdentifySdkModule.swift */,
+				8D19172B2FFD99E9009B6554 /* README.md */,
+			);
+			path = "react-native";
+			sourceTree = "<group>";
+		};
+		8D19172D2FFD99E9009B6554 /* integration */ = {
+			isa = PBXGroup;
+			children = (
+				8D1917272FFD99E9009B6554 /* flutter */,
+				8D19172C2FFD99E9009B6554 /* react-native */,
+			);
+			path = integration;
+			sourceTree = "<group>";
+		};
+		8D19172E2FFD99E9009B6554 /* docs */ = {
+			isa = PBXGroup;
+			children = (
+				8D1917232FFD99E9009B6554 /* guides */,
+				8D19172D2FFD99E9009B6554 /* integration */,
+			);
+			path = docs;
+			sourceTree = "<group>";
+		};
 		8DD4665D2FED270000710491 /* Debug */ = {
 			isa = PBXGroup;
 			children = (
@@ -506,6 +586,17 @@
 				1CAB2FD912344E09646B3249 /* ThankYou.md */,
 			);
 			path = ThankYou;
+			sourceTree = "<group>";
+		};
+		D0C5D0C5D0C5000000000004 /* Documentation */ = {
+			isa = PBXGroup;
+			children = (
+				D0C5D0C5D0C5000000000002 /* README.md */,
+				D0C5D0C5D0C5000000000003 /* CHANGELOG.md */,
+				8D1917AA2FFD99E9009B6554 /* FULL-INTERGATION.md */,
+				8D19172E2FFD99E9009B6554 /* docs */,
+			);
+			name = Documentation;
 			sourceTree = "<group>";
 		};
 		E138BC6B3DEC2DA8038E3F37 /* VideoRecorder */ = {
@@ -662,6 +753,7 @@
 				DC6ED2B24FE3552BD0CD7079 /* CallScreenExample.swift in Sources */,
 				603C8C37208CCC7F131712AF /* ThankYouExample.swift in Sources */,
 				85F7CAB3920EA35AF9F2E7C3 /* ShowcaseSupport.swift in Sources */,
+				AA10C0DE920EA35AF9F2E099 /* ShowcaseMockData.swift in Sources */,
 				C6F2438F86CC1A84EAB1D579 /* ShowcaseCatalog.swift in Sources */,
 				F7266D24C6CEF67A2157AC3B /* ShowcaseCatalogView.swift in Sources */,
 				648C062BF824A6EFC090BF54 /* ShowcaseDetailView.swift in Sources */,
@@ -843,7 +935,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = NewTest/SupportingFiles/NewTest.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_TEAM = 9D3UPKQ9AL;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -887,7 +979,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = NewTest/SupportingFiles/NewTest.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_TEAM = 9D3UPKQ9AL;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",

@@ -3,20 +3,27 @@
 //  NewTest
 //
 //  SDK "Kimlik OVD" (hologram/gökkuşağı) modülü — ENTEGRASYON REHBERİ.
-//  1) OvdExample         → SDK hazır ekranı (kamera + yönlendirmeli adımlar)
-//  2) OvdExampleThemed   → tema override
-//  3) OvdExampleReplaced → KENDİ VIEW'ın + SDK'nın SDKIdCardOVDViewModel iş akışı
+//  1) OvdExample         → SDK hazır ekranı (kimlik: ön→hologram→arka)
+//  2) OvdExamplePassport → pasaport varyantı (ön→hologram, ARKA YOK — tek veri sayfası)
+//  3) OvdExampleThemed   → tema override
+//  4) OvdExampleReplaced → KENDİ VIEW'ın + SDK'nın SDKIdCardOVDViewModel iş akışı
 //
 //  Devreye alma: registry.override(.idCardOVD) { OvdExampleReplaced() }
-//  Not: Gerçek hologram tespiti SDK'da TODO (algoritma yok); akış/adımlar çalışır.
+//  Not: Gerçek hologram/OVD tespiti SDK'da (OVDAnalyzer + Vision + CMMotion) canlı çalışır;
+//  gerçek cihaz + uygun ışık gerektirir. Sesli yönerge TTS açıksa okunur, kapalıysa ekran metni.
 //
 
 import SwiftUI
 import IdentifySDK
 
-// MARK: - 1) Varsayılan
+// MARK: - 1) Varsayılan (kimlik)
 struct OvdExample: View {
     var body: some View { SDKIdCardOVDView() }
+}
+
+// MARK: - 2) Pasaport (ön yüz + hologram, arka yok)
+struct OvdExamplePassport: View {
+    var body: some View { SDKIdCardOVDView(documentType: .passport) }
 }
 
 // MARK: - 2) Tema
@@ -63,13 +70,15 @@ struct OvdExampleReplaced: View {
         .background(IDColor.adaptiveBackground(for: colorScheme).ignoresSafeArea())
         .onAppear {
             host.onEvent = { print("analytics:", $0) }
-            host.applyConfig(requiresHologram: config.requiresHologramStep)   // env-config → host
+            // env-config → host (hologram zorunluluğu + belge tipi: pasaport ise arka adım atlanır)
+            host.applyConfig(requiresHologram: config.requiresHologramStep, documentType: config.documentType)
         }
     }
 }
 
 // MARK: - Previews
-#Preview("OVD — Varsayılan") { OvdExample().showcaseHost() }
+#Preview("OVD — Kimlik") { OvdExample().showcaseHost() }
+#Preview("OVD — Pasaport (ön yüz)") { OvdExamplePassport().showcaseHost() }
 #Preview("OVD — Tema") { OvdExampleThemed().showcaseHost() }
 #Preview("OVD — Tam Replace") {
     OvdExampleReplaced().showcaseHost().environmentObject(OvdConfig.preview)

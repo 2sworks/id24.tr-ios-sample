@@ -134,6 +134,7 @@ private struct ShowcaseThemeOverride: ViewModifier {
                 if original == nil { original = SDKTheme.shared.colors.primary }
                 SDKTheme.shared.colors.primary = primary
                 applied = true
+                
             }
             .onDisappear {
                 if let original { SDKTheme.shared.colors.primary = original }
@@ -182,6 +183,11 @@ struct ShowcaseCustomScaffold: View {
 /// SDK modül ekranını sabit yükseklikte, çerçeveli bir "cihaz önizlemesi" içinde gösterir.
 /// (Tam ekran göstermek katalog navigasyonu ile çakışırdı; modülün kendi geri butonu
 ///  mock coordinator üzerinde çalışır, kataloğu etkilemez.)
+///
+/// İçerik kendi `NavigationView`'ına sarılır: bazı SDK ekranları
+/// `.navigationBarHidden(true)` çağırır (Liveness, ThankYou, SelfieWithLiveness,
+/// LostConnection). Sarmalanmazsa bu modifier KATALOĞUN nav bar'ını gizler ve
+/// detay sayfasında geri butonu kaybolur. İç NavigationView bu etkiyi izole eder.
 struct ShowcaseLivePreview<Content: View>: View {
     private let content: () -> Content
     @Environment(\.colorScheme) private var colorScheme
@@ -191,23 +197,27 @@ struct ShowcaseLivePreview<Content: View>: View {
     }
 
     var body: some View {
-        content()
-            .showcaseHost()
-            .frame(height: 540)
-            .frame(maxWidth: .infinity)
-            .clipShape(RoundedRectangle(cornerRadius: 20))
-            .overlay(
-                RoundedRectangle(cornerRadius: 20)
-                    .stroke(IDColor.inkBorder, lineWidth: 1)
-            )
-            .overlay(alignment: .topTrailing) {
-                Text("CANLI")
-                    .font(.system(size: 10, weight: .bold))
-                    .padding(.horizontal, 8).padding(.vertical, 4)
-                    .background(IDColor.primary, in: Capsule())
-                    .foregroundColor(.white)
-                    .padding(10)
-            }
+        NavigationView {
+            content()
+                .showcaseHost()
+                .navigationBarHidden(true)
+        }
+        .navigationViewStyle(.stack)
+        .frame(height: 540)
+        .frame(maxWidth: .infinity)
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .overlay(
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(IDColor.inkBorder, lineWidth: 1)
+        )
+        .overlay(alignment: .topTrailing) {
+            Text("CANLI")
+                .font(.system(size: 10, weight: .bold))
+                .padding(.horizontal, 8).padding(.vertical, 4)
+                .background(IDColor.primary, in: Capsule())
+                .foregroundColor(.white)
+                .padding(10)
+        }
     }
 }
 

@@ -16,10 +16,24 @@ struct ShowcaseCatalogView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
 
+    /// Debug/test: `SHOWCASE_ITEM` env değişkeni verilen id'nin detayını otomatik açar
+    /// (örn. SIMCTL_CHILD_SHOWCASE_ITEM=liveness). UI otomasyonu olmadan detay
+    /// sayfalarının (back button dahil) test edilebilmesi için.
+    @State private var autoOpenItem: ShowcaseItem? =
+        ProcessInfo.processInfo.environment["SHOWCASE_ITEM"]
+            .flatMap { id in ShowcaseCatalog.items.first { $0.id == id } }
+    @State private var autoOpenActive = false
+
     var body: some View {
         NavigationView {
             ScrollView(showsIndicators: false) {
                 LazyVStack(alignment: .leading, spacing: IDSpacing.md) {
+                    if let item = autoOpenItem {
+                        NavigationLink(isActive: $autoOpenActive) {
+                            ShowcaseDetailView(item: item)
+                        } label: { EmptyView() }
+                        .onAppear { autoOpenActive = true }
+                    }
                     header
                     ForEach(showcaseCategories, id: \.self) { category in
                         let items = ShowcaseCatalog.items.filter { $0.category == category }
@@ -47,6 +61,11 @@ struct ShowcaseCatalogView: View {
             }
         }
         .navigationViewStyle(.stack)
+        // Mock oturum verisi: katalog açıkken SDK ekranları gerçekçi içerikle çizilir
+        // (konuşma cümlesi, NFC ön-doldurma, sıra bilgisi...). Kapanışta geri yüklenir
+        // ki mock değerler sonraki gerçek oturuma sızmasın.
+        .onAppear { ShowcaseMockData.apply() }
+        .onDisappear { ShowcaseMockData.restore() }
     }
 
     private var header: some View {

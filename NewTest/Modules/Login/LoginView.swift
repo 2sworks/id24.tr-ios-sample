@@ -185,6 +185,13 @@ struct LoginView: View {
         .fullScreenCover(isPresented: $showShowcase) {
             ShowcaseCatalogView()
         }
+        // Debug/test: `-showShowcase` launch argümanı katalogu otomatik açar
+        // (simülatörde UI otomasyonu olmadan showcase test edilebilsin diye).
+        .onAppear {
+            if ProcessInfo.processInfo.arguments.contains("-showShowcase") {
+                showShowcase = true
+            }
+        }
         .sheet(isPresented: $showLangPicker) {
             if #available(iOS 16.4, *) {
                 LanguagePickerSheet(current: viewModel.selectedSDKLang) { lang in
@@ -872,47 +879,161 @@ struct ServerListView: View {
     @ObservedObject var viewModel: LoginViewModel
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
-    
+    @State private var isEditing = false
+    @State private var newTitle = ""
+    @State private var newApiUrl = ""
+    @State private var keyboardHeight: CGFloat = 0
+    @FocusState private var focusedField: LoginField?
+
     var body: some View {
         ZStack {
             IDColor.adaptiveBackground(for: colorScheme).ignoresSafeArea()
-            
+
             VStack(spacing: 0) {
                 SubScreenTopBar(
                     title: "Sunucu Seçimi",
                     subtitle: "Test etmek istediğiniz ortamı seçin",
-                    onBack: { dismiss() }
-                )
-                
-                ScrollView(showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: IDSpacing.lg) {
-                        VStack(alignment: .leading, spacing: IDSpacing.sm) {
-                            Text("Sunucu Listesi")
-                                .font(IDFont.displaySmall(.bold))
-                                .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
-                            Text("Bağlanmak istediğiniz sunucuyu aşağıdan seçerek devam edebilirsiniz.")
-                                .font(IDFont.bodySmall())
-                                .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
-                                .lineSpacing(3)
+                    onBack: { dismiss() },
+                    trailing: {
+                        Button {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                isEditing.toggle()
+                            }
+                        } label: {
+                            HStack {
+                                Image(.icPencilLine)
+                                    .renderingMode(.template)
+                                    .foregroundColor(IDColor.inkBackground)
+
+                                Text(isEditing ? "Bitti" : "Edit")
+                                    .font(IDFont.bodySmall(.semibold))
+                                    .foregroundColor(IDColor.inkBackground)
+                            }
+                            .padding(.horizontal, IDSpacing.md)
+                            .padding(.vertical, 6)
+                            .background(
+                                RoundedRectangle(cornerRadius: IDRadius.pill)
+                                    .foregroundStyle(IDColor.primary)
+                            )
                         }
-                        
-                        VStack(spacing: IDSpacing.sm) {
-                            ForEach(viewModel.serverList) { server in
-                                ServerOptionRow(
-                                    server: server,
-                                    isSelected: viewModel.selectedServer.id == server.id,
-                                    onTap: { viewModel.selectServer(server) }
-                                )
+                    }
+                )
+
+                ScrollViewReader { proxy in
+                    ScrollView(showsIndicators: false) {
+                        VStack(alignment: .leading, spacing: IDSpacing.lg) {
+                            VStack(alignment: .leading, spacing: IDSpacing.sm) {
+                                Text("Sunucu Listesi")
+                                    .font(IDFont.displaySmall(.bold))
+                                    .foregroundColor(IDColor.adaptiveTitle(for: colorScheme))
+                                Text("Bağlanmak istediğiniz sunucuyu aşağıdan seçerek devam edebilirsiniz.")
+                                    .font(IDFont.bodySmall())
+                                    .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
+                                    .lineSpacing(3)
+                            }
+
+                            VStack(spacing: IDSpacing.sm) {
+                                ForEach(viewModel.serverList) { server in
+                                    ServerOptionRow(
+                                        server: server,
+                                        isSelected: viewModel.selectedServer.id == server.id,
+                                        isEditing: isEditing,
+                                        onTap: { viewModel.selectServer(server) },
+                                        onDelete: {
+                                            withAnimation { viewModel.deleteServer(server) }
+                                        }
+                                    )
+                                }
+                            }
+
+                            if isEditing {
+                                addServerSection
+                                    .transition(.opacity.combined(with: .move(edge: .bottom)))
+                            }
+                        }
+                        .padding(IDSpacing.xl)
+                        // Klavye açıkken form alanları klavyenin üstünde kalabilsin.
+                        .padding(.bottom, keyboardHeight)
+                    }
+                    .toolbar {
+                        ToolbarItemGroup(placement: .keyboard) {
+                            Spacer()
+                            Button { focusedField = nil } label: {
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: 16, weight: .semibold))
                             }
                         }
                     }
-                    .padding(IDSpacing.xl)
+                    .onChange(of: focusedField) { field in
+                        guard let field else { return }
+                        withAnimation(.easeOut(duration: 0.25)) {
+                            proxy.scrollTo(field, anchor: .center)
+                        }
+                    }
+                    .onChange(of: keyboardHeight) { height in
+                        guard height > 0, let field = focusedField else { return }
+                        withAnimation(.easeOut(duration: 0.25)) {
+                            proxy.scrollTo(field, anchor: .center)
+                        }
+                    }
                 }
-                
+
                 SDKButton(title: "Devam") { dismiss() }
                     .padding(.horizontal, IDSpacing.xl)
                     .padding(.bottom, IDSpacing.xl)
             }
+        }
+        // Devam butonu klavyeyle yukarı itilmesin; klavye açılınca arkasında kalır.
+        .ignoresSafeArea(.keyboard, edges: .bottom)
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillChangeFrameNotification)) { note in
+            guard let frame = note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
+            let overlap = max(0, UIScreen.main.bounds.height - frame.origin.y)
+            withAnimation(.easeOut(duration: 0.25)) { keyboardHeight = overlap }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+            withAnimation(.easeOut(duration: 0.25)) { keyboardHeight = 0 }
+        }
+    }
+
+    // MARK: - Yeni Sunucu Formu
+
+    private var trimmedTitle: String { newTitle.trimmingCharacters(in: .whitespaces) }
+    private var trimmedApiUrl: String { newApiUrl.trimmingCharacters(in: .whitespaces) }
+
+    private var isAddDisabled: Bool {
+        trimmedTitle.isEmpty || trimmedApiUrl.isEmpty
+    }
+
+    private var addServerSection: some View {
+        VStack(alignment: .leading, spacing: IDSpacing.sm) {
+            Text("Yeni Sunucu Ekle")
+                .font(IDFont.caption(.semibold))
+                .foregroundColor(IDColor.adaptiveSubtitle(for: colorScheme))
+
+            StyledTextField(placeholder: "Sunucu Adı", text: $newTitle, focus: $focusedField, field: .serverTitle)
+            StyledTextField(placeholder: "API URL (https://...)", text: $newApiUrl, keyboardType: .URL, focus: $focusedField, field: .serverApiUrl)
+
+            Button {
+                viewModel.addServer(title: trimmedTitle, apiUrl: trimmedApiUrl)
+                newTitle = ""
+                newApiUrl = ""
+            } label: {
+                HStack(spacing: IDSpacing.xs) {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.system(size: 16))
+                    Text("Sunucuyu Kaydet")
+                        .font(IDFont.bodySmall(.semibold))
+                }
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .frame(height: 44)
+                .background(
+                    RoundedRectangle(cornerRadius: IDRadius.md)
+                        .fill(IDColor.primary.opacity(isAddDisabled ? 0.4 : 1))
+                )
+            }
+            .buttonStyle(.plain)
+            .disabled(isAddDisabled)
         }
     }
 }
@@ -922,26 +1043,46 @@ struct ServerListView: View {
 private struct ServerOptionRow: View {
     let server: ServerOption
     let isSelected: Bool
+    let isEditing: Bool
     let onTap: () -> Void
+    let onDelete: () -> Void
     @Environment(\.colorScheme) private var colorScheme
-    
+
     var body: some View {
         Button(action: onTap) {
-            HStack {
-                Text(server.title)
-                    .font(IDFont.bodyRegular(.semibold))
-                    .foregroundColor(isSelected ? .white : IDColor.adaptiveTitle(for: colorScheme))
+            HStack(spacing: IDSpacing.md) {
+                if isEditing && server.isCustom {
+                    Button(action: onDelete) {
+                        Image(systemName: "minus.circle.fill")
+                            .font(.system(size: 22))
+                            .foregroundColor(isSelected ? .white : IDColor.error)
+                    }
+                    .buttonStyle(.plain)
+                    .transition(.scale.combined(with: .opacity))
+                }
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(server.title)
+                        .font(IDFont.bodyRegular(.semibold))
+                        .foregroundColor(isSelected ? .white : IDColor.adaptiveTitle(for: colorScheme))
+                    Text(server.apiUrl)
+                        .font(IDFont.caption())
+                        .foregroundColor(isSelected ? .white.opacity(0.8) : IDColor.adaptiveSubtitle(for: colorScheme))
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                }
                 Spacer()
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                     .font(.system(size: 22))
                     .foregroundColor(isSelected ? .white : IDColor.adaptiveSubtitle(for: colorScheme))
             }
             .padding(.horizontal, IDSpacing.lg)
-            .padding(.vertical, IDSpacing.lg)
+            .padding(.vertical, IDSpacing.md + 2)
             .background(
                 RoundedRectangle(cornerRadius: IDRadius.md)
                     .fill(isSelected ? IDColor.primary : IDColor.adaptiveSurface(for: colorScheme))
             )
+            .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isEditing)
         }
     }
 }
@@ -1328,6 +1469,8 @@ enum LoginMode: CaseIterable {
 enum LoginField: Hashable {
     case identId
     case firstName, lastName, tcNo, serialNo, birthDate, expiryDate
+    /// Sunucu Seçimi ekranındaki "Yeni Sunucu Ekle" formu.
+    case serverTitle, serverApiUrl
 }
 
 private extension View {

@@ -19,10 +19,12 @@ final class OvdHostViewModel: HostModuleViewModel {
         sdk.onSkipRequested = { [weak self] in self?.log("ovd_skip_requested") }
     }
 
-    /// Dışarıdan (env-config) hologram adımı zorunluluğu.
-    func applyConfig(requiresHologram: Bool) {
+    /// Dışarıdan (env-config) hologram adımı zorunluluğu + belge tipi.
+    func applyConfig(requiresHologram: Bool, documentType: OVDDocumentType = .idCard) {
         sdk.requiresHologramStep = requiresHologram
+        sdk.documentType = documentType
         log("ovd_requires_hologram_\(requiresHologram)")
+        log("ovd_doc_\(documentType == .passport ? "passport" : "idCard")")
     }
 
     var instruction: String { sdk.instruction }

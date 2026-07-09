@@ -135,7 +135,7 @@ enum ShowcaseCatalog {
             id: "thankYou", title: "Teşekkür / Sonuç",
             subtitle: "Süreç sonucu (pozitif/negatif/kaçırılmış)",
             icon: "checkmark.seal",
-            liveView: { AnyView(SDKThankYouView()) },
+            liveView: { AnyView(ThankYouShowcasePreview()) },
             integrationCode: integration(route: ".thankYou(nil)", view: "SDKThankYouView"),
             customizationCode: customization(route: ".thankYou(nil)", custom: "ThankYouExampleReplaced")
         ),

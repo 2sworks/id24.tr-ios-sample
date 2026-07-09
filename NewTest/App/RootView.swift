@@ -28,7 +28,7 @@ struct RootView: View {
     private func configureIfNeeded() {
         guard !didConfigure else { return }
         didConfigure = true
-
+        
         // 1) Host-side localization override: dışarıdan SDK string'ini değiştir.
 //        SDKLocalization.shared.registerOverrides([
 //            .tr: ["Connect": "Bağlan (host)"],

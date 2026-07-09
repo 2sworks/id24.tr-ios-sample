@@ -15,6 +15,8 @@ struct ServerOption: Identifiable, Hashable {
     var title: String
     var apiUrl: String
     var wsUrl: String
+    /// Core Data'dan gelen kullanıcı tanımlı sunucu; yalnızca bunlar silinebilir.
+    var isCustom: Bool = false
 }
 
 // MARK: - LoginViewModel
@@ -146,7 +148,7 @@ final class LoginViewModel: ObservableObject {
                 let title  = item.value(forKey: "envTitle")  as? String ?? "Sunucu"
                 let apiUrl = item.value(forKey: "apiUrl")    as? String ?? ""
                 let wsUrl  = item.value(forKey: "socketUrl") as? String ?? ""
-                customList.append(ServerOption(title: title, apiUrl: apiUrl, wsUrl: wsUrl))
+                customList.append(ServerOption(title: title, apiUrl: apiUrl, wsUrl: wsUrl, isCustom: true))
             }
         }
         serverList = sabitSunucular + customList
@@ -155,6 +157,42 @@ final class LoginViewModel: ObservableObject {
     func selectServer(_ server: ServerOption) {
         selectedServer = server
         saveSelectedServer(server)
+    }
+
+    /// Kullanıcı tanımlı yeni sunucuyu Core Data'ya kaydeder ve listeyi yeniler.
+    /// WS adresi ayrıca sorulmaz; bağlantı yalnızca apiUrl üzerinden kurulur.
+    func addServer(title: String, apiUrl: String) {
+        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
+        let context = appDelegate.persistentContainer.viewContext
+        guard let entity = NSEntityDescription.entity(forEntityName: "EnvServers", in: context) else { return }
+        let server = NSManagedObject(entity: entity, insertInto: context)
+        server.setValue(title,  forKey: "envTitle")
+        server.setValue(apiUrl, forKey: "apiUrl")
+        server.setValue("",     forKey: "socketUrl")
+        try? context.save()
+        loadSavedServers()
+    }
+
+    /// Kullanıcı tanımlı sunucuyu Core Data'dan siler. Sabit sunucular silinemez.
+    /// Silinen sunucu seçiliyse ilk sabit sunucuya dönülür.
+    func deleteServer(_ server: ServerOption) {
+        guard server.isCustom,
+              let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
+        let context = appDelegate.persistentContainer.viewContext
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "EnvServers")
+        if let results = try? context.fetch(fetchRequest) as? [NSManagedObject] {
+            for item in results where
+                (item.value(forKey: "envTitle") as? String) == server.title &&
+                (item.value(forKey: "apiUrl")   as? String) == server.apiUrl {
+                context.delete(item)
+            }
+            try? context.save()
+        }
+        loadSavedServers()
+        if selectedServer.title == server.title && selectedServer.apiUrl == server.apiUrl,
+           let fallback = serverList.first {
+            selectServer(fallback)
+        }
     }
 
     // MARK: - Remember Me

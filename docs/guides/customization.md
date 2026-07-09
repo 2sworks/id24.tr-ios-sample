@@ -82,6 +82,22 @@ Bu ekranlar **pasiftir**: backend'in modül sayacını (`moduleStepOrder`) etkil
 konuşmaz. Bu yüzden istediğiniz kadar ekleyebilirsiniz — soket ve WebRTC
 `IdentifyManager` singleton'ında yaşadığı için araya giren ekranlar bağlantıyı etkilemez.
 
+Birden fazla ekranı aynı noktaya zincirleyebilirsiniz — dizi sırası gösterim sırasıdır,
+aynı rotaya ikinci `insert` çağrısı kuyruğun sonuna ekler (ezmez):
+
+```swift
+coordinator.insert(["intro1", "intro2"], before: .nfc)   // intro1 → intro2 → NFC
+```
+
+**Ekran değil MODÜL eklemek istiyorsanız** (dallanan senaryolar — bir adımın sonucuna
+göre akışın uzaması), `appendModules` kullanın; eklenenler kalan modüllerin sonuna gider
+ve ilerleme şeridi (`progressTotal`) otomatik güncellenir:
+
+```swift
+coordinator.appendModules([.idCard, .waitScreen])
+coordinator.advanceToNextModule()
+```
+
 ---
 
 ## C) Host VM Composition — Gözlemleyerek Zenginleştirme

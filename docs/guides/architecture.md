@@ -96,6 +96,7 @@ yürütür — buna ["bypass yok" kuralı](customization.md#bypass-yok-kuralı) 
 | `advanceToNextModule()` | Sıradaki modül (varsa araya eklenmiş custom ekranlar önce) |
 | `skipCurrentModule()` | Modülü atla (`manager.skipModule()` + ilerle) |
 | `insert(_:before:)` / `insert(_:after:)` | Bir rotanın önüne/arkasına custom ekran zincirle |
+| `appendModules(_:)` / `appendModules(moduleList:)` | Akışın devamına yeni SDK modülü ekle (dallanan senaryolar; `progressTotal` otomatik güncellenir) |
 | `showExternalScreen(_:)` / `advanceExternal()` | Anlık custom ekran göster / custom ekrandan devam et |
 | `popBack()` | Geri; kökteyse `exitSDK()` |
 | `pushThankYouDirectly(status:)` | Görüşme sonucuyla doğrudan sonuç ekranına |
