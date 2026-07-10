@@ -30,8 +30,11 @@ Ekran açılır → SDKFlowHostView.speakOnAppear(route)
                 • .native      → AVSpeechSynthesizer( translate(route.ttsKey) )
                 • .customAudio → AVAudioPlayer( <route.ttsKey.rawValue>.<uzantı> )  // yoksa native'e düş
                 • .off         → sessiz
-Ekrandan ayrılınca → stop()
+Sonraki modüle geçilince → stop() → yeni modül kendi okumasını baştan başlatır
 ```
+
+Açılış yönergesinin ötesinde, NFC / Selfie / Canlılık modülleri kullanıcının **aksiyonunu**
+takip eden ek seslendirme yapar (bkz. [§7c](#7c-aksiyona-bağlı-seslendirme-itr-1903)).
 
 ---
 
@@ -181,30 +184,44 @@ SDKLocalization.shared.setOverride(key: .selfieTts, language: .tr,
 
 ---
 
-## 7. Kesme / kilit politikası (yarıda kesilme)
+## 7. Kesme politikası (yarıda kesilme)
 
-Kullanıcı bir yönerge okunurken sonraki modüle geçerse okuma yarıda kalabilir. Davranış
-`SDKSpeechConfig.shared.interruptPolicy` ile seçilir:
+**Sesli okuma ekranı hiçbir zaman kilitlemez.** Kullanıcı yönerge okunurken butonlara
+basabilir ve sonraki modüle geçebilir; geçtiği anda okuma kesilir ve sonraki modül kendi
+okumasını `onAppear`'da baştan başlatır. Motor bu anlamda **her modül için yeniden başlar**.
+
+Kesme davranışı `SDKSpeechConfig.shared.interruptPolicy` ile seçilir:
 
 | Politika | Davranış |
 |---|---|
-| `.blockUntilDone` **(varsayılan)** | Okuma bitene kadar ekran etkileşimi **kilitlenir**; kullanıcı erken ilerleyemez, yönerge tam duyulur. `SDKFlowHostView`, `SDKSpeechService.shared.isSpeaking` iken ekranı `.disabled` yapar. |
-| `.interruptOnNext` | Geçişte kesilmez; yalnızca **sonraki ekranın kendi okuması** öncekini keser. Sonraki modül `.off` ise önceki doğal biter. |
+| `.interruptOnNext` **(varsayılan)** | Modül geçişinde okuma anında kesilir; sonraki modül kendi okumasını baştan başlatır. |
 | `.finishThenNext` | Okumalar **sıraya** alınır (native `AVSpeechSynthesizer` doğal kuyruğu). Custom audio için kuyruk yoktur; kesintili çalar. |
+| `.blockUntilDone` | **Kullanımdan kaldırıldı.** Atanırsa `.interruptOnNext` gibi davranır; ekran kilitlenmez. |
 
 ```swift
-SDKSpeechConfig.shared.interruptPolicy = .blockUntilDone   // varsayılan
+SDKSpeechConfig.shared.interruptPolicy = .interruptOnNext   // varsayılan
 ```
 
-**Emniyet:** blockUntilDone'da bitiş bildirimi hiç gelmezse ekran süresiz kilitli kalmasın
-diye 30 sn'lik watchdog kilidi zorla çözer.
+`SDKSpeechService.shared.isInteractionLocked` da kullanımdan kaldırıldı ve her zaman `false`
+döner. Okumanın sürüp sürmediğini öğrenmek için `isSpeaking` kullanın.
+
+**Kesme nerede yapılır?** `SDKFlowCoordinator`'ın geçiş noktalarında: `advanceToNextModule`
+(ağ çağrısı beklenmeden, buton basılır basılmaz), `push`, `popBack`, `restartCurrentModule`.
+`onDisappear`'da **yapılmaz** — SwiftUI'da giden ekranın `onDisappear`'ı gelen ekranın
+`onAppear`'ından sonra ateşlendiği için yeni modülün okumasını susturur.
+
+**Emniyet:** Bitiş bildirimi hiç gelmezse `isSpeaking` takılı kalmasın diye watchdog durumu
+zorla temizler. Gecikmeli işler (kamera-erteleme, watchdog) bir kuşak sayacı taşır; modül
+değiştiyse sessizce çekilir, yanlış ekranda konuşmaz.
+
+**Yumuşak gate'ler (kilit değil):** Selfie'de yönerge okunurken **otomatik** çekim bekler
+(kullanıcı manuel çekebilir), OVD'de bitiş mesajı duyulsun diye otomatik ilerleme en fazla
+6 sn bekler. VideoRecorder'da kayıt başlarken okuma susturulur ki TTS sesi videoya karışmasın.
 
 **Neden thread değil?** `AVSpeechSynthesizer` / `AVAudioPlayer` zaten **asenkron** çalar;
-main thread'i bloklamaz. Kesilme bir yaşam-döngüsü kararıdır (ekran kaybolunca `stop()`),
-eşzamanlılık sorunu değil — bu yüzden çözüm politika/kilit, background thread değildir.
+main thread'i bloklamaz. Kesilme bir yaşam-döngüsü kararıdır, eşzamanlılık sorunu değil.
 
-**Geri / çıkış:** İleri geçişte okuma (politikaya göre) sürer; **geri** gidildiğinde
-(`navDirection == .back`) okuma anında durur.
+**Geri / çıkış:** Geri gidildiğinde de okuma anında durur.
 
 ### Kamera-öncelikli modüller (kamera hazır olunca oku)
 Selfie, Liveness, VideoRecorder, SelfieWithLiveness ve OVD gibi ekran açılır açılmaz kamera
@@ -247,8 +264,7 @@ IdentityScannerView(
 ```
 
 - `onAppear` → `speak(key, in: module)`, `onDisappear` → `stop()`.
-- `blockUntilDone` politikasında, okuma süresince tarayıcı içeriği `.disabled` olur (yönerge
-  tam duyulur); cover'ın **geri** butonu etkilenmez, kullanıcı kilitli kalmaz.
+- Okuma sürerken tarayıcı **kilitlenmez**; kullanıcı istediği an belgeyi gösterebilir.
 
 **Yön/tarafa özel yönerge (idCard):** SDK'nın hazır IdCard modülü tarayıcıyı, taranan **yüze
 ve kart tipine** göre farklı key ile bağlar; böylece kullanıcı hangi tarafı göstereceğini duyar:
@@ -266,7 +282,67 @@ ile metinleri veya `.customAudio` modunda `IdCardFrontTts.<uzantı>` / `IdCardBa
 mevcuttur; standalone `IdentityScannerView` kullananlar dilediği key'i geçebilir.
 
 > idCard modülünde yönerge iki anda okunur: modül seçim ekranına girişte (`.idCardTts`) ve
-> tarayıcı tarama anında (yüze özel key). blockUntilDone'da bunlar sıralıdır (üst üste binmez).
+> tarayıcı tarama anında (yüze özel key). İkincisi birincisini keser.
+
+---
+
+## 7c. Aksiyona bağlı seslendirme (ITR-1903)
+
+Bazı modüllerde tek bir açılış yönergesi yetmez: kullanıcı ne yaparsa ses de onu takip
+etmelidir. Bunun için `SDKSpeechService` üç ayrı giriş noktası sunar.
+
+| Çağrı | Ne zaman | Davranış |
+|---|---|---|
+| `speak(_:in:)` | Yönerge veya **tekil olay** (NFC başarılı / hata) | Süren okumayı böler, mutlaka okunur |
+| `speakAfterCurrent(_:in:)` | Süren okumanın **arkasına** sıraya girmeli (canlılık adım komutu) | Tek slot; yeni gelen eskisinin yerini alır |
+| `announce(_:in:)` | Sık tekrar eden **durum** (yüz yönlendirmesi, "okunuyor") | Aynı durumu tekrarlamaz, yönergeyi bölmez, anonslar arasına ≥2 sn boşluk koyar |
+
+`announce` kendini kısıtladığı için **kamera karesi başına** çağrılabilir.
+
+**Anons ≠ yönerge.** `isAnnouncing`, o an okunanın geçici bir durum anonsu olduğunu söyler.
+Yumuşak gate'ler yalnızca **yönergede** durur: Selfie'nin otomatik çekimi açılış yönergesi
+okunurken bekler, ama "Hareketsiz kalın" anonsu okunurken **beklemez** — aksi hâlde tam da
+hazır olunduğunda çalan anons çekimi kendi kendine engellerdi.
+
+### Modül modül
+
+**NFC** — yönerge belge tipine göre seçildiği için route'un statik `ttsKey`'i kapalıdır;
+ekran kendi seslendirir.
+
+| An | Key |
+|---|---|
+| Ekran açılışı | `NfcTts` (kimlik) / `NfcPassportTts` (pasaport) |
+| Çip bulundu, okuma sürüyor | `NfcReadingTts` — *"Okuma devam ediyor, lütfen belgenizi hareket ettirmeyin."* |
+| Okuma bitti | `NfcSuccessTts` — *"Çip okuma tamamlandı."* |
+| Hata → tekrar denenecek | `NfcErrorTts` |
+
+> Başarı, `onCompleted`'ta **değil** çipin okunduğu anda seslendirilir: `onCompleted` modül
+> geçişini tetikler ve geçiş aktif okumayı anında keser.
+
+**Selfie** — ekranda yazan yönlendirme ile sesli anons **aynı anahtardan** gelir
+(`SDKSelfieViewModel.guidanceKey(for:)`), böylece ayrışmazlar: yüz uzaksa *"Biraz öne gelin"*,
+ortam karanlıksa *"Ortam çok karanlık…"*, her şey uygunsa *"Hareketsiz kalın…"*.
+
+**Canlılık** — açılışta hazırlık yönergesi (`LivenessTts` → *"Yüzünüzü çerçevenin içinde sabit
+tutun."*), sonra her adım değişiminde o adımın komutu. İlk adımın komutu hazırlık yönergesini
+bölmez, arkasına sıraya girer.
+
+| Adım | Key | Durum |
+|---|---|---|
+| Gülümse | `LivenessSmileTts` | ✅ ARKit algılıyor |
+| Göz kırp | `LivenessBlinkTts` | ✅ |
+| Başı sağa çevir | `LivenessTurnRightTts` | ✅ |
+| Başı sola çevir | `LivenessTurnLeftTts` | ✅ |
+| Başı öne eğ | `LivenessHeadDownTts` | ⏳ metin hazır, algılama yok |
+| Kaşları kaldır | `LivenessRaiseEyebrowsTts` | ⏳ |
+| Gözleri sola kaydır | `LivenessEyesLeftTts` | ⏳ |
+| Gözleri sağa kaydır | `LivenessEyesRightTts` | ⏳ |
+| Başı geriye eğ | `LivenessHeadBackTts` | ⏳ |
+| Yukarı bak | `LivenessLookUpTts` | ⏳ |
+
+⏳ işaretli altı komut beş dilde çevrilmiş olarak hazır bekler. ARKit algılaması ve sunucu adım
+kodu eklendiğinde `SDKLivenessViewModel.ttsKey(for:)` içine ilgili `LivenessTestStep` case'i
+eklenir; başka değişiklik gerekmez.
 
 ---
 
@@ -275,9 +351,9 @@ mevcuttur; standalone `IdentityScannerView` kullananlar dilediği key'i geçebil
 ```swift
 // Konfig (SDKSpeechConfig.shared)
 enum Mode { case off, native, customAudio }
-enum InterruptPolicy { case blockUntilDone, interruptOnNext, finishThenNext }
+enum InterruptPolicy { case interruptOnNext, finishThenNext }   // blockUntilDone: deprecated
 var defaultMode: Mode
-var interruptPolicy: InterruptPolicy       // varsayılan .blockUntilDone
+var interruptPolicy: InterruptPolicy       // varsayılan .interruptOnNext
 var respectVoiceOver: Bool                 // varsayılan true
 func setMode(_:for: SdkModules)          // tek modül
 func setMode(_:for: [SdkModules])        // çoklu
@@ -288,10 +364,13 @@ var audioFileExtension: String             // öncelikli uzantı; diğerleri oto
 var fallbackToNativeIfAudioMissing: Bool  // varsayılan true
 
 // Seslendirme (SDKSpeechService.shared)
-@Published private(set) var isSpeaking: Bool           // blockUntilDone kilidi bunu izler
-func speak(_ key: SDKKeyword, in module: SdkModules)   // moda göre
+@Published private(set) var isSpeaking: Bool           // yumuşak gate'ler bunu izler (kilit değil)
+@Published private(set) var isAnnouncing: Bool         // okunan şey geçici bir durum anonsu mu?
+func speak(_ key: SDKKeyword, in module: SdkModules)   // moda göre; süreni böler
 func speak(_ key: SDKKeyword)                          // her zaman native
 func speak(text: String)                               // her zaman native
+func speakAfterCurrent(_ key: SDKKeyword, in module: SdkModules)  // süren okumanın arkasına
+func announce(_ key: SDKKeyword, in module: SdkModules)           // kısıtlı durum anonsu
 func stop()
 // VM köprüsü (SDKBaseModuleViewModel): speak(_:in:), speak(_:), stopSpeech()
 ```

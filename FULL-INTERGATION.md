@@ -444,7 +444,7 @@ SDKSpeechConfig.shared.setMode(.off, for: .livenessDetection)
 | Property | Varsayılan | Açıklama |
 |---|---|---|
 | `defaultMode` | `.off` | Per-modül override yoksa geçerli mod |
-| `interruptPolicy` | `.blockUntilDone` | Aşağıya bakın |
+| `interruptPolicy` | `.interruptOnNext` | Aşağıya bakın |
 | `respectVoiceOver` | `true` | VoiceOver açıkken SDK okuması devre dışı |
 | `speechRate` | sistem | `AVSpeechUtterance.rate` (0.0–1.0) |
 | `pitch` | `1.0` | Perde çarpanı (0.5–2.0) |
@@ -455,11 +455,14 @@ SDKSpeechConfig.shared.setMode(.off, for: .livenessDetection)
 
 **`InterruptPolicy` seçenekleri:**
 
+Sesli okuma ekranı **kilitlemez**; kullanıcı okuma sürerken ilerleyebilir. Geçişte okuma
+kesilir, sonraki modül `onAppear`'da kendi okumasını baştan başlatır.
+
 | Politika | Davranış |
 |---|---|
-| `.blockUntilDone` (varsayılan) | Okuma bitene kadar ekran etkileşimi kilitli — yönerge yarıda kesilmez |
-| `.interruptOnNext` | Geçişte kesilmez; sonraki ekranın okuması öncekini keser |
+| `.interruptOnNext` (varsayılan) | Modül geçişinde okuma anında kesilir; sonraki modül baştan okur |
 | `.finishThenNext` | Okumalar sıraya alınır; sonraki, önceki bitince başlar |
+| `.blockUntilDone` | Kullanımdan kaldırıldı; `.interruptOnNext` gibi davranır |
 
 ### Custom ses dosyası adlandırma
 
@@ -486,8 +489,8 @@ bulunamazsa `fallbackToNativeIfAudioMissing` açıksa native okunur; akış asla
 | `.selfieWithLiveness` | `SelfieWithLivenessTts` | Kamera beklenir |
 | `.idCard` | `IdCardTypeSelectTts` | Ayrıca: `IdCardFrontTts`, `IdCardBackTts`, `PassportTts` view içinden |
 | `.idCardOVD` | `IdCardOVDTts` | Kamera beklenir |
-| `.nfc` | `NfcTts` | |
-| `.liveness` | `LivenessTts` | Kamera beklenir |
+| `.nfc` | — | Otomatik okuma yok; view belge tipine göre `NfcTts` / `NfcPassportTts` okur |
+| `.liveness` | `LivenessTts` | Kamera beklenir; ardından her adımın komutu okunur |
 | `.speech` | `SpeechTts` | |
 | `.addressConfirm` | `AddressConfirmTts` | SDK'da hazır TR klibi var (`AddressConfirmTts_tr.mp3`) |
 | `.signature` | `SignatureTts` | |
@@ -496,13 +499,29 @@ bulunamazsa `fallbackToNativeIfAudioMissing` açıksa native okunur; akış asla
 | `.thankYou` | `ThankYouTts` | |
 | `.custom(id)` | — | Otomatik okuma yok; kendiniz tetikleyebilirsiniz |
 
+### Aksiyona bağlı seslendirme
+
+Açılış yönergesinin ötesinde NFC, Selfie ve Canlılık modülleri kullanıcının aksiyonunu takip eder:
+
+- **NFC:** okuma başladı (`NfcReadingTts`) → bitti (`NfcSuccessTts`) → hata (`NfcErrorTts`).
+- **Selfie:** ekrandaki yüz yönlendirmesi ne diyorsa o okunur (uzaksınız / karanlık / hareketsiz kalın).
+- **Canlılık:** her adımda o adımın komutu (`LivenessSmileTts`, `LivenessBlinkTts`, …).
+  ARKit'in henüz algılamadığı altı komut da beş dilde hazır bekler.
+
+Bunun için üç giriş noktası vardır: `speak` (böler, mutlaka okunur), `speakAfterCurrent`
+(sıraya girer), `announce` (tekrar eden durum; kendini kısıtlar, kare başına çağrılabilir).
+Ayrıntı: `SampleApp/NewTest/Modules/ReadAloud.md` §7c.
+
 ### Programatik okuma — kendi ekranlarınızda
 
 ```swift
-SDKSpeechService.shared.speak(.selfieTts, in: .selfie)   // modül moduna göre
+SDKSpeechService.shared.speak(.selfieTts, in: .selfie)   // modül moduna göre, süreni böler
 SDKSpeechService.shared.speak(text: "Serbest metin")     // native, doğrudan
+SDKSpeechService.shared.speakAfterCurrent(.livenessSmileTts, in: .livenessDetection)
+SDKSpeechService.shared.announce(.stayStill, in: .selfie)  // kısıtlı durum anonsu
 SDKSpeechService.shared.stop()
 SDKSpeechService.shared.isSpeaking                       // @Published — gözlemlenebilir
+SDKSpeechService.shared.isAnnouncing                     // okunan şey durum anonsu mu?
 
 // SwiftUI: ekran açıldığında rotanın metnini oku (SDK'nın kendi ekranlarının yaptığı)
 MyView().speakOnAppear(.selfie)
@@ -561,7 +580,7 @@ Yaptıkları (hepsi otomatik):
 - Path boşken kök (login) view'ınızı, doluysa en üstteki rotayı çizer (iOS 15 uyumlu, `NavigationStack` yok).
 - İleri geçiş sağdan, geri geçiş soldan animasyonlu.
 - Her rota için önce registry'ye bakar → override / custom / SDK default.
-- `speakOnAppear` ile rota TTS'ini tetikler; `.blockUntilDone`'da okuma bitene kadar ekranı kilitler.
+- `speakOnAppear` ile rota TTS'ini tetikler. Okuma ekranı **kilitlemez**; modül geçişinde kesilir.
 - Global klavye tap-to-dismiss (yalnızca SDK akış ekranlarında; kök/login ekranınız ve kendi sheet'leriniz kendi klavye davranışını yönetir).
 - Arka plana geçişi loglar + `app.background` olayını yayınlar.
 - `.connectionErr` geldiğinde `SDKLostConnectionView`'ı fullscreen açar; reconnect başarısında aktif modülü yeniden başlatır.
