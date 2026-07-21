@@ -217,7 +217,7 @@ extension SDKCallScreenViewController: SDKSocketListener {
         switch message {
         case .incomingCall:
             print("yeni bir çağrı geliyor")
-            if !manager.hideCallAnswerScreen {
+            if manager.hideCallAnswerScreen {
                 self.acceptCall()
             } else {
                 let nextVC = SDKRingViewController()
