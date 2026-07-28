@@ -10,10 +10,11 @@ import ARKit
 import SwiftUI
 import IdentifySDK
 
-// MARK: - LivenessConfig (K)
+// MARK: - SelfieDepthConfig (K)
 
 // Tüm sihirli sayılar burada toplanmıştır; tuning ve test için.
-private struct LivenessConfig {
+// (Ad SelfieDepthConfig: SampleApp target'ında Call Screen içindeki internal LivenessConfig ile çakışmasın diye.)
+private struct SelfieDepthConfig {
     // Hold süresi
     let requiredHoldDuration: TimeInterval = 3.0
     // Faz 1 (küçük oval) için yüzün kesintisiz uygun kalması gereken kısa süre; dolunca oval büyür.
@@ -89,7 +90,7 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
     private var instructionLabel: UILabel!
 
     private let configuration = ARFaceTrackingConfiguration()
-    private let config = LivenessConfig()
+    private let config = SelfieDepthConfig()
 
     // Oval genişliğinin ekran genişliğine oranı: küçük faz 0.50, büyük faz 0.75 (büyük ekranı aşmaz; oran yine 1.5).
     private var ovalScale: CGFloat { ovalPhase == .small ? 0.5 : 0.75 }
