@@ -17,7 +17,7 @@ Bu depo, SDK'yı edinen bir geliştiricinin **ilk bakacağı yer** olarak tasarl
 
 ## İçindekiler
 
-1. [5 Dakikada Başlangıç](#5-dakikada-başlangıç)
+1. [Başlangıç](#başlangıç)
 2. [SDK Nasıl Çalışır — Kuşbakışı](#sdk-nasıl-çalışır--kuşbakışı)
 3. [Modül Kataloğu](#modül-kataloğu)
 4. [Kavram Rehberleri](#kavram-rehberleri)
@@ -104,7 +104,7 @@ Tam parametre listesi için: [Sunucu & API Rehberi](docs/guides/server-api.md).
 
 ---
 
-## SDK Nasıl Çalışır — Kuşbakışı
+## SDK Nasıl Çalışır
 
 ```
 Host App                         IdentifySDK                        Identify Backend
