@@ -138,6 +138,7 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .black
         setupUI()
     }
 
@@ -276,7 +277,7 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
 
     // Hysteresis (B): enter=0.50, exit=0.40
     private func checkTilt(_ faceAnchor: ARFaceAnchor) -> FaceCondition? {
-        let pitchY = faceAnchor.transform.columns.2.y
+        let pitchY = CGFloat(faceAnchor.transform.columns.2.y)
 
         if hyst_tiltedDown {
             if pitchY <  config.tiltExitThreshold  { hyst_tiltedDown = false } else { return .tiltedDown }
@@ -634,6 +635,10 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
                 }
             } else if response.result == true {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    // Başarılı karşılaştırma sonrası deneme sayacı sıfırlanır (sonraki girişte
+                    // eski sayaç taşınmasın); loader sonraki modüle geçmeden gizlenir.
+                    self.manager.tryedSelfieComparisonCount = 1
+                    self.hideLoader()
                     self.manager.getNextModule { nextVC in
                         self.arView?.session.pause()
                         self.resetState()
