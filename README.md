@@ -18,7 +18,7 @@ Bu depo, SDK'yı edinen bir geliştiricinin **ilk bakacağı yer** olarak tasarl
 ## İçindekiler
 
 1. [Başlangıç](#başlangıç)
-2. [SDK Nasıl Çalışır — Kuşbakışı](#sdk-nasıl-çalışır--kuşbakışı)
+2. [SDK Nasıl Çalışır](#sdk-nasıl-çalışır)
 3. [Modül Kataloğu](#modül-kataloğu)
 4. [Kavram Rehberleri](#kavram-rehberleri)
 5. [Ekranları Özelleştirme](#ekranları-özelleştirme)
@@ -29,7 +29,7 @@ Bu depo, SDK'yı edinen bir geliştiricinin **ilk bakacağı yer** olarak tasarl
 
 ---
 
-## 5 Dakikada Başlangıç
+## Başlangıç
 
 ### 1. Paketi ekleyin (Swift Package Manager)
 
