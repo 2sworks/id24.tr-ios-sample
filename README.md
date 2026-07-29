@@ -11,8 +11,6 @@ Bu depo, SDK'yı edinen bir geliştiricinin **ilk bakacağı yer** olarak tasarl
 - **Modül bazlı entegrasyon rehberleri** — her ekran için "kendi tasarımınla nasıl çalıştırırsın"
 - **Kavram rehberleri** — sunucu yapısı, WebSocket, TURN/WebRTC, log, event, tema, dil
 
-> Resmi dökümantasyon ve SDK indirme linki: <https://docs.identify.com.tr/docs/ios/first-setup/>
-
 ---
 
 ## İçindekiler
