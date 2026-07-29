@@ -635,13 +635,17 @@ class SDKSelfieWithLivenessViewController: SDKBaseViewController {
                 }
             } else if response.result == true {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    // Başarılı karşılaştırma sonrası deneme sayacı sıfırlanır (sonraki girişte
-                    // eski sayaç taşınmasın); loader sonraki modüle geçmeden gizlenir.
+                    // Modül başarıyla geçildi: deneme sayacı sıfırlanır (sonraki girişte eski sayaç
+                    // taşınmasın), loader gizlenir. Modül GEÇERKEN tam reset yapılır:
+                    //  • AR oturumu resetTracking + removeExistingAnchors ile temizlenir (bayat
+                    //    takip/anchor sonraki girişe taşınmasın), sonra durdurulur.
+                    //  • resetState() koşulsuz çağrılır (getNextModule callback'ini beklemeden).
                     self.manager.tryedSelfieComparisonCount = 1
                     self.hideLoader()
+                    self.arView?.session.run(self.configuration, options: [.resetTracking, .removeExistingAnchors])
+                    self.arView?.session.pause()
+                    self.resetState()
                     self.manager.getNextModule { nextVC in
-                        self.arView?.session.pause()
-                        self.resetState()
                         self.navigationController?.pushViewController(nextVC, animated: true)
                     }
                 }
