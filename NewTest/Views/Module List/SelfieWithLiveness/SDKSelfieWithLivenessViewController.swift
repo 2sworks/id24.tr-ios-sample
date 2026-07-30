@@ -770,7 +770,7 @@ private class FaceOvalMaskView: UIView {
     var ovalScale: CGFloat = 0.5 { didSet { setNeedsDisplay() } }
     override func draw(_ rect: CGRect) {
         guard let ctx = UIGraphicsGetCurrentContext() else { return }
-        UIColor.black.withAlphaComponent(0.65).setFill()
+        UIColor.black.withAlphaComponent(0.80).setFill()
         ctx.fill(rect)
         ctx.setBlendMode(.clear)
         UIBezierPath(ovalIn: ovalRect(in: rect, scale: ovalScale)).fill()
