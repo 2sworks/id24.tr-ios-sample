@@ -55,7 +55,7 @@ class SDKListenSocketViewController: SDKBaseViewController {
         if manager.socket.isConnected {
             // Bağlı ama cevap vermiyorsa önce kes, 3s sonra yeniden bağlan.
             // Bu süre boyunca isReconnecting = true olduğu için tekrar tetiklenemez.
-            manager.socket.disconnect()
+            manager.disconnectSocket(reason: .reconnectCycle) // 4104 — sunucu logunda sebep görünür
             DispatchQueue.main.asyncAfter(deadline: .now() + 3, execute: {
                 self.reconnectSocket()
             })

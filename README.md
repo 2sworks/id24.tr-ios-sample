@@ -3,6 +3,20 @@ Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.
 
 # Son Güncellemeler
 
+### SDK 2.5.9:
+- **Kritik:** ~2 dakikayı aşan görüntülü görüşmelerin kendiliğinden kopmasına yol açan PING zaman aşımı hatası giderildi.
+- `disconnectSocket(reason:)` public fonksiyonu eklendi — socket'i kapatmak için **tek** giriş noktası.
+- ⚠️ **Entegrasyon notu:** `manager.socket.disconnect()` doğrudan çağrılmamalı; Starscream RFC 6455 `1000 (normal)` yazdığı için sunucu logunda kapanışın gerçek sebebi kayboluyor. Bunun yerine:
+  ```swift
+  manager.disconnectSocket(reason: .callCompleted)   // 4106 — görüşme tamamlandı
+  manager.disconnectSocket(reason: .reconnectCycle)  // 4104 — yeniden bağlanma öncesi
+  manager.disconnectSocket(reason: .pingTimeout)     // 4107 — PING zaman aşımı
+  ```
+  `reason` 4100–4109 aralığında olmalı; dışında bir kod verilirse SDK uyarıp `4104` ile kapatır.
+- Yeni kapanış kodları: `4106 callCompleted`, `4107 pingTimeout`. Son kapanış `manager.lastSocketCloseCode` ile okunabilir (`rawValue`, `logDescription`, `category`, `isDeliberate`).
+- `isCallActive` (read-only) ve `waitScreenPingTimeoutCount` (varsayılan 6) public property'leri eklendi.
+- `sendStep()` aynı içeriği 3 sn içinde tekrar göndermiyor; `sendStep(force: true)` ile zorlanabilir.
+
 ### SDK 2.5.6:
 - `selfieWithLiveness` modülü eklendi,
 - `uploadIdPhoto` fonksiyonuna `withLiveness: Bool = false` parametresi eklendi; `true` gönderildiğinde socket mesajı `uploadSelfieWithLiveness` olarak iletiliyor.

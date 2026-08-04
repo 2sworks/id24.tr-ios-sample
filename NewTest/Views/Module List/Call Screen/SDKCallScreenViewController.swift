@@ -230,7 +230,8 @@ extension SDKCallScreenViewController: SDKSocketListener {
         case .endCall:
             stopLiveness()
             self.listenToSocketConnection(callCompleted: true)
-            manager.socket.disconnect()
+            // 4106 — sunucu logunda kapanışın sebebi "görüşme tamamlandı" olarak görünür.
+            manager.disconnectSocket(reason: .callCompleted)
             print("görüşme tamamlandı, sonraki modüle geçebiliriz")
             
         case .approveSms(let tanCode):
@@ -279,7 +280,9 @@ extension SDKCallScreenViewController: SDKSocketListener {
             }
 
             func reconnect() {
-                manager.socket.disconnect()
+                // Kapanış sebebi sunucu logunda ayrışsın: PING zaman aşımı 4107,
+                // diğer tüm yeniden bağlanma döngüleri 4104.
+                manager.disconnectSocket(reason: terminateReason == "PING_TIMEOUT" ? .pingTimeout : .reconnectCycle)
                 setupCallScreen(inCall: false) // kameraları kapatıp bekleme ekranı görüntüsünü aktif eder
                 openSocketDisconnect(callCompleted: false) // bağlantı koptuğuna dair disconnect penceresini present eder
                 isTerminating = false
