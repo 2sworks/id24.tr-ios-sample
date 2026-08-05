@@ -31,6 +31,9 @@ class SDKCallScreenViewController: SDKBaseViewController {
     private var confStarted = false // ilk kez bağlantı kurulma - temsilci ve kişinin kamerasını bu değişkene göre aktif eder
     var checkedSignLang = false
     var isTerminating = false
+    /// Çalma ekranı yalnızca "kabul et" ile kapandığından, çağrı yanıtlanmadan sonlanırsa
+    /// (RINGING_TIMEOUT, terminateCall, imOffline) ekranda asılı kalmasın diye tutuluyor.
+    private weak var ringVC: SDKRingViewController?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -60,6 +63,19 @@ class SDKCallScreenViewController: SDKBaseViewController {
     
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
+
+        // ⚠️ Üstümüze bir modal açıldığında da bu metot çalışır (ör. yeniden bağlanma
+        // ekranı .fullScreen present ediliyor). Görüşme sırasında panele giden video
+        // ARKit karelerinden besleniyor (`startLiveness()` → `switchToARKitCapture()`),
+        // dolayısıyla burada koşulsuz `stopLiveness()` çağırmak kare kaynağını tamamen
+        // kesiyordu: panelde görüntü gidiyor, ses akmaya devam ediyordu.
+        // Yalnızca ekrandan gerçekten ayrılırken durdur; görüşmenin bittiği her akış
+        // (endCall / terminate / imOffline / missedCall) zaten stopLiveness çağırıyor.
+        guard isMovingFromParent || isBeingDismissed else {
+            print("callScreen: üste modal açıldı, ARKit/kamera akışı sürdürülüyor")
+            return
+        }
+
         self.confStarted = false
         stopLiveness()
     }
@@ -142,6 +158,16 @@ class SDKCallScreenViewController: SDKBaseViewController {
         startLiveness()
     }
     
+    /// Çağrı yanıtlanmadan sonlandıysa çalma ekranını kapatır; aksi halde
+    /// yeniden bağlan penceresi çalma ekranının üstünde açılır ve altta o ekran asılı kalır.
+    private func dismissRingScreenIfNeeded() {
+        guard let ringVC = ringVC else { return }
+        self.ringVC = nil
+        DispatchQueue.main.async {
+            ringVC.dismiss(animated: true)
+        }
+    }
+
     private func callIsDone(doneStatus: CallStatus) {
         stopLiveness()
         self.manager.forceQuitSDK()
@@ -222,6 +248,7 @@ extension SDKCallScreenViewController: SDKSocketListener {
             } else {
                 let nextVC = SDKRingViewController()
                 nextVC.delegate = self
+                self.ringVC = nextVC
                 self.present(nextVC, animated: true)
             }
         case .comingSms:
@@ -247,8 +274,9 @@ extension SDKCallScreenViewController: SDKSocketListener {
         case .terminateCall(let terminateReason, let statusSummaryType):
             
             print("terminateCall: (terminateReason=\(terminateReason ?? "-"), statusSummaryType=\(statusSummaryType ?? "-"))")
-            
+
             isTerminating = true
+            dismissRingScreenIfNeeded()
 
             if terminateReason == "TURN_DISCONNECTED" {
                 reconnect()
@@ -281,9 +309,20 @@ extension SDKCallScreenViewController: SDKSocketListener {
 
             func reconnect() {
                 // Kapanış sebebi sunucu logunda ayrışsın: PING zaman aşımı 4107,
-                // diğer tüm yeniden bağlanma döngüleri 4104.
-                manager.disconnectSocket(reason: terminateReason == "PING_TIMEOUT" ? .pingTimeout : .reconnectCycle)
-                setupCallScreen(inCall: false) // kameraları kapatıp bekleme ekranı görüntüsünü aktif eder
+                // yanıtlanmayan çağrı 4108, diğer tüm yeniden bağlanma döngüleri 4104.
+                let closeCode: SDKSocketCloseCode
+                switch terminateReason {
+                case "PING_TIMEOUT":    closeCode = .pingTimeout
+                case "RINGING_TIMEOUT": closeCode = .ringingTimeout
+                default:                closeCode = .reconnectCycle
+                }
+                manager.disconnectSocket(reason: closeCode)
+                // Görüşme burada bitiyor: ARKit oturumunu bilinçli olarak kapat (kamerayı
+                // serbest bırakır). Yeniden bağlanma başarılı olursa yeni çağrıda
+                // `start2SideTransfer()` → `startLiveness()` ile tekrar başlar.
+                confStarted = false
+                stopLiveness()
+                setupCallScreen(inCall: false) // bekleme ekranı görüntüsünü aktif eder
                 openSocketDisconnect(callCompleted: false) // bağlantı koptuğuna dair disconnect penceresini present eder
                 isTerminating = false
                 return
@@ -293,6 +332,7 @@ extension SDKCallScreenViewController: SDKSocketListener {
         case .imOffline:
             print("bağlantı kopartıldı - panelde sayfa yenilendi - browser kapatıldı")
             confStarted = false
+            dismissRingScreenIfNeeded()
             stopLiveness()
             setupCallScreen(inCall: false)
         case .updateQueue(let order, let min):
@@ -356,7 +396,11 @@ extension SDKCallScreenViewController: SDKSocketListener {
             }
             
         case .connectionErr:  // socket kopması durumunda tetiklenir
-            setupCallScreen(inCall: false) // kameraları kapatıp bekleme ekranı görüntüsünü aktif eder
+            // Sinyal koptu: ARKit oturumunu bilinçli kapat. (SDK tarafında yerel medya
+            // gönderimi zaten susturuluyor; burada kamera da serbest bırakılıyor.)
+            confStarted = false
+            stopLiveness()
+            setupCallScreen(inCall: false) // bekleme ekranı görüntüsünü aktif eder
             openSocketDisconnect(callCompleted: false) // bağlantı koptuğuna dair disconnect penceresini present eder
         case .wrongSocketActionErr(_):
             break

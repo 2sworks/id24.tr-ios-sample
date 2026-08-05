@@ -18,6 +18,11 @@ class SDKListenSocketViewController: SDKBaseViewController {
     weak var delegate: SDKNoConnectionDelegate?
 
     private var isReconnecting = false
+    /// Kullanıcı hiç dokunmasa da denenen otomatik yeniden bağlanma turu.
+    private var autoRetryTimer: Timer?
+    private var autoRetryCount = 0
+    private let autoRetryMaxCount = 6
+    private let autoRetryInterval: TimeInterval = 5
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,8 +32,10 @@ class SDKListenSocketViewController: SDKBaseViewController {
                                                selector: #selector(handleReachabilityChanged(_:)),
                                                name: .reachabilityChanged,
                                                object: nil)
+
+        startAutoRetry()
     }
-    
+
     private func setupUI() {
         reConnectBtn.setTitle(self.translate(text: .coreReConnect), for: .normal)
         reConnectBtn.cornerRadius = 3
@@ -36,12 +43,41 @@ class SDKListenSocketViewController: SDKBaseViewController {
         reConnectBtn.setTitleColor(IdentifyTheme.submitBlueColor, for: .normal)
         reConnectBtn.dropShadow(color: .black, opacity: 0.3, offSet: CGSize(width: -1, height: 1), radius: 9, scale: true)
         reConnectBtn.addTarget(self, action: #selector(tapButton), for: .touchUpInside)
-        
+
+        // ⚠️ Buton reachability'ye göre KİLİTLENMİYOR. WiFi kapanıp hücresel devreye
+        // girerken SCNetworkReachability birkaç saniye `.unavailable` raporluyor; bu ekran
+        // kopmadan ~1 sn sonra açıldığı için o pencereye denk gelip kalıcı olarak kapalı
+        // kalıyor, kullanıcı toparlanmayı sağlayacak tek eylemi yapamıyordu.
+        // İnternet gerçekten yoksa deneme zaten başarısız olur ve buton geri açılır.
         if SDKReachabilityHelper.shared.reachability.connection == .unavailable {
             reConnectBtn.setTitle(self.translate(text: .coreNoInternet), for: .normal)
-            toggleButton(disabled: true)
         }
-        
+    }
+
+    /// Kullanıcı dokunmasa bile belirli aralıklarla yeniden bağlanmayı dener.
+    private func startAutoRetry() {
+        autoRetryTimer?.invalidate()
+        autoRetryTimer = Timer.scheduledTimer(withTimeInterval: autoRetryInterval, repeats: true) { [weak self] timer in
+            guard let self = self else {
+                timer.invalidate()
+                return
+            }
+            guard self.autoRetryCount < self.autoRetryMaxCount else {
+                print("reconnect: otomatik deneme sınırına ulaşıldı, kullanıcı elle deneyebilir")
+                timer.invalidate()
+                self.autoRetryTimer = nil
+                return
+            }
+            guard !self.isReconnecting else { return }
+            self.autoRetryCount += 1
+            print("reconnect: otomatik deneme \(self.autoRetryCount)/\(self.autoRetryMaxCount)")
+            self.tapButton()
+        }
+    }
+
+    private func stopAutoRetry() {
+        autoRetryTimer?.invalidate()
+        autoRetryTimer = nil
     }
     
     @objc func tapButton() {
@@ -70,6 +106,7 @@ class SDKListenSocketViewController: SDKBaseViewController {
             // Callback dönünce (başarılı veya başarısız) flag'i serbest bırak
             self.isReconnecting = false
             if socket.isConnected {
+                self.stopAutoRetry()
                 self.delegate?.reconnectCompleted()
                 print("tekrar bağlantı kuruldu")
                 self.dismiss(animated: true)
@@ -98,9 +135,10 @@ class SDKListenSocketViewController: SDKBaseViewController {
     }
 
     deinit {
+        autoRetryTimer?.invalidate()
         NotificationCenter.default.removeObserver(self, name: .reachabilityChanged, object: nil)
     }
-    
+
     @objc private func handleReachabilityChanged(_ note: Notification) {
         guard let reachability = note.object as? Reachability else { return }
         DispatchQueue.main.async { [weak self] in
@@ -114,9 +152,10 @@ class SDKListenSocketViewController: SDKBaseViewController {
                     self?.toggleButton(disabled: false)
                 })
             case .unavailable:
-                // İnternet yokken butonu devre dışı bırak
+                // Yalnızca metni değiştir: buton kilitlenmiyor (bkz. setupUI'daki not).
+                guard self?.isReconnecting == false else { return }
                 self?.reConnectBtn.setTitle(self?.translate(text: .coreNoInternet), for: .normal)
-                self?.toggleButton(disabled: true)
+                self?.toggleButton(disabled: false)
             }
         }
     }
