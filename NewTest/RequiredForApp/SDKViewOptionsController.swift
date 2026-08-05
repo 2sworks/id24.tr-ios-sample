@@ -251,9 +251,15 @@ class SDKBaseViewController: SDKViewOptionsController {
         nc.addObserver(self, selector: #selector(reActiveScreen), name: UIApplication.didBecomeActiveNotification, object: nil)
     }
 
+    /// `socket.onDisconnect` tek slotlu olduğundan, bu slotu üzerine almaması gereken
+    /// ekranlar (ör. yeniden bağlanma ekranının kendisi) bunu `false` döndürerek kapatır.
+    var listensToSocketDisconnect: Bool { true }
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.listenToSocketConnection(callCompleted: false)
+        if listensToSocketDisconnect {
+            self.listenToSocketConnection(callCompleted: false)
+        }
     }
 
     @objc func reActiveScreen() {

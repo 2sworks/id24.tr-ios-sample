@@ -36,6 +36,12 @@ class SDKListenSocketViewController: SDKBaseViewController {
         startAutoRetry()
     }
 
+    /// ⚠️ `socket.onDisconnect` **tek slotlu**. Base sınıf her `viewWillAppear`'da bu
+    /// slotu kendi üzerine yazıyor; bu ekran da yazsaydı kapanıp dealloc olduğunda slot
+    /// ölü bir VC'yi işaret eder halde kalır ve sonraki kopmalarda yeniden bağlanma
+    /// ekranı hiç açılmazdı. Bu ekranın zaten kendini açmaya ihtiyacı yok.
+    override var listensToSocketDisconnect: Bool { false }
+
     private func setupUI() {
         reConnectBtn.setTitle(self.translate(text: .coreReConnect), for: .normal)
         reConnectBtn.cornerRadius = 3
