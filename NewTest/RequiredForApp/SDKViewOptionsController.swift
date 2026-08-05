@@ -104,19 +104,43 @@ class SDKViewOptionsController: UIViewController, SDKNoConnectionDelegate {
     
     func openSocketDisconnect(callCompleted: Bool) {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
-            if !self.manager.kycIsCompleted { // eğer kyc işlemleri bitmediyse
-                if callCompleted == false && self.manager.isAlreadyShowingReConnectScreen == false {
-                    let nextVC = SDKListenSocketViewController()
-                    nextVC.delegate = self
-                    self.manager.isAlreadyShowingReConnectScreen = true
-                    nextVC.modalPresentationStyle = .fullScreen
-                    nextVC.modalTransitionStyle = .crossDissolve
-                    let controller = UIApplication.topViewController()
-                    DispatchQueue.main.async {
-                        controller?.present(nextVC, animated: true)
-                    }
-                }
+            guard callCompleted == false, !self.manager.kycIsCompleted else { return }
+
+            let controller = UIApplication.topViewController()
+
+            // Ekran zaten açıksa bayrağı gerçek duruma göre tazele ve çık.
+            if controller is SDKListenSocketViewController {
+                self.manager.isAlreadyShowingReConnectScreen = true
+                return
             }
+
+            // Bayrak ekranın kendi yaşam döngüsüyle sıfırlanıyor; burada hâlâ açıksa
+            // gerçekten görünen bir ekran vardır.
+            guard self.manager.isAlreadyShowingReConnectScreen == false else {
+                print("reconnect: ekran açılmadı — yeniden bağlanma ekranı zaten açık işaretli")
+                return
+            }
+
+            guard let controller = controller else {
+                print("reconnect: ekran açılmadı — üstte sunum yapılabilecek ekran bulunamadı")
+                return
+            }
+
+            let nextVC = SDKListenSocketViewController()
+            nextVC.delegate = self
+            nextVC.modalPresentationStyle = .fullScreen
+            nextVC.modalTransitionStyle = .crossDissolve
+            controller.present(nextVC, animated: true)
+
+            // Sunum bir geçiş animasyonuna denk gelirse UIKit isteği sessizce yutar;
+            // ekran açılmadıysa bir kez daha denenir.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
+                guard nextVC.presentingViewController == nil,
+                      !self.manager.kycIsCompleted else { return }
+                self.manager.isAlreadyShowingReConnectScreen = false
+                print("reconnect: ekran sunulamadı — tekrar deneniyor")
+                self.openSocketDisconnect(callCompleted: callCompleted)
+            })
         })
     }
     

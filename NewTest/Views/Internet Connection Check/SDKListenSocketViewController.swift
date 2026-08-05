@@ -26,6 +26,11 @@ class SDKListenSocketViewController: SDKBaseViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        // ⚠️ Bayrak ekranın kendi yaşam döngüsüne bağlandı. Önceden yalnızca `zayıf`
+        // delegate üzerinden gelen `reconnectCompleted()` ile sıfırlanıyordu; bu çağrı
+        // herhangi bir sebeple ulaşmazsa bayrak açık kalıyor ve oturumun geri kalanında
+        // hiçbir kopmada yeniden bağlanma ekranı açılmıyordu.
+        manager.isAlreadyShowingReConnectScreen = true
         self.setupUI()
 
         NotificationCenter.default.addObserver(self,
@@ -41,6 +46,15 @@ class SDKListenSocketViewController: SDKBaseViewController {
     /// ölü bir VC'yi işaret eder halde kalır ve sonraki kopmalarda yeniden bağlanma
     /// ekranı hiç açılmazdı. Bu ekranın zaten kendini açmaya ihtiyacı yok.
     override var listensToSocketDisconnect: Bool { false }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        // Üste başka bir ekran açıldığında değil, yalnızca bu ekran gerçekten
+        // kapandığında bayrak düşer.
+        if isBeingDismissed || presentingViewController == nil {
+            manager.isAlreadyShowingReConnectScreen = false
+        }
+    }
 
     private func setupUI() {
         reConnectBtn.setTitle(self.translate(text: .coreReConnect), for: .normal)
@@ -141,6 +155,7 @@ class SDKListenSocketViewController: SDKBaseViewController {
     }
 
     deinit {
+        manager.isAlreadyShowingReConnectScreen = false
         autoRetryTimer?.invalidate()
         NotificationCenter.default.removeObserver(self, name: .reachabilityChanged, object: nil)
     }
