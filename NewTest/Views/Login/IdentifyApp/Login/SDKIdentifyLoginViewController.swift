@@ -42,8 +42,11 @@ class SDKIdentifyLoginViewController: SDKBaseViewController {
     
     // MARK:  Modül - Controller eşleşmesi yapıyoruz
     
-    private func setupSDK() { // Modül - Controller eşleşmesi yapıyoruz
-        self.manager.setSDKLang(lang: .eng)
+    /// ⚠️ Her oturum başlangıcında **yeniden** çağrılmalıdır. Modül ekranları tek örnek
+    /// olarak tutulursa bir önceki oturumun iç durumu (ör. liveness ekranının
+    /// `nextStep == .completed` değeri) taşınır; `viewDidLoad` ikinci kez çalışmadığı
+    /// için modül hiç çalışmadan kendini tamamlanmış sayıp atlanır.
+    private func assignModuleControllers() {
         self.manager.loginModuleController = SDKLoginViewController.instantiate()
         self.manager.selfieModuleController = SDKSelfieViewController.instantiate()
         self.manager.idCardModuleController = SDKCardReaderViewController.instantiate()
@@ -51,7 +54,9 @@ class SDKIdentifyLoginViewController: SDKBaseViewController {
         self.manager.nfcModuleController = SDKNfcViewController.instantiate()
         self.manager.signatureModuleController = SDKSignatureViewController.instantiate()
         self.manager.videoRecorderModuleController = SDKVideoRecorderViewController.instantiate()
-        self.manager.livenessModuleController = SDKLivenessViewController.instantiate()
+        self.manager.livenessModuleController = newLivenessBtn?.isSelected == true
+            ? SDKNewLivenessViewController.instantiate()
+            : SDKLivenessViewController.instantiate()
         self.manager.addressModuleController = SDKAddressConfirmViewController.instantiate()
         self.manager.callWaitModuleController = SDKCallScreenViewController.instantiate()
         self.manager.speechModuleController = SDKSpeechRecViewController.instantiate()
@@ -59,6 +64,11 @@ class SDKIdentifyLoginViewController: SDKBaseViewController {
         self.manager.prepareViewController = SDKPrepareViewController.instantiate()
         self.manager.selfieWithLivenessViewController = SDKSelfieWithLivenessViewController.instantiate()
         self.manager.socketMessageListener = self // eğer odada farklı bir kişi varsa listener sayesinde detect edebiliyoruz.
+    }
+
+    private func setupSDK() { // Modül - Controller eşleşmesi yapıyoruz
+        self.manager.setSDKLang(lang: .eng)
+        self.assignModuleControllers()
         self.setupUI()
         if manager.jailBreakStatus {
             self.jbView.isHidden = false
@@ -167,6 +177,8 @@ class SDKIdentifyLoginViewController: SDKBaseViewController {
     
     private func connectSDK() {
         self.view.endEditing(true)
+        // Yeni oturum → tertemiz modül ekranları (bkz. assignModuleControllers notu)
+        self.assignModuleControllers()
         if identIdArea.text == "xxx" {
             self.identIdArea.text = "eaebe29505c8c27ab68a626f8c0a8bb61e61d3f9"
         } else if identIdArea.text == "x" {

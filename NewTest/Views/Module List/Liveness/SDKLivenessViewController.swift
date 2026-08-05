@@ -65,31 +65,37 @@ class SDKLivenessViewController: SDKBaseViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupUI()
-        configureScreenRecorder()
-        
+        // ⚠️ Bayraklar `setupUI()`'dan önce okunmalı: setupUI → resumeSession zinciri
+        // `recordingIsEnabled` değerine bakıyor, sonra atanırsa ilk turda kayıt hiç
+        // başlamıyor ve ekran kaydına bağlı tüm davranışlar tutarsız kalıyor.
         recordingIsEnabled = self.manager.livenessRecordingEnabled
         recordingMaxFileSize = self.manager.requestMaxBodySize
-                
+
+        setupUI()
+        configureScreenRecorder()
+
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(handleAppInterruption),
                                                name: UIApplication.willResignActiveNotification,
                                                object: nil)
-        
+
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(handleAppBecomeActive),
                                                name: UIApplication.didBecomeActiveNotification,
                                                object: nil)
     }
-    
+
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
-    
+
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         self.pauseSession()
-        if self.recordingIsEnabled {
+        // ⚠️ Kayıt yalnızca modülden gerçekten çıkılırken durdurulur. Üste bir modal
+        // açıldığında (ör. yeniden bağlanma ekranı) durdurulursa geri dönüldüğünde
+        // `startCapture` yeniden çağrılır ve iOS ekran kaydı iznini baştan sorar.
+        if self.recordingIsEnabled, isMovingFromParent || isBeingDismissed {
             self.stopCapture()
         }
     }
@@ -334,17 +340,6 @@ class SDKLivenessViewController: SDKBaseViewController {
         }
     }
     
-    func handleRecordingInterruptedError() {
-        print("recording interrupted error")
-        DispatchQueue.main.async {
-            self.showToast(type:.fail, title: self.translate(text: .coreError), subTitle: self.translate(text: .livenessRecordingFailedToast), attachTo: self.view) {
-                self.oneButtonAlertShow(message: self.translate(text: .livenessRecordingInterrupted), title1: self.translate(text: .coreOk)) {
-                    self.resetLiveness()
-                }
-            }
-        }
-    }
-    
     func handleRecordingFileTooLarge() {
         print("recording file too large")
         DispatchQueue.main.async {
@@ -384,23 +379,40 @@ class SDKLivenessViewController: SDKBaseViewController {
     override func appMovedToBackground() {
         self.pauseSession()
     }
-    
+
+    /// Bayrak yalnızca kayıt o an gerçekten sürüyorsa kalkar. İzin diyaloğu ekrandayken
+    /// `isRecording` henüz false olduğu için izin sorusu kesinti sayılmaz.
     @objc func handleAppInterruption() {
         if recordingIsEnabled && recordingInProgress && screenRecorder.isRecording {
             recordingIsInterrupted = true
         }
     }
-    
+
     @objc func handleAppBecomeActive() {
-        if recordingIsEnabled && recordingIsInterrupted {
-            recordingIsInterrupted = false
-            pauseSession()
-            stopCapture() {
-                self.handleRecordingInterruptedError()
+        guard recordingIsEnabled, recordingIsInterrupted else { return }
+        recordingIsInterrupted = false
+        // Kontrol Merkezi, bildirim banner'ı gibi kısa aktiflik kayıplarında ReplayKit
+        // kaydı sürdürür. Uyarı yalnızca kayıt gerçekten düştüyse (izin verilmemiş,
+        // uygulama arka plana atılmış vb.) gösterilir.
+        guard !screenRecorder.isRecording else { return }
+        pauseSession()
+        stopCapture() {
+            self.handleRecordingInterruptedError()
+        }
+    }
+
+    func handleRecordingInterruptedError() {
+        print("recording interrupted error")
+        DispatchQueue.main.async {
+            self.showToast(type:.fail, title: self.translate(text: .coreError), subTitle: self.translate(text: .livenessRecordingFailedToast), attachTo: self.view) {
+                self.oneButtonAlertShow(message: self.translate(text: .livenessRecordingInterrupted), title1: self.translate(text: .coreOk)) {
+                    self.resetLiveness()
+                }
             }
         }
     }
-    
+
+
     override func appMovedToForeground() {
         if !recordingIsEnabled {
             self.pauseView.isHidden = false

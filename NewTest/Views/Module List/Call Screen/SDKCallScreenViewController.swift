@@ -290,6 +290,13 @@ extension SDKCallScreenViewController: SDKSocketListener {
 
                 let hasStatus: Bool = {
                     guard let type = statusSummaryType else { return false }
+                    // id == -3 → "Durum Seçilmedi": temsilci henüz karar vermemiştir.
+                    // Bunu karar sayarsak `positive` olmadığı için müşteriye "doğrulama
+                    // başarısız" ekranı çıkıyor; oysa oturum kararsız kapanmıştır.
+                    guard manager.lastStatusSummary?.id != -3 else {
+                        print("terminateCall: temsilci durum seçmemiş (id -3), karar sayılmıyor")
+                        return false
+                    }
                     return type == "positive" || type == "negative" || type == "neutral"
                 }()
 
