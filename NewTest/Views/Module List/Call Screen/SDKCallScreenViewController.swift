@@ -221,6 +221,9 @@ class SDKCallScreenViewController: SDKBaseViewController {
 extension SDKCallScreenViewController: CallScreenDelegate {
     
     func acceptCall() { // temsilciden gelen  çağrı kabul edilince bu fonksiyon çalışır
+        // Çalma ekranı kendini kapattı: referans burada bırakılmazsa sonraki çağrının
+        // çalma ekranı "zaten açık" sanılıp hiç gösterilmez.
+        self.ringVC = nil
         manager.acceptCall { connected, errMsg, sdpConnOk in
             if let _ = connected, !connected! {
                 self.showToast(title: self.translate(text: .coreError), subTitle: errMsg?.errorMessages ?? "", attachTo: self.view) {
@@ -246,6 +249,11 @@ extension SDKCallScreenViewController: SDKSocketListener {
             if manager.hideCallAnswerScreen {
                 self.acceptCall()
             } else {
+                // Ekranda zaten bir çalma ekranı varsa üstüne ikincisi açılmaz.
+                guard ringVC == nil else {
+                    print("çalma ekranı zaten açık, yeni çağrı bildirimi yok sayıldı")
+                    return
+                }
                 let nextVC = SDKRingViewController()
                 nextVC.delegate = self
                 self.ringVC = nextVC
@@ -406,6 +414,10 @@ extension SDKCallScreenViewController: SDKSocketListener {
             // Sinyal koptu: ARKit oturumunu bilinçli kapat. (SDK tarafında yerel medya
             // gönderimi zaten susturuluyor; burada kamera da serbest bırakılıyor.)
             confStarted = false
+            // Kopmayla birlikte çağrı da düştü: açık kalan çalma ekranı kapatılır. Aksi halde
+            // yeniden bağlanma ekranının altında asılı kalıyor ve reconnect sonrası ortaya
+            // çıkıp kullanıcıya artık var olmayan bir çağrıyı yanıtlatıyordu.
+            dismissRingScreenIfNeeded()
             stopLiveness()
             setupCallScreen(inCall: false) // bekleme ekranı görüntüsünü aktif eder
             openSocketDisconnect(callCompleted: false) // bağlantı koptuğuna dair disconnect penceresini present eder
