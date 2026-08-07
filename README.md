@@ -4,7 +4,11 @@ Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.
 # Son Güncellemeler
 
 ### SDK 2.5.9:
-- **Kritik:** ~2 dakikayı aşan görüntülü görüşmelerin kendiliğinden kopmasına yol açan PING zaman aşımı hatası giderildi.
+- **Bağlantı canlılığı ölçüme dayalı hale getirildi:** sunucunun PING aralığı çalışma anında ölçülüp tolerans buna göre hesaplanıyor. `pingMissTolerance` (varsayılan 4) ve `connectionSilenceTimeout` (varsayılan 120 sn) ile ayarlanabilir.
+- **ICE toparlanma penceresi eklendi:** kısa medya kesintilerinde görüşme sonlandırılmadan önce toparlanma bekleniyor — `iceDisconnectGraceSeconds` (8 sn), `iceFailedGraceSeconds` (12 sn).
+- **Görüşme sağlık raporu eklendi:** her görüşme sonunda süre, socket kopma sayısı, ICE kesinti/toparlanma, ağ değişimi ve en uzun sunucu sessizliği tek log olarak sunucuya gönderiliyor. Host aynı veriye `manager.lastCallHealthReport` (`SDKCallHealthReport`) ile erişebilir.
+- **Gelen aramada zil sesi ve titreşim eklendi:** sessiz moddayken haptik titreşimle sürüyor. `incomingCallRingtoneEnabled`, `incomingCallVibrationEnabled`, `incomingCallRingtoneInterval` (2.5 sn) ile yönetilir.
+- **Çalma penceresi zaman aşımı eklendi:** `ringingTimeout` (varsayılan 300 sn) — yanıtlanmayan çağrı `4108 ringingTimeout` ile kapatılır.
 - `disconnectSocket(reason:)` public fonksiyonu eklendi — socket'i kapatmak için **tek** giriş noktası.
 - ⚠️ **Entegrasyon notu:** `manager.socket.disconnect()` doğrudan çağrılmamalı; Starscream RFC 6455 `1000 (normal)` yazdığı için sunucu logunda kapanışın gerçek sebebi kayboluyor. Bunun yerine:
   ```swift
@@ -13,9 +17,21 @@ Proje ile ilgili dökümantasyona ve SDK download linkine https://docs.identify.
   manager.disconnectSocket(reason: .pingTimeout)     // 4107 — PING zaman aşımı
   ```
   `reason` 4100–4109 aralığında olmalı; dışında bir kod verilirse SDK uyarıp `4104` ile kapatır.
-- Yeni kapanış kodları: `4106 callCompleted`, `4107 pingTimeout`. Son kapanış `manager.lastSocketCloseCode` ile okunabilir (`rawValue`, `logDescription`, `category`, `isDeliberate`).
-- `isCallActive` (read-only) ve `waitScreenPingTimeoutCount` (varsayılan 6) public property'leri eklendi.
+- Yeni kapanış kodları: `4106 callCompleted`, `4107 pingTimeout`, `4108 ringingTimeout`, `4119 authRejected`, `4133 connectTimeout`. Son kapanış `manager.lastSocketCloseCode` ile okunabilir (`rawValue`, `logDescription`, `category`, `isDeliberate`).
+- Sinyal hattı koptuğunda WebRTC oturumu tamamen kapatılıp medya susturuluyor; yeniden bağlanma temiz bir oturumla başlıyor.
+- Yeniden bağlanma süresi `reconnectTimeoutSeconds` (varsayılan 10 sn) ile ayarlanabilir; sonuçsuz kalan deneme host'a bildiriliyor.
+- `subscribe` yanıtsız kalırsa 4 sn arayla 3 kez tekrarlanıyor; sınır aşılırsa host'a "başka oturum açık" bilgisi iletiliyor.
+- Yeni read-only property'ler: `isCallActive`, `isRinging`, `lastStatusSummary`.
 - `sendStep()` aynı içeriği 3 sn içinde tekrar göndermiyor; `sendStep(force: true)` ile zorlanabilir.
+- Minimum dağıtım hedefi iOS 15'e yükseltildi.
+
+### Build 220:
+- Gelen arama çalma ekranı yaşam döngüsü SDK zil sesi/titreşim akışıyla eşitlendi.
+- Görüntülü görüşme ekranına canlılık kaydı bilgilendirme popup'ı eklendi.
+- Bağlantı koptuğunda yeniden bağlanma ekranı her kopmada açılıyor; ARKit oturumu sürüyor ve "Tekrar Bağlan" butonu kilitlenmiyor.
+- Uygulama tarafındaki tüm socket kapanışları 4xxx birleşik kodlarla gönderiliyor.
+- `selfieWithLiveness`: modül geçişinde tam reset (AR `resetTracking` + deneme sayacı sıfırlama), iki fazlı oval (küçük→büyük), çekim anı flaşı ve mesh gizleme eklendi; oval dışı karartma 0.80'e çıkarıldı.
+- SampleApp minimum hedefi iOS 15'e yükseltildi.
 
 ### SDK 2.5.6:
 - `selfieWithLiveness` modülü eklendi,
