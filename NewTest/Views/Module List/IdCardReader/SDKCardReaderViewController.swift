@@ -34,12 +34,15 @@ class SDKCardReaderViewController: SDKBaseViewController {
     private var photoFrontSide = false
     private var photoBackSide = false
     private var passportInfo = FrontIdInfo()
+    /// Belge türü seçimi bu ekran için bir kez otomatik açılır; kullanıcı sağ üstteki
+    /// butonla istediği zaman tekrar açabilir.
+    private var didPresentTypeSelection = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
     }
-    
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         checkCameraPermission()
@@ -47,12 +50,19 @@ class SDKCardReaderViewController: SDKBaseViewController {
             setContinueButton(isActive: false)
         }
     }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        presentTypeSelectionIfNeeded()
+    }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
     }
     
     private func resetCache() {
+        // Modülden çıkılıyor; tekrar girilirse belge türü yeniden sorulsun.
+        self.didPresentTypeSelection = false
         if self.manager.selectedCardType == .passport {
             self.frontIdPhoto.image = UIImage(named: "passport")
         } else {
@@ -75,29 +85,51 @@ class SDKCardReaderViewController: SDKBaseViewController {
             }
         }
         continueBtn.populate()
+    }
+
+    /// Belge türü seçimini ekran gerçekten göründükten sonra açar. `viewDidLoad` içinde
+    /// sunulduğunda push animasyonu sırasında view henüz window hiyerarşisinde olmadığı için
+    /// UIKit sunumu düşürüyor ve ekran boş kalıyordu.
+    private func presentTypeSelectionIfNeeded() {
+        guard didPresentTypeSelection == false else { return }
+        // Kamera izni uyarısı gibi başka bir ekran sunuluyorsa seçim onun kapanmasını bekler.
+        guard self.presentedViewController == nil else {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                self?.presentTypeSelectionIfNeeded()
+            }
+            return
+        }
+        didPresentTypeSelection = true
         self.showOptions()
     }
-    
-    @objc func showOptions() {
-        let actionSheetController: UIAlertController = UIAlertController(title: self.translate(text: .scanType), message: nil, preferredStyle: .actionSheet)
-        
-        let firstAction: UIAlertAction = UIAlertAction(title: self.translate(text: .newIdCard), style: .default) { action -> Void in
-            self.manager.selectedCardType = .idCard
-            self.setForIdCard()
-        }
-        
-        let secondAct: UIAlertAction = UIAlertAction(title: self.translate(text: .passport), style: .default) { action -> Void in
-            self.manager.selectedCardType = .passport
-            self.setForPassport()
-        }
-        
-        let thirdAct: UIAlertAction = UIAlertAction(title: self.translate(text: .otherCards), style: .default) { action -> Void in
-            self.manager.selectedCardType = .oldSchool
-            self.setForOldSchoolCard()
-        }
-        
 
-        for allowedType in self.manager.allowedCardType {
+    @objc func showOptions() {
+        // Boş liste gelirse ekran kilitlenmesin diye kimlik varsayılanına düşülür.
+        let allowedTypes = self.manager.allowedCardType.isEmpty ? [.idCard] : self.manager.allowedCardType
+
+        // Tek tip destekleniyorsa seçim sormanın anlamı yok, doğrudan uygulanır.
+        if allowedTypes.count == 1, let onlyType = allowedTypes.first {
+            self.apply(cardType: onlyType)
+            return
+        }
+
+        // .alert stili: seçim ekranın ORTASINDA çıkar (.actionSheet altta açılıyordu).
+        let actionSheetController: UIAlertController = UIAlertController(title: self.translate(text: .scanType), message: nil, preferredStyle: .alert)
+
+        let firstAction: UIAlertAction = UIAlertAction(title: self.translate(text: .newIdCard), style: .default) { action -> Void in
+            self.apply(cardType: .idCard)
+        }
+
+        let secondAct: UIAlertAction = UIAlertAction(title: self.translate(text: .passport), style: .default) { action -> Void in
+            self.apply(cardType: .passport)
+        }
+
+        let thirdAct: UIAlertAction = UIAlertAction(title: self.translate(text: .otherCards), style: .default) { action -> Void in
+            self.apply(cardType: .oldSchool)
+        }
+
+
+        for allowedType in allowedTypes {
             switch allowedType {
                 case .idCard:
                     actionSheetController.addAction(firstAction)
@@ -105,15 +137,48 @@ class SDKCardReaderViewController: SDKBaseViewController {
                     actionSheetController.addAction(secondAct)
                 case .oldSchool:
                     actionSheetController.addAction(thirdAct)
-                
+
                 default:
-                    return
+                    // Tanınmayan bir tip tüm listeyi iptal etmemeli, yalnızca atlanır.
+                    continue
             }
         }
-        actionSheetController.popoverPresentationController?.sourceView = self.view
+
+        // Seçim daha önce yapıldıysa kullanıcı vazgeçip mevcut tiple devam edebilir.
+        if self.manager.selectedCardType != nil {
+            actionSheetController.addAction(UIAlertAction(title: self.translate(text: .coreCancel), style: .cancel))
+        }
+
         present(actionSheetController, animated: true)
     }
-    
+
+    /// Seçilen belge türünü sunucuya (setDocType) bildirir; kabul edilirse ekranı o türe
+    /// göre kurar. Sunucu reddederse çekime izin verilmez, kullanıcı yeniden seçer.
+    private func apply(cardType: CardType) {
+        self.showLoader()
+        self.manager.applyDocTypeSelection(cardType) { [weak self] error in
+            guard let self = self else { return }
+            self.hideLoader()
+            if let error = error {
+                self.oneButtonAlertShow(message: error.errorMessages ?? self.translate(text: .coreError),
+                                        title1: self.translate(text: .coreOk)) {
+                    self.showOptions()
+                }
+                return
+            }
+            switch cardType {
+                case .idCard:
+                    self.setForIdCard()
+                case .passport:
+                    self.setForPassport()
+                case .oldSchool:
+                    self.setForOldSchoolCard()
+                default:
+                    self.setForIdCard()
+            }
+        }
+    }
+
     private func setForIdCard() {
         self.manager.selectedCardType = .idCard
         self.backIdStack.isHidden = false
@@ -350,7 +415,9 @@ class SDKCardReaderViewController: SDKBaseViewController {
             self.showLoader()
             self.manager.startPassportMrzKey(frontImg: self.frontIdPhoto.image ?? UIImage(), cominData: self.passportInfo) { idInfo, err in
                 if err == nil {
-                    self.manager.uploadIdPhoto(idPhoto: self.frontIdPhoto.image ?? UIImage(), selfieType: .frontId) { webResp in
+                    // Pasaport tek sayfa: type=passport ile yüklenir (idFront DEĞİL),
+                    // socket'e uploadPassport gider.
+                    self.manager.uploadIdPhoto(idPhoto: self.frontIdPhoto.image ?? UIImage(), selfieType: .passport) { webResp in
                         if webResp.result == true {
                             self.photoFrontSide = true
                             self.hideLoader()
