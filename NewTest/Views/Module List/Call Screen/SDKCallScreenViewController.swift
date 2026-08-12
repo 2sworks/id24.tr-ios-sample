@@ -31,6 +31,34 @@ class SDKCallScreenViewController: SDKBaseViewController {
     private var confStarted = false // ilk kez bağlantı kurulma - temsilci ve kişinin kamerasını bu değişkene göre aktif eder
     var checkedSignLang = false
     var isTerminating = false
+
+    /// Temsilci tarafının görüşmeyi **normal** kapattığını bildiren `terminateReason` değerleri.
+    ///
+    /// Android istemcisiyle aynı kümedir (`callProcessFinished` dalı): hata ekranı gösterilmez,
+    /// oturum biter ve sonuç panelin statüsüne göre yazılır.
+    static let agentClosedNormallyReasons: Set<String> = [
+        "NORMAL_CLOSE_BY_AGENT",
+        "AGENT_SOCKET_NETWORK_PROBLEM",
+        "AGENT_FORCE_DISCONNECT_FOR_AUTO_CLOSE"
+    ]
+
+    /// Temsilci tarafında **sorun** oluştuğunu bildiren `terminateReason` değerleri.
+    ///
+    /// Android istemcisiyle aynı kümedir (`closeSocket` → "sorun oluştu" dalı). Buradaki
+    /// karşılığı yeniden bağlanma ekranıdır: oturum karara bağlanmaz, kullanıcı bekleme
+    /// odasına dönebilir.
+    ///
+    /// ⚠️ `ADMIN_DISCONNECTED_TURN` panelden gelir; SDK'nın kendi ürettiği `TURN_DISCONNECTED`
+    /// (medya hattı düşmesi) ile aynı şey DEĞİLDİR.
+    ///
+    /// ⚠️ Android'de bu değerin enum adı `UNKNOWN`, tel üzerindeki karşılığı ise `UNKNOW`'dur
+    /// (`UNKNOWN("UNKNOW")`). Sunucunun hangisini gönderdiği sürüme göre değişebileceği için
+    /// ikisi de kabul edilir; `UNKNOW` yazımı hatalı görünse de doğrudur, düzeltilmemelidir.
+    static let agentClosedWithProblemReasons: Set<String> = [
+        "ADMIN_DISCONNECTED_TURN",
+        "UNKNOW",
+        "UNKNOWN"
+    ]
     /// Çalma ekranı yalnızca "kabul et" ile kapandığından, çağrı yanıtlanmadan sonlanırsa
     /// (RINGING_TIMEOUT, terminateCall, imOffline) ekranda asılı kalmasın diye tutuluyor.
     private weak var ringVC: SDKRingViewController?
@@ -287,6 +315,26 @@ extension SDKCallScreenViewController: SDKSocketListener {
             dismissRingScreenIfNeeded()
 
             if terminateReason == "TURN_DISCONNECTED" {
+                // NOT: Bu değeri SDK'nın KENDİSİ üretir (medya hattı düştüğünde). Panelden
+                // gelen `ADMIN_DISCONNECTED_TURN` ile karıştırılmamalıdır.
+                reconnect()
+            } else if Self.agentClosedNormallyReasons.contains(terminateReason ?? "") {
+                // Temsilci tarafı görüşmeyi NORMAL kapattı (Android'deki `callProcessFinished`
+                // dalı): hata ekranı gösterilmez, oturum biter ve sonuç panelin statüsüne
+                // göre yazılır. Tek istisna, temsilcinin hiç durum seçmemiş olmasıdır.
+                if manager.lastStatusSummary?.id == -3 {
+                    print("terminateCall: normal kapanış ama temsilci durum seçmemiş (id -3), bekleme odasına dönülüyor")
+                    reconnect()
+                } else {
+                    self.listenToSocketConnection(callCompleted: true)
+                    self.setupCallScreen(inCall: false)
+                    self.callIsDone(doneStatus: statusSummaryType == "positive" ? .completed : .notCompleted)
+                    isTerminating = false
+                }
+            } else if Self.agentClosedWithProblemReasons.contains(terminateReason ?? "") {
+                // Temsilci tarafında sorun oluştu (Android'deki `closeSocket` dalı): oturum
+                // karara bağlanmaz, kullanıcı bekleme odasına dönebilir.
+                print("terminateCall: panel görüşmeyi sorunlu kapattı (\(terminateReason ?? "-")), yeniden bağlanma ekranı açılıyor")
                 reconnect()
             } else if terminateReason == "CLIENT_IS_DISCONNECTED" {
                 if manager.socket.isConnected {
