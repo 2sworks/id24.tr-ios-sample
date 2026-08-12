@@ -31,16 +31,19 @@ class SDKCallScreenViewController: SDKBaseViewController {
     private var confStarted = false // ilk kez bağlantı kurulma - temsilci ve kişinin kamerasını bu değişkene göre aktif eder
     var checkedSignLang = false
     var isTerminating = false
-    /// Temsilcinin görüşmeyi normal kapattığı sebepler (Android `callProcessFinished`).
+    /// Temsilcinin görüşmeyi kendi iradesiyle kapattığı sebep. Oturumu yalnızca bu bitirir.
     static let agentClosedNormallyReasons: Set<String> = [
-        "NORMAL_CLOSE_BY_AGENT",
-        "AGENT_SOCKET_NETWORK_PROBLEM",
-        "AGENT_FORCE_DISCONNECT_FOR_AUTO_CLOSE"
+        "NORMAL_CLOSE_BY_AGENT"
     ]
-    /// Temsilci tarafında sorun oluştuğunu bildiren sebepler (Android `closeSocket`).
+    /// Oturumu bitirmeyen kapanış sebepleri: kullanıcı kopma ekranına alınır, oradan bekleme
+    /// odasına dönüp sıraya yeniden girer. Ortak yanları temsilcinin hüküm vermemiş olmasıdır;
+    /// panel bu kapanışlarda "Müşteri cevap vermedi" (id 8) gibi otomatik etiket gönderebiliyor.
+    /// Android bu sebeplerden ikisini normal kapanış sayar, iOS bilinçli olarak ayrılır.
     /// Android'de `UNKNOWN` enum'unun tel değeri `UNKNOW`'dur; ikisi de kabul edilir.
     static let agentClosedWithProblemReasons: Set<String> = [
         "ADMIN_DISCONNECTED_TURN",
+        "AGENT_SOCKET_NETWORK_PROBLEM",
+        "AGENT_FORCE_DISCONNECT_FOR_AUTO_CLOSE",
         "UNKNOW",
         "UNKNOWN"
     ]
@@ -424,13 +427,16 @@ extension SDKCallScreenViewController: SDKSocketListener {
                     self.qualityImg.image = UIImage()
                 }
             }
-        case .missedCall: // belirli süre boyunca telefon çaldı fakat müşteri açmadı veya temsilci aradı fakat telefon açılmadan aramayı sonlandırdı
+        case .missedCall:
+            // Cevapsız çağrı oturumu BİTİRMEZ: temsilci bir durum seçmemiştir, müşteri bekleme
+            // odasında kalır ve yeni çağrıyı bekler. Panel, müşterinin bağlantısı koptuğunda da
+            // bu mesajı gönderebiliyor; oturumu burada kapatmak kullanıcıyı karar verilmeden
+            // akıştan atıyordu.
+            manager.sdkLog(logMsg: "Cevapsız çağrı bildirimi alındı — oturum bitirilmiyor, bekleme odasına dönülüyor")
+            confStarted = false
+            dismissRingScreenIfNeeded()
             stopLiveness()
-            self.listenToSocketConnection(callCompleted: true)
             setupCallScreen(inCall: false)
-            self.dismiss(animated: true) {
-                self.callIsDone(doneStatus: .missedCall)
-            }
             
         case .connectionErr:  // socket kopması durumunda tetiklenir
             // Sinyal koptu: ARKit oturumunu bilinçli kapat. (SDK tarafında yerel medya

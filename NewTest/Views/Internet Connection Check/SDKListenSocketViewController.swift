@@ -136,8 +136,13 @@ class SDKListenSocketViewController: SDKBaseViewController {
             }
         }, statusCallback: { [weak self] statusSummary in
             guard let self = self else { return }
-            // statusSummary.id == -3 → bekleme odasına dönülüyor
-            let isWaitingRoom = statusSummary?.id == -3
+            // `getIdentStatus` bir SORGUDUR; yanıtı olan `SendIdentStatusInfo` o an kayıtlı
+            // statüdür, panelin oturumu bitirdiğinin kanıtı değildir. Panelin gerçek kararı
+            // `terminateCall` ile gelir. Bu yüzden yeniden bağlanmada yalnızca `positive`
+            // oturumu bitirir; `negative`, `neutral`, id -3 ve panelin otomatik yazdığı
+            // "Müşteri cevap vermedi" (id 8) kullanıcıyı bekleme odasına döndürür.
+            let isWaitingRoom = statusSummary?.type != "positive"
+            self.manager.sdkLog(logMsg: "Yeniden bağlanma tamamlandı — panel statüsü: id \(statusSummary?.id.map(String.init) ?? "yok"), tip \(statusSummary?.type ?? "yok") → \(isWaitingRoom ? "olumlu karar yok, bekleme odasına dönülüyor" : "olumlu karar uygulanıyor, oturum bitiriliyor")")
             DispatchQueue.main.async {
                 self.delegate?.reconnectCompletedWithStatus(isWaitingRoom: isWaitingRoom, statusType: statusSummary?.type)
             }
