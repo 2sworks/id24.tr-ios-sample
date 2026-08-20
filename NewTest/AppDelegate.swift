@@ -7,7 +7,6 @@
 
 import UIKit
 import IQKeyboardManagerSwift
-import netfox
 import IdentifySDK
 import CoreData
 
@@ -22,7 +21,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         IQKeyboardManager.shared.enable = true
         IQKeyboardManager.shared.enableAutoToolbar = true
         SDKReachabilityHelper.shared.observeReachability()
-        NFX.sharedInstance().start()
+        // Panelde hangi sekmelerin açılacağı burada belirlenir.
+        SDKLogPanel.start(requests: true, console: true, socket: true)
         startFirstScreen()
         return true
     }

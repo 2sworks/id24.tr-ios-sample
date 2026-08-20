@@ -98,6 +98,7 @@
 		485C15322907D2E8007B9ED0 /* SDKLoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485C15302907D2E8007B9ED0 /* SDKLoginViewController.swift */; };
 		485C15332907D2E8007B9ED0 /* SDKLoginViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 485C15312907D2E8007B9ED0 /* SDKLoginViewController.xib */; };
 		485C15392907D3CF007B9ED0 /* SDKViewOptionsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485C15382907D3CF007B9ED0 /* SDKViewOptionsController.swift */; };
+		48A1C0D12C11AB0200000001 /* SDKLogPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48A1C0D12C11AB0200000002 /* SDKLogPanel.swift */; };
 		485C154E2907DC19007B9ED0 /* SDKSelfieViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485C154C2907DC19007B9ED0 /* SDKSelfieViewController.swift */; };
 		485C154F2907DC19007B9ED0 /* SDKSelfieViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 485C154D2907DC19007B9ED0 /* SDKSelfieViewController.xib */; };
 		485C155A2907F3A7007B9ED0 /* SDKUITableViewCell+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485C15512907F3A7007B9ED0 /* SDKUITableViewCell+.swift */; };
@@ -267,6 +268,7 @@
 		485C15302907D2E8007B9ED0 /* SDKLoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKLoginViewController.swift; sourceTree = "<group>"; };
 		485C15312907D2E8007B9ED0 /* SDKLoginViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SDKLoginViewController.xib; sourceTree = "<group>"; };
 		485C15382907D3CF007B9ED0 /* SDKViewOptionsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKViewOptionsController.swift; sourceTree = "<group>"; };
+		48A1C0D12C11AB0200000002 /* SDKLogPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKLogPanel.swift; sourceTree = "<group>"; };
 		485C154C2907DC19007B9ED0 /* SDKSelfieViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SDKSelfieViewController.swift; sourceTree = "<group>"; };
 		485C154D2907DC19007B9ED0 /* SDKSelfieViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SDKSelfieViewController.xib; sourceTree = "<group>"; };
 		485C15512907F3A7007B9ED0 /* SDKUITableViewCell+.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "SDKUITableViewCell+.swift"; sourceTree = "<group>"; };
@@ -645,6 +647,7 @@
 			children = (
 				48CD8CFD29792C31008573F8 /* Language Files */,
 				485C15382907D3CF007B9ED0 /* SDKViewOptionsController.swift */,
+				48A1C0D12C11AB0200000002 /* SDKLogPanel.swift */,
 				48DE1484290A7D3A00057EAD /* UIViewController+.swift */,
 				48DE147C290A6C3E00057EAD /* SDKButtonExtension.swift */,
 				48DE147A290A6C1900057EAD /* SDKColorManager.swift */,
@@ -986,7 +989,7 @@
 				48AB73FD291A762100F591A4 /* XCRemoteSwiftPackageReference "SwiftSignatureView" */,
 				4880596C291D0EBD0058C7CD /* XCRemoteSwiftPackageReference "Toast" */,
 				48D802272924F6B000B9BB83 /* XCRemoteSwiftPackageReference "CHIOTPField" */,
-				48171403294716830095A64F /* XCRemoteSwiftPackageReference "netfox" */,
+				48171403294716830095A64F /* XCLocalSwiftPackageReference "Vendor/netfox" */,
 				48F0867629F7CA4E00FCA4BF /* XCRemoteSwiftPackageReference "QKMRZScanner" */,
 				48420BA52A8B61840005250F /* XCRemoteSwiftPackageReference "WebRTC" */,
 				486A111C2B07BED000A34623 /* XCRemoteSwiftPackageReference "PermissionsKit" */,
@@ -1085,6 +1088,7 @@
 				481065992922646600053004 /* SDKLivenessViewController.swift in Sources */,
 				482D2BD02A547AC000F1344F /* UIImage+SFSymbol.swift in Sources */,
 				485C15392907D3CF007B9ED0 /* SDKViewOptionsController.swift in Sources */,
+				48A1C0D12C11AB0200000001 /* SDKLogPanel.swift in Sources */,
 				485C155B2907F3A7007B9ED0 /* SDKUIApplication+.swift in Sources */,
 				485C155F2907F3A7007B9ED0 /* SDKString+.swift in Sources */,
 				DF7BC16A2D4A279600372CAB /* Env.xcdatamodeld in Sources */,
@@ -1430,15 +1434,14 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		48171403294716830095A64F /* XCRemoteSwiftPackageReference "netfox" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/kasketis/netfox";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.0;
-			};
+/* Begin XCLocalSwiftPackageReference section */
+		48171403294716830095A64F /* XCLocalSwiftPackageReference "Vendor/netfox" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Vendor/netfox;
 		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCRemoteSwiftPackageReference section */
 		4831E1F12B69284400B67891 /* XCRemoteSwiftPackageReference "IQKeyboardManager" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/hackiftekhar/IQKeyboardManager.git";
@@ -1516,7 +1519,6 @@
 /* Begin XCSwiftPackageProductDependency section */
 		48171404294716830095A64F /* netfox */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 48171403294716830095A64F /* XCRemoteSwiftPackageReference "netfox" */;
 			productName = netfox;
 		};
 		4831E1F22B69284400B67891 /* IQKeyboardManagerSwift */ = {
