@@ -102,6 +102,28 @@ class SDKViewOptionsController: UIViewController, SDKNoConnectionDelegate {
         }
     }
     
+    /// Sunucu bağlantısı hazır değilken modül sonucunun gönderilmesini / akışın ilerlemesini
+    /// engeller.
+    ///
+    /// Kural v3'teki `beginFlowWhenRoomReady` ile aynıdır: oda kaydı (`subscribed`) yokken
+    /// gönderilen adım sonucunu sunucu düşürür, panel kullanıcıyı hiç görmez. Kullanıcı
+    /// modül ortasında uygulamadan çıkıp döndüğünde socket kopmuş olabildiği için, gönderim
+    /// anında da kontrol edilir — yalnızca ekran açılışında bakmak yetmiyor.
+    ///
+    /// - Returns: `true` ise arayan işlemine devam edebilir; `false` ise yeniden bağlanma
+    ///   ekranı açılmıştır ve işlem yapılmamalıdır.
+    @discardableResult
+    func ensureLiveConnection() -> Bool {
+        // Oturum henüz kurulmadıysa (giriş/ortam ekranları) kural işlemez.
+        guard manager.socket != nil else { return true }
+        if manager.isSocketAlive && manager.isRoomSubscribed { return true }
+        manager.sdkLog(logMsg: "Sunucu bağlantısı hazır değil — adım gönderilmedi, yeniden bağlanma ekranı açılıyor")
+        if manager.isAlreadyShowingReConnectScreen == false {
+            openSocketDisconnect(callCompleted: false)
+        }
+        return false
+    }
+
     func openSocketDisconnect(callCompleted: Bool) {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
             guard callCompleted == false, !self.manager.kycIsCompleted else { return }

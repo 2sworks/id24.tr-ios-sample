@@ -160,6 +160,11 @@ class SDKAddressConfirmViewController: SDKBaseViewController {
     }
     
     private func submitForm() {
+        // Bağlantı hazır değilken gönderim yapılmaz: yükleme HTTP ile başarıyla tamamlansa
+        // bile sonucu bildiren socket mesajı panele ulaşmaz ve adım kırmızı kalır. Kullanıcı
+        // bu modülde adresini aramak için sık sık uygulamadan çıkıp döndüğü için kontrol
+        // ekran açılışında değil, tam gönderim anında yapılır.
+        guard ensureLiveConnection() else { return }
         self.showLoader()
         if idPhoto != "" {
             self.manager.uploadAddressInfo(invoicePhoto: docImg, addressText: self.addressTxt.text) { webResp, sdkError in
