@@ -14,6 +14,14 @@ class SDKPrepareViewController: SDKBaseViewController {
 
     @IBOutlet weak var submitBtn: IdentifyButton!
     var speedCheckDone = false
+    var speedTestRunning = false
+    /// Bu ekranda bağlantı hız testinin çalışıp çalışmayacağı.
+    ///
+    /// Test SDK tarafında hiçbir modüle bağlı değildir; nerede çağırırsanız orada çalışır.
+    /// - `true`  : her zaman çalışır
+    /// - `false` : hiç çalışmaz
+    /// - `nil`   : sunucudan gelen `needSpeedTest` bayrağına uyar (waitScreen modülü açıksa true)
+    let speedTestEnabled: Bool? = true
     @IBOutlet weak var speedStackView: UIStackView!
     @IBOutlet weak var button1: UIButton!
     @IBOutlet weak var button2: UIButton!
@@ -38,7 +46,7 @@ class SDKPrepareViewController: SDKBaseViewController {
     override func viewDidLayoutSubviews() {
         self.navigationItem.rightBarButtonItem = nil // bu modülün skip edilebilmesini kaldırıyoruz
     }
-    
+
     func checkPermissions() {
         self.camReqBtn.isSelected = camReq.authorized
         self.speechReqBtn.isSelected = speechReq.authorized
@@ -242,36 +250,56 @@ class SDKPrepareViewController: SDKBaseViewController {
     }
     
     func startSpeedTest() {
-        if manager.needSpeedTest ?? false == true {
-            self.showLoader()
-            self.submitBtn.type = .loader
-            self.manager.startSpeedTest { connectionStatus, kbPerSec in
-                print(kbPerSec)
-                self.hideLoader()
-                if connectionStatus == .good {
-                    DispatchQueue.main.async {
-                        self.showToast(title: self.translate(text: .connectionSpeedSuccess), attachTo: self.view) {
-                                return
-                        }
-                        self.speedStackView.isHidden = false
-                        self.submitBtn.type = .submit
-                        self.submitBtn.setTitle(self.translate(text: .continuePage), for: .normal)
-                        self.submitBtn.onTap = {
-                            self.getNextModule()
-                        }
-                        self.submitBtn.populate()
-                    }
-                } else {
-                    DispatchQueue.main.async {
-                        self.showToast(type:.fail, title: "Bağlantı hızı kötü", attachTo: self.view) {
-                            return
-                        }
-                    }
-                    // MARK: Bağlantı kalitesi düşük ise buradan yönlendirmelerinizi yapabilirsiniz
-                }
-            }
-        } else {
+        guard speedTestEnabled ?? (manager.needSpeedTest ?? false) else {
             self.getNextModule()
+            return
+        }
+        // Ölçüm sürerken butona tekrar basılırsa ikinci bir ölçüm başlatılmaz.
+        guard !speedTestRunning else { return }
+        speedTestRunning = true
+
+        self.showLoader()
+        self.submitBtn.type = .loader
+
+        // Kontrat tabanlı ölçüm. Bakılacak tek alan `result.blockIdent`:
+        // true ise kullanıcı ilerletilmez, false ise (ölçüm atlanmış olsa bile) akış devam eder.
+        // Karar sunucudan gelir; eşikler burada yeniden değerlendirilmez.
+        self.manager.startConnectionSpeedTest { [weak self] result in
+            guard let self = self else { return }
+            self.speedTestRunning = false
+            self.hideLoader()
+
+            // Geri bildirim tek sefer gösterilir.
+            guard !self.speedCheckDone else { return }
+            self.speedCheckDone = true
+
+            if result.blockIdent {
+                // MARK: Sunucu bağlantıyı yetersiz buldu; yönlendirmelerinizi buradan yapabilirsiniz.
+                self.submitBtn.type = .cancel
+                self.submitBtn.setTitle(self.translate(text: .checkMyConn), for: .normal)
+                self.submitBtn.populate()
+                self.speedCheckDone = false
+                self.showToast(type: .fail, title: "Bağlantı hızı yetersiz", attachTo: self.view) {
+                    return
+                }
+                return
+            }
+
+            if result.outcome == .skipped {
+                // Ölçüm yapılamadı; kullanıcı bekletilmez, akış devam eder.
+                print("Hız testi atlandı: \(result.skipReason ?? "-")")
+            }
+
+            self.showToast(title: self.translate(text: .connectionSpeedSuccess), attachTo: self.view) {
+                return
+            }
+            self.speedStackView.isHidden = false
+            self.submitBtn.type = .submit
+            self.submitBtn.setTitle(self.translate(text: .continuePage), for: .normal)
+            self.submitBtn.onTap = {
+                self.getNextModule()
+            }
+            self.submitBtn.populate()
         }
     }
     
