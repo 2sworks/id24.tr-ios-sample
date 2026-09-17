@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import IdentifySDK
 import CameraPermission
 import SpeechRecognizerPermission
 import MicrophonePermission
@@ -289,8 +290,13 @@ class SDKPrepareViewController: SDKBaseViewController {
                 // Ölçüm yapılamadı; kullanıcı bekletilmez, akış devam eder.
                 print("Hız testi atlandı: \(result.skipReason ?? "-")")
             }
+            print("Hız testi: \(result.summary)")
 
-            self.showToast(title: self.translate(text: .connectionSpeedSuccess), attachTo: self.view) {
+            // Sunucunun puan bandı (ITR-2066). Gösterim isteğe bağlıdır; `quality` gelmediyse
+            // (puanlama kapalı ya da test atlandı) yalnız başlık gösterilir.
+            self.showToast(title: self.translate(text: .connectionSpeedSuccess),
+                           subTitle: self.qualityMessage(for: result.qualityBand),
+                           attachTo: self.view) {
                 return
             }
             self.speedStackView.isHidden = false
@@ -303,6 +309,16 @@ class SDKPrepareViewController: SDKBaseViewController {
         }
     }
     
+    /// Kontrattaki önerilen bilgilendirme metinleri; bant yoksa boş döner.
+    func qualityMessage(for band: SDKSpeedTestQualityBand?) -> String {
+        switch band {
+        case .good: return "Bağlantınız görüntülü görüşme için uygun."
+        case .fair: return "Bağlantınız zayıf; görüntü zaman zaman donabilir. Wi-Fi'ye yaklaşın ya da mobil veriye geçin."
+        case .poor: return "Bağlantınız görüntülü görüşme için yetersiz görünüyor."
+        case .none: return ""
+        }
+    }
+
     func getNextModule() {
         self.manager.sendPreparetatus(isCompleted: true) // panel tarafına bu modülün tamamlandığını bildiriyoruz.
         self.manager.getNextModule { nextVC in
